@@ -87,3 +87,6 @@ crashlytics-build.properties
 #Bundles
 Bundles/
 
+#Ignore testDemo
+/[Aa]ssets/[Ii]gnore/
+/[Aa]ssets/[Ii]gnore.meta

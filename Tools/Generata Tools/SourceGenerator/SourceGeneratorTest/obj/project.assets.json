@@ -1,0 +1,79 @@
+{
+  "version": 3,
+  "targets": {
+    "net9.0": {}
+  },
+  "libraries": {},
+  "projectFileDependencyGroups": {
+    "net9.0": []
+  },
+  "packageFolders": {
+    "C:\\Users\\QZJ\\.nuget\\packages\\": {},
+    "D:\\Code IDE\\Microsoft\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
+  },
+  "project": {
+    "version": "1.0.0",
+    "restore": {
+      "projectUniqueName": "D:\\Unity\\C# Project\\SourceGenerator\\SourceGeneratorTest\\SourceGeneratorTest.csproj",
+      "projectName": "SourceGeneratorTest",
+      "projectPath": "D:\\Unity\\C# Project\\SourceGenerator\\SourceGeneratorTest\\SourceGeneratorTest.csproj",
+      "packagesPath": "C:\\Users\\QZJ\\.nuget\\packages\\",
+      "outputPath": "D:\\Unity\\C# Project\\SourceGenerator\\SourceGeneratorTest\\obj\\",
+      "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "D:\\Code IDE\\Microsoft\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+      ],
+      "configFilePaths": [
+        "C:\\Users\\QZJ\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+      ],
+      "originalTargetFrameworks": [
+        "net9.0"
+      ],
+      "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "https://api.nuget.org/v3/index.json": {}
+      },
+      "frameworks": {
+        "net9.0": {
+          "targetAlias": "net9.0",
+          "projectReferences": {}
+        }
+      },
+      "warningProperties": {
+        "warnAsError": [
+          "NU1605"
+        ]
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "true",
+        "auditLevel": "low",
+        "auditMode": "direct"
+      },
+      "SdkAnalysisLevel": "9.0.200"
+    },
+    "frameworks": {
+      "net9.0": {
+        "targetAlias": "net9.0",
+        "imports": [
+          "net461",
+          "net462",
+          "net47",
+          "net471",
+          "net472",
+          "net48",
+          "net481"
+        ],
+        "assetTargetFallback": true,
+        "warn": true,
+        "frameworkReferences": {
+          "Microsoft.NETCore.App": {
+            "privateAssets": "all"
+          }
+        },
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.201/PortableRuntimeIdentifierGraph.json"
+      }
+    }
+  }
+}

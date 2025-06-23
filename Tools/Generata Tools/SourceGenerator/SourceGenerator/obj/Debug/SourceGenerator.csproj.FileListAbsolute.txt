@@ -1,0 +1,10 @@
+D:\Unity\C# Project\SourceGenerator\SourceGenerator\bin\Debug\SourceGenerator.deps.json
+D:\Unity\C# Project\SourceGenerator\SourceGenerator\bin\Debug\SourceGenerator.dll
+D:\Unity\C# Project\SourceGenerator\SourceGenerator\bin\Debug\SourceGenerator.pdb
+D:\Unity\C# Project\SourceGenerator\SourceGenerator\obj\Debug\SourceGenerator.csproj.AssemblyReference.cache
+D:\Unity\C# Project\SourceGenerator\SourceGenerator\obj\Debug\SourceGenerator.GeneratedMSBuildEditorConfig.editorconfig
+D:\Unity\C# Project\SourceGenerator\SourceGenerator\obj\Debug\SourceGenerator.AssemblyInfoInputs.cache
+D:\Unity\C# Project\SourceGenerator\SourceGenerator\obj\Debug\SourceGenerator.AssemblyInfo.cs
+D:\Unity\C# Project\SourceGenerator\SourceGenerator\obj\Debug\SourceGenerator.csproj.CoreCompileInputs.cache
+D:\Unity\C# Project\SourceGenerator\SourceGenerator\obj\Debug\SourceGenerator.dll
+D:\Unity\C# Project\SourceGenerator\SourceGenerator\obj\Debug\SourceGenerator.pdb

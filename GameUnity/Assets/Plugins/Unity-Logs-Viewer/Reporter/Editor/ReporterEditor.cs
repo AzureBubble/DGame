@@ -1,14 +1,165 @@
 ﻿using UnityEngine;
+using System.IO;
+using System.Collections;
+using DGame;
+
+#if UNITY_EDITOR
+
+using UnityEditor.SceneManagement;
 using UnityEditor;
 using UnityEditor.Callbacks;
 
-using System.IO;
-using System.Collections;
-
-
 public class ReporterEditor : Editor
 {
-	[MenuItem("Reporter/Create")]
+	#region 日志打印系统
+
+	/// <summary>
+	/// 开启日志打印到本地系统功能 同时开启所有级别的日志输出
+	/// </summary>
+	[MenuItem("DGame Tools/日志宏定义开启选项/开启日志打印系统", false, 28)]
+	public static void EnableLog2File()
+	{
+		var logObj = GameObject.Find("LogRoot");
+
+		if (logObj != null)
+		{
+			logObj.AddComponent<DGameLog2File>();
+		}
+		else
+		{
+			logObj = new GameObject("LogRoot");
+			logObj.AddComponent<LogRoot>();
+			logObj.AddComponent<DGameLog2File>();
+		}
+		DGame.Editor.ScriptingDefineSymbolsTools.EnableAllLogs();
+		AssetDatabase.SaveAssets();
+		EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene() );
+		AssetDatabase.Refresh();
+	}
+
+	/// <summary>
+	/// 关闭日志打印到本地系统功能
+	/// </summary>
+	[MenuItem("DGame Tools/日志宏定义开启选项/禁用日志打印系统", false, 29)]
+	public static void DisableLog2File()
+	{
+		var log2File = GameObject.FindObjectOfType<DGameLog2File>();
+
+		if (log2File != null)
+		{
+			DestroyImmediate(log2File);
+			RemoveLogRootObj();
+			AssetDatabase.SaveAssets();
+			EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene() );
+			AssetDatabase.Refresh();
+		}
+	}
+
+	#endregion
+	
+	
+	#region FPS
+
+	/// <summary>
+	/// 开启FPS显示
+	/// </summary>
+	[MenuItem("DGame Tools/日志宏定义开启选项/开启FPS", false, 38)]
+	public static void EnableFPS()
+	{
+		var fpsObj = GameObject.Find("FPS");
+
+		if (fpsObj == null)
+		{
+			fpsObj = new GameObject("FPS");
+			fpsObj.AddComponent<FPS>();
+			var logObj = GameObject.Find("LogRoot");
+
+			if (logObj != null)
+			{
+				fpsObj.transform.SetParent(logObj.transform);
+			}
+			else
+			{
+				logObj = new GameObject("LogRoot");
+				logObj.AddComponent<LogRoot>();
+				fpsObj.transform.SetParent(logObj.transform);
+			}
+			AssetDatabase.SaveAssets();
+			EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene() );
+			AssetDatabase.Refresh();
+		}
+	}
+
+	/// <summary>
+	/// 开启FPS显示
+	/// </summary>
+	[MenuItem("DGame Tools/日志宏定义开启选项/关闭FPS", false, 39)]
+	public static void DisableFPS()
+	{
+		var fpsObj = GameObject.Find("FPS");
+
+		if (fpsObj != null)
+		{
+			DestroyImmediate(fpsObj);
+			RemoveLogRootObj();
+			AssetDatabase.SaveAssets();
+			EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene() );
+			AssetDatabase.Refresh();
+		}
+	}
+
+	#endregion
+
+	#region Reporter
+
+	/// <summary>
+	/// 开启Reporter日志窗口系统
+	/// </summary>
+	[MenuItem("DGame Tools/日志宏定义开启选项/开启Reporter日志窗口系统", false, 36)]
+	public static void EnableReporter()
+	{
+		var reporterObj = GameObject.Find("Reporter");
+
+		if (reporterObj == null)
+		{
+			CreateReporter();
+			AssetDatabase.SaveAssets();
+			EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene() );
+			AssetDatabase.Refresh();
+		}
+	}
+
+	/// <summary>
+	/// 关闭Reporter日志窗口系统
+	/// </summary>
+	[MenuItem("DGame Tools/日志宏定义开启选项/关闭Reporter日志窗口系统", false, 37)]
+	public static void DisableReporter()
+	{
+		var reporterObj = GameObject.Find("Reporter");
+
+		if (reporterObj != null)
+		{
+			DestroyImmediate(reporterObj);
+			RemoveLogRootObj();
+			AssetDatabase.SaveAssets();
+			EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene() );
+			AssetDatabase.Refresh();
+		}
+	}
+
+	#endregion
+
+	private static void RemoveLogRootObj()
+	{
+		var logObj = GameObject.Find("LogRoot");
+
+		if (logObj != null && logObj.transform.childCount <= 0)
+		{
+			DestroyImmediate(logObj);
+		}
+	}
+
+	// [MenuItem("Reporter/Create")]
 	public static void CreateReporter()
 	{
 		const int ReporterExecOrder = -12000;
@@ -16,6 +167,18 @@ public class ReporterEditor : Editor
 		reporterObj.name = "Reporter";
 		Reporter reporter = reporterObj.AddComponent<Reporter>();
 		reporterObj.AddComponent<ReporterMessageReceiver>();
+		var logObj = GameObject.Find("LogRoot");
+
+		if (logObj != null)
+		{
+			reporterObj.transform.SetParent(logObj.transform);
+		}
+		else
+		{
+			logObj = new GameObject("LogRoot");
+			logObj.AddComponent<LogRoot>();
+			reporterObj.transform.SetParent(logObj.transform);
+		}
 		//reporterObj.AddComponent<TestReporter>();
 		
 		// Register root object for undo.
@@ -92,3 +255,5 @@ public class ReporterModificationProcessor : UnityEditor.AssetModificationProces
 		}
 	}
 }
+
+#endif

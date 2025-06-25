@@ -14,5 +14,13 @@ namespace DGame.Editor
             path = path.Replace(@"\", "/");
             Application.OpenURL("file://" + path);
         }
+
+        [MenuItem("DGame Tools/打开文件夹/打开StreamingAssetsPathFolder")]
+        private static void OpenStreamingAssetsPathFolder()
+        {
+            string path = Application.streamingAssetsPath;
+            path = path.Replace(@"\", "/");
+            Application.OpenURL("file://" + path);
+        }
     }
 }

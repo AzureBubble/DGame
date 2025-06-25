@@ -80,6 +80,7 @@ crashlytics-build.properties
 
 /[Aa]ssets/[Ss]treamingAssets.meta
 /[Aa]ssets/[Ss]treamingAssets
+/[Aa]ssets/[Ss]treamingAssets/*
 
 #HybirdCLR(HuaTuo)
 /HybirdCLRData/

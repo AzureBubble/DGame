@@ -138,38 +138,38 @@ namespace DGame
             {
                 case ELogLevel.Info:
                     m_stringBuilder.AppendFormat(showColor
-                        ? $"<color=#CFCFCF><b>[{DateTime.Now:HH:mm:ss-fff}][INFO] ► </b></color> - <color=#CFCFCF>{logStr}</color>"
-                        : $"<color=#CFCFCF><b>[{DateTime.Now:HH:mm:ss-fff}][INFO] ► </b></color> - {logStr}");
+                        ? $"<color=#CFCFCF><b>[{DateTime.Now:HH:mm:ss-fff}] [INFO] ► </b></color> - <color=#CFCFCF>{logStr}</color>"
+                        : $"<color=#CFCFCF><b>[{DateTime.Now:HH:mm:ss-fff}] [INFO] ► </b></color> - {logStr}");
                     break;
 
                 case ELogLevel.Debug:
                     m_stringBuilder.AppendFormat(showColor
-                        ? $"<color=#CFCFCF><b>[{DateTime.Now:HH:mm:ss-fff}][DEBUG] ► </b></color> - <color=#00FF18>{logStr}</color>"
-                        : $"<color=#00FF18><b>[{DateTime.Now:HH:mm:ss-fff}][DEBUG] ► </b></color> - {logStr}");
+                        ? $"<color=#CFCFCF><b>[{DateTime.Now:HH:mm:ss-fff}] [DEBUG] ► </b></color> - <color=#00FF18>{logStr}</color>"
+                        : $"<color=#00FF18><b>[{DateTime.Now:HH:mm:ss-fff}] [DEBUG] ► </b></color> - {logStr}");
                     break;
 
                 case ELogLevel.Assert:
                     m_stringBuilder.AppendFormat(showColor
-                        ? $"<color=#FF00BD><b>[{DateTime.Now:HH:mm:ss-fff}][ASSERT] ► </b></color> - <color=green>{{logStr}}</color>"
-                        : $"<color=#FF00BD><b>[{DateTime.Now:HH:mm:ss-fff}][ASSERT] ► </b></color> - {{logStr}}");
+                        ? $"<color=#FF00BD><b>[{DateTime.Now:HH:mm:ss-fff}] [ASSERT] ► </b></color> - <color=green>{{logStr}}</color>"
+                        : $"<color=#FF00BD><b>[{DateTime.Now:HH:mm:ss-fff}] [ASSERT] ► </b></color> - {{logStr}}");
                     break;
 
                 case ELogLevel.Warning:
                     m_stringBuilder.AppendFormat(showColor
-                        ? $"<color=#FF9400><b>[{DateTime.Now:HH:mm:ss-fff}][WARNING] ► </b></color> - <color=yellow>{logStr}</color>"
-                        : $"<color=#FF9400><b>[{DateTime.Now:HH:mm:ss-fff}][WARNING] ► </b></color> - {logStr}");
+                        ? $"<color=#FF9400><b>[{DateTime.Now:HH:mm:ss-fff}] [WARNING] ► </b></color> - <color=yellow>{logStr}</color>"
+                        : $"<color=#FF9400><b>[{DateTime.Now:HH:mm:ss-fff}] [WARNING] ► </b></color> - {logStr}");
                     break;
 
                 case ELogLevel.Error:
                     m_stringBuilder.AppendFormat(showColor
-                        ? $"<color=red><b>[{DateTime.Now:HH:mm:ss-fff}][ERROR] ► </b></color> - <color=red>{logStr}</color>"
-                        : $"<color=red><b>[{DateTime.Now:HH:mm:ss-fff}][ERROR] ► </b></color> - {logStr}");
+                        ? $"<color=red><b>[{DateTime.Now:HH:mm:ss-fff}] [ERROR] ► </b></color> - <color=red>{logStr}</color>"
+                        : $"<color=red><b>[{DateTime.Now:HH:mm:ss-fff}] [ERROR] ► </b></color> - {logStr}");
                     break;
 
                 case ELogLevel.Exception:
                     m_stringBuilder.AppendFormat(showColor
-                        ? $"<color=red><b>[{DateTime.Now:HH:mm:ss-fff}][EXCEPTION] ► </b></color> - <color=red>{logStr}</color>"
-                        : $"<color=red><b>[{DateTime.Now:HH:mm:ss-fff}][EXCEPTION] ► </b></color> - {logStr}");
+                        ? $"<color=red><b>[{DateTime.Now:HH:mm:ss-fff}] [EXCEPTION] ► </b></color> - <color=red>{logStr}</color>"
+                        : $"<color=red><b>[{DateTime.Now:HH:mm:ss-fff}] [EXCEPTION] ► </b></color> - {logStr}");
                     break;
             }
 

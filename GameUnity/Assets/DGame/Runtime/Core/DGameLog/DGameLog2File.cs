@@ -57,23 +57,41 @@ namespace DGame
                 }
                 while (m_logQueue.Count > 0 && m_logQueue.TryDequeue(out var data))
                 {
-                    if (data.type==LogType.Log)
+                    switch (data.type)
                     {
-                        m_logWriter.Write("[Log] ► ");
-                        m_logWriter.WriteLine(data.logMsg);
-                        m_logWriter.WriteLine(data.trace);
-                    }
-                    else if(data.type == LogType.Warning)
-                    {
-                        m_logWriter.Write("[Warning] ► ");
-                        m_logWriter.WriteLine(data.logMsg);
-                        m_logWriter.WriteLine(data.trace);
-                    }
-                    else if (data.type == LogType.Error)
-                    {
-                        m_logWriter.Write("[Error] ► ");
-                        m_logWriter.WriteLine(data.logMsg);
-                        m_logWriter.WriteLine(data.trace);
+                        case LogType.Error:
+                            m_logWriter.Write("[Error] ► ");
+                            m_logWriter.WriteLine(data.logMsg);
+                            m_logWriter.WriteLine(data.trace);
+                            break;
+
+                        case LogType.Assert:
+                            m_logWriter.Write("[Assert] ► ");
+                            m_logWriter.WriteLine(data.logMsg);
+                            m_logWriter.WriteLine(data.trace);
+                            break;
+
+                        case LogType.Warning:
+                            m_logWriter.Write("[Warning] ► ");
+                            m_logWriter.WriteLine(data.logMsg);
+                            m_logWriter.WriteLine(data.trace);
+                            break;
+
+                        case LogType.Log:
+                            m_logWriter.Write("[Log] ► ");
+                            m_logWriter.WriteLine(data.logMsg);
+                            m_logWriter.WriteLine(data.trace);
+                            break;
+
+                        case LogType.Exception:
+                            m_logWriter.Write("[Exception] ► ");
+                            m_logWriter.WriteLine(data.logMsg);
+                            m_logWriter.WriteLine(data.trace);
+                            break;
+
+                        default:
+                            m_logWriter.Write("[Log] ► [NULL]");
+                            break;
                     }
                     m_logWriter.Write("\r\n");
                 }

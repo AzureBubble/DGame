@@ -13,8 +13,6 @@ public class FPS : MonoBehaviour
         mStyle.normal.background = null;
         mStyle.fontSize = 35;
         mStyle.normal.textColor = Color.red;
-
-        DontDestroyOnLoad(gameObject);
     }
 
     void Update()

@@ -360,7 +360,8 @@ public class Reporter : MonoBehaviour
 			scenes = new string[Application.levelCount];
 			currentScene = Application.loadedLevelName;
 #endif
-			DontDestroyOnLoad(gameObject);
+			// 因为Reporter挂载在一个LogRoot物体下 该物体已经设置了不销毁 这里不需要再设置
+			//DontDestroyOnLoad(gameObject);
 #if UNITY_CHANGE1
 			Application.RegisterLogCallback (new Application.LogCallback (CaptureLog));
 			Application.RegisterLogCallbackThreaded (new Application.LogCallback (CaptureLogThread));
@@ -2118,5 +2119,3 @@ public class Reporter : MonoBehaviour
         File.WriteAllLines(filePath, fileContentsList.ToArray());
     }
 }
-
-

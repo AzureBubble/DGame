@@ -14,11 +14,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Unity\\C# Project\\SourceGenerator\\SourceGeneratorTest\\SourceGeneratorTest.csproj",
+      "projectUniqueName": "D:\\Unity\\GitHub Project\\DGame\\Tools\\Generata Tools\\SourceGenerator\\SourceGeneratorTest\\SourceGeneratorTest.csproj",
       "projectName": "SourceGeneratorTest",
-      "projectPath": "D:\\Unity\\C# Project\\SourceGenerator\\SourceGeneratorTest\\SourceGeneratorTest.csproj",
+      "projectPath": "D:\\Unity\\GitHub Project\\DGame\\Tools\\Generata Tools\\SourceGenerator\\SourceGeneratorTest\\SourceGeneratorTest.csproj",
       "packagesPath": "C:\\Users\\QZJ\\.nuget\\packages\\",
-      "outputPath": "D:\\Unity\\C# Project\\SourceGenerator\\SourceGeneratorTest\\obj\\",
+      "outputPath": "D:\\Unity\\GitHub Project\\DGame\\Tools\\Generata Tools\\SourceGenerator\\SourceGeneratorTest\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "D:\\Code IDE\\Microsoft\\Microsoft Visual Studio\\Shared\\NuGetPackages"

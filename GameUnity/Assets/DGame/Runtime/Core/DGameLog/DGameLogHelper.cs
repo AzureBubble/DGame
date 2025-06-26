@@ -44,7 +44,7 @@ namespace DGame
             switch (level)
             {
                 case DGameLogLevel.Debug:
-                    LogImp(ELogLevel.Debug, Utility.StringTools.Format("<color=#888888>{0}</color>", msg));
+                    LogImp(ELogLevel.Debug, Utility.StringUtil.Format("<color=#888888>{0}</color>", msg));
                     break;
 
                 case DGameLogLevel.Info:

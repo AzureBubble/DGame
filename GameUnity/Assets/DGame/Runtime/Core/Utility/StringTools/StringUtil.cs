@@ -6,13 +6,13 @@ namespace DGame
         /// 字符串工具类
         /// 避免了string.Format中的object装箱拆箱操作
         /// </summary>
-        public static partial class StringTools
+        public static partial class StringUtil
         {
-            private static IStringHelper m_stringHelper = null;
+            private static IStringUtilHelper STRING_UTIL_HELPER = null;
 
-            public static void SetStringHelper(IStringHelper helper)
+            public static void SetStringHelper(IStringUtilHelper stringUtilHelper)
             {
-                m_stringHelper = helper;
+                STRING_UTIL_HELPER = stringUtilHelper;
             }
 
             /// <summary>
@@ -29,7 +29,7 @@ namespace DGame
                     throw new DGameException("Format is invalid.");
                 }
 
-                return m_stringHelper == null ? string.Format(format, arg) : m_stringHelper.Format(format, arg);
+                return STRING_UTIL_HELPER == null ? string.Format(format, arg) : STRING_UTIL_HELPER.Format(format, arg);
             }
 
             /// <summary>
@@ -48,7 +48,7 @@ namespace DGame
                     throw new DGameException("Format is invalid.");
                 }
 
-                return m_stringHelper == null ? string.Format(format, arg1, arg2) : m_stringHelper.Format(format, arg1, arg2);
+                return STRING_UTIL_HELPER == null ? string.Format(format, arg1, arg2) : STRING_UTIL_HELPER.Format(format, arg1, arg2);
             }
 
             /// <summary>
@@ -69,9 +69,9 @@ namespace DGame
                     throw new DGameException("Format is invalid.");
                 }
 
-                return m_stringHelper == null
+                return STRING_UTIL_HELPER == null
                     ? string.Format(format, arg1, arg2, arg3)
-                    : m_stringHelper.Format(format, arg1, arg2, arg3);
+                    : STRING_UTIL_HELPER.Format(format, arg1, arg2, arg3);
             }
 
             /// <summary>
@@ -94,9 +94,9 @@ namespace DGame
                     throw new DGameException("Format is invalid.");
                 }
 
-                return m_stringHelper == null
+                return STRING_UTIL_HELPER == null
                     ? string.Format(format, arg1, arg2, arg3, arg4)
-                    : m_stringHelper.Format(format, arg1, arg2, arg3, arg4);
+                    : STRING_UTIL_HELPER.Format(format, arg1, arg2, arg3, arg4);
             }
 
             /// <summary>
@@ -121,9 +121,9 @@ namespace DGame
                     throw new DGameException("Format is invalid.");
                 }
 
-                return m_stringHelper == null
+                return STRING_UTIL_HELPER == null
                     ? string.Format(format, arg1, arg2, arg3, arg4, arg5)
-                    : m_stringHelper.Format(format, arg1, arg2, arg3, arg4, arg5);
+                    : STRING_UTIL_HELPER.Format(format, arg1, arg2, arg3, arg4, arg5);
             }
 
             /// <summary>
@@ -150,9 +150,9 @@ namespace DGame
                     throw new DGameException("Format is invalid.");
                 }
 
-                return m_stringHelper == null
+                return STRING_UTIL_HELPER == null
                     ? string.Format(format, arg1, arg2, arg3, arg4, arg5, arg6)
-                    : m_stringHelper.Format(format, arg1, arg2, arg3, arg4, arg5, arg6);
+                    : STRING_UTIL_HELPER.Format(format, arg1, arg2, arg3, arg4, arg5, arg6);
             }
 
             /// <summary>
@@ -181,9 +181,9 @@ namespace DGame
                     throw new DGameException("Format is invalid.");
                 }
 
-                return m_stringHelper == null
+                return STRING_UTIL_HELPER == null
                     ? string.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7)
-                    : m_stringHelper.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+                    : STRING_UTIL_HELPER.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
             }
 
             /// <summary>
@@ -214,9 +214,9 @@ namespace DGame
                     throw new DGameException("Format is invalid.");
                 }
 
-                return m_stringHelper == null
+                return STRING_UTIL_HELPER == null
                     ? string.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
-                    : m_stringHelper.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
+                    : STRING_UTIL_HELPER.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
             }
 
             /// <summary>
@@ -249,9 +249,9 @@ namespace DGame
                     throw new DGameException("Format is invalid.");
                 }
 
-                return m_stringHelper == null
+                return STRING_UTIL_HELPER == null
                     ? string.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
-                    : m_stringHelper.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
+                    : STRING_UTIL_HELPER.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
             }
 
             /// <summary>
@@ -286,9 +286,9 @@ namespace DGame
                     throw new DGameException("Format is invalid.");
                 }
 
-                return m_stringHelper == null
+                return STRING_UTIL_HELPER == null
                     ? string.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10)
-                    : m_stringHelper.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);
+                    : STRING_UTIL_HELPER.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);
             }
 
             /// <summary>
@@ -325,9 +325,9 @@ namespace DGame
                     throw new DGameException("Format is invalid.");
                 }
 
-                return m_stringHelper == null
+                return STRING_UTIL_HELPER == null
                     ? string.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11)
-                    : m_stringHelper.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11);
+                    : STRING_UTIL_HELPER.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11);
             }
 
             /// <summary>
@@ -366,9 +366,9 @@ namespace DGame
                     throw new DGameException("Format is invalid.");
                 }
 
-                return m_stringHelper == null
+                return STRING_UTIL_HELPER == null
                     ? string.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12)
-                    : m_stringHelper.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12);
+                    : STRING_UTIL_HELPER.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12);
             }
 
             /// <summary>
@@ -409,9 +409,9 @@ namespace DGame
                     throw new DGameException("Format is invalid.");
                 }
 
-                return m_stringHelper == null
+                return STRING_UTIL_HELPER == null
                     ? string.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13)
-                    : m_stringHelper.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13);
+                    : STRING_UTIL_HELPER.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13);
             }
 
             /// <summary>
@@ -454,9 +454,9 @@ namespace DGame
                     throw new DGameException("Format is invalid.");
                 }
 
-                return m_stringHelper == null
+                return STRING_UTIL_HELPER == null
                     ? string.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14)
-                    : m_stringHelper.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14);
+                    : STRING_UTIL_HELPER.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14);
             }
 
             /// <summary>
@@ -501,9 +501,9 @@ namespace DGame
                     throw new DGameException("Format is invalid.");
                 }
 
-                return m_stringHelper == null
+                return STRING_UTIL_HELPER == null
                     ? string.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15)
-                    : m_stringHelper.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15);
+                    : STRING_UTIL_HELPER.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15);
             }
 
             /// <summary>
@@ -550,9 +550,9 @@ namespace DGame
                     throw new DGameException("Format is invalid.");
                 }
 
-                return m_stringHelper == null
+                return STRING_UTIL_HELPER == null
                     ? string.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16)
-                    : m_stringHelper.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16);
+                    : STRING_UTIL_HELPER.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16);
             }
         }
     }

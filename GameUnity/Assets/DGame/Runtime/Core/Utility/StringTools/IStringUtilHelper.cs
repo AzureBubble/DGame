@@ -6,12 +6,12 @@ namespace DGame
 {
     public static partial class Utility
     {
-        public static partial class StringTools
+        public static partial class StringUtil
         {
             /// <summary>
             /// 字符串工具类功能接口
             /// </summary>
-            public interface IStringHelper
+            public interface IStringUtilHelper
             {
                 /// <summary>
                 /// 获取格式化字符串。

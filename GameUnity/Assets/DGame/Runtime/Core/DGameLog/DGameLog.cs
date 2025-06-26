@@ -49,7 +49,7 @@ namespace DGame
         /// <param name="arg">日志参数。</param>
         public static void Debug<T>(string format, T arg)
         {
-            m_logHelper?.Log(DGameLogLevel.Debug, Utility.StringTools.Format(format, arg));
+            m_logHelper?.Log(DGameLogLevel.Debug, Utility.StringUtil.Format(format, arg));
         }
 
         /// <summary>
@@ -67,7 +67,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Debug, Utility.StringTools.Format(format, arg1, arg2));
+            m_logHelper.Log(DGameLogLevel.Debug, Utility.StringUtil.Format(format, arg1, arg2));
         }
 
         /// <summary>
@@ -87,7 +87,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Debug, Utility.StringTools.Format(format, arg1, arg2, arg3));
+            m_logHelper.Log(DGameLogLevel.Debug, Utility.StringUtil.Format(format, arg1, arg2, arg3));
         }
 
         /// <summary>
@@ -109,7 +109,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Debug, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4));
+            m_logHelper.Log(DGameLogLevel.Debug, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4));
         }
 
         /// <summary>
@@ -133,7 +133,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Debug, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5));
+            m_logHelper.Log(DGameLogLevel.Debug, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5));
         }
 
         /// <summary>
@@ -159,7 +159,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Debug, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6));
+            m_logHelper.Log(DGameLogLevel.Debug, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6));
         }
 
         /// <summary>
@@ -187,7 +187,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Debug, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7));
+            m_logHelper.Log(DGameLogLevel.Debug, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7));
         }
 
         /// <summary>
@@ -217,7 +217,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Debug, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8));
+            m_logHelper.Log(DGameLogLevel.Debug, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8));
         }
 
         /// <summary>
@@ -249,7 +249,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Debug, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9));
+            m_logHelper.Log(DGameLogLevel.Debug, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9));
         }
 
         /// <summary>
@@ -283,7 +283,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Debug, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10));
+            m_logHelper.Log(DGameLogLevel.Debug, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10));
         }
 
         /// <summary>
@@ -319,7 +319,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Debug, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11));
+            m_logHelper.Log(DGameLogLevel.Debug, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11));
         }
 
         /// <summary>
@@ -357,7 +357,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Debug, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12));
+            m_logHelper.Log(DGameLogLevel.Debug, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12));
         }
 
         /// <summary>
@@ -397,7 +397,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Debug, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13));
+            m_logHelper.Log(DGameLogLevel.Debug, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13));
         }
 
         /// <summary>
@@ -439,7 +439,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Debug, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14));
+            m_logHelper.Log(DGameLogLevel.Debug, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14));
         }
 
         /// <summary>
@@ -483,7 +483,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Debug, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15));
+            m_logHelper.Log(DGameLogLevel.Debug, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15));
         }
 
         /// <summary>
@@ -529,7 +529,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Debug, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16));
+            m_logHelper.Log(DGameLogLevel.Debug, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16));
         }
 
         #endregion
@@ -577,7 +577,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Info, Utility.StringTools.Format(format, arg));
+            m_logHelper.Log(DGameLogLevel.Info, Utility.StringUtil.Format(format, arg));
         }
 
         /// <summary>
@@ -595,7 +595,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Info, Utility.StringTools.Format(format, arg1, arg2));
+            m_logHelper.Log(DGameLogLevel.Info, Utility.StringUtil.Format(format, arg1, arg2));
         }
 
         /// <summary>
@@ -615,7 +615,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Info, Utility.StringTools.Format(format, arg1, arg2, arg3));
+            m_logHelper.Log(DGameLogLevel.Info, Utility.StringUtil.Format(format, arg1, arg2, arg3));
         }
 
         /// <summary>
@@ -637,7 +637,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Info, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4));
+            m_logHelper.Log(DGameLogLevel.Info, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4));
         }
 
         /// <summary>
@@ -661,7 +661,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Info, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5));
+            m_logHelper.Log(DGameLogLevel.Info, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5));
         }
 
         /// <summary>
@@ -687,7 +687,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Info, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6));
+            m_logHelper.Log(DGameLogLevel.Info, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6));
         }
 
         /// <summary>
@@ -715,7 +715,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Info, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7));
+            m_logHelper.Log(DGameLogLevel.Info, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7));
         }
 
         /// <summary>
@@ -745,7 +745,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Info, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8));
+            m_logHelper.Log(DGameLogLevel.Info, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8));
         }
 
         /// <summary>
@@ -777,7 +777,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Info, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9));
+            m_logHelper.Log(DGameLogLevel.Info, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9));
         }
 
         /// <summary>
@@ -811,7 +811,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Info, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10));
+            m_logHelper.Log(DGameLogLevel.Info, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10));
         }
 
         /// <summary>
@@ -847,7 +847,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Info, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11));
+            m_logHelper.Log(DGameLogLevel.Info, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11));
         }
 
         /// <summary>
@@ -885,7 +885,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Info, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12));
+            m_logHelper.Log(DGameLogLevel.Info, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12));
         }
 
         /// <summary>
@@ -925,7 +925,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Info, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13));
+            m_logHelper.Log(DGameLogLevel.Info, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13));
         }
 
         /// <summary>
@@ -967,7 +967,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Info, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14));
+            m_logHelper.Log(DGameLogLevel.Info, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14));
         }
 
         /// <summary>
@@ -1011,7 +1011,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Info, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15));
+            m_logHelper.Log(DGameLogLevel.Info, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15));
         }
 
         /// <summary>
@@ -1057,7 +1057,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Info, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16));
+            m_logHelper.Log(DGameLogLevel.Info, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16));
         }
 
         #endregion
@@ -1105,7 +1105,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Warning, Utility.StringTools.Format(format, arg));
+            m_logHelper.Log(DGameLogLevel.Warning, Utility.StringUtil.Format(format, arg));
         }
 
         /// <summary>
@@ -1123,7 +1123,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Warning, Utility.StringTools.Format(format, arg1, arg2));
+            m_logHelper.Log(DGameLogLevel.Warning, Utility.StringUtil.Format(format, arg1, arg2));
         }
 
         /// <summary>
@@ -1143,7 +1143,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Warning, Utility.StringTools.Format(format, arg1, arg2, arg3));
+            m_logHelper.Log(DGameLogLevel.Warning, Utility.StringUtil.Format(format, arg1, arg2, arg3));
         }
 
         /// <summary>
@@ -1165,7 +1165,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Warning, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4));
+            m_logHelper.Log(DGameLogLevel.Warning, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4));
         }
 
         /// <summary>
@@ -1189,7 +1189,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Warning, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5));
+            m_logHelper.Log(DGameLogLevel.Warning, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5));
         }
 
         /// <summary>
@@ -1215,7 +1215,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Warning, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6));
+            m_logHelper.Log(DGameLogLevel.Warning, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6));
         }
 
         /// <summary>
@@ -1243,7 +1243,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Warning, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7));
+            m_logHelper.Log(DGameLogLevel.Warning, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7));
         }
 
         /// <summary>
@@ -1273,7 +1273,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Warning, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8));
+            m_logHelper.Log(DGameLogLevel.Warning, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8));
         }
 
         /// <summary>
@@ -1305,7 +1305,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Warning, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9));
+            m_logHelper.Log(DGameLogLevel.Warning, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9));
         }
 
         /// <summary>
@@ -1339,7 +1339,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Warning, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10));
+            m_logHelper.Log(DGameLogLevel.Warning, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10));
         }
 
         /// <summary>
@@ -1375,7 +1375,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Warning, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11));
+            m_logHelper.Log(DGameLogLevel.Warning, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11));
         }
 
         /// <summary>
@@ -1413,7 +1413,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Warning, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12));
+            m_logHelper.Log(DGameLogLevel.Warning, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12));
         }
 
         /// <summary>
@@ -1453,7 +1453,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Warning, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13));
+            m_logHelper.Log(DGameLogLevel.Warning, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13));
         }
 
         /// <summary>
@@ -1495,7 +1495,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Warning, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14));
+            m_logHelper.Log(DGameLogLevel.Warning, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14));
         }
 
         /// <summary>
@@ -1539,7 +1539,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Warning, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15));
+            m_logHelper.Log(DGameLogLevel.Warning, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15));
         }
 
         /// <summary>
@@ -1585,7 +1585,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Warning, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16));
+            m_logHelper.Log(DGameLogLevel.Warning, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16));
         }
 
         #endregion
@@ -1633,7 +1633,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Error, Utility.StringTools.Format(format, arg));
+            m_logHelper.Log(DGameLogLevel.Error, Utility.StringUtil.Format(format, arg));
         }
 
         /// <summary>
@@ -1651,7 +1651,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Error, Utility.StringTools.Format(format, arg1, arg2));
+            m_logHelper.Log(DGameLogLevel.Error, Utility.StringUtil.Format(format, arg1, arg2));
         }
 
         /// <summary>
@@ -1671,7 +1671,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Error, Utility.StringTools.Format(format, arg1, arg2, arg3));
+            m_logHelper.Log(DGameLogLevel.Error, Utility.StringUtil.Format(format, arg1, arg2, arg3));
         }
 
         /// <summary>
@@ -1693,7 +1693,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Error, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4));
+            m_logHelper.Log(DGameLogLevel.Error, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4));
         }
 
         /// <summary>
@@ -1717,7 +1717,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Error, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5));
+            m_logHelper.Log(DGameLogLevel.Error, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5));
         }
 
         /// <summary>
@@ -1743,7 +1743,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Error, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6));
+            m_logHelper.Log(DGameLogLevel.Error, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6));
         }
 
         /// <summary>
@@ -1771,7 +1771,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Error, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7));
+            m_logHelper.Log(DGameLogLevel.Error, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7));
         }
 
         /// <summary>
@@ -1801,7 +1801,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Error, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8));
+            m_logHelper.Log(DGameLogLevel.Error, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8));
         }
 
         /// <summary>
@@ -1833,7 +1833,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Error, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9));
+            m_logHelper.Log(DGameLogLevel.Error, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9));
         }
 
         /// <summary>
@@ -1867,7 +1867,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Error, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10));
+            m_logHelper.Log(DGameLogLevel.Error, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10));
         }
 
         /// <summary>
@@ -1903,7 +1903,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Error, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11));
+            m_logHelper.Log(DGameLogLevel.Error, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11));
         }
 
         /// <summary>
@@ -1941,7 +1941,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Error, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12));
+            m_logHelper.Log(DGameLogLevel.Error, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12));
         }
 
         /// <summary>
@@ -1981,7 +1981,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Error, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13));
+            m_logHelper.Log(DGameLogLevel.Error, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13));
         }
 
         /// <summary>
@@ -2023,7 +2023,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Error, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14));
+            m_logHelper.Log(DGameLogLevel.Error, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14));
         }
 
         /// <summary>
@@ -2067,7 +2067,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Error, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15));
+            m_logHelper.Log(DGameLogLevel.Error, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15));
         }
 
         /// <summary>
@@ -2113,7 +2113,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Error, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16));
+            m_logHelper.Log(DGameLogLevel.Error, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16));
         }
 
         #endregion
@@ -2161,7 +2161,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Fatal, Utility.StringTools.Format(format, arg));
+            m_logHelper.Log(DGameLogLevel.Fatal, Utility.StringUtil.Format(format, arg));
         }
 
         /// <summary>
@@ -2179,7 +2179,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Fatal, Utility.StringTools.Format(format, arg1, arg2));
+            m_logHelper.Log(DGameLogLevel.Fatal, Utility.StringUtil.Format(format, arg1, arg2));
         }
 
         /// <summary>
@@ -2199,7 +2199,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Fatal, Utility.StringTools.Format(format, arg1, arg2, arg3));
+            m_logHelper.Log(DGameLogLevel.Fatal, Utility.StringUtil.Format(format, arg1, arg2, arg3));
         }
 
         /// <summary>
@@ -2221,7 +2221,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Fatal, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4));
+            m_logHelper.Log(DGameLogLevel.Fatal, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4));
         }
 
         /// <summary>
@@ -2245,7 +2245,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Fatal, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5));
+            m_logHelper.Log(DGameLogLevel.Fatal, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5));
         }
 
         /// <summary>
@@ -2271,7 +2271,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Fatal, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6));
+            m_logHelper.Log(DGameLogLevel.Fatal, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6));
         }
 
         /// <summary>
@@ -2299,7 +2299,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Fatal, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7));
+            m_logHelper.Log(DGameLogLevel.Fatal, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7));
         }
 
         /// <summary>
@@ -2329,7 +2329,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Fatal, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8));
+            m_logHelper.Log(DGameLogLevel.Fatal, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8));
         }
 
         /// <summary>
@@ -2361,7 +2361,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Fatal, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9));
+            m_logHelper.Log(DGameLogLevel.Fatal, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9));
         }
 
         /// <summary>
@@ -2395,7 +2395,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Fatal, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10));
+            m_logHelper.Log(DGameLogLevel.Fatal, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10));
         }
 
         /// <summary>
@@ -2431,7 +2431,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Fatal, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11));
+            m_logHelper.Log(DGameLogLevel.Fatal, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11));
         }
 
         /// <summary>
@@ -2469,7 +2469,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Fatal, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12));
+            m_logHelper.Log(DGameLogLevel.Fatal, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12));
         }
 
         /// <summary>
@@ -2509,7 +2509,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Fatal, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13));
+            m_logHelper.Log(DGameLogLevel.Fatal, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13));
         }
 
         /// <summary>
@@ -2551,7 +2551,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Fatal, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14));
+            m_logHelper.Log(DGameLogLevel.Fatal, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14));
         }
 
         /// <summary>
@@ -2595,7 +2595,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Fatal, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15));
+            m_logHelper.Log(DGameLogLevel.Fatal, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15));
         }
 
         /// <summary>
@@ -2641,7 +2641,7 @@ namespace DGame
                 return;
             }
 
-            m_logHelper.Log(DGameLogLevel.Fatal, Utility.StringTools.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16));
+            m_logHelper.Log(DGameLogLevel.Fatal, Utility.StringUtil.Format(format, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16));
         }
 
         #endregion

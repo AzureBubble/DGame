@@ -8,11 +8,22 @@ namespace DGame.Editor
     public static partial class ScriptingDefineSymbolsTools
     {
         private const string ENABLE_DGAME_LOG_SCRIPTING_DEFINE_SYMBOL = "ENABLE_DGAME_LOG";
-        private const string ENABLE_DGAME_DEBUG_AND_ABOVE_LOG_SCRIPTING_DEFINE_SYMBOL = "ENABLE_DGAME_DEBUG_AND_ABOVE_LOG";
-        private const string ENABLE_DGAME_INFO_AND_ABOVE_LOG_SCRIPTING_DEFINE_SYMBOL = "ENABLE_DGAME_INFO_AND_ABOVE_LOG";
-        private const string ENABLE_DGAME_WARNING_AND_ABOVE_LOG_SCRIPTING_DEFINE_SYMBOL = "ENABLE_DGAME_WARNING_AND_ABOVE_LOG";
-        private const string ENABLE_DGAME_ERROR_AND_ABOVE_LOG_SCRIPTING_DEFINE_SYMBOL = "ENABLE_DGAME_ERROR_AND_ABOVE_LOG";
-        private const string ENABLE_DGAME_FATAL_AND_ABOVE_LOG_SCRIPTING_DEFINE_SYMBOL = "ENABLE_DGAME_FATAL_AND_ABOVE_LOG";
+
+        private const string ENABLE_DGAME_DEBUG_AND_ABOVE_LOG_SCRIPTING_DEFINE_SYMBOL =
+            "ENABLE_DGAME_DEBUG_AND_ABOVE_LOG";
+
+        private const string ENABLE_DGAME_INFO_AND_ABOVE_LOG_SCRIPTING_DEFINE_SYMBOL =
+            "ENABLE_DGAME_INFO_AND_ABOVE_LOG";
+
+        private const string ENABLE_DGAME_WARNING_AND_ABOVE_LOG_SCRIPTING_DEFINE_SYMBOL =
+            "ENABLE_DGAME_WARNING_AND_ABOVE_LOG";
+
+        private const string ENABLE_DGAME_ERROR_AND_ABOVE_LOG_SCRIPTING_DEFINE_SYMBOL =
+            "ENABLE_DGAME_ERROR_AND_ABOVE_LOG";
+
+        private const string ENABLE_DGAME_FATAL_AND_ABOVE_LOG_SCRIPTING_DEFINE_SYMBOL =
+            "ENABLE_DGAME_FATAL_AND_ABOVE_LOG";
+
         private const string ENABLE_DGAME_DEBUG_LOG_SCRIPTING_DEFINE_SYMBOL = "ENABLE_DGAME_DEBUG_LOG";
         private const string ENABLE_DGAME_INFO_LOG_SCRIPTING_DEFINE_SYMBOL = "ENABLE_DGAME_INFO_LOG";
         private const string ENABLE_DGAME_WARNING_LOG_SCRIPTING_DEFINE_SYMBOL = "ENABLE_DGAME_WARNING_LOG";
@@ -40,7 +51,7 @@ namespace DGame.Editor
         /// <summary>
         /// 禁用所有日志脚本宏定义。
         /// </summary>
-        [MenuItem("DGame Tools/日志宏定义开启选项/禁用所有的日志输出", false, 30)]
+        [MenuItem("DGame Tools/日志系统/禁用所有的日志输出", false, 41)]
         public static void DisableAllLogs()
         {
             ScriptingDefineSymbolsTools.DisableScriptingDefineSymbol(ENABLE_DGAME_LOG_SCRIPTING_DEFINE_SYMBOL);
@@ -59,7 +70,7 @@ namespace DGame.Editor
         /// <summary>
         /// 开启所有日志脚本宏定义。
         /// </summary>
-        [MenuItem("DGame Tools/日志宏定义开启选项/开启所有的日志输出", false, 31)]
+        [MenuItem("DGame Tools/日志系统/开启所有的日志输出", false, 42)]
         public static void EnableAllLogs()
         {
             DisableAllLogs();
@@ -69,7 +80,7 @@ namespace DGame.Editor
         /// <summary>
         /// 开启调试及以上级别的日志脚本宏定义。
         /// </summary>
-        [MenuItem("DGame Tools/日志宏定义开启选项/开启调试及以上级别的日志输出", false, 32)]
+        [MenuItem("DGame Tools/日志系统/开启调试及以上级别的日志输出", false, 43)]
         public static void EnableDebugAndAboveLogs()
         {
             SetAboveLogScriptingDefineSymbol(ENABLE_DGAME_DEBUG_AND_ABOVE_LOG_SCRIPTING_DEFINE_SYMBOL);
@@ -78,7 +89,7 @@ namespace DGame.Editor
         /// <summary>
         /// 开启信息及以上级别的日志脚本宏定义。
         /// </summary>
-        [MenuItem("DGame Tools/日志宏定义开启选项/开启信息及以上级别的日志输出", false, 33)]
+        [MenuItem("DGame Tools/日志系统/开启信息及以上级别的日志输出", false, 44)]
         public static void EnableInfoAndAboveLogs()
         {
             SetAboveLogScriptingDefineSymbol(ENABLE_DGAME_INFO_AND_ABOVE_LOG_SCRIPTING_DEFINE_SYMBOL);
@@ -87,7 +98,7 @@ namespace DGame.Editor
         /// <summary>
         /// 开启警告及以上级别的日志脚本宏定义。
         /// </summary>
-        [MenuItem("DGame Tools/日志宏定义开启选项/开启警告及以上级别的日志输出", false, 34)]
+        [MenuItem("DGame Tools/日志系统/开启警告及以上级别的日志输出", false, 45)]
         public static void EnableWarningAndAboveLogs()
         {
             SetAboveLogScriptingDefineSymbol(ENABLE_DGAME_WARNING_AND_ABOVE_LOG_SCRIPTING_DEFINE_SYMBOL);
@@ -96,7 +107,7 @@ namespace DGame.Editor
         /// <summary>
         /// 开启错误及以上级别的日志脚本宏定义。
         /// </summary>
-        [MenuItem("DGame Tools/日志宏定义开启选项/开启错误及以上级别的日志输出", false, 35)]
+        [MenuItem("DGame Tools/日志系统/开启错误及以上级别的日志输出", false, 46)]
         public static void EnableErrorAndAboveLogs()
         {
             SetAboveLogScriptingDefineSymbol(ENABLE_DGAME_ERROR_AND_ABOVE_LOG_SCRIPTING_DEFINE_SYMBOL);
@@ -105,7 +116,7 @@ namespace DGame.Editor
         /// <summary>
         /// 开启严重错误及以上级别的日志脚本宏定义。
         /// </summary>
-        [MenuItem("DGame Tools/日志宏定义开启选项/开启严重错误及以上级别的日志输出", false, 36)]
+        [MenuItem("DGame Tools/日志系统/开启严重错误及以上级别的日志输出", false, 47)]
         public static void EnableFatalAndAboveLogs()
         {
             SetAboveLogScriptingDefineSymbol(ENABLE_DGAME_FATAL_AND_ABOVE_LOG_SCRIPTING_DEFINE_SYMBOL);

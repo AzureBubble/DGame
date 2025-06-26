@@ -2782,7 +2782,7 @@ namespace DGame
         {
             if (!condition)
             {
-                string message = Utility.StringTools.Format("{0}\n{1}", "Assert Failed", System.Environment.StackTrace);
+                string message = Utility.StringUtil.Format("{0}\n{1}", "Assert Failed", System.Environment.StackTrace);
                 Fatal(message);
             }
         }
@@ -2797,7 +2797,7 @@ namespace DGame
         {
             if (!condition)
             {
-                string message = Utility.StringTools.Format("{0}\n{1}", "Assert Failed" + retStr, System.Environment.StackTrace);
+                string message = Utility.StringUtil.Format("{0}\n{1}", "Assert Failed" + retStr, System.Environment.StackTrace);
                 Fatal(message);
             }
         }

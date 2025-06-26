@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Unity\\C# Project\\SourceGenerator\\SourceGenerator\\SourceGenerator.csproj": {}
+    "D:\\Unity\\GitHub Project\\DGame\\Tools\\Generata Tools\\SourceGenerator\\SourceGenerator\\SourceGenerator.csproj": {}
   },
   "projects": {
-    "D:\\Unity\\C# Project\\SourceGenerator\\SourceGenerator\\SourceGenerator.csproj": {
+    "D:\\Unity\\GitHub Project\\DGame\\Tools\\Generata Tools\\SourceGenerator\\SourceGenerator\\SourceGenerator.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Unity\\C# Project\\SourceGenerator\\SourceGenerator\\SourceGenerator.csproj",
+        "projectUniqueName": "D:\\Unity\\GitHub Project\\DGame\\Tools\\Generata Tools\\SourceGenerator\\SourceGenerator\\SourceGenerator.csproj",
         "projectName": "SourceGenerator",
-        "projectPath": "D:\\Unity\\C# Project\\SourceGenerator\\SourceGenerator\\SourceGenerator.csproj",
+        "projectPath": "D:\\Unity\\GitHub Project\\DGame\\Tools\\Generata Tools\\SourceGenerator\\SourceGenerator\\SourceGenerator.csproj",
         "packagesPath": "C:\\Users\\QZJ\\.nuget\\packages\\",
-        "outputPath": "D:\\Unity\\C# Project\\SourceGenerator\\SourceGenerator\\obj\\",
+        "outputPath": "D:\\Unity\\GitHub Project\\DGame\\Tools\\Generata Tools\\SourceGenerator\\SourceGenerator\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "D:\\Code IDE\\Microsoft\\Microsoft Visual Studio\\Shared\\NuGetPackages"

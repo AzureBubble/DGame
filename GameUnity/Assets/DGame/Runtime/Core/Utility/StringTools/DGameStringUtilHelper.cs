@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
@@ -8,10 +9,11 @@ namespace DGame
     /// <summary>
     /// 字符串工具帮助实现类
     /// </summary>
-    public class DGameStringHelper : Utility.StringTools.IStringHelper
+    public class DGameStringUtilHelper : Utility.StringUtil.IStringUtilHelper
     {
         private const int STRING_BUILDER_CAPACITY = 1024;
 
+        [ThreadStatic]
         private static StringBuilder m_cacheStringBuilder = null;
 
         private static void CheckCachedStringBuilder()

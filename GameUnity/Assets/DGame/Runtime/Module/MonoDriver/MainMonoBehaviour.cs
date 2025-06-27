@@ -4,140 +4,143 @@ using UnityEngine;
 
 namespace DGame
 {
-    public class MainMonoBehaviour : MonoBehaviour
+    internal partial class MonoDriver
     {
-        private event Action OnUpdateEvent;
-        private event Action OnFixedUpdateEvent;
-        private event Action OnLateUpdateEvent;
-        private event Action OnDestroyEvent;
-        private event Action OnDrawGizmosEvent;
-        private event Action OnDrawGizmosSelectedEvent;
-        private event Action<bool> OnApplicationPauseEvent;
-
-        private void Update()
+        private class MainMonoBehaviour : MonoBehaviour
         {
-            OnUpdateEvent?.Invoke();
-        }
+            private event Action OnUpdateEvent;
+            private event Action OnFixedUpdateEvent;
+            private event Action OnLateUpdateEvent;
+            private event Action OnDestroyEvent;
+            private event Action OnDrawGizmosEvent;
+            private event Action OnDrawGizmosSelectedEvent;
+            private event Action<bool> OnApplicationPauseEvent;
 
-        private void FixedUpdate()
-        {
-            OnFixedUpdateEvent?.Invoke();
-        }
+            private void Update()
+            {
+                OnUpdateEvent?.Invoke();
+            }
 
-        private void LateUpdate()
-        {
-            OnLateUpdateEvent?.Invoke();
-        }
+            private void FixedUpdate()
+            {
+                OnFixedUpdateEvent?.Invoke();
+            }
 
-        private void OnDestroy()
-        {
-            OnDestroyEvent?.Invoke();
-        }
+            private void LateUpdate()
+            {
+                OnLateUpdateEvent?.Invoke();
+            }
 
-        [Conditional("UNITY_EDITOR")]
-        private void OnDrawGizmos()
-        {
-            OnDrawGizmosEvent?.Invoke();
-        }
+            private void OnDestroy()
+            {
+                OnDestroyEvent?.Invoke();
+            }
 
-        [Conditional("UNITY_EDITOR")]
-        private void OnDrawGizmosSelected()
-        {
-            OnDrawGizmosSelectedEvent?.Invoke();
-        }
+            [Conditional("UNITY_EDITOR")]
+            private void OnDrawGizmos()
+            {
+                OnDrawGizmosEvent?.Invoke();
+            }
 
-        private void OnApplicationPause(bool pauseStatus)
-        {
-            OnApplicationPauseEvent?.Invoke(pauseStatus);
-        }
+            [Conditional("UNITY_EDITOR")]
+            private void OnDrawGizmosSelected()
+            {
+                OnDrawGizmosSelectedEvent?.Invoke();
+            }
 
-        #region 事件添加删除操作
+            private void OnApplicationPause(bool pauseStatus)
+            {
+                OnApplicationPauseEvent?.Invoke(pauseStatus);
+            }
 
-        public void AddUpdateListener(Action action)
-        {
-            OnUpdateEvent += action;
-        }
+            #region 事件添加删除操作
 
-        public void RemoveUpdateListener(Action action)
-        {
-            OnUpdateEvent -= action;
-        }
+            public void AddUpdateListener(Action action)
+            {
+                OnUpdateEvent += action;
+            }
 
-        public void AddFixedUpdateListener(Action action)
-        {
-            OnFixedUpdateEvent += action;
-        }
+            public void RemoveUpdateListener(Action action)
+            {
+                OnUpdateEvent -= action;
+            }
 
-        public void RemoveFixedUpdateListener(Action action)
-        {
-            OnFixedUpdateEvent -= action;
-        }
+            public void AddFixedUpdateListener(Action action)
+            {
+                OnFixedUpdateEvent += action;
+            }
 
-        public void AddLateUpdateListener(Action action)
-        {
-            OnLateUpdateEvent += action;
-        }
+            public void RemoveFixedUpdateListener(Action action)
+            {
+                OnFixedUpdateEvent -= action;
+            }
 
-        public void RemoveLateUpdateListener(Action action)
-        {
-            OnLateUpdateEvent -= action;
-        }
+            public void AddLateUpdateListener(Action action)
+            {
+                OnLateUpdateEvent += action;
+            }
 
-        public void AddDestroyListener(Action action)
-        {
-            OnDestroyEvent += action;
-        }
+            public void RemoveLateUpdateListener(Action action)
+            {
+                OnLateUpdateEvent -= action;
+            }
 
-        public void RemoveDestroyListener(Action action)
-        {
-            OnDestroyEvent -= action;
-        }
+            public void AddDestroyListener(Action action)
+            {
+                OnDestroyEvent += action;
+            }
 
-        [Conditional("UNITY_EDITOR")]
-        public void AddOnDrawGizmosListener(Action action)
-        {
-            OnDrawGizmosEvent += action;
-        }
+            public void RemoveDestroyListener(Action action)
+            {
+                OnDestroyEvent -= action;
+            }
 
-        [Conditional("UNITY_EDITOR")]
-        public void RemoveOnDrawGizmosListener(Action action)
-        {
-            OnDrawGizmosEvent -= action;
-        }
+            [Conditional("UNITY_EDITOR")]
+            public void AddOnDrawGizmosListener(Action action)
+            {
+                OnDrawGizmosEvent += action;
+            }
 
-        [Conditional("UNITY_EDITOR")]
-        public void AddOnDrawGizmosSelectedListener(Action action)
-        {
-            OnDrawGizmosSelectedEvent += action;
-        }
+            [Conditional("UNITY_EDITOR")]
+            public void RemoveOnDrawGizmosListener(Action action)
+            {
+                OnDrawGizmosEvent -= action;
+            }
 
-        [Conditional("UNITY_EDITOR")]
-        public void RemoveOnDrawGizmosSelectedListener(Action action)
-        {
-            OnDrawGizmosSelectedEvent -= action;
-        }
+            [Conditional("UNITY_EDITOR")]
+            public void AddOnDrawGizmosSelectedListener(Action action)
+            {
+                OnDrawGizmosSelectedEvent += action;
+            }
 
-        public void AddOnApplicationPauseListener(Action<bool> action)
-        {
-            OnApplicationPauseEvent += action;
-        }
+            [Conditional("UNITY_EDITOR")]
+            public void RemoveOnDrawGizmosSelectedListener(Action action)
+            {
+                OnDrawGizmosSelectedEvent -= action;
+            }
 
-        public void RemoveOnApplicationPauseListener(Action<bool> action)
-        {
-            OnApplicationPauseEvent -= action;
-        }
+            public void AddOnApplicationPauseListener(Action<bool> action)
+            {
+                OnApplicationPauseEvent += action;
+            }
 
-        #endregion
+            public void RemoveOnApplicationPauseListener(Action<bool> action)
+            {
+                OnApplicationPauseEvent -= action;
+            }
 
-        public void Destroy()
-        {
-            OnUpdateEvent = null;
-            OnFixedUpdateEvent = null;
-            OnLateUpdateEvent = null;
-            OnDestroyEvent = null;
-            OnDrawGizmosEvent = null;
-            OnDrawGizmosSelectedEvent = null;
-            OnApplicationPauseEvent = null;
+            #endregion
+
+            public void Destroy()
+            {
+                OnUpdateEvent = null;
+                OnFixedUpdateEvent = null;
+                OnLateUpdateEvent = null;
+                OnDestroyEvent = null;
+                OnDrawGizmosEvent = null;
+                OnDrawGizmosSelectedEvent = null;
+                OnApplicationPauseEvent = null;
+            }
         }
     }
 }

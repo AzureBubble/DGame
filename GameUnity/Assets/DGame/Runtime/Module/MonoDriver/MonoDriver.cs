@@ -1,12 +1,11 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 namespace DGame
 {
-    public class MonoDriver : Module, IMonoDriver
+    internal partial class MonoDriver : Module, IMonoDriver
     {
         private GameObject m_monoDriver;
         private MainMonoBehaviour m_monoBehaviour;

@@ -25,8 +25,8 @@ namespace DGame
         /// <summary>
         /// 模块轮询
         /// </summary>
-        /// <param name="elapsedTime">逻辑时间 秒为单位</param>
-        /// <param name="realElapsedTime">真实时间 秒为单位</param>
+        /// <param name="elapsedTime">逻辑时间间隔 秒为单位</param>
+        /// <param name="realElapsedTime">真实时间间隔 秒为单位</param>
         public static void Update(float elapsedTime, float realElapsedTime)
         {
             if (m_isExecuteListDirty)

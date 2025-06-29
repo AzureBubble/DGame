@@ -17,7 +17,7 @@ namespace DGame
         /// 总是启用
         /// </summary>
         [Tooltip("总是启用")]
-#if ODIN_INSPECTOR
+#if ODIN_INSPECTOR && ENABLE_ODIN_INSPECTOR
         [LabelText("总是启用")]
 #endif
         AlwaysEnable = 0,
@@ -26,7 +26,7 @@ namespace DGame
         /// 仅在开发模式启用
         /// </summary>
         [Tooltip("仅在开发模式启用")]
-#if ODIN_INSPECTOR
+#if ODIN_INSPECTOR && ENABLE_ODIN_INSPECTOR
         [LabelText("仅在开发模式启用")]
 #endif
         OnlyEnableWhenDevelopment,
@@ -35,7 +35,7 @@ namespace DGame
         /// 仅在编辑器中启用
         /// </summary>
         [Tooltip("仅在编辑器中启用")]
-#if ODIN_INSPECTOR
+#if ODIN_INSPECTOR && ENABLE_ODIN_INSPECTOR
         [LabelText("仅在编辑器中启用")]
 #endif
         OnlyEnableInEditor,
@@ -44,7 +44,7 @@ namespace DGame
         /// 总是禁用
         /// </summary>
         [Tooltip("总是禁用")]
-#if ODIN_INSPECTOR
+#if ODIN_INSPECTOR && ENABLE_ODIN_INSPECTOR
         [LabelText("总是禁用")]
 #endif
         AlwaysDisable,
@@ -56,7 +56,7 @@ namespace DGame
     [DisallowMultipleComponent]
     public sealed class MemoryPoolSetting : MonoBehaviour
     {
-#if ODIN_INSPECTOR
+#if ODIN_INSPECTOR && ENABLE_ODIN_INSPECTOR
         [LabelText("内存池强制检查开启模式")]
 #endif
         [SerializeField]

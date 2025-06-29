@@ -44,6 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2995ea388083dc341b7fc29bfe76dd65, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_memoryStrictCheckType: 2
 --- !u!1 &8427157544136828062
 GameObject:
   m_ObjectHideFlags: 0
@@ -54,7 +55,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8427157544136828061}
   - component: {fileID: 8427157544136828060}
-  - component: {fileID: 8427157544136828063}
+  - component: {fileID: 419457098496666668}
   m_Layer: 0
   m_Name: GameEntry
   m_TagString: Untagged
@@ -90,7 +91,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e5bb512dbde48d347a8e9309bf6637f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &8427157544136828063
+--- !u!114 &419457098496666668
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -102,3 +103,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 46222450bca5b634fb11b9dd0c96853a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  stringUtilHelperTypeName: DGame.DGameStringUtilHelper

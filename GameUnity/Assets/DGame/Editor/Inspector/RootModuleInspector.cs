@@ -45,7 +45,7 @@ namespace DGame.Editor
                             m_stringUtilHelperTypeName.stringValue = textHelperSelectedIndex <= 0 ? null : m_stringUtilHelperTypeNames[textHelperSelectedIndex];
                         }
 
-                        int logHelperSelectedIndex = EditorGUILayout.Popup("字符串辅助器", m_logHelperTypeNameIndex, m_logHelperTypeNames);
+                        int logHelperSelectedIndex = EditorGUILayout.Popup("日志辅助器", m_logHelperTypeNameIndex, m_logHelperTypeNames);
                         if (logHelperSelectedIndex != m_logHelperTypeNameIndex)
                         {
                             m_logHelperTypeNameIndex = logHelperSelectedIndex;

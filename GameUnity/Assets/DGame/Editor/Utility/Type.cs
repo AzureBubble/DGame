@@ -12,6 +12,7 @@ namespace DGame.Editor
             "DGame.Runtime",
             "Assembly-CSharp",
             "GameLauncher",
+            "GameLogic"
         };
 
         private static readonly string[] m_runtimeOrEditorAssemblyNames =

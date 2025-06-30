@@ -27,11 +27,49 @@ namespace DGame
 #endif
         private string stringUtilHelperTypeName = "DGame.DGameStringUtilHelper";
 
+        [SerializeField]
+#if ODIN_INSPECTOR && ENABLE_ODIN_INSPECTOR
+        [ValueDropdown("GetILogHelperImplementations"), LabelText("日志系统辅助器"), FoldoutGroup("全局辅助器设置", true), DisableInPlayMode]
+#endif
+        private string logHelperTypeName = "DGame.DGameLogHelper";
+
         private void Awake()
         {
             m_instance = this;
             InitStringUtilHelper();
+            InitLogHelper();
             GameTime.StartFrame();
+        }
+
+        private void InitLogHelper()
+        {
+            if (string.IsNullOrEmpty(logHelperTypeName))
+            {
+                return;
+            }
+
+            Type logHelperType = Utility.AssemblyUtil.GetType(logHelperTypeName);
+
+            if (logHelperType == typeof(Nullable))
+            {
+                return;
+            }
+
+            if (logHelperType == null)
+            {
+                Debugger.Error("查找不到默认的ILogHelper类型：'{0}'", logHelperTypeName);
+                return;
+            }
+
+            DGameLog.ILogHelper logHelper = Activator.CreateInstance(logHelperType) as DGameLog.ILogHelper;
+
+            if (logHelper == null)
+            {
+                Debugger.Error("无法创建ILogHelper类型实例：'{0}'", stringUtilHelperTypeName);
+                return;
+            }
+
+            DGameLog.SetLogHelper(logHelper);
         }
 
         private void InitStringUtilHelper()
@@ -42,14 +80,14 @@ namespace DGame
             }
             Type type = Utility.AssemblyUtil.GetType(stringUtilHelperTypeName);
 
-            if (type.IsNullableType())
+            if (type == typeof(Nullable))
             {
                 return;
             }
 
             if (type == null)
             {
-                Debugger.Error("查找不到默认的StringUtilHelper类型：'{0}'", stringUtilHelperTypeName);
+                Debugger.Error("查找不到默认的IStringUtilHelper类型：'{0}'", stringUtilHelperTypeName);
                 return;
             }
 
@@ -57,7 +95,7 @@ namespace DGame
 
             if (stringUtilHelper == null)
             {
-                Debugger.Error("无法创建StringUtilHelper类型实例：'{0}'", stringUtilHelperTypeName);
+                Debugger.Error("无法创建IStringUtilHelper类型实例：'{0}'", stringUtilHelperTypeName);
                 return;
             }
 
@@ -101,6 +139,31 @@ namespace DGame
         private IEnumerable<ValueDropdownItem> GetIStringUtilHelperImplementations()
         {
             var types = Utility.AssemblyUtil.GetTypes(typeof(Utility.StringUtil.IStringUtilHelper));
+
+            for (int i = 0; i < types.Count + 1; i++)
+            {
+                if (i == 0)
+                {
+                    var type = typeof(Nullable);
+                    yield return new ValueDropdownItem(
+                        text: "<None>",
+                        value: type.AssemblyQualifiedName
+                    );
+                }
+                else
+                {
+                    var type = types[i - 1];
+                    yield return new ValueDropdownItem(
+                        text: type.FullName,
+                        value: type.AssemblyQualifiedName
+                    );
+                }
+            }
+        }
+
+        private IEnumerable<ValueDropdownItem> GetILogHelperImplementations()
+        {
+            var types = Utility.AssemblyUtil.GetTypes(typeof(DGameLog.ILogHelper));
 
             for (int i = 0; i < types.Count + 1; i++)
             {

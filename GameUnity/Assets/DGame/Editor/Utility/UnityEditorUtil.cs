@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace DGame.Editor
 {
-    public class UnityEditorUtility
+    public class UnityEditorUtil
     {
         /// <summary>
         /// 设置新创建的UI物体作为 Canvas 的子物体
@@ -91,7 +91,7 @@ namespace DGame.Editor
         /// <param name="label">折叠框标题</param>
         /// <param name="open">是否折叠</param>
         /// <param name="box">是否有装饰框</param>
-        public static void LayoutFrameBox(System.Action action, string label, ref bool open, bool box = false)
+        public static void LayoutFoldoutBox(System.Action action, string label, ref bool open, bool box = false)
         {
             bool m_open = open;
             LayoutVertical(() =>

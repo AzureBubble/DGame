@@ -16,11 +16,15 @@ namespace DGame.Editor
         private static readonly string[] m_gameSpeedForDisplay = new string[] { "0x", "0.01x", "0.1x", "0.25x", "0.5x", "1x", "1.5x", "2x", "4x", "8x" };
 
         private SerializedProperty m_stringUtilHelperTypeName = null;
-        // private SerializedProperty m_isShowGlobalHelperSetting;
-        private bool m_isShowGlobalHelperSetting = true;
+        private SerializedProperty m_logHelperTypeName = null;
 
         private string[] m_stringUtilHelperTypeNames = null;
         private int m_stringUtilHelperTypeNameIndex = 0;
+
+        private string[] m_logHelperTypeNames = null;
+        private int m_logHelperTypeNameIndex = 0;
+
+        private bool m_isShowGlobalHelperSetting = true;
 
         public override void OnInspectorGUI()
         {
@@ -32,13 +36,20 @@ namespace DGame.Editor
             {
                 EditorGUILayout.BeginVertical("box");
                 {
-                    UnityEditorUtility.LayoutFrameBox(() =>
+                    UnityEditorUtil.LayoutFoldoutBox(() =>
                     {
                         int textHelperSelectedIndex = EditorGUILayout.Popup("字符串辅助器", m_stringUtilHelperTypeNameIndex, m_stringUtilHelperTypeNames);
                         if (textHelperSelectedIndex != m_stringUtilHelperTypeNameIndex)
                         {
                             m_stringUtilHelperTypeNameIndex = textHelperSelectedIndex;
                             m_stringUtilHelperTypeName.stringValue = textHelperSelectedIndex <= 0 ? null : m_stringUtilHelperTypeNames[textHelperSelectedIndex];
+                        }
+
+                        int logHelperSelectedIndex = EditorGUILayout.Popup("字符串辅助器", m_logHelperTypeNameIndex, m_logHelperTypeNames);
+                        if (logHelperSelectedIndex != m_logHelperTypeNameIndex)
+                        {
+                            m_logHelperTypeNameIndex = logHelperSelectedIndex;
+                            m_logHelperTypeName.stringValue = logHelperSelectedIndex <= 0 ? null : m_logHelperTypeNames[logHelperSelectedIndex];
                         }
                     }, "全局辅助器设置", ref m_isShowGlobalHelperSetting, true);
                 }
@@ -63,6 +74,7 @@ namespace DGame.Editor
                 return;
             }
             m_stringUtilHelperTypeName = serializedObject?.FindProperty("stringUtilHelperTypeName");
+            m_logHelperTypeName = serializedObject?.FindProperty("logHelperTypeName");
             // m_isShowGlobalHelperSetting = serializedObject?.FindProperty("m_isShowGlobalHelperSetting");
             RefreshTypeNames();
         }
@@ -84,6 +96,24 @@ namespace DGame.Editor
                 {
                     m_stringUtilHelperTypeNameIndex = 0;
                     m_stringUtilHelperTypeName.stringValue = null;
+                }
+            }
+
+            List<string> logHelperTypeNames = new List<string>
+            {
+                NONE_OPTION_NAME
+            };
+
+            logHelperTypeNames.AddRange(Type.GetRuntimeTypeNames(typeof(DGameLog.ILogHelper)));
+            m_logHelperTypeNames = logHelperTypeNames.ToArray();
+            m_logHelperTypeNameIndex = 0;
+            if (!string.IsNullOrEmpty(m_logHelperTypeName.stringValue))
+            {
+                m_logHelperTypeNameIndex = logHelperTypeNames.IndexOf(m_logHelperTypeName.stringValue);
+                if (m_logHelperTypeNameIndex <= 0)
+                {
+                    m_logHelperTypeNameIndex = 0;
+                    m_logHelperTypeName.stringValue = null;
                 }
             }
 

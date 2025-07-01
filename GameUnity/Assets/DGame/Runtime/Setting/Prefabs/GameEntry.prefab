@@ -104,3 +104,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   stringUtilHelperTypeName: DGame.DGameStringUtilHelper
+  logHelperTypeName: DGame.DGameLogHelper

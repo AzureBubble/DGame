@@ -1,0 +1,15 @@
+D:\Unity\GitHub Project\DGame\Tools\Generata Tools\SourceGenerator\SourceGeneratorTest\bin\Release\net9.0\SourceGeneratorTest.exe
+D:\Unity\GitHub Project\DGame\Tools\Generata Tools\SourceGenerator\SourceGeneratorTest\bin\Release\net9.0\SourceGeneratorTest.deps.json
+D:\Unity\GitHub Project\DGame\Tools\Generata Tools\SourceGenerator\SourceGeneratorTest\bin\Release\net9.0\SourceGeneratorTest.runtimeconfig.json
+D:\Unity\GitHub Project\DGame\Tools\Generata Tools\SourceGenerator\SourceGeneratorTest\bin\Release\net9.0\SourceGeneratorTest.dll
+D:\Unity\GitHub Project\DGame\Tools\Generata Tools\SourceGenerator\SourceGeneratorTest\bin\Release\net9.0\SourceGeneratorTest.pdb
+D:\Unity\GitHub Project\DGame\Tools\Generata Tools\SourceGenerator\SourceGeneratorTest\obj\Release\net9.0\SourceGeneratorTest.GeneratedMSBuildEditorConfig.editorconfig
+D:\Unity\GitHub Project\DGame\Tools\Generata Tools\SourceGenerator\SourceGeneratorTest\obj\Release\net9.0\SourceGeneratorTest.AssemblyInfoInputs.cache
+D:\Unity\GitHub Project\DGame\Tools\Generata Tools\SourceGenerator\SourceGeneratorTest\obj\Release\net9.0\SourceGeneratorTest.AssemblyInfo.cs
+D:\Unity\GitHub Project\DGame\Tools\Generata Tools\SourceGenerator\SourceGeneratorTest\obj\Release\net9.0\SourceGeneratorTest.csproj.CoreCompileInputs.cache
+D:\Unity\GitHub Project\DGame\Tools\Generata Tools\SourceGenerator\SourceGeneratorTest\obj\Release\net9.0\SourceGeneratorTest.sourcelink.json
+D:\Unity\GitHub Project\DGame\Tools\Generata Tools\SourceGenerator\SourceGeneratorTest\obj\Release\net9.0\SourceGeneratorTest.dll
+D:\Unity\GitHub Project\DGame\Tools\Generata Tools\SourceGenerator\SourceGeneratorTest\obj\Release\net9.0\refint\SourceGeneratorTest.dll
+D:\Unity\GitHub Project\DGame\Tools\Generata Tools\SourceGenerator\SourceGeneratorTest\obj\Release\net9.0\SourceGeneratorTest.pdb
+D:\Unity\GitHub Project\DGame\Tools\Generata Tools\SourceGenerator\SourceGeneratorTest\obj\Release\net9.0\SourceGeneratorTest.genruntimeconfig.cache
+D:\Unity\GitHub Project\DGame\Tools\Generata Tools\SourceGenerator\SourceGeneratorTest\obj\Release\net9.0\ref\SourceGeneratorTest.dll

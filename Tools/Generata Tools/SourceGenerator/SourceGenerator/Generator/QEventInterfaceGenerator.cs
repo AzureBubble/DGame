@@ -89,7 +89,7 @@ public class QEventInterfaceGenerator : ISourceGenerator
                     sb.AppendLine("\t\t{");
                     foreach (var className in classNameList)
                     {
-                        sb.AppendLine($"\t\t\tvar m_{className} = new {className}(GameEvent.EventMgr.GetDispatcher());");
+                        sb.AppendLine($"\t\t\tvar m_{className} = new {className}(GameEvent.EventMgr.Dispatcher);");
                     }
                     sb.AppendLine("\t\t}");
                 }
@@ -134,6 +134,7 @@ public class QEventInterfaceGenerator : ISourceGenerator
             {
                 sb.AppendLine("\t{");
                 sb.AppendLine("\t\tprivate EventDispatcher m_dispatcher;");
+                sb.AppendLine();
                 sb.AppendLine($"\t\tpublic {interfaceName}_Gen(EventDispatcher dispatcher)");
                 {
                     sb.AppendLine("\t\t{");
@@ -141,12 +142,14 @@ public class QEventInterfaceGenerator : ISourceGenerator
                     sb.AppendLine($"\t\t\tGameEvent.EventMgr.RegWrapInterface(\"{fullName}\", this);");
                     sb.AppendLine("\t\t}");
                 }
+                sb.AppendLine();
+                var methods = interfaceNode.Members.OfType<MethodDeclarationSyntax>();
 
-                foreach (var method in interfaceNode.Members.OfType<MethodDeclarationSyntax>())
+                for (int i = 0; i < methods.Count(); i++)
                 {
+                    var method = methods.ElementAt(i);
                     var methodName = method.Identifier.ToString();
                     var parameters = GenerateParameters(method, semanticModel);
-
                     sb.AppendLine($"\t\tpublic void {methodName}({parameters})");
                     {
                         sb.AppendLine("\t\t{");
@@ -161,7 +164,36 @@ public class QEventInterfaceGenerator : ISourceGenerator
                         }
                         sb.AppendLine("\t\t}");
                     }
+
+                    if (i < methods.Count() - 1)
+                    {
+                        sb.AppendLine();
+                    }
                 }
+                // foreach (var method in interfaceNode.Members.OfType<MethodDeclarationSyntax>())
+                // {
+                //     var methodName = method.Identifier.ToString();
+                //     var parameters = GenerateParameters(method, semanticModel);
+                //     if (!isFirstMethod)
+                //     {
+                //         sb.AppendLine();
+                //     }
+                //     isFirstMethod = false;
+                //     sb.AppendLine($"\t\tpublic void {methodName}({parameters})");
+                //     {
+                //         sb.AppendLine("\t\t{");
+                //         if (method.ParameterList.Parameters.Count > 0)
+                //         {
+                //             var paramNames = string.Join(", ", method.ParameterList.Parameters.Select(p => p.Identifier.ToString()));
+                //             sb.AppendLine($"\t\t\tm_dispatcher.Send({interfaceName}_Event.{methodName}, {paramNames});");
+                //         }
+                //         else
+                //         {
+                //             sb.AppendLine($"\t\t\tm_dispatcher.Send({interfaceName}_Event.{methodName});");
+                //         }
+                //         sb.AppendLine("\t\t}");
+                //     }
+                // }
 
                 sb.AppendLine("\t}");
             }

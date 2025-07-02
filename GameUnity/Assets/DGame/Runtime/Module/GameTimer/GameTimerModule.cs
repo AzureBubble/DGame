@@ -22,6 +22,8 @@ namespace DGame
         private bool m_hasUnscaleBadFrame = false;
         private readonly int m_maxBadFrameCheckCnt = 10;
 
+        #region override
+
         public override void OnCreate()
         {
 
@@ -228,21 +230,6 @@ namespace DGame
                             m_unscaleGameTimers.Remove(curNode);
                         }
                     }
-
-                    // if (curNode.Value.IsLoop)
-                    // {
-                    //     curNode.Value.TriggerTime += curNode.Value.IntervalTime;
-                    //
-                    //     if (curNode.Value.TriggerTime <= 0)
-                    //     {
-                    //         hasUnscaledBadFrame = true;
-                    //     }
-                    // }
-                    // else
-                    // {
-                    //     curNode.Value.Destroy();
-                    //     m_unscaleGameTimers.Remove(curNode);
-                    // }
                 }
 
                 curNode = nextNode;
@@ -299,13 +286,6 @@ namespace DGame
                                 m_hasUnscaleBadFrame = true;
                             }
                         }
-
-                        // curNode.Value.TriggerTime += curNode.Value.IntervalTime;
-                        //
-                        // if (curNode.Value.TriggerTime <= 0)
-                        // {
-                        //     m_hasUnscaleBadFrame = true;
-                        // }
                     }
                     curNode = nextNode;
                 }
@@ -318,6 +298,8 @@ namespace DGame
         {
             DestroyAllGameTimer();
         }
+
+        #endregion
 
         #region CreateTimer
 
@@ -419,6 +401,10 @@ namespace DGame
             return timer;
         }
 
+        #endregion
+
+        #region DestroyGameTimer
+
         /// <summary>
         /// 立即移除。
         /// </summary>
@@ -438,7 +424,6 @@ namespace DGame
                 }
             }
         }
-
 
         public void DestroyGameTimer(GameTimer timer)
         {

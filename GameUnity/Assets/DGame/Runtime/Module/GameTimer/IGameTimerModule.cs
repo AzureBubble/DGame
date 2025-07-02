@@ -8,6 +8,56 @@ namespace DGame
     public interface IGameTimerModule
     {
         /// <summary>
+        /// 暂停计时器
+        /// </summary>
+        /// <param name="timer"></param>
+        void Pause(GameTimer timer);
+
+        /// <summary>
+        /// 恢复计时器
+        /// </summary>
+        /// <param name="timer"></param>
+        void Resume(GameTimer timer);
+
+        /// <summary>
+        /// 计时器是否在运行中
+        /// </summary>
+        /// <param name="timer"></param>
+        bool IsRunning(GameTimer timer);
+
+        /// <summary>
+        /// 计时器剩余时间
+        /// </summary>
+        /// <param name="timer"></param>
+        /// <returns></returns>
+        float GetTimerLeft(GameTimer timer);
+
+        /// <summary>
+        /// 重置计时器到初始状态
+        /// </summary>
+        /// <param name="timer"></param>
+        void Restart(GameTimer timer);
+
+        /// <summary>
+        /// 重置计时器 可重新设置循环、时间缩放、回调
+        /// </summary>
+        /// <param name="timer"></param>
+        /// <param name="interval"></param>
+        /// <param name="isLoop"></param>
+        /// <param name="isUnscaled"></param>
+        /// <param name="handler"></param>
+        void Reset(GameTimer timer, float interval, bool isLoop, bool isUnscaled, TimerHandler handler);
+
+        /// <summary>
+        /// 重置计时器 可重新设置循环、时间缩放
+        /// </summary>
+        /// <param name="timer"></param>
+        /// <param name="interval"></param>
+        /// <param name="isLoop"></param>
+        /// <param name="isUnscaled"></param>
+        void Reset(GameTimer timer, float interval, bool isLoop, bool isUnscaled);
+
+        /// <summary>
         /// 创建受时间缩放影响的Loop次数计时器。
         /// </summary>
         /// <param name="handler">计时器回调。</param>
@@ -85,5 +135,12 @@ namespace DGame
         /// 移除所有计时器。
         /// </summary>
         void DestroyAllGameTimer();
+
+        /// <summary>
+        /// 创建一个一秒触发一次的Loop系统计时器
+        /// </summary>
+        /// <param name="callback">计时器回调，触发事件的定时器对象 获取定时器触发时的时间信息</param>
+        /// <returns></returns>
+        // System.Timers.Timer CreateSystemTimer(Action<object, System.Timers.ElapsedEventArgs> callback);
     }
 }

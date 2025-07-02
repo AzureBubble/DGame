@@ -120,17 +120,15 @@ namespace DGame
 
         private void OnDestroy()
         {
-#if !UNITY_EDITOR
+// #if !UNITY_EDITOR
             ModuleSystem.OnDestroy();
-#endif
+// #endif
         }
 
         internal void Destroy()
         {
             Destroy(gameObject);
         }
-
-
 
         #region Odin 相关处理
 

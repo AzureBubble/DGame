@@ -297,6 +297,7 @@ namespace DGame
         public override void OnDestroy()
         {
             DestroyAllGameTimer();
+            DestroyAllSystemTimer();
         }
 
         #endregion
@@ -351,6 +352,80 @@ namespace DGame
                 else
                 {
                     m_gameTimers.AddBefore(curNode, timer);
+                }
+            }
+        }
+
+        public void Pause(GameTimer timer)
+        {
+            if (!GameTimer.IsNull(timer))
+            {
+                timer.IsRunning = false;
+            }
+        }
+
+        public void Resume(GameTimer timer)
+        {
+            if (!GameTimer.IsNull(timer))
+            {
+                timer.IsRunning = true;
+            }
+        }
+
+        public bool IsRunning(GameTimer timer)
+        {
+            return !GameTimer.IsNull(timer) && timer.IsRunning;
+        }
+
+        public float GetTimerLeft(GameTimer timer)
+        {
+            return !GameTimer.IsNull(timer) ? timer.TriggerTime : 0;
+        }
+
+        public void Restart(GameTimer timer)
+        {
+            if (!GameTimer.IsNull(timer))
+            {
+                timer.TriggerTime = timer.IntervalTime;
+                timer.IsRunning = true;
+            }
+        }
+
+        public void Reset(GameTimer timer, float interval, bool isLoop, bool isUnscaled, TimerHandler handler)
+        {
+            if (!GameTimer.IsNull(timer))
+            {
+                timer.IntervalTime = interval;
+                timer.TriggerTime = timer.IntervalTime;
+                timer.IsLoop = isLoop;
+                timer.IsNeedRemove = false;
+                timer.IsDestroyed = false;
+                timer.IsRunning = true;
+                timer.Handler = handler;
+                if (timer.IsUnscaled != isUnscaled)
+                {
+                    DestroyGameTimerImmediate(timer);
+                    timer.IsUnscaled = isUnscaled;
+                    InsertGameTimer(timer);
+                }
+            }
+        }
+
+        public void Reset(GameTimer timer, float interval, bool isLoop, bool isUnscaled)
+        {
+            if (!GameTimer.IsNull(timer))
+            {
+                timer.IntervalTime = interval;
+                timer.TriggerTime = timer.IntervalTime;
+                timer.IsLoop = isLoop;
+                timer.IsNeedRemove = false;
+                timer.IsDestroyed = false;
+                timer.IsRunning = true;
+                if (timer.IsUnscaled != isUnscaled)
+                {
+                    DestroyGameTimerImmediate(timer);
+                    timer.IsUnscaled = isUnscaled;
+                    InsertGameTimer(timer);
                 }
             }
         }
@@ -439,6 +514,40 @@ namespace DGame
             m_unscaleGameTimers.ClearNodePool();
             m_gameTimers.Clear();
             m_gameTimers.ClearNodePool();
+        }
+
+        #endregion
+
+        #region SystemTimer
+
+        private readonly List<System.Timers.Timer> m_tickers = new List<System.Timers.Timer>();
+
+        /// <summary>
+        /// 创建一个一秒触发一次的Loop系统计时器
+        /// </summary>
+        /// <param name="callback">计时器回调</param>
+        /// <returns></returns>
+        public System.Timers.Timer CreateSystemTimer(Action<object, System.Timers.ElapsedEventArgs> callback)
+        {
+            int interval = 1000;
+            var timerTick = new System.Timers.Timer(interval);
+            timerTick.AutoReset = true;
+            timerTick.Enabled = true;
+            timerTick.Elapsed += new System.Timers.ElapsedEventHandler(callback);
+            m_tickers.Add(timerTick);
+            return timerTick;
+        }
+
+        public void DestroyAllSystemTimer()
+        {
+            foreach (var ticker in m_tickers)
+            {
+                if (ticker != null)
+                {
+                    ticker.Stop();
+                }
+            }
+            m_tickers.Clear();
         }
 
         #endregion

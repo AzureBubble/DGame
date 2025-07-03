@@ -28,6 +28,7 @@ public class QEventInterfaceGenerator : ISourceGenerator
             // 获取当前语法树中的所有命名空间节点
             var namespaces = root.DescendantNodes().OfType<NamespaceDeclarationSyntax>();
 
+            // 判断语法树是否在指定检测的命名空间下
             if (namespaces.All(ns => !Definition.TargetNameSpaces.Contains(ns.Name.ToString())))
             {
                 continue;

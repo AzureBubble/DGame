@@ -3,20 +3,20 @@ using System.Collections.Generic;
 
 namespace DGame
 {
-    internal class UIEventRecord
-    {
-        public int EventID;
-        public Delegate Handler;
-
-        public UIEventRecord(int eventID, Delegate handler)
-        {
-            EventID = eventID;
-            Handler = handler;
-        }
-    }
-
     public class GameEventMgr : IMemory
     {
+        private class UIEventRecord
+        {
+            public int EventID;
+            public Delegate Handler;
+
+            public UIEventRecord(int eventID, Delegate handler)
+            {
+                EventID = eventID;
+                Handler = handler;
+            }
+        }
+
         private readonly List<UIEventRecord> m_eventRecords = new List<UIEventRecord>();
         private readonly bool m_isInitialized = false;
 

@@ -26,6 +26,7 @@ namespace DGame
             {
                 return (T)eventData.InterfaceWrap;
             }
+
             return default(T);
         }
 

@@ -17,12 +17,20 @@ namespace DGame
         /// <summary>
         /// 当前未在使用中的容量
         /// </summary>
-        public int Count => m_collector == null ? 0 : m_collector.Count;
+        public int UnusedCount => m_collector == null ? 0 : m_collector.Count;
 
         /// <summary>
         /// 对象池总容量 = 当前未在使用中的容量 + 正在使用中的数量
         /// </summary>
         public int Capacity => m_collector == null ? 0 : m_collector.Count + UsingCount;
+
+        public int SpawnCount { get; private set; }
+
+        public int RecycleCount { get; private set; }
+
+        public int AddCount { get; private set; }
+
+        public int RemoveCount { get; private set; }
 
         #region Constructor
 
@@ -42,6 +50,10 @@ namespace DGame
         {
             ClassType = classType;
             UsingCount = 0;
+            SpawnCount = 0;
+            RecycleCount = 0;
+            AddCount = 0;
+            RemoveCount = 0;
         }
 
         #endregion
@@ -56,6 +68,7 @@ namespace DGame
             }
 
             UsingCount++;
+            SpawnCount++;
 
             T memory;
             lock (m_collector)
@@ -69,13 +82,16 @@ namespace DGame
                     memory = new T();
                 }
             }
-            memory.OnSpawn();
+
+            AddCount++;
+            memory.OnSpawnFromMemoryPool();
             return memory;
         }
 
         public IMemory Spawn()
         {
             UsingCount++;
+            SpawnCount++;
             IMemory memory;
             lock (m_collector)
             {
@@ -88,8 +104,8 @@ namespace DGame
                     memory = Activator.CreateInstance(ClassType) as IMemory;
                 }
             }
-
-            memory?.OnSpawn();
+            AddCount++;
+            memory?.OnSpawnFromMemoryPool();
             return memory;
         }
 
@@ -99,7 +115,7 @@ namespace DGame
 
         public void Recycle(IMemory memory)
         {
-            memory.OnRecycle();
+            memory.OnRecycleToMemoryPool();
             lock (m_collector)
             {
                 if (MemoryPool.EnableStrictCheck && m_collector.Contains(memory))
@@ -110,6 +126,7 @@ namespace DGame
                 m_collector.Enqueue(memory);
             }
 
+            RecycleCount--;
             UsingCount--;
         }
 
@@ -126,6 +143,7 @@ namespace DGame
 
             lock (m_collector)
             {
+                AddCount += count;
                 while (count-- > 0)
                 {
                     m_collector.Enqueue(new T());
@@ -137,6 +155,7 @@ namespace DGame
         {
             lock (m_collector)
             {
+                AddCount += count;
                 while (count-- > 0)
                 {
                     m_collector.Enqueue(Activator.CreateInstance(ClassType) as IMemory);
@@ -153,7 +172,7 @@ namespace DGame
             lock (m_collector)
             {
                 count = Capacity < count ? Capacity : count;
-
+                RemoveCount += count;
                 while (count-- > 0)
                 {
                     m_collector.Dequeue();
@@ -167,6 +186,7 @@ namespace DGame
         {
             lock (m_collector)
             {
+                RemoveCount += m_collector.Count;
                 m_collector.Clear();
             }
         }

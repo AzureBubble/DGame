@@ -180,7 +180,7 @@ namespace DGame
 
 #if UNITY_EDITOR
 
-namespace DGame.Editor
+namespace DGame
 {
     /// <summary>
     /// 日志重定向相关的实用函数。

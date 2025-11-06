@@ -1,8 +1,13 @@
 {
     "name": "DGame.Editor",
-    "rootNamespace": "DGame.Editor",
+    "rootNamespace": "DGame",
     "references": [
-        "GUID:0510f21df0bc72647b839474e83421bb"
+        "GUID:0510f21df0bc72647b839474e83421bb",
+        "GUID:e34a5702dd353724aa315fb8011f08c3",
+        "GUID:4d1926c9df5b052469a1c63448b7609a",
+        "GUID:2373f786d14518f44b0f475db77ba4de",
+        "GUID:f51ebe6a0ceec4240a699833d6309b23",
+        "GUID:b6a4cc5e963e3354187f83c658e8d3df"
     ],
     "includePlatforms": [
         "Editor"

@@ -2,7 +2,12 @@
     "name": "DGame.Runtime",
     "rootNamespace": "DGame",
     "references": [
-        "GUID:f51ebe6a0ceec4240a699833d6309b23"
+        "GUID:f51ebe6a0ceec4240a699833d6309b23",
+        "GUID:e34a5702dd353724aa315fb8011f08c3",
+        "GUID:6055be8ebefd69e48b49212b09b47b2f",
+        "GUID:4d1926c9df5b052469a1c63448b7609a",
+        "GUID:75469ad4d38634e559750d17036d5f7c",
+        "GUID:21b0c8d1703a94250bfac916590cea4f"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

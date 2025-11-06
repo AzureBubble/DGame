@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-namespace DGame.Editor
+namespace DGame
 {
     /// <summary>
     /// 编辑器增加一个Odin功能的开关 用于测试使用

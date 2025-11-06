@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-namespace DGame.Editor
+namespace DGame
 {
     public static partial class ScriptingDefineSymbolsTools
     {

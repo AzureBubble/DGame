@@ -8,7 +8,7 @@ namespace DGame
     /// </summary>
     public class EventDispatcher
     {
-        private static readonly Dictionary<int, EventDelegateData> m_eventTable = new Dictionary<int, EventDelegateData>();
+        private readonly Dictionary<int, EventDelegateData> m_eventTable = new Dictionary<int, EventDelegateData>();
 
         internal void Destroy()
         {

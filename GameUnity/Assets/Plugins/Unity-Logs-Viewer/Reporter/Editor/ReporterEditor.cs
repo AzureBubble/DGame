@@ -14,7 +14,7 @@ public class ReporterEditor : Editor
 	[MenuItem("DGame Tools/日志系统/关闭整个日志系统", false, 80)]
 	public static void DisableLogSystem()
 	{
-		DGame.Editor.ScriptingDefineSymbolsTools.DisableAllLogs();
+		DGame.ScriptingDefineSymbolsTools.DisableAllLogs();
 		DisableLog2File();
 		DisableFPS();
 		DisableReporter();
@@ -45,7 +45,7 @@ public class ReporterEditor : Editor
 			logObj.AddComponent<DGameLog2File>();
 		}
 
-		DGame.Editor.ScriptingDefineSymbolsTools.EnableAllLogs();
+		DGame.ScriptingDefineSymbolsTools.EnableAllLogs();
 		AssetDatabase.SaveAssets();
 		EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene());
 		AssetDatabase.Refresh();

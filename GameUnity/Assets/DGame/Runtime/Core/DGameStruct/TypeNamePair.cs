@@ -14,7 +14,6 @@ namespace DGame
 
         public TypeNamePair(Type type) : this(type, string.Empty)
         {
-
         }
 
         public TypeNamePair(Type type, string name)

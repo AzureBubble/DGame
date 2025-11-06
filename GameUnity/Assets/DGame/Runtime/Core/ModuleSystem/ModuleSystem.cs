@@ -188,7 +188,7 @@ namespace DGame
         /// <summary>
         /// 销毁并清理所有的模块
         /// </summary>
-        public static void OnDestroy()
+        public static void Destroy()
         {
             // 按优先级从低往高执行销毁处理（从后往前）
             LinkedListNode<Module> current = m_modules.Last;
@@ -202,8 +202,8 @@ namespace DGame
             m_moduleMaps.Clear();
             m_updateModules.Clear();
             m_updateExecuteList.Clear();
-
-            //TODO:
+            MemoryPool.ClearAll();
+            Utility.Marshal.FreeCachedHGlobal();
         }
     }
 }

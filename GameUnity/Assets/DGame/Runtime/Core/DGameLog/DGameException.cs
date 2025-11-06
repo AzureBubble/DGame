@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.Serialization;
+using System.Text;
 
 namespace DGame
 {
@@ -45,5 +46,16 @@ namespace DGame
         {
 
         }
+
+        /// <summary>
+        /// 重写ToString方法，在输出前添加[DGame]前缀
+        /// </summary>
+        /// <returns>带有[DGame]前缀的异常信息</returns>
+        public override string ToString() => $"<color=#B23333><b>[{DateTime.Now:HH:mm:ss-fff}] [DGameEXCEPTION] ► </b></color> - <color=red>{base.ToString()}</color>";
+
+        /// <summary>
+        /// 重写Message属性，在消息前添加[DGame]前缀（可选）
+        /// </summary>
+        public override string Message =>  $"<color=#B23333><b>[{DateTime.Now:HH:mm:ss-fff}] [DGameEXCEPTION] ► </b></color> - <color=red>{base.Message}</color>";
     }
 }

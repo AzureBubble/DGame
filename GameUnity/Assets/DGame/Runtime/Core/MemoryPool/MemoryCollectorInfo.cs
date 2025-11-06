@@ -30,12 +30,38 @@ namespace DGame
         /// </summary>
         public int Capacity{ get; private set; }
 
-        public MemoryCollectorInfo(Type classType, int unusedCount, int usingCount, int capacity)
+        /// <summary>
+        /// 获取获取内存对象数量
+        /// </summary>
+        public int SpawnCount { get; private set; }
+
+        /// <summary>
+        /// 获取归还内存对象数量
+        /// </summary>
+        public int RecycleCount { get; private set; }
+
+        /// <summary>
+        /// 获取增加内存对象数量
+        /// </summary>
+        public int AddCount { get; private set; }
+
+        /// <summary>
+        /// 获取移除内存对象数量
+        /// </summary>
+        public int RemoveCount { get; private set; }
+
+        public MemoryCollectorInfo(Type classType, int unusedCount,
+            int usingCount, int spawnCount, int recycleCount,
+            int addCount, int removeCount, int capacity)
         {
             ClassType = classType;
             UnusedCount = unusedCount;
             UsingCount = usingCount;
             Capacity = capacity;
+            SpawnCount = spawnCount;
+            RecycleCount = recycleCount;
+            AddCount = addCount;
+            RemoveCount = removeCount;
         }
     }
 }

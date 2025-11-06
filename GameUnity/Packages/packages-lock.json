@@ -8,7 +8,7 @@
       "hash": "59a3c3974a6e435e0ed57fb9af61fbbc6d17a8b7"
     },
     "com.tuyoogame.yooasset": {
-      "version": "2.3.10",
+      "version": "2.3.17",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -61,7 +61,7 @@
       }
     },
     "com.unity.ide.rider": {
-      "version": "3.0.36",
+      "version": "3.0.38",
       "depth": 0,
       "source": "registry",
       "dependencies": {

@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: f118e09f35fa241fda19f1f3b1e7c5a2
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 255470
+  packageName: vFolders 2
+  packageVersion: 2.1.7
+  assetPath: Assets/vFolders/VFoldersMenu.cs
+  uploadId: 765419

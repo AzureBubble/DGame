@@ -8,12 +8,12 @@ namespace DGame
         /// <summary>
         /// 从对象池中取出的操作
         /// </summary>
-        public abstract void OnSpawn();
+        public abstract void OnSpawnFromMemoryPool();
 
         /// <summary>
         /// 清理内存 返回内存池
         /// </summary>
-        public abstract void OnRecycle();
+        public abstract void OnRecycleToMemoryPool();
 
         public static void Recycle(MemoryObject memoryObject)
         {

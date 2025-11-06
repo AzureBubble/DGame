@@ -34,8 +34,9 @@ namespace DGame
 
                 foreach (var memoryCollector in m_memoryCollectorPool.Values)
                 {
-                    results[index++] = new MemoryCollectorInfo(memoryCollector.ClassType, memoryCollector.Count,
-                        memoryCollector.UsingCount, memoryCollector.Capacity);
+                    results[index++] = new MemoryCollectorInfo(memoryCollector.ClassType, memoryCollector.UnusedCount,
+                        memoryCollector.UsingCount, memoryCollector.SpawnCount, memoryCollector.RecycleCount, memoryCollector.AddCount,
+                        memoryCollector.RemoveCount, memoryCollector.Capacity);
                 }
             }
             return results;

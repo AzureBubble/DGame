@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.Build;
 
-namespace DGame.Editor
+namespace DGame
 {
     /// <summary>
     /// 宏定义工具类

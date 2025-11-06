@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 3331bc437f3a24586b7e86e7bdd62b5e
+AssemblyDefinitionImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 255470
+  packageName: vFolders 2
+  packageVersion: 2.1.7
+  assetPath: Assets/vFolders/VFolders.asmdef
+  uploadId: 765419

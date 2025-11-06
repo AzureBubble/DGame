@@ -122,8 +122,8 @@ namespace DGame
         /// <param name="handler">计时器回调</param>
         /// <param name="args">传参。(避免闭包)</param>
         /// <returns></returns>
-        GameTimer CreateGameTimer(float interval, bool isLoop, bool isUnscaled, TimerHandler handler,
-            object[] args = null);
+        // GameTimer CreateGameTimer(float interval, bool isLoop, bool isUnscaled, TimerHandler handler,
+        //     object[] args = null);
 
         /// <summary>
         /// 移除计时器。

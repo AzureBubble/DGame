@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace DGame
 {
-    public class GameTimerModule : Module, IUpdateModule, IGameTimerModule
+    internal class GameTimerModule : Module, IUpdateModule, IGameTimerModule
     {
         private int m_timerID = 0;
         public int GlobalTimerID => ++m_timerID;
@@ -462,7 +462,7 @@ namespace DGame
             return CreateGameTimer(interval, false, true, handler, args);
         }
 
-        public GameTimer CreateGameTimer(float interval, bool isLoop, bool isUnscaled, TimerHandler handler, object[] args = null)
+        private GameTimer CreateGameTimer(float interval, bool isLoop, bool isUnscaled, TimerHandler handler, object[] args = null)
         {
             GameTimer timer = new GameTimer(GlobalTimerID, interval, isUnscaled, isLoop, handler, args);
             InsertGameTimer(timer);

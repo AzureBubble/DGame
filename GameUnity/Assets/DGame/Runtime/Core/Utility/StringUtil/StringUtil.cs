@@ -11,9 +11,7 @@ namespace DGame
             private static IStringUtilHelper STRING_UTIL_HELPER = null;
 
             public static void SetStringHelper(IStringUtilHelper stringUtilHelper)
-            {
-                STRING_UTIL_HELPER = stringUtilHelper;
-            }
+                => STRING_UTIL_HELPER = stringUtilHelper;
 
             /// <summary>
             /// 获取格式化字符串。

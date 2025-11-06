@@ -1,7 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace DGame.Editor
+namespace DGame
 {
     /// <summary>
     /// Inspector抽象基类

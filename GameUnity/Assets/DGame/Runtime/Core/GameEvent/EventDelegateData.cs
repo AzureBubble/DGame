@@ -73,6 +73,7 @@ namespace DGame
                     m_existList.Remove(m_removeList[i]);
                 }
                 m_removeList.Clear();
+                m_isDirty = false;
             }
         }
 

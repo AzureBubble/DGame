@@ -5,7 +5,7 @@ using Sirenix.Utilities;
 using UnityEditor;
 using UnityEngine;
 
-namespace DGame.Editor
+namespace DGame
 {
 #if !ODIN_INSPECTOR || !ENABLE_ODIN_INSPECTOR
 

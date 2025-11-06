@@ -32,37 +32,48 @@ namespace GameLogic
         /// </summary>
         public readonly int HideTimeToClose;
 
-        public WindowAttribute(byte uiLayer, string location = "", bool fullScreen = false, int hideTimeToClose = 10)
+        /// <summary>
+        /// 是否动画弹出
+        /// </summary>
+        public readonly bool NeedTweenPop;
+
+
+
+        public WindowAttribute(byte uiLayer, string location = "", bool fullScreen = false, bool needTweenPop = true, int hideTimeToClose = 10)
         {
             UILayer = uiLayer;
             Location = location;
             FullScreen = fullScreen;
             HideTimeToClose = hideTimeToClose;
+            NeedTweenPop = needTweenPop && !fullScreen;
         }
 
-        public WindowAttribute(UILayer uiLayer, string location = "", bool fullScreen = false, int hideTimeToClose = 10)
+        public WindowAttribute(UILayer uiLayer, string location = "", bool fullScreen = false, bool needTweenPop = true, int hideTimeToClose = 10)
         {
             UILayer = (byte)uiLayer;
             Location = location;
             FullScreen = fullScreen;
             HideTimeToClose = hideTimeToClose;
+            NeedTweenPop = needTweenPop && !fullScreen;
         }
 
-        public WindowAttribute(UILayer uiLayer, string location, bool isResources, bool fullScreen = false, int hideTimeToClose = 10)
+        public WindowAttribute(UILayer uiLayer, string location, bool isResources, bool fullScreen = false, bool needTweenPop = true, int hideTimeToClose = 10)
         {
             UILayer = (byte)uiLayer;
             Location = location;
             FullScreen = fullScreen;
             HideTimeToClose = hideTimeToClose;
             IsResources = isResources;
+            NeedTweenPop = needTweenPop && !fullScreen;
         }
 
-        public WindowAttribute(UILayer uiLayer, bool isResources, bool fullScreen = false, int hideTimeToClose = 10)
+        public WindowAttribute(UILayer uiLayer, bool isResources, bool fullScreen = false, bool needTweenPop = true, int hideTimeToClose = 10)
         {
             UILayer = (byte)uiLayer;
             FullScreen = fullScreen;
             HideTimeToClose = hideTimeToClose;
             IsResources = isResources;
+            NeedTweenPop = needTweenPop && !fullScreen;
         }
     }
 }

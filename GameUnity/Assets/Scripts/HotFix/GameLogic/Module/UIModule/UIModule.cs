@@ -328,11 +328,11 @@ namespace GameLogic
             if (windowAttribute != null)
             {
                 string assetLocation = string.IsNullOrEmpty(windowAttribute.Location) ? type.Name : windowAttribute.Location;
-                window.Init(type.Name, windowAttribute.UILayer, windowAttribute.FullScreen, assetLocation, windowAttribute.IsResources, windowAttribute.HideTimeToClose);
+                window.Init(type.Name, windowAttribute.UILayer, windowAttribute.FullScreen, assetLocation, windowAttribute.IsResources, windowAttribute.NeedTweenPop, windowAttribute.HideTimeToClose);
             }
             else
             {
-                window.Init(type.Name, (int)UILayer.UI, window.FullScreen, type.Name, false, 10);
+                window.Init(type.Name, (int)UILayer.UI, window.FullScreen, type.Name, false,  !window.FullScreen, 10);
             }
             return window;
         }
@@ -350,11 +350,11 @@ namespace GameLogic
             if (windowAttribute != null)
             {
                 string assetLocation = string.IsNullOrEmpty(windowAttribute.Location) ? type.Name : windowAttribute.Location;
-                window.Init(type.Name, windowAttribute.UILayer, windowAttribute.FullScreen, assetLocation, windowAttribute.IsResources, windowAttribute.HideTimeToClose);
+                window.Init(type.Name, windowAttribute.UILayer, windowAttribute.FullScreen, assetLocation, windowAttribute.IsResources, windowAttribute.NeedTweenPop, windowAttribute.HideTimeToClose);
             }
             else
             {
-                window.Init(type.Name, (int)UILayer.UI, window.FullScreen, type.Name, false, 10);
+                window.Init(type.Name, (int)UILayer.UI, window.FullScreen, type.Name, false, !window.FullScreen, 10);
             }
             return window;
         }
@@ -617,8 +617,8 @@ namespace GameLogic
 
         private void OnWindowPrepare(UIWindow window)
         {
-            OnSortWindowSortingOrder(window.WindowLayer);
             window.InternalCreate();
+            OnSortWindowSortingOrder(window.WindowLayer);
             OnSetWindowVisible();
         }
 

@@ -14,12 +14,11 @@ namespace Procedure
         public override void OnEnter()
         {
             Debugger.Info("======== 11-恭喜进入最后一步=>成功完成所有热更准备 进入游戏 ========");
-            StartGame().Forget();
+            StartGame();
         }
 
-        private async UniTaskVoid StartGame()
+        private void StartGame()
         {
-            await UniTask.Yield();
             LauncherMgr.HideAllUI();
         }
 

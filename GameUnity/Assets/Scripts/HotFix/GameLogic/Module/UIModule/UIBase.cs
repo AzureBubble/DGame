@@ -99,6 +99,8 @@ namespace GameLogic
         /// </summary>
         protected bool m_hasOverrideUpdate = true;
 
+        protected bool m_isSortingOrderDirty = false;
+
         /// <summary>
         /// 窗口更新
         /// </summary>
@@ -120,10 +122,25 @@ namespace GameLogic
         }
 
         /// <summary>
+        /// 当触发窗口的层级排序。
+        /// </summary>
+        protected void _OnSortDepth()
+        {
+            if (ChildList != null)
+            {
+                for (int i = 0; i < ChildList.Count; i++)
+                {
+                    ChildList[i].OnSortDepth();
+                }
+            }
+
+            OnSortDepth();
+        }
+
+        /// <summary>
         /// 触发窗口的层级排序
         /// </summary>
-        /// <param name="depth"></param>
-        protected virtual void OnSortDepth(int depth) { }
+        protected virtual void OnSortDepth() { }
 
         /// <summary>
         /// 当因为全屏遮挡触发或者窗口可见性触发窗口的显隐

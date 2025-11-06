@@ -1,8 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using DG.Tweening;
 using DGame;
 using UnityEngine;
 using UnityEngine.UI;
+using Object = UnityEngine.Object;
 
 namespace GameLogic
 {
@@ -21,6 +24,12 @@ namespace GameLogic
         private GraphicRaycaster[] m_childGraphicRaycasters;
         private bool m_isChildCanvasDirty = false;
         public override UIType Type => UIType.Window;
+        private const float NORMAL_TWEEN_POP_TIME = 0.3f;
+        private const float NORMAL_MODEL_ALPHA = 1f;
+        private float m_curModelAlpha;
+        private float m_manualAlpha;
+        private Image m_modelSprite;
+        private UIButton m_modelCloseBtn;
 
         /// <summary>
         /// 窗口位置组件
@@ -104,9 +113,13 @@ namespace GameLogic
                     }
                 }
                 // 虚函数
-                if (m_isCreated)
+                if (Visible)
                 {
-                    OnSortDepth(value);
+                    _OnSortDepth();
+                }
+                else
+                {
+                    m_isSortingOrderDirty = true;
                 }
             }
         }
@@ -131,6 +144,11 @@ namespace GameLogic
                 for (int i = 0; i < m_childCanvas.Length; i++)
                 {
                     m_childCanvas[i].gameObject.layer = setLayer;
+                }
+
+                if (m_isSortingOrderDirty && m_isCreated)
+                {
+                    _OnSortDepth();
                 }
 
                 Interactable = value;
@@ -175,9 +193,13 @@ namespace GameLogic
         /// </summary>
         public bool IsHide { get; internal set; } = false;
 
+        public bool NeedTweenPop { get; internal set; } = false;
+
+        private bool m_isTweenPoping = false;
+
         #endregion
 
-        public void Init(string windowName, int layer, bool fullScreen, string assetLocation, bool fromResources, int hideTimeToClose)
+        public void Init(string windowName, int layer, bool fullScreen, string assetLocation, bool fromResources, bool needTweenPop, int hideTimeToClose)
         {
             WindowName = windowName;
             WindowLayer = layer;
@@ -185,6 +207,22 @@ namespace GameLogic
             AssetLocation = assetLocation;
             FromResources = fromResources;
             HideTimeToClose = hideTimeToClose;
+            NeedTweenPop = needTweenPop;
+        }
+
+        public void SetModelAlphaManually(float alpha)
+        {
+            m_manualAlpha = alpha;
+        }
+
+        protected virtual ModelType GetModelType()
+        {
+            if (FullScreen || WindowLayer == (int)UILayer.Top)
+            {
+                return ModelType.TransparentType;
+            }
+
+            return ModelType.NormalType;
         }
 
         internal void TryInvokePrepareCallback(System.Action<UIWindow> prepareCallback, System.Object[] userData)
@@ -236,7 +274,104 @@ namespace GameLogic
                 BindMemberProperty();
                 RegisterEvent();
                 OnCreate();
+                SetModelState(GetModelType());
+                if (NeedTweenPop)
+                {
+                    TweenPop();
+                }
             }
+        }
+
+        private void SetModelState(ModelType modelType)
+        {
+            m_curModelAlpha = NORMAL_MODEL_ALPHA;
+            var canClose = false;
+            switch (modelType)
+            {
+                case ModelType.NormalType:
+                    break;
+
+                case ModelType.TransparentType:
+                    m_curModelAlpha = 0.4f;
+                    break;
+
+                case ModelType.NormalType75:
+                    m_curModelAlpha = 0.75f;
+                    break;
+
+                case ModelType.UndertintHaveClose:
+                    m_curModelAlpha = 0.4f;
+                    canClose = true;
+                    break;
+
+                case ModelType.NormalHaveClose:
+                    canClose = true;
+                    break;
+
+                case ModelType.TransparentHaveClose:
+                    m_curModelAlpha = 0.01f;
+                    canClose = true;
+                    break;
+
+                default:
+                    m_curModelAlpha = 0f;
+                    break;
+            }
+
+            m_curModelAlpha = m_manualAlpha > 0 ? m_manualAlpha : m_curModelAlpha;
+
+            if (m_curModelAlpha <= 0)
+            {
+                return;
+            }
+            string modelSpritePath = "ModelSprite";
+            GameObject modelObj = UIModule.ResourceLoader.LoadGameObject(modelSpritePath, transform);
+            modelObj.transform.SetAsFirstSibling();
+            modelObj.transform.localScale = Vector3.one;
+            modelObj.transform.localPosition = Vector3.zero;
+            modelObj.name = modelSpritePath;
+            if (canClose)
+            {
+                m_modelCloseBtn = DGame.Utility.UnityUtil.AddMonoBehaviour<UIButton>(modelObj);
+                m_modelCloseBtn.onClick.AddListener(Close);
+            }
+            m_modelSprite = DGame.Utility.UnityUtil.AddMonoBehaviour<UIImage>(modelObj);
+
+            if (m_isTweenPoping)
+            {
+                m_modelSprite.color = new Color(0, 0, 0, 0);
+            }
+            else
+            {
+                m_modelSprite.color = new Color(0, 0, 0, m_curModelAlpha);
+            }
+        }
+
+        private void TweenPop()
+        {
+            if (m_isTweenPoping || this.gameObject == null)
+            {
+                return;
+            }
+
+            m_isTweenPoping = true;
+            this.transform.localScale = Vector3.one * 0.8f;
+            this.transform.DOScale(Vector3.one, NORMAL_TWEEN_POP_TIME).SetEase(Ease.OutBack).SetUpdate(true).SetAutoKill(true).onComplete += OnTweenPopComplete;
+
+            if (m_modelSprite != null)
+            {
+                m_modelSprite.color = new Color(0f, 0f, 0f, 0f);
+                m_modelSprite.DOFade(m_curModelAlpha, NORMAL_TWEEN_POP_TIME).SetUpdate(true).SetAutoKill(true).onComplete +=
+                    () =>
+                    {
+                        m_modelSprite.color = new Color(0f, 0f, 0f, m_curModelAlpha);
+                    };
+            }
+        }
+
+        private void OnTweenPopComplete()
+        {
+            m_isTweenPoping = false;
         }
 
         internal bool InternalUpdate()

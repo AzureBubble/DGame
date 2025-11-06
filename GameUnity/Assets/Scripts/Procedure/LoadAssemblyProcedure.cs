@@ -281,7 +281,6 @@ namespace Procedure
             }
 
             var entryType = m_mainLogicAssembly.GetType("GameStart");
-
             if (entryType == null)
             {
                 Debugger.Fatal("游戏主入口文件 'GameStart' 丢失");
@@ -293,6 +292,7 @@ namespace Procedure
                 Debugger.Fatal("游戏主入口方法 'GameStart.Entrance' 丢失");
                 return;
             }
+            // await UniTask.Yield();
             object[] objects = new object[] { new object[] { m_hotfixAssemblyList } };
             entryMethod.Invoke(entryType, objects);
         }

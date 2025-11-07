@@ -29,7 +29,7 @@ namespace DGame
         private void OnGUI()
         {
             var config = AtlasConfig.Instance;
-
+            DrawHeader();
             using var scrollScope = new EditorGUILayout.ScrollViewScope(m_scrollPos);
             m_scrollPos = scrollScope.scrollPosition;
             EditorGUI.BeginChangeCheck();
@@ -47,6 +47,49 @@ namespace DGame
             }
 
             DrawBottomButtons();
+            DrawStatusBar();
+        }
+
+        private void DrawHeader()
+        {
+            // 标题区域背景
+            // Rect headerRect = EditorGUILayout.GetControlRect(false, 60);
+            // EditorGUI.DrawRect(new Rect(headerRect.x, headerRect.y, position.width, 60),
+            //     new Color(0.1f, 0.1f, 0.1f, 0.8f));
+
+            GUILayout.Space(10);
+
+            // 主标题
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+
+            var titleStyle = new GUIStyle(EditorStyles.largeLabel)
+            {
+                fontSize = 18,
+                fontStyle = FontStyle.Bold,
+                alignment = TextAnchor.MiddleCenter,
+                normal = { textColor = Color.white }
+            };
+
+            EditorGUILayout.LabelField(new GUIContent("图集配置窗口", "DGame Atlas Configuration System"),
+                titleStyle, GUILayout.Height(30));
+
+            GUILayout.FlexibleSpace();
+            EditorGUILayout.EndHorizontal();
+
+            // 副标题
+            // var subtitleStyle = new GUIStyle(EditorStyles.miniLabel)
+            // {
+            //     alignment = TextAnchor.MiddleCenter,
+            //     normal = { textColor = new Color(0.8f, 0.8f, 0.8f, 1f) }
+            // };
+
+            // EditorGUILayout.LabelField("高效管理您的UI图集资源", subtitleStyle);
+            GUILayout.Space(5);
+
+            // 分隔线
+            EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
+            GUILayout.Space(10);
         }
 
         private void DrawBottomButtons()
@@ -71,7 +114,7 @@ namespace DGame
 
         private void DrawSpriteImportSettings(AtlasConfig config)
         {
-            EditorGUILayout.BeginVertical("box");
+            EditorGUILayout.BeginVertical("HelpBox");
             var labelGUIContent = new GUIContent(" Sprite导入设置", EditorGUIUtility.IconContent("Sprite Icon").image);
             GUILayout.Label(labelGUIContent, EditorStyles.boldLabel, GUILayout.ExpandWidth(true), GUILayout.Height(20));
             var checkMipmapsContent = new GUIContent(" 检查Mipmap导入设置", EditorGUIUtility.IconContent("LODGroup Icon").image);
@@ -87,7 +130,7 @@ namespace DGame
 
         private void DrawAdvancedSettings(AtlasConfig config)
         {
-            EditorGUILayout.BeginVertical("box");
+            EditorGUILayout.BeginVertical("HelpBox");
             var labelGUIContent = new GUIContent(" 高级设置", EditorGUIUtility.IconContent("ToolHandleGlobal").image);
             GUILayout.Label(labelGUIContent, EditorStyles.boldLabel, GUILayout.ExpandWidth(true), GUILayout.Height(20));
             var autoGenerateContent = new GUIContent(" 自动生成", EditorGUIUtility.IconContent("PlayButton").image);
@@ -120,7 +163,7 @@ namespace DGame
             EditorGUILayout.EndHorizontal();
             if (m_showExcludeKeyword)
             {
-                EditorGUILayout.BeginVertical("box");
+                EditorGUILayout.BeginVertical("HelpBox");
                 for (int i = 0; i < config.excludeKeywords.Length; i++)
                 {
                     var keywordsContent = new GUIContent($" 关键词 [{i}]", EditorGUIUtility.IconContent("FilterByLabel").image);
@@ -140,7 +183,7 @@ namespace DGame
 
         private void DrawPackingSettings(AtlasConfig config)
         {
-            EditorGUILayout.BeginVertical("box");
+            EditorGUILayout.BeginVertical("HelpBox");
             var labelGUIContent = new GUIContent(" 图集设置", EditorGUIUtility.IconContent("SpriteAtlas Icon").image);
             GUILayout.Label(labelGUIContent, EditorStyles.boldLabel, GUILayout.ExpandWidth(true), GUILayout.Height(20));
             // var paddingContent = new GUIContent(" Padding", EditorGUIUtility.IconContent("RectTransformBlueprint").image);
@@ -161,7 +204,7 @@ namespace DGame
 
         private void DrawPlatformSettings(AtlasConfig config)
         {
-            EditorGUILayout.BeginVertical("box");
+            EditorGUILayout.BeginVertical("HelpBox");
             var labelGUIContent = new GUIContent(" 平台设置", EditorGUIUtility.IconContent("BuildSettings.Standalone").image);
             GUILayout.Label(labelGUIContent, EditorStyles.boldLabel, GUILayout.ExpandWidth(true), GUILayout.Height(20));
             var androidContent = new GUIContent(" Android 格式", EditorGUIUtility.IconContent("BuildSettings.Android.Small").image);
@@ -178,7 +221,7 @@ namespace DGame
 
         private void DrawFolderSettings(AtlasConfig config)
         {
-            EditorGUILayout.BeginVertical("box");
+            EditorGUILayout.BeginVertical("HelpBox");
             var labelGUIContent = new GUIContent(" 目录设置", EditorGUIUtility.IconContent("Folder Icon").image);
             GUILayout.Label(labelGUIContent, EditorStyles.boldLabel, GUILayout.ExpandWidth(true), GUILayout.Height(20));
             config.outputAtlasDir = DrawFolderField("输出目录", "FolderOpened Icon", config.outputAtlasDir);
@@ -263,7 +306,7 @@ namespace DGame
             EditorGUILayout.EndHorizontal();
             if (isShow)
             {
-                EditorGUILayout.BeginVertical("box");
+                EditorGUILayout.BeginVertical("HelpBox");
                 for (int i = 0; i < paths.Length; i++)
                 {
                     paths[i] = DrawFolderField($"{itemLabel}[{i}]", iconName, paths[i]);
@@ -301,6 +344,23 @@ namespace DGame
                 }
             }
             return path;
+        }
+
+        private void DrawStatusBar()
+        {
+            EditorGUILayout.Space(5);
+            EditorGUILayout.BeginHorizontal("Box");
+            {
+                var config = AtlasConfig.Instance;
+                int totalPaths = config.sourceAtlasRootDir.Length + config.rootChildAtlasDir.Length +
+                                 config.singleAtlasDir.Length + config.excludeFolder.Length;
+
+                EditorGUILayout.LabelField($"监控目录: {totalPaths} 个", EditorStyles.miniLabel);
+                // GUILayout.FlexibleSpace();
+                EditorGUILayout.LabelField(config.autoGenerate ? "自动生成: 开启" : "自动生成: 关闭",
+                    EditorStyles.miniLabel);
+            }
+            EditorGUILayout.EndHorizontal();
         }
     }
 }

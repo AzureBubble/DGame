@@ -120,7 +120,7 @@ namespace GameLogic
         {
             if (isBox)
             {
-                GUIStyle style = new GUIStyle(GUI.skin.box);
+                GUIStyle style = new GUIStyle("HelpBox");
                 GUILayout.BeginHorizontal(style);
             }
             else
@@ -140,7 +140,7 @@ namespace GameLogic
         {
             if (isBox)
             {
-                GUIStyle style = new GUIStyle(GUI.skin.box)
+                GUIStyle style = new GUIStyle("HelpBox")
                 {
                     padding = new RectOffset(2, 2, 2, 2)
                 };

@@ -513,33 +513,33 @@ namespace DGame
         }
     }
 
-    [InitializeOnLoad]
-    public static class HybridCLRSettingsSyncUpdateSettings
-    {
-        private static List<string> m_lastHotUpdateAssemblies;
-        private static List<string> m_lastAOTAssemblies;
-
-        static HybridCLRSettingsSyncUpdateSettings()
-        {
-            m_lastHotUpdateAssemblies = new List<string>(HybridCLRSettings.Instance.hotUpdateAssemblies);
-            m_lastAOTAssemblies = new List<string>(HybridCLRSettings.Instance.patchAOTAssemblies);
-            EditorApplication.update += OnEditorUpdate;
-        }
-
-        private static void OnEditorUpdate()
-        {
-            if (HybridCLRSettings.Instance == null)
-            {
-                return;
-            }
-
-            if (!m_lastHotUpdateAssemblies.SequenceEqual(HybridCLRSettings.Instance.hotUpdateAssemblies)
-                || !m_lastAOTAssemblies.SequenceEqual(HybridCLRSettings.Instance.patchAOTAssemblies))
-            {
-                UpdateSettingsInspector.ForceUpdateAssemblies2();
-                m_lastHotUpdateAssemblies = new List<string>(HybridCLRSettings.Instance.hotUpdateAssemblies);
-                m_lastAOTAssemblies = new List<string>(HybridCLRSettings.Instance.patchAOTAssemblies);
-            }
-        }
-    }
+    // [InitializeOnLoad]
+    // public static class HybridCLRSettingsSyncUpdateSettings
+    // {
+    //     private static List<string> m_lastHotUpdateAssemblies;
+    //     private static List<string> m_lastAOTAssemblies;
+    //
+    //     static HybridCLRSettingsSyncUpdateSettings()
+    //     {
+    //         m_lastHotUpdateAssemblies = new List<string>(HybridCLRSettings.Instance.hotUpdateAssemblies);
+    //         m_lastAOTAssemblies = new List<string>(HybridCLRSettings.Instance.patchAOTAssemblies);
+    //         EditorApplication.update += OnEditorUpdate;
+    //     }
+    //
+    //     private static void OnEditorUpdate()
+    //     {
+    //         if (HybridCLRSettings.Instance == null)
+    //         {
+    //             return;
+    //         }
+    //
+    //         if (!m_lastHotUpdateAssemblies.SequenceEqual(HybridCLRSettings.Instance.hotUpdateAssemblies)
+    //             || !m_lastAOTAssemblies.SequenceEqual(HybridCLRSettings.Instance.patchAOTAssemblies))
+    //         {
+    //             UpdateSettingsInspector.ForceUpdateAssemblies2();
+    //             m_lastHotUpdateAssemblies = new List<string>(HybridCLRSettings.Instance.hotUpdateAssemblies);
+    //             m_lastAOTAssemblies = new List<string>(HybridCLRSettings.Instance.patchAOTAssemblies);
+    //         }
+    //     }
+    // }
 }

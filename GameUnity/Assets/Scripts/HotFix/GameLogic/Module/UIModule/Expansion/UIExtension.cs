@@ -1,5 +1,8 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -237,6 +240,61 @@ namespace GameLogic
             {
                 canvasGroup.gameObject.SetActive(value);
             }
+        }
+
+        #endregion
+
+        #region UniTask
+
+        public static UniTask<CanvasGroup> FadeToAlphaAsync(this CanvasGroup canvasGroup, float targetAlpha, float duration,
+            Action callback = null, CancellationToken cancellationToken = default,
+            DGame.Utility.EaseType easeType = DGame.Utility.EaseType.Linear)
+        {
+            return DGame.Utility.EaseUtil.FadeToAlphaAsync(canvasGroup, targetAlpha, duration, callback, cancellationToken, easeType, false);
+        }
+
+        public static UniTask<CanvasGroup> FadeToAlphaAsyncUnscaled(this CanvasGroup canvasGroup, float targetAlpha, float duration,
+            Action callback = null, CancellationToken cancellationToken = default,
+            DGame.Utility.EaseType easeType = DGame.Utility.EaseType.Linear)
+        {
+            return DGame.Utility.EaseUtil.FadeToAlphaAsync(canvasGroup, targetAlpha, duration, callback, cancellationToken, easeType, true);
+        }
+
+        public static UniTask<CanvasGroup> FadeInAsync(this CanvasGroup canvasGroup, float duration = 0.3f,
+            Action callback = null, CancellationToken cancellationToken = default)
+        {
+            return FadeToAlphaAsyncUnscaled(canvasGroup,1f, duration, callback, cancellationToken);
+        }
+
+        public static UniTask<CanvasGroup> FadeOutAsync(this CanvasGroup canvasGroup, float duration = 0.3f,
+            Action callback = null, CancellationToken cancellationToken = default)
+        {
+            return FadeToAlphaAsyncUnscaled(canvasGroup, 0f, duration, callback, cancellationToken);
+        }
+
+        public static UniTask<Slider> SmoothValue(this Slider slider, float targetValue, float duration = 0.3f,
+            Action callback = null, CancellationToken cancellationToken = default,
+            DGame.Utility.EaseType easeType = DGame.Utility.EaseType.Linear)
+        {
+            return DGame.Utility.EaseUtil.SmoothValue(slider, targetValue, duration, callback, cancellationToken,
+                easeType);
+        }
+
+        public static UniTask<Image> SmoothValue(this Image image, float targetValue, float duration = 0.3f,
+            Action callback = null, CancellationToken cancellationToken = default)
+        {
+            return DGame.Utility.EaseUtil.SmoothValue(image, targetValue, duration, callback, cancellationToken);
+        }
+
+        public static UniTask<Scrollbar> SmoothValue(this Scrollbar scrollbar, float targetValue, float duration = 0.3f,
+            Action callback = null, CancellationToken cancellationToken = default)
+        {
+            return DGame.Utility.EaseUtil.SmoothValue(scrollbar, targetValue, duration, callback, cancellationToken);
+        }
+
+        public static bool TryGetMouseDownUIPos(this UIModule uiModule, out Vector2 screenPos)
+        {
+            return DGame.Utility.MathUtil.TryGetMouseDownUIPos((RectTransform)UIModule.UICanvas, uiModule.UICamera, out screenPos);
         }
 
         #endregion

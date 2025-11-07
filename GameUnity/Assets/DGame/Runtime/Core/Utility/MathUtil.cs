@@ -590,6 +590,43 @@ namespace DGame
                 return true;
             }
 
+            public static bool TryGetMouseDownUIPos(RectTransform uiRoot, Camera uiCamera, out Vector2 screenPos)
+            {
+                screenPos = Vector2.zero;
+
+                if (uiRoot == null || uiCamera == null)
+                {
+                    return false;
+                }
+                Vector3 mousePos = Vector3.zero;
+
+#if UNITY_EDITOR || PLATFORM_STANDALONE_WIN
+                if (Input.GetMouseButton(0))
+                {
+                    mousePos = Input.mousePosition;
+                }
+                else
+                {
+                    return false;
+                }
+#else
+                if (Input.touchCount > 0)
+                {
+                    mousePos = Input.GetTouch(0).position;
+                }
+                else
+                {
+                    return false;
+                }
+#endif
+                if (RectTransformUtility.ScreenPointToLocalPointInRectangle(uiRoot, mousePos, uiCamera, out var localPoint))
+                {
+                    screenPos = uiRoot.transform.TransformPoint(localPoint);
+                    return true;
+                }
+                return false;
+            }
+
             #endregion
         }
     }

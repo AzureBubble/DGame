@@ -117,7 +117,7 @@ MonoBehaviour:
     even_logImage: {fileID: 2800000, guid: d27aad55b568c6544b0b95a95da44bc7, type: 3}
     odd_logImage: {fileID: 2800000, guid: 8ffbb44a2c3adae45913474e4fd487f5, type: 3}
     selectedImage: {fileID: 2800000, guid: 17117a429b08e7e43b0b6c8421de69fe, type: 3}
-    reporterScrollerSkin: {fileID: 11400000, guid: 761851fd71fb5c2438798211850ea633, type: 2}
+    reporterScrollerSkin: {fileID: 11400000, guid: 80dba04821e0a554eafe33094f3e745e, type: 2}
   activeWindowType: 2
   m_showFullWindow: 0
   m_consoleWindow:

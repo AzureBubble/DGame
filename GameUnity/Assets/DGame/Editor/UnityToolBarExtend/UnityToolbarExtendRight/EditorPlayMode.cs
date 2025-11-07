@@ -92,6 +92,8 @@ namespace DGame
                     // 保存预制体修改
                     PrefabUtility.SaveAsPrefabAssetAndConnect(prefabRoot, prefabAssetPath, InteractionMode.UserAction);
                     Debug.Log($"已保存预制体: {prefabAssetPath} 的资源运行模式: {m_resourcesModeNames[m_resourcesModeIndex]}");
+                    AssetDatabase.SaveAssets();
+                    AssetDatabase.Refresh();
                 }
             }
         }

@@ -6,8 +6,6 @@ using UnityEngine;
 
 namespace DGame
 {
-#if !ODIN_INSPECTOR || !ENABLE_ODIN_INSPECTOR
-
     [CustomEditor(typeof(RootModule))]
     internal sealed class RootModuleInspector : DGameInspector
     {
@@ -497,6 +495,4 @@ namespace DGame
             serializedObject.ApplyModifiedProperties();
         }
     }
-
-#endif
 }

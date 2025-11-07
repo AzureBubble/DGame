@@ -271,14 +271,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 4103294288059457241, guid: 3375c1da4c80d8e40bca1675c3990457, type: 3}
-      propertyPath: m_consoleWindow.needPrintLog
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4103294288059457241, guid: 3375c1da4c80d8e40bca1675c3990457, type: 3}
-      propertyPath: imageSettings.reporterScrollerSkin
-      value: 
-      objectReference: {fileID: 11400000, guid: 80dba04821e0a554eafe33094f3e745e, type: 2}
     - target: {fileID: 8427157544136828061, guid: 3375c1da4c80d8e40bca1675c3990457, type: 3}
       propertyPath: m_RootOrder
       value: 1

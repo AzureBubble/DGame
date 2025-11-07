@@ -182,7 +182,7 @@ namespace DGame
 
         private static StringBuilder m_sbGetHierarchyPath = new StringBuilder();
 
-        [MenuItem("DGame Tools/AtlasRefWindow")]
+        [MenuItem("DGame Tools/性能分析工具/AtlasRefWindow")]
         static void OpenWindow()
         {
             m_selectBackground = MakeTex(0, 255, 0, 128);

@@ -43,7 +43,7 @@ namespace DGame
             mAssetTreeView?.OnGUI(new Rect(0, _toolbarGUIStyle.fixedHeight, position.width, position.height - _toolbarGUIStyle.fixedHeight));
         }
 
-        [MenuItem("DGame Tools/查找资产引用 _F10", false, 100)]
+        [MenuItem("DGame Tools/性能分析工具/查找资产引用 _F10", false, 100)]
         public static void FindRef()
         {
             InitDataIfNeeded();

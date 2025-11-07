@@ -697,7 +697,7 @@ namespace DGame
                 return AssetReference.Instantiate(assetObject.Target as GameObject, parent, this).gameObject;
             }
             m_loadingAssetList.Add(assetObjectKey);
-            AssetHandle handle = GetAssetHandleAsync<string>(location, packageName);
+            AssetHandle handle = GetAssetHandleAsync<GameObject>(location, packageName);
             bool cancelOrFailed = await handle.ToUniTask().AttachExternalCancellation(cancellationToken).SuppressCancellationThrow();
 
             if (cancelOrFailed)

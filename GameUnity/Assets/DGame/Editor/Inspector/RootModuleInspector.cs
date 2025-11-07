@@ -32,7 +32,11 @@ namespace DGame
         private string[] m_jsonHelperTypeNames = null;
         private int m_jsonHelperTypeNameIndex = 0;
 
-        private bool m_isShowGlobalHelperSetting = true;
+        // UI状态
+        private Vector2 m_scrollPosition;
+        private bool m_showGlobalHelperSetting = true;
+        private bool m_showPerformanceSetting = true;
+        private bool m_showSystemSetting = true;
 
         public override void OnInspectorGUI()
         {
@@ -40,105 +44,350 @@ namespace DGame
 
             serializedObject.Update();
             RootModule rootModule = (RootModule)target;
+
+            // 绘制标题区域
+            DrawInspectorHeader();
+
             EditorGUI.BeginDisabledGroup(EditorApplication.isPlayingOrWillChangePlaymode);
             {
-                EditorGUILayout.BeginVertical("box");
-                {
-                    UnityEditorUtil.LayoutFoldoutBox(() =>
-                    {
-                        int textHelperSelectedIndex = EditorGUILayout.Popup("字符串辅助器", m_stringUtilHelperTypeNameIndex, m_stringUtilHelperTypeNames);
-                        if (textHelperSelectedIndex != m_stringUtilHelperTypeNameIndex)
-                        {
-                            m_stringUtilHelperTypeNameIndex = textHelperSelectedIndex;
-                            m_stringUtilHelperTypeName.stringValue = textHelperSelectedIndex <= 0 ? null : m_stringUtilHelperTypeNames[textHelperSelectedIndex];
-                        }
-
-                        int logHelperSelectedIndex = EditorGUILayout.Popup("日志辅助器", m_logHelperTypeNameIndex, m_logHelperTypeNames);
-                        if (logHelperSelectedIndex != m_logHelperTypeNameIndex)
-                        {
-                            m_logHelperTypeNameIndex = logHelperSelectedIndex;
-                            m_logHelperTypeName.stringValue = logHelperSelectedIndex <= 0 ? null : m_logHelperTypeNames[logHelperSelectedIndex];
-                        }
-
-                        int jsonHelperSelectedIndex = EditorGUILayout.Popup("Json辅助器", m_jsonHelperTypeNameIndex, m_jsonHelperTypeNames);
-                        if (jsonHelperSelectedIndex != m_jsonHelperTypeNameIndex)
-                        {
-                            m_jsonHelperTypeNameIndex = jsonHelperSelectedIndex;
-                            m_jsonHelperTypeName.stringValue = jsonHelperSelectedIndex <= 0 ? null : m_jsonHelperTypeNames[jsonHelperSelectedIndex];
-                        }
-                    }, "全局辅助器设置", ref m_isShowGlobalHelperSetting, true);
-                }
-                EditorGUILayout.EndVertical();
+                DrawGlobalHelperSettings(rootModule);
+                DrawPerformanceSettings(rootModule);
+                DrawSystemSettings(rootModule);
+                DrawStatistics(rootModule);
             }
             EditorGUI.EndDisabledGroup();
 
-            // 绘制游戏帧率
-            int frameRate = EditorGUILayout.IntSlider("游戏帧率", m_frameRate.intValue, 1, 120);
-            if (frameRate != m_frameRate.intValue)
+            serializedObject.ApplyModifiedProperties();
+        }
+
+        private void DrawInspectorHeader()
+        {
+            GUILayout.Space(5);
+
+            // 主标题
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+
+            var titleStyle = new GUIStyle(EditorStyles.largeLabel)
             {
-                if (EditorApplication.isPlaying)
+                fontSize = 16,
+                fontStyle = FontStyle.Bold,
+                alignment = TextAnchor.MiddleCenter,
+                normal = { textColor = Color.white }
+            };
+
+            EditorGUILayout.LabelField(new GUIContent("🎮 游戏根模块配置", "Root Module Configuration"),
+                titleStyle, GUILayout.Height(30));
+
+            GUILayout.FlexibleSpace();
+            EditorGUILayout.EndHorizontal();
+
+            // 状态指示
+            var statusStyle = new GUIStyle(EditorStyles.miniLabel)
+            {
+                alignment = TextAnchor.MiddleCenter,
+                normal = { textColor = new Color(0.8f, 0.8f, 0.8f, 1f) }
+            };
+
+            EditorGUILayout.LabelField("配置游戏核心系统和辅助器", statusStyle);
+            GUILayout.Space(5);
+
+            // 分隔线
+            EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
+            GUILayout.Space(10);
+        }
+
+        private void DrawGlobalHelperSettings(RootModule rootModule)
+        {
+            m_showGlobalHelperSetting = EditorGUILayout.BeginFoldoutHeaderGroup(m_showGlobalHelperSetting,
+                new GUIContent("🔧 全局辅助器设置", "配置各种工具辅助器"));
+
+            if (m_showGlobalHelperSetting)
+            {
+                EditorGUILayout.BeginVertical("HelpBox");
                 {
-                    rootModule.FrameRate = frameRate;
+                    // 字符串辅助器
+                    EditorGUILayout.BeginHorizontal();
+                    EditorGUILayout.LabelField(new GUIContent("📝 字符串辅助器", "字符串处理工具"), GUILayout.Width(120));
+                    int textHelperSelectedIndex = EditorGUILayout.Popup(m_stringUtilHelperTypeNameIndex, m_stringUtilHelperTypeNames);
+                    if (textHelperSelectedIndex != m_stringUtilHelperTypeNameIndex)
+                    {
+                        m_stringUtilHelperTypeNameIndex = textHelperSelectedIndex;
+                        m_stringUtilHelperTypeName.stringValue = textHelperSelectedIndex <= 0 ? null : m_stringUtilHelperTypeNames[textHelperSelectedIndex];
+                    }
+                    EditorGUILayout.EndHorizontal();
+
+                    // 日志辅助器
+                    EditorGUILayout.BeginHorizontal();
+                    EditorGUILayout.LabelField(new GUIContent("📋 日志辅助器", "日志输出工具"), GUILayout.Width(120));
+                    int logHelperSelectedIndex = EditorGUILayout.Popup(m_logHelperTypeNameIndex, m_logHelperTypeNames);
+                    if (logHelperSelectedIndex != m_logHelperTypeNameIndex)
+                    {
+                        m_logHelperTypeNameIndex = logHelperSelectedIndex;
+                        m_logHelperTypeName.stringValue = logHelperSelectedIndex <= 0 ? null : m_logHelperTypeNames[logHelperSelectedIndex];
+                    }
+                    EditorGUILayout.EndHorizontal();
+
+                    // JSON辅助器
+                    EditorGUILayout.BeginHorizontal();
+                    EditorGUILayout.LabelField(new GUIContent("🔤 JSON辅助器", "JSON序列化工具"), GUILayout.Width(120));
+                    int jsonHelperSelectedIndex = EditorGUILayout.Popup(m_jsonHelperTypeNameIndex, m_jsonHelperTypeNames);
+                    if (jsonHelperSelectedIndex != m_jsonHelperTypeNameIndex)
+                    {
+                        m_jsonHelperTypeNameIndex = jsonHelperSelectedIndex;
+                        m_jsonHelperTypeName.stringValue = jsonHelperSelectedIndex <= 0 ? null : m_jsonHelperTypeNames[jsonHelperSelectedIndex];
+                    }
+                    EditorGUILayout.EndHorizontal();
+
+                    EditorGUILayout.Space(3);
+
+                    // 辅助器状态
+                    string helperStatus = GetHelperStatus();
+                    EditorGUILayout.HelpBox(helperStatus,
+                        IsAllHelpersConfigured() ? MessageType.Info : MessageType.Warning);
                 }
-                else
-                {
-                    m_frameRate.intValue = frameRate;
-                }
+                EditorGUILayout.EndVertical();
             }
+            EditorGUILayout.EndFoldoutHeaderGroup();
+            GUILayout.Space(8);
+        }
 
-            // 绘制游戏速度
-            EditorGUILayout.BeginVertical("box");
+        private void DrawPerformanceSettings(RootModule rootModule)
+        {
+            m_showPerformanceSetting = EditorGUILayout.BeginFoldoutHeaderGroup(m_showPerformanceSetting,
+                new GUIContent("⚡ 性能设置", "游戏性能和帧率配置"));
+
+            if (m_showPerformanceSetting)
             {
-                float gameSpeed = EditorGUILayout.Slider("游戏速度", m_gameSpeed.floatValue, 0f, 8f);
-                int selectedGameSpeed = GUILayout.SelectionGrid(GetSelectedGameSpeed(gameSpeed), m_gameSpeedForDisplay, 5);
-
-                if (selectedGameSpeed >= 0)
+                EditorGUILayout.BeginVertical("HelpBox");
                 {
-                    gameSpeed = GetGameSpeed(selectedGameSpeed);
-                }
+                    // 游戏帧率
+                    EditorGUILayout.BeginHorizontal();
+                    EditorGUILayout.LabelField(new GUIContent("🎯 游戏帧率", "目标帧率设置"), GUILayout.Width(100));
+                    int frameRate = EditorGUILayout.IntSlider(m_frameRate.intValue, 1, 120);
+                    EditorGUILayout.EndHorizontal();
 
-                if (Mathf.Abs(gameSpeed - m_gameSpeed.floatValue) > 0.001f)
-                {
-                    if (EditorApplication.isPlaying)
+                    if (frameRate != m_frameRate.intValue)
                     {
-                        rootModule.GameSpeed = gameSpeed;
+                        if (EditorApplication.isPlaying)
+                        {
+                            rootModule.FrameRate = frameRate;
+                        }
+                        else
+                        {
+                            m_frameRate.intValue = frameRate;
+                        }
                     }
-                    else
+
+                    // 帧率建议
+                    string frameRateAdvice = GetFrameRateAdvice(frameRate);
+                    EditorGUILayout.HelpBox(frameRateAdvice, MessageType.Info);
+
+                    EditorGUILayout.Space(5);
+
+                    // 游戏速度
+                    EditorGUILayout.LabelField("🚀 游戏速度", EditorStyles.boldLabel);
+
+                    float gameSpeed = EditorGUILayout.Slider("速度倍率", m_gameSpeed.floatValue, 0f, 8f);
+
+                    // 快速选择按钮
+                    EditorGUILayout.BeginHorizontal();
+                    GUILayout.Label("快速设置:", GUILayout.Width(60));
+                    int selectedGameSpeed = GUILayout.Toolbar(GetSelectedGameSpeed(gameSpeed), m_gameSpeedForDisplay);
+                    EditorGUILayout.EndHorizontal();
+
+                    if (selectedGameSpeed >= 0)
                     {
-                        m_gameSpeed.floatValue = gameSpeed;
+                        gameSpeed = GetGameSpeed(selectedGameSpeed);
+                    }
+
+                    if (Mathf.Abs(gameSpeed - m_gameSpeed.floatValue) > 0.001f)
+                    {
+                        if (EditorApplication.isPlaying)
+                        {
+                            rootModule.GameSpeed = gameSpeed;
+                        }
+                        else
+                        {
+                            m_gameSpeed.floatValue = gameSpeed;
+                        }
+                    }
+
+                    // 游戏速度说明
+                    if (Mathf.Approximately(gameSpeed, 0f))
+                    {
+                        EditorGUILayout.HelpBox("游戏暂停", MessageType.Warning);
+                    }
+                    else if (gameSpeed > 1f)
+                    {
+                        EditorGUILayout.HelpBox($"加速模式: {gameSpeed}x", MessageType.Info);
                     }
                 }
+                EditorGUILayout.EndVertical();
+            }
+            EditorGUILayout.EndFoldoutHeaderGroup();
+            GUILayout.Space(8);
+        }
+
+        private void DrawSystemSettings(RootModule rootModule)
+        {
+            m_showSystemSetting = EditorGUILayout.BeginFoldoutHeaderGroup(m_showSystemSetting,
+                new GUIContent("💻 系统设置", "运行时系统行为配置"));
+
+            if (m_showSystemSetting)
+            {
+                EditorGUILayout.BeginVertical("HelpBox");
+                {
+                    // 后台运行
+                    bool runInBackground = EditorGUILayout.ToggleLeft(
+                        new GUIContent("🖥️ 可在后台运行", "游戏窗口失去焦点时继续运行"),
+                        m_runInBackground.boolValue);
+
+                    if (runInBackground != m_runInBackground.boolValue)
+                    {
+                        if (EditorApplication.isPlaying)
+                        {
+                            rootModule.RunInBackground = runInBackground;
+                        }
+                        else
+                        {
+                            m_runInBackground.boolValue = runInBackground;
+                        }
+                    }
+
+                    // 从不休眠
+                    bool neverSleep = EditorGUILayout.ToggleLeft(
+                        new GUIContent("🔋 从不休眠", "防止系统进入睡眠模式"),
+                        m_neverSleep.boolValue);
+
+                    if (neverSleep != m_neverSleep.boolValue)
+                    {
+                        if (EditorApplication.isPlaying)
+                        {
+                            rootModule.NeverSleep = neverSleep;
+                        }
+                        else
+                        {
+                            m_neverSleep.boolValue = neverSleep;
+                        }
+                    }
+
+                    EditorGUILayout.Space(3);
+
+                    // 系统设置说明
+                    string systemStatus = GetSystemStatus(runInBackground, neverSleep);
+                    MessageType messageType = (runInBackground || neverSleep) ? MessageType.Info : MessageType.None;
+                    EditorGUILayout.HelpBox(systemStatus, messageType);
+                }
+                EditorGUILayout.EndVertical();
+            }
+            EditorGUILayout.EndFoldoutHeaderGroup();
+            GUILayout.Space(8);
+        }
+
+        private void DrawStatistics(RootModule rootModule)
+        {
+            EditorGUILayout.BeginVertical("Box");
+            {
+                EditorGUILayout.LabelField("📊 配置概览", EditorStyles.boldLabel);
+
+                EditorGUILayout.BeginHorizontal();
+                {
+                    EditorGUILayout.LabelField("辅助器配置:", GUILayout.Width(80));
+                    string helperStatus = IsAllHelpersConfigured() ? "✅ 完整" : "⚠️ 不完整";
+                    EditorGUILayout.LabelField(helperStatus, EditorStyles.miniLabel);
+                }
+                EditorGUILayout.EndHorizontal();
+
+                EditorGUILayout.BeginHorizontal();
+                {
+                    EditorGUILayout.LabelField("当前帧率:", GUILayout.Width(80));
+                    EditorGUILayout.LabelField($"{m_frameRate.intValue} FPS", EditorStyles.miniLabel);
+                }
+                EditorGUILayout.EndHorizontal();
+
+                EditorGUILayout.BeginHorizontal();
+                {
+                    EditorGUILayout.LabelField("游戏速度:", GUILayout.Width(80));
+                    EditorGUILayout.LabelField($"{m_gameSpeed.floatValue}x", EditorStyles.miniLabel);
+                }
+                EditorGUILayout.EndHorizontal();
+
+                EditorGUILayout.BeginHorizontal();
+                {
+                    EditorGUILayout.LabelField("系统状态:", GUILayout.Width(80));
+                    string systemStatus = GetSystemStatusSummary();
+                    EditorGUILayout.LabelField(systemStatus, EditorStyles.miniLabel);
+                }
+                EditorGUILayout.EndHorizontal();
+
+                // 操作按钮
+                EditorGUILayout.Space(5);
+                EditorGUILayout.BeginHorizontal();
+                {
+                    if (GUILayout.Button("🔄 刷新类型", GUILayout.Height(25)))
+                    {
+                        RefreshTypeNames();
+                    }
+
+                    if (GUILayout.Button("💾 保存配置", GUILayout.Height(25)))
+                    {
+                        serializedObject.ApplyModifiedProperties();
+                        Debug.Log("✅ 根模块配置已保存");
+                    }
+                }
+                EditorGUILayout.EndHorizontal();
             }
             EditorGUILayout.EndVertical();
+        }
 
-            bool runInBackground = EditorGUILayout.ToggleLeft("可在后台运行", m_runInBackground.boolValue);
-            if (runInBackground != m_runInBackground.boolValue)
-            {
-                if (EditorApplication.isPlaying)
-                {
-                    rootModule.RunInBackground = runInBackground;
-                }
-                else
-                {
-                    m_runInBackground.boolValue = runInBackground;
-                }
-            }
+        private string GetHelperStatus()
+        {
+            int configuredCount = 0;
+            int totalCount = 3;
 
-            bool neverSleep = EditorGUILayout.ToggleLeft("从不休眠", m_neverSleep.boolValue);
+            if (!string.IsNullOrEmpty(m_stringUtilHelperTypeName.stringValue)) configuredCount++;
+            if (!string.IsNullOrEmpty(m_logHelperTypeName.stringValue)) configuredCount++;
+            if (!string.IsNullOrEmpty(m_jsonHelperTypeName.stringValue)) configuredCount++;
 
-            if (neverSleep != m_neverSleep.boolValue)
-            {
-                if (EditorApplication.isPlaying)
-                {
-                    rootModule.NeverSleep = neverSleep;
-                }
-                else
-                {
-                    m_neverSleep.boolValue = neverSleep;
-                }
-            }
+            return $"辅助器配置: {configuredCount}/{totalCount} 已配置" +
+                   (configuredCount < totalCount ? "\n建议配置所有辅助器以获得完整功能" : "");
+        }
 
-            serializedObject.ApplyModifiedProperties();
+        private bool IsAllHelpersConfigured()
+        {
+            return !string.IsNullOrEmpty(m_stringUtilHelperTypeName.stringValue) &&
+                   !string.IsNullOrEmpty(m_logHelperTypeName.stringValue) &&
+                   !string.IsNullOrEmpty(m_jsonHelperTypeName.stringValue);
+        }
+
+        private string GetFrameRateAdvice(int frameRate)
+        {
+            if (frameRate <= 30) return "低帧率模式 - 适合性能要求低的设备";
+            if (frameRate <= 60) return "标准帧率 - 适合大多数游戏";
+            if (frameRate <= 90) return "高帧率模式 - 适合动作游戏";
+            return "超高帧率 - 适合竞技游戏，消耗更多资源";
+        }
+
+        private string GetSystemStatus(bool runInBackground, bool neverSleep)
+        {
+            List<string> features = new List<string>();
+
+            if (runInBackground) features.Add("后台运行");
+            if (neverSleep) features.Add("不休眠");
+
+            if (features.Count == 0) return "标准系统模式";
+            return "启用功能: " + string.Join("，", features);
+        }
+
+        private string GetSystemStatusSummary()
+        {
+            List<string> status = new List<string>();
+
+            if (m_runInBackground.boolValue) status.Add("后台");
+            if (m_neverSleep.boolValue) status.Add("不休眠");
+
+            return status.Count > 0 ? string.Join("+", status) : "标准";
         }
 
         private int GetSelectedGameSpeed(float gameSpeed)
@@ -170,7 +419,6 @@ namespace DGame
         protected override void OnCompileComplete()
         {
             base.OnCompileComplete();
-
             RefreshTypeNames();
         }
 
@@ -187,7 +435,6 @@ namespace DGame
             m_frameRate = serializedObject?.FindProperty("frameRate");
             m_runInBackground = serializedObject?.FindProperty("runInBackground");
             m_neverSleep = serializedObject?.FindProperty("neverSleep");
-            // m_isShowGlobalHelperSetting = serializedObject?.FindProperty("m_isShowGlobalHelperSetting");
             RefreshTypeNames();
         }
 

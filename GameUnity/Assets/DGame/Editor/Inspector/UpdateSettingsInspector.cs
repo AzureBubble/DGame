@@ -29,6 +29,13 @@ namespace DGame
         private List<string> m_aotMetaAssembliesList;
         private int m_logicMainDllNameIndex;
 
+        // UI状态
+        private Vector2 m_scrollPosition;
+
+        // 颜色定义
+        private Color m_warningColor = new Color(1f, 0.6f, 0.2f, 1f);
+        private Color m_successColor = new Color(0.2f, 0.8f, 0.3f, 1f);
+
         private void OnEnable()
         {
             m_projectName = serializedObject.FindProperty("projectName");
@@ -46,6 +53,7 @@ namespace DGame
             m_buildAddress = serializedObject.FindProperty("m_buildAddress");
 
             UpdateSettings updateSettings = (UpdateSettings)target;
+
             if (updateSettings != null)
             {
                 m_hotUpdateAssembliesList = new List<string>(updateSettings.HotUpdateAssemblies);
@@ -55,79 +63,386 @@ namespace DGame
 
         public override void OnInspectorGUI()
         {
-            // 记录修改前状态
+            // 绘制标题区域
+            DrawInspectorHeader();
+
             EditorGUI.BeginChangeCheck();
-            // base.OnInspectorGUI();
 
             serializedObject.Update();
             UpdateSettings updateSettings = (UpdateSettings)target;
+
+
             EditorGUI.BeginDisabledGroup(EditorApplication.isPlayingOrWillChangePlaymode);
             {
-                EditorGUILayout.PropertyField(m_projectName, new GUIContent("项目名称"));
-                EditorGUILayout.PropertyField(m_hotUpdateAssemblies, new GUIContent("热更程序集"));
-                EditorGUILayout.PropertyField(m_aotMetaAssemblies, new GUIContent("AOT程序集"));
-                // EditorGUILayout.PropertyField(m_logicMainDllName, new GUIContent("主业务逻辑DLL"));
-                m_logicMainDllNameIndex = updateSettings.HotUpdateAssemblies.IndexOf(m_logicMainDllName.stringValue);
-                if (m_logicMainDllNameIndex < 0)
-                {
-                    m_logicMainDllNameIndex = 0;
-                }
-                m_logicMainDllNameIndex = EditorGUILayout.Popup("主业务逻辑DLL", m_logicMainDllNameIndex, updateSettings.HotUpdateAssemblies.ToArray());
-                if (m_logicMainDllName.stringValue != updateSettings.HotUpdateAssemblies[m_logicMainDllNameIndex])
-                {
-                    m_logicMainDllName.stringValue = updateSettings.HotUpdateAssemblies[m_logicMainDllNameIndex];
-                }
-                EditorGUILayout.PropertyField(m_assemblyTextAssetExtension, new GUIContent("DLL文本资产打包后缀名"));
-                EditorGUILayout.PropertyField(m_assemblyTextAssetPath, new GUIContent("DLL文本资产路径"));
-                EditorGUILayout.PropertyField(m_updateStyle, new GUIContent("强制更新类型"));
-                // UnityEditorUtil.DrawChineseEnumPopup<UpdateStyle>(m_updateStyle, "强制更新类型");
-                // UnityEditorUtil.DrawChineseEnumPopup<UpdateNotice>(m_updateNotice, "更新是否有提示");
-                EditorGUILayout.PropertyField(m_updateNotice, new GUIContent("是否有更新提示"));
-                EditorGUILayout.PropertyField(m_resDownloadPath, new GUIContent("资源服务器地址"));
-                EditorGUILayout.PropertyField(m_fallbackResDownloadPath, new GUIContent("资源服务器备用地址"));
-                EditorGUILayout.PropertyField(m_loadResWayWebGL, new GUIContent("WebGL平台加载资源方式"));
-                // UnityEditorUtil.DrawChineseEnumPopup<LoadResWayWebGL>(m_loadResWayWebGL, "WebGL平台加载资源方式");
-                // EditorGUILayout.PropertyField(m_isAutoAssetCopyToBuildAddress, new GUIContent("自动Copy资源到StreamingAssets"));
-                bool isAutoAssetCopyToBuildAddress = EditorGUILayout.ToggleLeft("自动Copy资源到StreamingAssets", m_isAutoAssetCopyToBuildAddress.boolValue);
-                if (isAutoAssetCopyToBuildAddress != m_isAutoAssetCopyToBuildAddress.boolValue)
-                {
-                    m_isAutoAssetCopyToBuildAddress.boolValue = isAutoAssetCopyToBuildAddress;
-                }
-                EditorGUILayout.PropertyField(m_buildAddress, new GUIContent("打包程序资源地址"));
+                DrawBasicSettings(updateSettings);
+                DrawAssemblySettings(updateSettings);
+                DrawUpdateSettings(updateSettings);
+                DrawResourceSettings(updateSettings);
+                DrawAdvancedSettings(updateSettings);
+                DrawStatistics(updateSettings);
             }
             EditorGUI.EndDisabledGroup();
+
             serializedObject.ApplyModifiedProperties();
+            EditorGUI.BeginDisabledGroup(EditorApplication.isPlayingOrWillChangePlaymode);
+            {
+                // 底部操作按钮
+                DrawActionButtons(updateSettings);
+            }
+            EditorGUI.EndDisabledGroup();
 
             if (EditorGUI.EndChangeCheck())
             {
                 EditorUtility.SetDirty(updateSettings);
-                bool isHotChanged = !m_hotUpdateAssembliesList.SequenceEqual(updateSettings.HotUpdateAssemblies);
-                bool isAOTChanged = !m_aotMetaAssembliesList.SequenceEqual(updateSettings.AOTMetaAssemblies);
+                AssetDatabase.SaveAssets();
+                HandleSettingsChange(updateSettings);
+            }
+        }
 
-                if (isHotChanged)
+        private void DrawInspectorHeader()
+        {
+            GUILayout.Space(5);
+            // 主标题
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+
+            var titleStyle = new GUIStyle(EditorStyles.largeLabel)
+            {
+                fontSize = 16,
+                fontStyle = FontStyle.Bold,
+                alignment = TextAnchor.MiddleCenter,
+                normal = { textColor = Color.white }
+            };
+
+            EditorGUILayout.LabelField(new GUIContent("热更新配置系统", "Hot Update Configuration System"),
+                titleStyle, GUILayout.Height(30));
+
+            GUILayout.FlexibleSpace();
+            EditorGUILayout.EndHorizontal();
+
+            // 副标题
+            var subtitleStyle = new GUIStyle(EditorStyles.miniLabel)
+            {
+                alignment = TextAnchor.MiddleCenter,
+                normal = { textColor = new Color(0.8f, 0.8f, 0.8f, 1f) }
+            };
+
+            EditorGUILayout.LabelField("配置 HybridCLR 热更新参数", subtitleStyle);
+            GUILayout.Space(5);
+
+            // 分隔线
+            EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
+            GUILayout.Space(10);
+        }
+
+        private void DrawBasicSettings(UpdateSettings updateSettings)
+        {
+            EditorGUILayout.BeginVertical("HelpBox");
+            {
+                EditorGUILayout.PropertyField(m_projectName, new GUIContent("项目名称", "项目标识名称"));
+                EditorGUILayout.Space(5);
+                // 主业务逻辑DLL选择
+                m_logicMainDllNameIndex =
+                    updateSettings.HotUpdateAssemblies.IndexOf(m_logicMainDllName.stringValue);
+
+                if (m_logicMainDllNameIndex < 0 && updateSettings.HotUpdateAssemblies.Count > 0)
                 {
-                    m_hotUpdateAssembliesList = new List<string>(updateSettings.HotUpdateAssemblies);
-                    HybridCLRSettings.Instance.hotUpdateAssemblies = updateSettings.HotUpdateAssemblies.ToArray();
-                    for (int i = 0; i < updateSettings.HotUpdateAssemblies.Count; i++)
+                    m_logicMainDllNameIndex = 0;
+                    m_logicMainDllName.stringValue = updateSettings.HotUpdateAssemblies[0];
+                }
+
+                if (updateSettings.HotUpdateAssemblies.Count > 0)
+                {
+                    m_logicMainDllNameIndex = EditorGUILayout.Popup(
+                        new GUIContent("主业务逻辑DLL", "游戏主要逻辑所在的DLL"),
+                        m_logicMainDllNameIndex, updateSettings.HotUpdateAssemblies.ToArray());
+
+                    if (m_logicMainDllName.stringValue !=
+                        updateSettings.HotUpdateAssemblies[m_logicMainDllNameIndex])
                     {
-                        var assemblyName = updateSettings.HotUpdateAssemblies[i];
-                        string assemblyNameWithoutExtension = assemblyName.Substring(0, assemblyName.LastIndexOf('.'));
-                        HybridCLRSettings.Instance.hotUpdateAssemblies[i] = assemblyNameWithoutExtension;
+                        m_logicMainDllName.stringValue =
+                            updateSettings.HotUpdateAssemblies[m_logicMainDllNameIndex];
                     }
-                    Debugger.Info("======== HybridCLR => 热更程序集发生变化 ========");
+
+                    // 显示当前选择的DLL
+                    EditorGUILayout.HelpBox(
+                        $"当前主逻辑: {updateSettings.HotUpdateAssemblies[m_logicMainDllNameIndex]}",
+                        MessageType.Info);
                 }
-                if (isAOTChanged)
+                else
                 {
-                    m_aotMetaAssembliesList = new List<string>(updateSettings.AOTMetaAssemblies);
-                    HybridCLRSettings.Instance.patchAOTAssemblies = updateSettings.AOTMetaAssemblies.ToArray();
-                    Debugger.Info("======== HybridCLR => AOT程序集发生变化 ========");
+                    EditorGUILayout.HelpBox("请先配置热更程序集", MessageType.Warning);
+                }
+            }
+            EditorGUILayout.EndVertical();
+            GUILayout.Space(8);
+        }
+
+        private void DrawAssemblySettings(UpdateSettings updateSettings)
+        {
+            EditorGUILayout.BeginVertical("HelpBox");
+            {
+                // 热更程序集
+                EditorGUILayout.LabelField("热更程序集", EditorStyles.boldLabel);
+                EditorGUILayout.PropertyField(m_hotUpdateAssemblies,
+                    new GUIContent("热更DLL列表", "需要热更新的程序集文件"));
+
+                // AOT程序集
+                EditorGUILayout.LabelField("AOT程序集", EditorStyles.boldLabel);
+                EditorGUILayout.PropertyField(m_aotMetaAssemblies,
+                    new GUIContent("AOT元数据DLL", "AOT泛型补充元数据程序集"));
+
+                EditorGUILayout.Space(5);
+
+                // DLL资产设置
+                EditorGUILayout.LabelField("DLL资产设置", EditorStyles.boldLabel);
+                EditorGUILayout.PropertyField(m_assemblyTextAssetExtension,
+                    new GUIContent("DLL打包后缀", "DLL转换为TextAsset的后缀名"));
+                EditorGUILayout.PropertyField(m_assemblyTextAssetPath,
+                    new GUIContent("DLL资产路径", "DLL TextAsset资源的存放路径"));
+
+                EditorGUILayout.Space(3);
+                EditorGUILayout.HelpBox("热更程序集: 包含需要热更新的业务逻辑\nAOT程序集: 为泛型提供元数据支持",
+                    MessageType.Info);
+            }
+            EditorGUILayout.EndVertical();
+            GUILayout.Space(8);
+        }
+
+        private void DrawUpdateSettings(UpdateSettings updateSettings)
+        {
+            EditorGUILayout.BeginVertical("HelpBox");
+            {
+                EditorGUILayout.PropertyField(m_updateStyle,
+                    new GUIContent("强制更新类型", "资源更新策略"));
+                EditorGUILayout.PropertyField(m_updateNotice,
+                    new GUIContent("更新提示", "是否显示更新提示对话框"));
+
+                EditorGUILayout.Space(3);
+
+                // 更新策略说明
+                string updateStyleDescription = GetUpdateStyleDescription((UpdateStyle)m_updateStyle.enumValueIndex);
+                string noticeDescription = GetUpdateStyleDescription((UpdateNotice)m_updateNotice.enumValueIndex);
+
+                EditorGUILayout.HelpBox($"更新策略: {updateStyleDescription}\n提示设置: {noticeDescription}",
+                    MessageType.Info);
+            }
+            EditorGUILayout.EndVertical();
+            GUILayout.Space(8);
+        }
+
+        private void DrawResourceSettings(UpdateSettings updateSettings)
+        {
+            EditorGUILayout.BeginVertical("HelpBox");
+            {
+                EditorGUILayout.PropertyField(m_resDownloadPath,
+                    new GUIContent("主资源服务器", "资源下载主服务器地址"));
+                EditorGUILayout.PropertyField(m_fallbackResDownloadPath,
+                    new GUIContent("备用资源服务器", "主服务器不可用时的备用地址"));
+
+                EditorGUILayout.Space(5);
+
+                EditorGUILayout.PropertyField(m_loadResWayWebGL,
+                    new GUIContent("WebGL加载方式", "WebGL平台资源加载方式"));
+
+                EditorGUILayout.Space(3);
+
+                // 服务器状态检查
+                bool hasPrimaryServer = !string.IsNullOrEmpty(m_resDownloadPath.stringValue);
+                bool hasFallbackServer = !string.IsNullOrEmpty(m_fallbackResDownloadPath.stringValue);
+
+                string serverStatus = hasPrimaryServer ? (hasFallbackServer ? "主备服务器已配置" : "仅配置了主服务器") : "未配置资源服务器";
+
+                EditorGUILayout.HelpBox(serverStatus,
+                    hasPrimaryServer ? MessageType.Info : MessageType.Warning);
+            }
+            EditorGUILayout.EndVertical();
+            GUILayout.Space(8);
+        }
+
+        private void DrawAdvancedSettings(UpdateSettings updateSettings)
+        {
+            EditorGUILayout.BeginVertical("HelpBox");
+            {
+                // 自动复制设置
+                bool isAutoAssetCopyToBuildAddress = EditorGUILayout.ToggleLeft(
+                    new GUIContent("自动复制资源到StreamingAssets", "构建时自动复制资源文件"),
+                    m_isAutoAssetCopyToBuildAddress.boolValue);
+
+                if (isAutoAssetCopyToBuildAddress != m_isAutoAssetCopyToBuildAddress.boolValue)
+                {
+                    m_isAutoAssetCopyToBuildAddress.boolValue = isAutoAssetCopyToBuildAddress;
                 }
 
-                if (isAOTChanged || isHotChanged)
+                EditorGUILayout.Space(3);
+
+                // 构建地址
+                EditorGUILayout.PropertyField(m_buildAddress,
+                    new GUIContent("打包程序资源地址", "构建输出的资源路径"));
+
+                EditorGUILayout.Space(3);
+
+                if (m_isAutoAssetCopyToBuildAddress.boolValue)
                 {
-                    EditorUtility.SetDirty(HybridCLRSettings.Instance);
-                    AssetDatabase.SaveAssets();
+                    EditorGUILayout.HelpBox("构建时将自动复制资源到StreamingAssets目录", MessageType.Info);
                 }
+                else
+                {
+                    EditorGUILayout.HelpBox("需要手动处理资源文件部署", MessageType.Warning);
+                }
+            }
+            EditorGUILayout.EndVertical();
+            GUILayout.Space(8);
+        }
+
+        private void DrawStatistics(UpdateSettings updateSettings)
+        {
+            EditorGUILayout.BeginVertical("Box");
+            {
+                EditorGUILayout.LabelField("配置统计", EditorStyles.boldLabel);
+
+                EditorGUILayout.BeginHorizontal();
+                {
+                    EditorGUILayout.LabelField("热更程序集:", GUILayout.Width(100));
+                    EditorGUILayout.LabelField(updateSettings.HotUpdateAssemblies.Count.ToString(),
+                        EditorStyles.miniLabel);
+                }
+                EditorGUILayout.EndHorizontal();
+
+                EditorGUILayout.BeginHorizontal();
+                {
+                    EditorGUILayout.LabelField("AOT程序集:", GUILayout.Width(100));
+                    EditorGUILayout.LabelField(updateSettings.AOTMetaAssemblies.Count.ToString(),
+                        EditorStyles.miniLabel);
+                }
+                EditorGUILayout.EndHorizontal();
+
+                EditorGUILayout.BeginHorizontal();
+                {
+                    EditorGUILayout.LabelField("主逻辑DLL:", GUILayout.Width(100));
+                    string mainDll = string.IsNullOrEmpty(m_logicMainDllName.stringValue)
+                        ? "未设置"
+                        : m_logicMainDllName.stringValue;
+                    EditorGUILayout.LabelField(mainDll, EditorStyles.miniLabel);
+                }
+                EditorGUILayout.EndHorizontal();
+
+                EditorGUILayout.BeginHorizontal();
+                {
+                    EditorGUILayout.LabelField("资源服务器:", GUILayout.Width(100));
+                    string serverStatus = string.IsNullOrEmpty(m_resDownloadPath.stringValue) ? "未配置" : "已配置";
+                    EditorGUILayout.LabelField(serverStatus, EditorStyles.miniLabel);
+                }
+                EditorGUILayout.EndHorizontal();
+            }
+            EditorGUILayout.EndVertical();
+            GUILayout.Space(8);
+        }
+
+        private void DrawActionButtons(UpdateSettings updateSettings)
+        {
+            GUILayout.Space(10);
+
+            EditorGUILayout.BeginHorizontal();
+            {
+                GUILayout.FlexibleSpace();
+
+                // 同步到HybridCLR按钮
+                var originalColor = GUI.color;
+                GUI.color = m_warningColor;
+
+                if (GUILayout.Button(new GUIContent("同步到HybridCLR", "强制同步程序集配置到HybridCLR"),
+                        GUILayout.Width(140), GUILayout.Height(30)))
+                {
+                    ForceUpdateAssemblies();
+                    Debug.Log("程序集配置已同步到HybridCLR");
+                }
+
+                GUI.color = originalColor;
+
+                GUILayout.Space(10);
+
+                // 从HybridCLR同步按钮
+                if (GUILayout.Button(new GUIContent("从HybridCLR同步", "从HybridCLR设置同步程序集"),
+                        GUILayout.Width(140), GUILayout.Height(30)))
+                {
+                    ForceUpdateAssemblies2();
+                    Debug.Log("已从HybridCLR同步程序集配置");
+                }
+
+                GUILayout.Space(10);
+
+                // 保存配置按钮
+                GUI.color = m_successColor;
+
+                if (GUILayout.Button(new GUIContent("保存配置", "保存当前所有设置"),
+                        GUILayout.Width(100), GUILayout.Height(30)))
+                {
+                    EditorUtility.SetDirty(updateSettings);
+                    AssetDatabase.SaveAssets();
+                    Debug.Log("热更新配置已保存");
+                }
+
+                GUI.color = originalColor;
+
+                GUILayout.FlexibleSpace();
+            }
+            EditorGUILayout.EndHorizontal();
+            GUILayout.Space(5);
+        }
+
+        private string GetUpdateStyleDescription(UpdateStyle style)
+        {
+            switch (style)
+            {
+                case UpdateStyle.Optional: return "非强制";
+                case UpdateStyle.Force: return "强制更新";
+                default: return "未知类型";
+            }
+        }
+
+        private string GetUpdateStyleDescription(UpdateNotice style)
+        {
+            switch (style)
+            {
+                case UpdateNotice.Notice: return "更新时会显示提示对话框";
+                case UpdateNotice.NoNotice: return "静默更新，不显示提示";
+                default: return "未知类型";
+            }
+        }
+
+        private void HandleSettingsChange(UpdateSettings updateSettings)
+        {
+            EditorUtility.SetDirty(updateSettings);
+            bool isHotChanged = !m_hotUpdateAssembliesList.SequenceEqual(updateSettings.HotUpdateAssemblies);
+            bool isAOTChanged = !m_aotMetaAssembliesList.SequenceEqual(updateSettings.AOTMetaAssemblies);
+
+            if (isHotChanged)
+            {
+                m_hotUpdateAssembliesList = new List<string>(updateSettings.HotUpdateAssemblies);
+                HybridCLRSettings.Instance.hotUpdateAssemblies = updateSettings.HotUpdateAssemblies.ToArray();
+
+                for (int i = 0; i < updateSettings.HotUpdateAssemblies.Count; i++)
+                {
+                    var assemblyName = updateSettings.HotUpdateAssemblies[i];
+                    string assemblyNameWithoutExtension = assemblyName.Substring(0, assemblyName.LastIndexOf('.'));
+                    HybridCLRSettings.Instance.hotUpdateAssemblies[i] = assemblyNameWithoutExtension;
+                }
+
+                Debugger.Info("======== HybridCLR => 热更程序集发生变化 ========");
+            }
+
+            if (isAOTChanged)
+            {
+                m_aotMetaAssembliesList = new List<string>(updateSettings.AOTMetaAssemblies);
+                HybridCLRSettings.Instance.patchAOTAssemblies = updateSettings.AOTMetaAssemblies.ToArray();
+                Debugger.Info("======== HybridCLR => AOT程序集发生变化 ========");
+            }
+
+            if (isAOTChanged || isHotChanged)
+            {
+                EditorUtility.SetDirty(HybridCLRSettings.Instance);
+                AssetDatabase.SaveAssets();
             }
         }
 
@@ -135,6 +450,7 @@ namespace DGame
         {
             UpdateSettings updateSettings = null;
             string[] guids = AssetDatabase.FindAssets("t:UpdateSettings");
+
             if (guids.Length > 0)
             {
                 string path = AssetDatabase.GUIDToAssetPath(guids[0]);
@@ -148,12 +464,14 @@ namespace DGame
             }
 
             HybridCLRSettings.Instance.hotUpdateAssemblies = updateSettings.HotUpdateAssemblies.ToArray();
+
             for (int i = 0; i < updateSettings.HotUpdateAssemblies.Count; i++)
             {
                 var assemblyName = updateSettings.HotUpdateAssemblies[i];
                 string assemblyNameWithoutExtension = assemblyName.Substring(0, assemblyName.LastIndexOf('.'));
                 HybridCLRSettings.Instance.hotUpdateAssemblies[i] = assemblyNameWithoutExtension;
             }
+
             HybridCLRSettings.Instance.patchAOTAssemblies = updateSettings.AOTMetaAssemblies.ToArray();
             Debugger.Info("======== HybridCLR => AOT和热更程序集发生变化 ========");
             EditorUtility.SetDirty(HybridCLRSettings.Instance);
@@ -165,6 +483,7 @@ namespace DGame
         {
             UpdateSettings updateSettings = null;
             string[] guids = AssetDatabase.FindAssets("t:UpdateSettings");
+
             if (guids.Length > 0)
             {
                 string path = AssetDatabase.GUIDToAssetPath(guids[0]);
@@ -178,12 +497,14 @@ namespace DGame
             }
 
             updateSettings.HotUpdateAssemblies = HybridCLRSettings.Instance.hotUpdateAssemblies.ToList();
+
             for (int i = 0; i < HybridCLRSettings.Instance.hotUpdateAssemblies.Length; i++)
             {
                 var assemblyName = HybridCLRSettings.Instance.hotUpdateAssemblies[i];
                 string assemblyNameWithoutExtension = assemblyName + ".dll";
                 updateSettings.HotUpdateAssemblies[i] = assemblyNameWithoutExtension;
             }
+
             updateSettings.AOTMetaAssemblies = HybridCLRSettings.Instance.patchAOTAssemblies.ToList();
             Debugger.Info("======== HybridCLR => AOT和热更程序集发生变化 ========");
             EditorUtility.SetDirty(HybridCLRSettings.Instance);
@@ -216,7 +537,7 @@ namespace DGame
                 || !m_lastAOTAssemblies.SequenceEqual(HybridCLRSettings.Instance.patchAOTAssemblies))
             {
                 UpdateSettingsInspector.ForceUpdateAssemblies2();
-                m_lastHotUpdateAssemblies = new List<string>(HybridCLRSettings.Instance.hotUpdateAssemblies) ;
+                m_lastHotUpdateAssemblies = new List<string>(HybridCLRSettings.Instance.hotUpdateAssemblies);
                 m_lastAOTAssemblies = new List<string>(HybridCLRSettings.Instance.patchAOTAssemblies);
             }
         }

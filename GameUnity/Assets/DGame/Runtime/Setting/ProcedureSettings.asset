@@ -24,4 +24,4 @@ MonoBehaviour:
   - Procedure.PreloadProcedure
   - Procedure.SplashProcedure
   - Procedure.StartGameProcedure
-  startProcedureTypeName: Procedure.LaunchProcedure
+  startProcedureTypeName: Procedure.LoadAssemblyProcedure

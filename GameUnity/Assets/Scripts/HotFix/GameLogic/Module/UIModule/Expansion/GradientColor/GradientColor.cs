@@ -38,6 +38,8 @@ namespace GameLogic
         public float gradientOffsetHorizontal { get { return m_gradientOffsetHorizontal; } set { if (m_gradientOffsetHorizontal != value) { m_gradientOffsetHorizontal = Mathf.Clamp(value, -1f, 1f); Refresh(); } } }
         public bool splitTextGradient { get { return m_splitTextGradient; } set { if (m_splitTextGradient != value) { m_splitTextGradient = value; Refresh(); } } }
 
+        public Graphic _Graphic => graphic;
+
         public override void ModifyMesh(VertexHelper vh)
         {
             if (IsActive() == false)

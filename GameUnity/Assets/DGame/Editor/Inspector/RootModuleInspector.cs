@@ -74,7 +74,7 @@ namespace DGame
                 normal = { textColor = Color.white }
             };
 
-            EditorGUILayout.LabelField(new GUIContent("🎮 游戏根模块配置", "Root Module Configuration"),
+            EditorGUILayout.LabelField(new GUIContent("游戏根模块配置", "Root Module Configuration"),
                 titleStyle, GUILayout.Height(30));
 
             GUILayout.FlexibleSpace();
@@ -98,7 +98,7 @@ namespace DGame
         private void DrawGlobalHelperSettings(RootModule rootModule)
         {
             m_showGlobalHelperSetting = EditorGUILayout.BeginFoldoutHeaderGroup(m_showGlobalHelperSetting,
-                new GUIContent("🔧 全局辅助器设置", "配置各种工具辅助器"));
+                new GUIContent("全局辅助器设置", "配置各种工具辅助器"));
 
             if (m_showGlobalHelperSetting)
             {
@@ -106,7 +106,7 @@ namespace DGame
                 {
                     // 字符串辅助器
                     EditorGUILayout.BeginHorizontal();
-                    EditorGUILayout.LabelField(new GUIContent("📝 字符串辅助器", "字符串处理工具"), GUILayout.Width(120));
+                    EditorGUILayout.LabelField(new GUIContent("字符串辅助器", "字符串处理工具"), GUILayout.Width(120));
                     int textHelperSelectedIndex = EditorGUILayout.Popup(m_stringUtilHelperTypeNameIndex, m_stringUtilHelperTypeNames);
                     if (textHelperSelectedIndex != m_stringUtilHelperTypeNameIndex)
                     {
@@ -117,7 +117,7 @@ namespace DGame
 
                     // 日志辅助器
                     EditorGUILayout.BeginHorizontal();
-                    EditorGUILayout.LabelField(new GUIContent("📋 日志辅助器", "日志输出工具"), GUILayout.Width(120));
+                    EditorGUILayout.LabelField(new GUIContent("日志辅助器", "日志输出工具"), GUILayout.Width(120));
                     int logHelperSelectedIndex = EditorGUILayout.Popup(m_logHelperTypeNameIndex, m_logHelperTypeNames);
                     if (logHelperSelectedIndex != m_logHelperTypeNameIndex)
                     {
@@ -128,7 +128,7 @@ namespace DGame
 
                     // JSON辅助器
                     EditorGUILayout.BeginHorizontal();
-                    EditorGUILayout.LabelField(new GUIContent("🔤 JSON辅助器", "JSON序列化工具"), GUILayout.Width(120));
+                    EditorGUILayout.LabelField(new GUIContent("JSON辅助器", "JSON序列化工具"), GUILayout.Width(120));
                     int jsonHelperSelectedIndex = EditorGUILayout.Popup(m_jsonHelperTypeNameIndex, m_jsonHelperTypeNames);
                     if (jsonHelperSelectedIndex != m_jsonHelperTypeNameIndex)
                     {
@@ -153,7 +153,7 @@ namespace DGame
         private void DrawPerformanceSettings(RootModule rootModule)
         {
             m_showPerformanceSetting = EditorGUILayout.BeginFoldoutHeaderGroup(m_showPerformanceSetting,
-                new GUIContent("⚡ 性能设置", "游戏性能和帧率配置"));
+                new GUIContent("性能设置", "游戏性能和帧率配置"));
 
             if (m_showPerformanceSetting)
             {
@@ -161,7 +161,7 @@ namespace DGame
                 {
                     // 游戏帧率
                     EditorGUILayout.BeginHorizontal();
-                    EditorGUILayout.LabelField(new GUIContent("🎯 游戏帧率", "目标帧率设置"), GUILayout.Width(100));
+                    EditorGUILayout.LabelField(new GUIContent("游戏帧率", "目标帧率设置"), GUILayout.Width(100));
                     int frameRate = EditorGUILayout.IntSlider(m_frameRate.intValue, 1, 120);
                     EditorGUILayout.EndHorizontal();
 
@@ -184,7 +184,7 @@ namespace DGame
                     EditorGUILayout.Space(5);
 
                     // 游戏速度
-                    EditorGUILayout.LabelField("🚀 游戏速度", EditorStyles.boldLabel);
+                    EditorGUILayout.LabelField("游戏速度", EditorStyles.boldLabel);
 
                     float gameSpeed = EditorGUILayout.Slider("速度倍率", m_gameSpeed.floatValue, 0f, 8f);
 
@@ -230,7 +230,7 @@ namespace DGame
         private void DrawSystemSettings(RootModule rootModule)
         {
             m_showSystemSetting = EditorGUILayout.BeginFoldoutHeaderGroup(m_showSystemSetting,
-                new GUIContent("💻 系统设置", "运行时系统行为配置"));
+                new GUIContent("系统设置", "运行时系统行为配置"));
 
             if (m_showSystemSetting)
             {
@@ -238,7 +238,7 @@ namespace DGame
                 {
                     // 后台运行
                     bool runInBackground = EditorGUILayout.ToggleLeft(
-                        new GUIContent("🖥️ 可在后台运行", "游戏窗口失去焦点时继续运行"),
+                        new GUIContent("可在后台运行", "游戏窗口失去焦点时继续运行"),
                         m_runInBackground.boolValue);
 
                     if (runInBackground != m_runInBackground.boolValue)
@@ -255,7 +255,7 @@ namespace DGame
 
                     // 从不休眠
                     bool neverSleep = EditorGUILayout.ToggleLeft(
-                        new GUIContent("🔋 从不休眠", "防止系统进入睡眠模式"),
+                        new GUIContent("从不休眠", "防止系统进入睡眠模式"),
                         m_neverSleep.boolValue);
 
                     if (neverSleep != m_neverSleep.boolValue)
@@ -287,12 +287,12 @@ namespace DGame
         {
             EditorGUILayout.BeginVertical("Box");
             {
-                EditorGUILayout.LabelField("📊 配置概览", EditorStyles.boldLabel);
+                EditorGUILayout.LabelField("配置概览", EditorStyles.boldLabel);
 
                 EditorGUILayout.BeginHorizontal();
                 {
                     EditorGUILayout.LabelField("辅助器配置:", GUILayout.Width(80));
-                    string helperStatus = IsAllHelpersConfigured() ? "✅ 完整" : "⚠️ 不完整";
+                    string helperStatus = IsAllHelpersConfigured() ? "完整" : "不完整";
                     EditorGUILayout.LabelField(helperStatus, EditorStyles.miniLabel);
                 }
                 EditorGUILayout.EndHorizontal();
@@ -323,15 +323,15 @@ namespace DGame
                 EditorGUILayout.Space(5);
                 EditorGUILayout.BeginHorizontal();
                 {
-                    if (GUILayout.Button("🔄 刷新类型", GUILayout.Height(25)))
+                    if (GUILayout.Button("刷新类型", GUILayout.Height(25)))
                     {
                         RefreshTypeNames();
                     }
 
-                    if (GUILayout.Button("💾 保存配置", GUILayout.Height(25)))
+                    if (GUILayout.Button("保存配置", GUILayout.Height(25)))
                     {
                         serializedObject.ApplyModifiedProperties();
-                        Debug.Log("✅ 根模块配置已保存");
+                        Debug.Log("根模块配置已保存");
                     }
                 }
                 EditorGUILayout.EndHorizontal();

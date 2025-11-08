@@ -20,6 +20,7 @@ namespace DGame
         private SerializedProperty m_frameRate = null;
         private SerializedProperty m_runInBackground = null;
         private SerializedProperty m_neverSleep = null;
+        private SerializedProperty m_memoryStrictCheckType = null;
 
         private string[] m_stringUtilHelperTypeNames = null;
         private int m_stringUtilHelperTypeNameIndex = 0;
@@ -33,8 +34,12 @@ namespace DGame
         // UI状态
         private Vector2 m_scrollPosition;
         private bool m_showGlobalHelperSetting = true;
+        private bool m_showMemorySetting = true;
         private bool m_showPerformanceSetting = true;
         private bool m_showSystemSetting = true;
+
+        private string[] m_memoryStrictCheckTypeNames = null;
+        private int m_memoryStrictCheckTypeIndex = 0;
 
         public override void OnInspectorGUI()
         {
@@ -49,6 +54,7 @@ namespace DGame
             EditorGUI.BeginDisabledGroup(EditorApplication.isPlayingOrWillChangePlaymode);
             {
                 DrawGlobalHelperSettings(rootModule);
+                DrawMemoryPoolSettings(rootModule);
                 DrawPerformanceSettings(rootModule);
                 DrawSystemSettings(rootModule);
                 DrawStatistics(rootModule);
@@ -56,6 +62,37 @@ namespace DGame
             EditorGUI.EndDisabledGroup();
 
             serializedObject.ApplyModifiedProperties();
+        }
+
+        private void DrawMemoryPoolSettings(RootModule rootModule)
+        {
+            m_showMemorySetting = EditorGUILayout.BeginFoldoutHeaderGroup(m_showMemorySetting,
+                new GUIContent("内存池设置"));
+
+            if (m_showMemorySetting)
+            {
+                EditorGUILayout.BeginVertical("HelpBox");
+                {
+                    EditorGUILayout.BeginHorizontal();
+                    int memoryStrictCheckTypeIndex = EditorGUILayout.Popup("内存池强制检查开启模式", m_memoryStrictCheckTypeIndex, m_memoryStrictCheckTypeNames);
+                    if (memoryStrictCheckTypeIndex != m_memoryStrictCheckTypeIndex)
+                    {
+                        m_memoryStrictCheckTypeIndex = memoryStrictCheckTypeIndex;
+                        m_memoryStrictCheckType.enumValueIndex = memoryStrictCheckTypeIndex <= 0 ? 0 : memoryStrictCheckTypeIndex;
+                    }
+                    EditorGUILayout.EndHorizontal();
+
+                    EditorGUILayout.Space(3);
+
+                    // 内存池检查状态
+                    string helperStatus = GetMemorySettingCheckStatus((MemoryStrictCheckType)m_memoryStrictCheckType.enumValueIndex);
+                    EditorGUILayout.HelpBox(helperStatus,
+                        IsMemorySettingWarning() ? MessageType.Warning : MessageType.Info);
+                }
+                EditorGUILayout.EndVertical();
+            }
+            EditorGUILayout.EndFoldoutHeaderGroup();
+            GUILayout.Space(8);
         }
 
         private void DrawInspectorHeader()
@@ -318,6 +355,13 @@ namespace DGame
                     EditorGUILayout.LabelField(systemStatus, EditorStyles.miniLabel);
                 }
                 EditorGUILayout.EndHorizontal();
+                EditorGUILayout.BeginHorizontal();
+                {
+                    EditorGUILayout.LabelField("内存池强制检查开启状态:", GUILayout.Width(150));
+                    string systemStatus = GetMemorySettingStatusSummary();
+                    EditorGUILayout.LabelField(systemStatus, EditorStyles.miniLabel);
+                }
+                EditorGUILayout.EndHorizontal();
 
                 // 操作按钮
                 EditorGUILayout.Space(5);
@@ -351,12 +395,44 @@ namespace DGame
             return $"辅助器配置: {configuredCount}/{totalCount} 已配置" +
                    (configuredCount < totalCount ? "\n建议配置所有辅助器以获得完整功能" : "");
         }
+        
+        private string GetMemorySettingCheckStatus(MemoryStrictCheckType type)
+        {
+            string tips1 = "";
+            string tips2 = "内存池已启用严格检查，这将极大程序影响性能。";
+            switch (type)
+            {
+                case MemoryStrictCheckType.AlwaysEnable:
+                    tips1 = "总是开启";
+                    break;
+
+                case MemoryStrictCheckType.OnlyEnableWhenDevelopment:
+                    tips1 = "仅在开发模式启用";
+                    break;
+
+                case MemoryStrictCheckType.OnlyEnableInEditor:
+                    tips1 = "仅在编辑器中启用";
+                    break;
+
+                case MemoryStrictCheckType.AlwaysDisable:
+                    tips1 = "总是禁用";
+                    tips2 = "禁用状态，不影响性能。";
+                    break;
+            }
+
+            return $"内存池强制检查开启状态: {tips1}\n{tips2}";
+        }
 
         private bool IsAllHelpersConfigured()
         {
             return !string.IsNullOrEmpty(m_stringUtilHelperTypeName.stringValue) &&
                    !string.IsNullOrEmpty(m_logHelperTypeName.stringValue) &&
                    !string.IsNullOrEmpty(m_jsonHelperTypeName.stringValue);
+        }
+
+        private bool IsMemorySettingWarning()
+        {
+            return (MemoryStrictCheckType)m_memoryStrictCheckType.enumValueIndex != MemoryStrictCheckType.AlwaysDisable;
         }
 
         private string GetFrameRateAdvice(int frameRate)
@@ -376,6 +452,30 @@ namespace DGame
 
             if (features.Count == 0) return "标准系统模式";
             return "启用功能: " + string.Join("，", features);
+        }
+
+        private string GetMemorySettingStatusSummary()
+        {
+            string tips1 = "未配置";
+            switch ((MemoryStrictCheckType)m_memoryStrictCheckType.enumValueIndex)
+            {
+                case MemoryStrictCheckType.AlwaysEnable:
+                    tips1 = "总是开启";
+                    break;
+
+                case MemoryStrictCheckType.OnlyEnableWhenDevelopment:
+                    tips1 = "仅在开发模式启用";
+                    break;
+
+                case MemoryStrictCheckType.OnlyEnableInEditor:
+                    tips1 = "仅在编辑器中启用";
+                    break;
+
+                case MemoryStrictCheckType.AlwaysDisable:
+                    tips1 = "总是禁用";
+                    break;
+            }
+            return tips1;
         }
 
         private string GetSystemStatusSummary()
@@ -433,6 +533,7 @@ namespace DGame
             m_frameRate = serializedObject?.FindProperty("frameRate");
             m_runInBackground = serializedObject?.FindProperty("runInBackground");
             m_neverSleep = serializedObject?.FindProperty("neverSleep");
+            m_memoryStrictCheckType = serializedObject?.FindProperty("m_memoryStrictCheckType");
             RefreshTypeNames();
         }
 
@@ -490,6 +591,39 @@ namespace DGame
                     m_jsonHelperTypeNameIndex = 0;
                     m_jsonHelperTypeName.stringValue = null;
                 }
+            }
+
+            List<string> tempList = new List<string>();
+            System.Type enumType = typeof(MemoryStrictCheckType);
+            // Array enumValues = Enum.GetValues(typeof(MemoryStrictCheckType));
+            string[] enumNames = Enum.GetNames(enumType);
+            for (int i = 0; i < enumNames.Length; i++)
+            {
+                var enumName = enumNames[i];
+
+                if (enumName == "AlwaysEnable")
+                {
+                    tempList.Add("总是启用");
+                }
+                else if (enumName == "OnlyEnableWhenDevelopment")
+                {
+                    tempList.Add("仅在开发模式启用");
+                }
+                else if (enumName == "OnlyEnableInEditor")
+                {
+                    tempList.Add("仅在编辑器中启用");
+                }
+                else if (enumName == "AlwaysDisable")
+                {
+                    tempList.Add("总是禁用");
+                }
+            }
+
+            m_memoryStrictCheckTypeNames = tempList.ToArray();
+            m_memoryStrictCheckTypeIndex = m_memoryStrictCheckType.enumValueIndex;
+            if (m_memoryStrictCheckType.enumValueIndex <= 0)
+            {
+                m_memoryStrictCheckTypeIndex = m_memoryStrictCheckType.enumValueIndex  = 0;
             }
 
             serializedObject.ApplyModifiedProperties();

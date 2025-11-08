@@ -1,3 +1,4 @@
+#if false
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -7,8 +8,6 @@ using UnityEngine;
 
 namespace DGame
 {
-#if !ODIN_INSPECTOR || !ENABLE_ODIN_INSPECTOR
-
     [CustomEditor(typeof(MemoryPoolSetting))]
     public class MemoryPoolSettingInSpector : DGameInspector
     {
@@ -85,6 +84,5 @@ namespace DGame
             serializedObject.ApplyModifiedProperties();
         }
     }
-
-#endif
 }
+#endif

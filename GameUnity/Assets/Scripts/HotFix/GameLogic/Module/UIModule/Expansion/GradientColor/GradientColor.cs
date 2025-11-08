@@ -45,7 +45,7 @@ namespace GameLogic
                 return;
             }
 
-            List<UIVertex> vList = UiEffectListPool<UIVertex>.Get();
+            List<UIVertex> vList = ListPool<UIVertex>.Get();
 
             vh.GetUIVertexStream(vList);
 
@@ -54,7 +54,7 @@ namespace GameLogic
             vh.Clear();
             vh.AddUIVertexTriangleStream(vList);
 
-            UiEffectListPool<UIVertex>.Release(vList);
+            ListPool<UIVertex>.Recycle(vList);
         }
 
         private void ModifyVertices(List<UIVertex> vList)

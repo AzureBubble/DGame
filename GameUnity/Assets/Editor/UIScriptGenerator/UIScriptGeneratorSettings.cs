@@ -22,6 +22,7 @@ namespace DGame
         [SerializeField] private string widgetName = "item";
         [SerializeField] private UIFieldCodeStyle codeStyle = UIFieldCodeStyle.MPrefix;
         public string WindowComponentSuffixName => windowComponentSuffixName;
+        public GameObject UIRoot => uiRoot;
         public string WidgetComponentSuffixName => widgetComponentSuffixName;
         public bool UseBindComponent => useBindComponent;
         public string CodePath => codePath;

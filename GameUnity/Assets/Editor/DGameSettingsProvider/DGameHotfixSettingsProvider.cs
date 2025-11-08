@@ -28,7 +28,6 @@ public static class DGameHotfixSettingsProvider
     // UI状态
     private static Vector2 m_scrollPosition;
     private static bool m_showBasicSettings = true;
-    private static bool m_showAssemblySettings = true;
     private static bool m_showUpdateSettings = true;
     private static bool m_showResourceSettings = true;
     private static bool m_showAdvancedSettings = true;
@@ -44,13 +43,23 @@ public static class DGameHotfixSettingsProvider
         return new SettingsProvider(HOTFIX_SETTINGS_PATH, SettingsScope.Project)
         {
             label = "[DGame] 热更新设置",
+            deactivateHandler = () =>
+            {
+                UpdateSettingsInspector.HotUpdateAssembliesList?.Clear();
+                UpdateSettingsInspector.AotMetaAssembliesList?.Clear();
+                UpdateSettingsInspector.HotUpdateAssembliesList = null;
+                UpdateSettingsInspector.AotMetaAssembliesList = null;
+            },
             activateHandler = (searchContext, rootElement) =>
             {
+                UpdateSettingsInspector.ForceUpdateAssemblies2();
                 var settings = Settings.UpdateSettings;
                 if (settings == null)
                 {
                     return;
                 }
+                UpdateSettingsInspector.HotUpdateAssembliesList = new List<string>(settings.HotUpdateAssemblies);
+                UpdateSettingsInspector.AotMetaAssembliesList = new List<string>(settings.AOTMetaAssemblies);
                 m_serializedObject = new SerializedObject(settings);
                 if (m_serializedObject == null)
                 {
@@ -77,7 +86,7 @@ public static class DGameHotfixSettingsProvider
 
                 // 绘制标题区域
                 DrawHeader();
-
+                EditorGUI.BeginChangeCheck();
                 EditorGUI.BeginDisabledGroup(EditorApplication.isPlayingOrWillChangePlaymode);
                 {
                     DrawHybridCLRSettings();
@@ -89,10 +98,12 @@ public static class DGameHotfixSettingsProvider
                     DrawStatistics(updateSettings);
                 }
                 EditorGUI.EndDisabledGroup();
-
-                DrawActionButtons(updateSettings);
-
                 m_serializedObject.ApplyModifiedProperties();
+                if (EditorGUI.EndChangeCheck())
+                {
+                    UpdateSettingsInspector.HandleSettingsChange(updateSettings);
+                }
+                DrawActionButtons(updateSettings);
             },
             keywords = new HashSet<string>(new[] { "DGame", "Settings", "Hotfix", "HybridCLR", "热更新", "程序集", "资源更新" })
         };
@@ -473,9 +484,10 @@ public static class DGameHotfixSettingsProvider
             if (GUILayout.Button(new GUIContent("保存配置", "保存当前所有设置"),
                 GUILayout.Width(100), GUILayout.Height(35)))
             {
-                EditorUtility.SetDirty(updateSettings);
+                // EditorUtility.SetDirty(updateSettings);
                 m_serializedObject.ApplyModifiedProperties();
-                AssetDatabase.SaveAssets();
+                UpdateSettingsInspector.ForceUpdateAssemblies();
+                // AssetDatabase.SaveAssets();
                 Debug.Log("热更新配置已保存");
             }
 

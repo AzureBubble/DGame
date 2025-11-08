@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using HybridCLR.Editor;
 using HybridCLR.Editor.Settings;
 using UnityEditor;
 using UnityEngine;
@@ -25,8 +26,8 @@ namespace DGame
         private SerializedProperty m_isAutoAssetCopyToBuildAddress;
         private SerializedProperty m_buildAddress;
 
-        private List<string> m_hotUpdateAssembliesList;
-        private List<string> m_aotMetaAssembliesList;
+        public static List<string> HotUpdateAssembliesList;
+        public static List<string> AotMetaAssembliesList;
         private int m_logicMainDllNameIndex;
 
         // UI状态
@@ -36,8 +37,17 @@ namespace DGame
         private Color m_warningColor = new Color(1f, 0.6f, 0.2f, 1f);
         private Color m_successColor = new Color(0.2f, 0.8f, 0.3f, 1f);
 
+        private void OnDestroy()
+        {
+            HotUpdateAssembliesList?.Clear();
+            AotMetaAssembliesList?.Clear();
+            HotUpdateAssembliesList = null;
+            AotMetaAssembliesList = null;
+        }
+
         private void OnEnable()
         {
+            ForceUpdateAssemblies2();
             m_projectName = serializedObject.FindProperty("projectName");
             m_hotUpdateAssemblies = serializedObject.FindProperty("HotUpdateAssemblies");
             m_aotMetaAssemblies = serializedObject.FindProperty("AOTMetaAssemblies");
@@ -56,8 +66,8 @@ namespace DGame
 
             if (updateSettings != null)
             {
-                m_hotUpdateAssembliesList = new List<string>(updateSettings.HotUpdateAssemblies);
-                m_aotMetaAssembliesList = new List<string>(updateSettings.AOTMetaAssemblies);
+                HotUpdateAssembliesList = new List<string>(updateSettings.HotUpdateAssemblies);
+                AotMetaAssembliesList = new List<string>(updateSettings.AOTMetaAssemblies);
             }
         }
 
@@ -93,8 +103,6 @@ namespace DGame
 
             if (EditorGUI.EndChangeCheck())
             {
-                EditorUtility.SetDirty(updateSettings);
-                AssetDatabase.SaveAssets();
                 HandleSettingsChange(updateSettings);
             }
         }
@@ -378,8 +386,8 @@ namespace DGame
                 if (GUILayout.Button(new GUIContent("保存配置", "保存当前所有设置"),
                         GUILayout.Width(100), GUILayout.Height(30)))
                 {
-                    EditorUtility.SetDirty(updateSettings);
-                    AssetDatabase.SaveAssets();
+                    UpdateSettingsInspector.ForceUpdateAssemblies();
+                    // AssetDatabase.SaveAssets();
                     Debug.Log("热更新配置已保存");
                 }
 
@@ -411,22 +419,22 @@ namespace DGame
             }
         }
 
-        private void HandleSettingsChange(UpdateSettings updateSettings)
+        public static void HandleSettingsChange(UpdateSettings updateSettings)
         {
             EditorUtility.SetDirty(updateSettings);
-            bool isHotChanged = !m_hotUpdateAssembliesList.SequenceEqual(updateSettings.HotUpdateAssemblies);
-            bool isAOTChanged = !m_aotMetaAssembliesList.SequenceEqual(updateSettings.AOTMetaAssemblies);
+            bool isHotChanged = !HotUpdateAssembliesList.SequenceEqual(updateSettings.HotUpdateAssemblies);
+            bool isAOTChanged = !AotMetaAssembliesList.SequenceEqual(updateSettings.AOTMetaAssemblies);
 
             if (isHotChanged)
             {
-                m_hotUpdateAssembliesList = new List<string>(updateSettings.HotUpdateAssemblies);
-                HybridCLRSettings.Instance.hotUpdateAssemblies = updateSettings.HotUpdateAssemblies.ToArray();
+                HotUpdateAssembliesList = new List<string>(updateSettings.HotUpdateAssemblies);
+                SettingsUtil.HybridCLRSettings.hotUpdateAssemblies = updateSettings.HotUpdateAssemblies.ToArray();
 
                 for (int i = 0; i < updateSettings.HotUpdateAssemblies.Count; i++)
                 {
                     var assemblyName = updateSettings.HotUpdateAssemblies[i];
                     string assemblyNameWithoutExtension = assemblyName.Substring(0, assemblyName.LastIndexOf('.'));
-                    HybridCLRSettings.Instance.hotUpdateAssemblies[i] = assemblyNameWithoutExtension;
+                    SettingsUtil.HybridCLRSettings.hotUpdateAssemblies[i] = assemblyNameWithoutExtension;
                 }
 
                 Debugger.Info("======== HybridCLR => 热更程序集发生变化 ========");
@@ -434,16 +442,17 @@ namespace DGame
 
             if (isAOTChanged)
             {
-                m_aotMetaAssembliesList = new List<string>(updateSettings.AOTMetaAssemblies);
-                HybridCLRSettings.Instance.patchAOTAssemblies = updateSettings.AOTMetaAssemblies.ToArray();
+                AotMetaAssembliesList = new List<string>(updateSettings.AOTMetaAssemblies);
+                SettingsUtil.HybridCLRSettings.patchAOTAssemblies = updateSettings.AOTMetaAssemblies.ToArray();
                 Debugger.Info("======== HybridCLR => AOT程序集发生变化 ========");
             }
 
             if (isAOTChanged || isHotChanged)
             {
-                EditorUtility.SetDirty(HybridCLRSettings.Instance);
-                AssetDatabase.SaveAssets();
+                EditorUtility.SetDirty(SettingsUtil.HybridCLRSettings);
+                HybridCLRSettings.Save();
             }
+            AssetDatabase.SaveAssets();
         }
 
         public static void ForceUpdateAssemblies()
@@ -476,6 +485,7 @@ namespace DGame
             Debugger.Info("======== HybridCLR => AOT和热更程序集发生变化 ========");
             EditorUtility.SetDirty(HybridCLRSettings.Instance);
             EditorUtility.SetDirty(updateSettings);
+            HybridCLRSettings.Save();
             AssetDatabase.SaveAssets();
         }
 
@@ -506,8 +516,7 @@ namespace DGame
             }
 
             updateSettings.AOTMetaAssemblies = HybridCLRSettings.Instance.patchAOTAssemblies.ToList();
-            Debugger.Info("======== HybridCLR => AOT和热更程序集发生变化 ========");
-            EditorUtility.SetDirty(HybridCLRSettings.Instance);
+            Debugger.Info("======== 同步HybridCLR的设置 ========");
             EditorUtility.SetDirty(updateSettings);
             AssetDatabase.SaveAssets();
         }

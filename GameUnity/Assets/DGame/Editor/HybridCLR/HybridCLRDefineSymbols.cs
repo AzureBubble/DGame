@@ -1,47 +1,52 @@
-#if ENABLE_HYBRIDCLR
-
 using HybridCLR.Editor;
 using HybridCLR.Editor.Commands;
 using HybridCLR.Editor.Installer;
-
-#endif
-
+using HybridCLR.Editor.Settings;
 using UnityEditor;
 
 namespace DGame
 {
     public static class HybridCLRDefineSymbols
     {
-        private const string ENABLE_HYBRIDCLR_SCRIPTING_DEFINE_SYMBOLS= "ENABLE_HYBRIDCLR";
+        private const string ENABLE_HYBRIDCLR_SCRIPTING_DEFINE_SYMBOLS = "ENABLE_HYBRIDCLR";
         private const string ENABLE_OBFUZ_SCRIPTING_DEFINE_SYMBOLS = "ENABLE_OBFUZ";
 
         [MenuItem("DGame Tools/HybridCLR/启用HybridCLR")]
         public static void EnableHybridCLR()
         {
-            ScriptingDefineSymbolsTools.EnableScriptingDefineSymbol(ENABLE_HYBRIDCLR_SCRIPTING_DEFINE_SYMBOLS);
-#if ENABLE_HYBRIDCLR
-
             var controller = new InstallerController();
+
             if (!controller.HasInstalledHybridCLR())
             {
                 controller.InstallDefaultHybridCLR();
             }
 
-            HybridCLR.Editor.SettingsUtil.Enable = true;
-            UpdateSettingsInspector.ForceUpdateAssemblies();
+            if (!HybridCLR.Editor.SettingsUtil.Enable)
+            {
+                // HybridCLRSettings.Instance.enable = true;
+                HybridCLR.Editor.SettingsUtil.Enable = true;
+                UpdateSettingsInspector.ForceUpdateAssemblies();
+                EditorUtility.SetDirty(SettingsUtil.HybridCLRSettings);
+                AssetDatabase.SaveAssets();
+            }
 
-#endif
+            ScriptingDefineSymbolsTools.EnableScriptingDefineSymbol(ENABLE_HYBRIDCLR_SCRIPTING_DEFINE_SYMBOLS);
         }
 
         [MenuItem("DGame Tools/HybridCLR/禁用HybridCLR")]
         public static void DisableHybridCLR()
         {
-            ScriptingDefineSymbolsTools.DisableScriptingDefineSymbol(ENABLE_HYBRIDCLR_SCRIPTING_DEFINE_SYMBOLS);
 #if ENABLE_HYBRIDCLR
 
+            // HybridCLRSettings.Instance.enable = true;
             HybridCLR.Editor.SettingsUtil.Enable = false;
+            EditorUtility.SetDirty(SettingsUtil.HybridCLRSettings);
+            // HybridCLR.Editor.SettingsUtil.Save();
+            AssetDatabase.SaveAssets();
 
 #endif
+
+            ScriptingDefineSymbolsTools.DisableScriptingDefineSymbol(ENABLE_HYBRIDCLR_SCRIPTING_DEFINE_SYMBOLS);
         }
 
 #if ENABLE_OBFUZ
@@ -49,18 +54,14 @@ namespace DGame
         public static void EnableObfuz()
         {
             ScriptingDefineSymbolsTools.EnableScriptingDefineSymbol(ENABLE_OBFUZ_SCRIPTING_DEFINE_SYMBOLS);
-#if ENABLE_OBFUZ
-
-#endif
         }
+#endif
 
+#if ENABLE_OBFUZ
         [MenuItem("DGame Tools/HybridCLR/禁用Obfuz")]
         public static void DisableObfuz()
         {
             ScriptingDefineSymbolsTools.DisableScriptingDefineSymbol(ENABLE_OBFUZ_SCRIPTING_DEFINE_SYMBOLS);
-#if ENABLE_OBFUZ
-
-#endif
         }
 #endif
     }

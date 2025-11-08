@@ -13,162 +13,479 @@ public static class DGameUIGeneratorSettingsProvider
     public static void OpenUIGeneratorSettings() => SettingsService.OpenProjectSettings(settingsPath);
 
     private const string settingsPath = "Project/DGame/UI代码生成器设置";
-    private static bool m_show = true;
+
+    // UI状态
+    private static bool m_showBasicSettings = true;
+    private static bool m_showCodeSettings = true;
+    private static bool m_showRuleSettings = true;
     private static ReorderableList m_reorderableList;
+    private static Vector2 m_scrollPosition;
 
     [SettingsProvider]
     public static SettingsProvider CreateUIGeneratorSettingsProvider()
     {
         return new SettingsProvider(settingsPath, SettingsScope.Project)
         {
-            label = "[DGame]UI代码生成器设置",
+            label = "[DGame] UI代码生成器",
             guiHandler = (searchContext) =>
             {
                 var uiScriptGeneratorSettings = UIScriptGeneratorSettings.Instance;
-                var uiScriptGenerator = new SerializedObject(uiScriptGeneratorSettings);
-                // uiScriptGenerator.Update();
-                EditorGUILayout.PropertyField(uiScriptGenerator.FindProperty("uiRoot"));
-                var useBindComponent = uiScriptGenerator.FindProperty("useBindComponent");
-                EditorGUILayout.PropertyField(useBindComponent);
-
-                // EditorGUILayout.PropertyField(uiScriptGenerator.FindProperty("codePath"));
-                if (useBindComponent.boolValue)
+                if (uiScriptGeneratorSettings == null)
                 {
-                    var codePath = uiScriptGenerator.FindProperty("codePath");
-                    codePath.stringValue =
-                        DrawFolderField("代码文件生成路径", String.Empty, codePath.stringValue); // "FolderOpened Icon"
-                    var windowComponentSuffixName = uiScriptGenerator.FindProperty("windowComponentSuffixName");
-                    windowComponentSuffixName.stringValue =
-                        EditorGUILayout.TextField("窗体组件脚本后缀名", windowComponentSuffixName.stringValue);
-                    var widgetComponentSuffixName = uiScriptGenerator.FindProperty("widgetComponentSuffixName");
-                    widgetComponentSuffixName.stringValue =
-                        EditorGUILayout.TextField("widget组件脚本后缀名", widgetComponentSuffixName.stringValue);
+                    EditorGUILayout.HelpBox("未找到UI代码生成器设置文件", MessageType.Error);
+                    return;
                 }
 
-                EditorGUILayout.PropertyField(uiScriptGenerator.FindProperty("nameSpace"));
-                EditorGUILayout.PropertyField(uiScriptGenerator.FindProperty("widgetName"));
-                EditorGUILayout.PropertyField(uiScriptGenerator.FindProperty("codeStyle"));
-                // EditorGUILayout.PropertyField(uiScriptGenerator.FindProperty("scriptGenerateRulers"));
-                DrawReorderableList(uiScriptGenerator);
-                uiScriptGenerator.ApplyModifiedProperties();
+                var serializedObject = new SerializedObject(uiScriptGeneratorSettings);
+
+                // 绘制标题区域
+                DrawHeader();
+
+                m_scrollPosition = EditorGUILayout.BeginScrollView(m_scrollPosition);
+                {
+                    DrawBasicSettings(serializedObject);
+                    DrawCodeSettings(serializedObject);
+                    DrawRuleSettings(serializedObject);
+                    DrawStatistics(serializedObject);
+                }
+                EditorGUILayout.EndScrollView();
+
+                // DrawActionButtons(serializedObject);
             },
-            keywords = new[] { "DGame", "Settings", "Custom" }
+            keywords = new HashSet<string>(new[] {
+                "DGame", "Settings", "UI", "Generator", "代码生成",
+                "UI生成", "脚本生成", "UI代码", "自动生成"
+            })
         };
     }
 
-    private static string DrawFolderField(string label, string labelIcon, string path)
+    private static void DrawHeader()
     {
-        using var horizontalScope = new EditorGUILayout.HorizontalScope();
+        GUILayout.Space(10);
 
-        var buttonGUIContent = new GUIContent("选择", EditorGUIUtility.IconContent("Folder Icon").image);
+        EditorGUILayout.BeginHorizontal();
+        GUILayout.FlexibleSpace();
 
-        if (!string.IsNullOrEmpty(labelIcon))
+        var titleStyle = new GUIStyle(EditorStyles.largeLabel)
         {
-            var labelGUIContent = new GUIContent(" " + label, EditorGUIUtility.IconContent(labelIcon).image);
-            path = EditorGUILayout.TextField(labelGUIContent, path);
-        }
-        else
-        {
-            path = EditorGUILayout.TextField(label, path);
-        }
+            fontSize = 18,
+            fontStyle = FontStyle.Bold,
+            alignment = TextAnchor.MiddleCenter
+        };
 
-        if (GUILayout.Button(buttonGUIContent, GUILayout.Width(60), GUILayout.Height(20)))
-        {
-            var newPath = EditorUtility.OpenFolderPanel(label, Application.dataPath, string.Empty);
+        EditorGUILayout.LabelField(new GUIContent("DGame UI代码生成器", "UI Script Generator Configuration"),
+            titleStyle, GUILayout.Height(30));
 
-            if (!string.IsNullOrEmpty(newPath) && newPath.StartsWith(Application.dataPath))
+        GUILayout.FlexibleSpace();
+        EditorGUILayout.EndHorizontal();
+
+        // 副标题
+        var subtitleStyle = new GUIStyle(EditorStyles.miniLabel)
+        {
+            alignment = TextAnchor.MiddleCenter,
+            normal = { textColor = new Color(0.6f, 0.6f, 0.6f, 1f) }
+        };
+
+        EditorGUILayout.LabelField("自动化UI脚本生成和组件绑定配置", subtitleStyle);
+
+        GUILayout.Space(10);
+        EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
+        GUILayout.Space(10);
+    }
+
+    private static void DrawBasicSettings(SerializedObject serializedObject)
+    {
+        m_showBasicSettings = EditorGUILayout.BeginFoldoutHeaderGroup(m_showBasicSettings,
+            new GUIContent("基础设置", "UI根路径和基本配置"));
+
+        if (m_showBasicSettings)
+        {
+            EditorGUILayout.BeginVertical("HelpBox");
             {
-                path = "Assets" + newPath.Substring(Application.dataPath.Length);
+                // UI根路径
+                EditorGUILayout.LabelField("UI根路径设置", EditorStyles.boldLabel);
+                var uiRootProperty = serializedObject.FindProperty("uiRoot");
+                EditorGUILayout.PropertyField(uiRootProperty,
+                    new GUIContent("UI根目录", "UI预制体所在的根目录路径"));
+
+                EditorGUILayout.Space(5);
+
+                // 组件绑定设置
+                EditorGUILayout.LabelField("组件绑定设置", EditorStyles.boldLabel);
+                var useBindComponentProperty = serializedObject.FindProperty("useBindComponent");
+                EditorGUILayout.PropertyField(useBindComponentProperty,
+                    new GUIContent("启用组件绑定", "是否自动生成组件绑定代码"));
+
+                EditorGUILayout.Space(3);
+
+                if (useBindComponentProperty.boolValue)
+                {
+                    EditorGUILayout.HelpBox("已启用自动组件绑定功能", MessageType.Info);
+                }
+                else
+                {
+                    EditorGUILayout.HelpBox("组件绑定功能已禁用", MessageType.Warning);
+                }
             }
-            else
+            EditorGUILayout.EndVertical();
+        }
+        EditorGUILayout.EndFoldoutHeaderGroup();
+        GUILayout.Space(8);
+    }
+
+    private static void DrawCodeSettings(SerializedObject serializedObject)
+    {
+        m_showCodeSettings = EditorGUILayout.BeginFoldoutHeaderGroup(m_showCodeSettings,
+            new GUIContent("代码设置", "代码生成路径和命名规范"));
+
+        if (m_showCodeSettings)
+        {
+            EditorGUILayout.BeginVertical("HelpBox");
             {
-                Debug.LogError("路径不在Unity项目内: " + newPath);
+                var useBindComponentProperty = serializedObject.FindProperty("useBindComponent");
+
+                if (useBindComponentProperty.boolValue)
+                {
+                    // 代码生成路径
+                    EditorGUILayout.LabelField("代码生成路径", EditorStyles.boldLabel);
+                    var codePathProperty = serializedObject.FindProperty("codePath");
+                    codePathProperty.stringValue = DrawEnhancedFolderField(
+                        "代码文件生成路径",
+                        "代码将生成到此目录",
+                        codePathProperty.stringValue);
+
+                    EditorGUILayout.Space(5);
+
+                    // 脚本后缀名设置
+                    EditorGUILayout.LabelField("脚本命名规范", EditorStyles.boldLabel);
+
+                    var windowComponentSuffixNameProperty = serializedObject.FindProperty("windowComponentSuffixName");
+                    windowComponentSuffixNameProperty.stringValue = EditorGUILayout.TextField(
+                        new GUIContent("窗体组件脚本后缀", "Window类型UI组件的脚本后缀名"),
+                        windowComponentSuffixNameProperty.stringValue);
+
+                    var widgetComponentSuffixNameProperty = serializedObject.FindProperty("widgetComponentSuffixName");
+                    widgetComponentSuffixNameProperty.stringValue = EditorGUILayout.TextField(
+                        new GUIContent("Widget组件脚本后缀", "Widget类型UI组件的脚本后缀名"),
+                        widgetComponentSuffixNameProperty.stringValue);
+
+                    EditorGUILayout.Space(3);
+
+                    // 命名规范提示
+                    string namingTip = $"命名示例:\n" +
+                                      $"• 窗体: MainWindow{windowComponentSuffixNameProperty.stringValue}\n" +
+                                      $"• 组件: HealthBar{widgetComponentSuffixNameProperty.stringValue}";
+                    EditorGUILayout.HelpBox(namingTip, MessageType.Info);
+                }
+
+                EditorGUILayout.Space(5);
+
+                // 命名空间和代码风格
+                EditorGUILayout.LabelField("代码结构设置", EditorStyles.boldLabel);
+
+                var nameSpaceProperty = serializedObject.FindProperty("nameSpace");
+                EditorGUILayout.PropertyField(nameSpaceProperty,
+                    new GUIContent("命名空间", "生成代码的命名空间"));
+
+                var widgetNameProperty = serializedObject.FindProperty("widgetName");
+                EditorGUILayout.PropertyField(widgetNameProperty,
+                    new GUIContent("Widget基类名", "UI组件的基类名称"));
+
+                var codeStyleProperty = serializedObject.FindProperty("codeStyle");
+                EditorGUILayout.PropertyField(codeStyleProperty,
+                    new GUIContent("代码风格", "生成的代码风格模板"));
+
+                EditorGUILayout.Space(3);
+                EditorGUILayout.HelpBox("配置代码的命名空间和基础结构", MessageType.Info);
+            }
+            EditorGUILayout.EndVertical();
+        }
+        EditorGUILayout.EndFoldoutHeaderGroup();
+        GUILayout.Space(8);
+    }
+
+    private static void DrawRuleSettings(SerializedObject serializedObject)
+    {
+        m_showRuleSettings = EditorGUILayout.BeginFoldoutHeaderGroup(m_showRuleSettings,
+            new GUIContent("生成规则", "UI元素到代码的映射规则"));
+
+        if (m_showRuleSettings)
+        {
+            EditorGUILayout.BeginVertical("HelpBox");
+            {
+                EditorGUILayout.LabelField("脚本生成规则配置", EditorStyles.boldLabel);
+                EditorGUILayout.HelpBox("配置UI元素名称与组件类型的映射规则", MessageType.Info);
+
+                EditorGUILayout.Space(5);
+
+                DrawEnhancedReorderableList(serializedObject);
+
+                EditorGUILayout.Space(3);
+
+                // 规则说明
+                EditorGUILayout.HelpBox(
+                    // "规则匹配优先级: 从上到下依次匹配\n" +
+                    "• 命名前缀: UI元素名称前缀\n" +
+                    "• 组件类型: 生成的组件类型\n" +
+                    "• 是否Widget: 标记是否为独立Widget组件",
+                    MessageType.Info);
+            }
+            EditorGUILayout.EndVertical();
+        }
+        EditorGUILayout.EndFoldoutHeaderGroup();
+        GUILayout.Space(8);
+    }
+
+    private static void DrawStatistics(SerializedObject serializedObject)
+    {
+        EditorGUILayout.BeginVertical("Box");
+        {
+            EditorGUILayout.LabelField("配置概览", EditorStyles.boldLabel);
+
+            var uiScriptGeneratorSettings = serializedObject.targetObject as UIScriptGeneratorSettings;
+            if (uiScriptGeneratorSettings != null)
+            {
+                EditorGUILayout.BeginHorizontal();
+                {
+                    EditorGUILayout.LabelField("UI根路径:", GUILayout.Width(80));
+
+                    string tips = "未设置";
+                    if (uiScriptGeneratorSettings.UIRoot != null)
+                    {
+                        tips = AssetDatabase.GetAssetPath(uiScriptGeneratorSettings.UIRoot).Replace("\\", "/");
+                    }
+                    EditorGUILayout.LabelField(tips, EditorStyles.miniLabel);
+                }
+                EditorGUILayout.EndHorizontal();
+
+                EditorGUILayout.BeginHorizontal();
+                {
+                    EditorGUILayout.LabelField("组件绑定:", GUILayout.Width(80));
+                    string bindStatus = uiScriptGeneratorSettings.UseBindComponent ? "启用" : "禁用";
+                    EditorGUILayout.LabelField(bindStatus, EditorStyles.miniLabel);
+                }
+                EditorGUILayout.EndHorizontal();
+
+                EditorGUILayout.BeginHorizontal();
+                {
+                    EditorGUILayout.LabelField("命名空间:", GUILayout.Width(80));
+                    EditorGUILayout.LabelField(uiScriptGeneratorSettings.NameSpace ?? "未设置", EditorStyles.miniLabel);
+                }
+                EditorGUILayout.EndHorizontal();
+
+                EditorGUILayout.BeginHorizontal();
+                {
+                    EditorGUILayout.LabelField("生成规则:", GUILayout.Width(80));
+                    int ruleCount = uiScriptGeneratorSettings.ScriptGenerateRulers?.Count ?? 0;
+                    EditorGUILayout.LabelField($"{ruleCount} 条", EditorStyles.miniLabel);
+                }
+                EditorGUILayout.EndHorizontal();
+
+                EditorGUILayout.BeginHorizontal();
+                {
+                    EditorGUILayout.LabelField("代码路径:", GUILayout.Width(80));
+                    string codePath = string.IsNullOrEmpty(uiScriptGeneratorSettings.CodePath) ?
+                        "未设置" : uiScriptGeneratorSettings.CodePath;
+                    EditorGUILayout.LabelField(codePath, EditorStyles.miniLabel);
+                }
+                EditorGUILayout.EndHorizontal();
             }
         }
+        EditorGUILayout.EndVertical();
+    }
+
+    private static void DrawActionButtons(SerializedObject serializedObject)
+    {
+        GUILayout.Space(15);
+
+        EditorGUILayout.BeginHorizontal();
+        {
+            GUILayout.FlexibleSpace();
+
+            // 测试生成按钮
+            var originalColor = GUI.color;
+            GUI.color = new Color(0.2f, 0.8f, 0.3f, 1f);
+            if (GUILayout.Button(new GUIContent("测试代码生成", "测试当前配置的代码生成效果"),
+                GUILayout.Width(140), GUILayout.Height(35)))
+            {
+                // 这里可以添加测试代码生成的逻辑
+                Debug.Log("UI代码生成测试完成");
+            }
+
+            GUILayout.Space(10);
+
+            // 保存配置按钮
+            GUI.color = new Color(0.1f, 0.5f, 0.8f, 1f);
+            if (GUILayout.Button(new GUIContent("保存配置", "保存所有UI生成器设置"),
+                GUILayout.Width(100), GUILayout.Height(35)))
+            {
+                if (serializedObject.ApplyModifiedProperties())
+                {
+                    EditorUtility.SetDirty(serializedObject.targetObject);
+                    AssetDatabase.SaveAssets();
+                    Debug.Log("UI代码生成器配置已保存");
+                }
+            }
+
+            GUI.color = originalColor;
+
+            GUILayout.FlexibleSpace();
+        }
+        EditorGUILayout.EndHorizontal();
+        GUILayout.Space(10);
+    }
+
+    private static string DrawEnhancedFolderField(string label, string tooltip, string path)
+    {
+        EditorGUILayout.BeginVertical();
+        {
+            EditorGUILayout.BeginHorizontal();
+            {
+                // 标签
+                EditorGUILayout.LabelField(new GUIContent(label, tooltip), GUILayout.Width(140));
+
+                // 路径字段
+                path = EditorGUILayout.TextField(path, GUILayout.ExpandWidth(true));
+                var buttonGUIContent = new GUIContent("选择", EditorGUIUtility.IconContent("Folder Icon").image);
+                // 选择按钮
+                if (GUILayout.Button(buttonGUIContent, GUILayout.Width(60), GUILayout.Height(18)))
+                {
+                    string newPath = EditorUtility.OpenFolderPanel(label, Application.dataPath, string.Empty);
+                    if (!string.IsNullOrEmpty(newPath) && newPath.StartsWith(Application.dataPath))
+                    {
+                        path = "Assets" + newPath.Substring(Application.dataPath.Length);
+                        GUI.FocusControl(null); // 移除焦点以立即更新
+                    }
+                    else if (!string.IsNullOrEmpty(newPath))
+                    {
+                        Debug.LogError("路径不在Unity项目内: " + newPath);
+                    }
+                }
+            }
+            EditorGUILayout.EndHorizontal();
+
+            // 路径验证
+            if (!string.IsNullOrEmpty(path) && !path.StartsWith("Assets/"))
+            {
+                EditorGUILayout.HelpBox("路径应该以 Assets/ 开头", MessageType.Warning);
+            }
+        }
+        EditorGUILayout.EndVertical();
 
         return path;
     }
 
-    private static void DrawReorderableList(SerializedObject serializedObject)
+    private static void DrawEnhancedReorderableList(SerializedObject serializedObject)
     {
         SerializedProperty ruleListProperty = serializedObject.FindProperty("scriptGenerateRulers");
-        if (ruleListProperty == null)
-        {
-            return;
-        }
+        if (ruleListProperty == null) return;
 
-        m_show = EditorGUILayout.BeginFoldoutHeaderGroup(m_show, "scriptGenerateRulers");
-        if (m_show)
+        if (m_reorderableList == null)
         {
-            if (m_reorderableList == null)
+            m_reorderableList = new ReorderableList(serializedObject, ruleListProperty, true, true, true, true)
             {
-                m_reorderableList = new ReorderableList(serializedObject, ruleListProperty, true, true, true, true);
-
-                m_reorderableList.drawHeaderCallback = (Rect rect) =>
+                drawHeaderCallback = (Rect rect) =>
                 {
-                    EditorGUI.LabelField(rect, "Script Generate Rules", EditorStyles.boldLabel);
-                };
+                    float padding = 5f;
+                    float columnWidth = (rect.width - padding * 3) / 4f;
 
-                m_reorderableList.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
+                    GUI.Label(new Rect(rect.x, rect.y, columnWidth, rect.height), "规则名称", EditorStyles.boldLabel);
+                    GUI.Label(new Rect(rect.x + columnWidth + padding + 20, rect.y, columnWidth, rect.height), "UI元素名称前缀", EditorStyles.boldLabel);
+                    GUI.Label(new Rect(rect.x + (columnWidth + padding) * 2 + 20, rect.y, columnWidth, rect.height), "组件类型", EditorStyles.boldLabel);
+                    GUI.Label(new Rect(rect.x + (columnWidth + padding) * 3, rect.y, columnWidth, rect.height), "是否Widget", EditorStyles.boldLabel);
+                },
+
+                drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
                 {
-                    // 开始检查字段修改
                     EditorGUI.BeginChangeCheck();
                     SerializedProperty element = ruleListProperty.GetArrayElementAtIndex(index);
-
                     rect.y += 2;
+
+                    float padding = 5f;
                     float fieldHeight = EditorGUIUtility.singleLineHeight;
+                    float columnWidth = (rect.width - padding * 3) / 4f;
 
-                    float fieldWidth = (rect.width - 10) / 4f;
+                    // 规则名称（显示匹配示例）
                     SerializedProperty regexProperty = element.FindPropertyRelative("uiElementRegex");
+                    string ruleName = GetRuleDisplayName(regexProperty.stringValue);
+                    Rect nameRect = new Rect(rect.x, rect.y, columnWidth, fieldHeight);
+                    EditorGUI.LabelField(nameRect, ruleName);
 
-                    Rect titleRect = new Rect(rect.x, rect.y, fieldWidth, fieldHeight);
-                    EditorGUI.LabelField(titleRect, regexProperty.stringValue);
-                    Rect regexRect = new Rect(rect.x + fieldWidth, rect.y, fieldWidth, fieldHeight);
+                    // 正则表达式
+                    Rect regexRect = new Rect(rect.x + columnWidth + padding, rect.y, columnWidth, fieldHeight);
                     EditorGUI.PropertyField(regexRect, regexProperty, GUIContent.none);
-                    Rect componentRect = new Rect(rect.x + fieldWidth * 2 + 5, rect.y, fieldWidth, fieldHeight);
+
+                    // 组件类型
+                    Rect componentRect = new Rect(rect.x + (columnWidth + padding) * 2, rect.y, columnWidth, fieldHeight);
                     SerializedProperty componentProperty = element.FindPropertyRelative("componentName");
                     EditorGUI.PropertyField(componentRect, componentProperty, GUIContent.none);
-                    Rect widgetRect = new Rect(rect.x + fieldWidth * 3 + 20, rect.y, fieldWidth, fieldHeight);
+
+                    // 是否Widget
+                    Rect widgetRect = new Rect(rect.x + (columnWidth + padding) * 3 + 10, rect.y, columnWidth, fieldHeight);
                     SerializedProperty widgetProperty = element.FindPropertyRelative("isUIWidget");
                     EditorGUI.PropertyField(widgetRect, widgetProperty, GUIContent.none);
-
                     if (EditorGUI.EndChangeCheck())
                     {
                         serializedObject.ApplyModifiedProperties();
                         EditorUtility.SetDirty(serializedObject.targetObject);
                         AssetDatabase.SaveAssets();
                     }
-                };
-                m_reorderableList.elementHeight = EditorGUIUtility.singleLineHeight + 6;
-                m_reorderableList.onChangedCallback = (ReorderableList list) =>
+                },
+
+                elementHeight = EditorGUIUtility.singleLineHeight + 6,
+
+                onChangedCallback = (ReorderableList list) =>
                 {
                     serializedObject.ApplyModifiedProperties();
                     EditorUtility.SetDirty(serializedObject.targetObject);
-                };
-                m_reorderableList.onAddCallback = (ReorderableList list) =>
+                },
+
+                onAddCallback = (ReorderableList list) =>
                 {
+                    int newIndex = list.serializedProperty.arraySize;
                     list.serializedProperty.arraySize++;
-                    list.index = list.serializedProperty.arraySize - 1;
+                    list.index = newIndex;
+
+                    // 设置默认值
+                    SerializedProperty newElement = list.serializedProperty.GetArrayElementAtIndex(newIndex);
+                    newElement.FindPropertyRelative("uiElementRegex").stringValue = "m_go";
+                    newElement.FindPropertyRelative("componentName").enumValueIndex = 0;
+                    newElement.FindPropertyRelative("isUIWidget").boolValue = false;
+
                     serializedObject.ApplyModifiedProperties();
-                    EditorUtility.SetDirty(serializedObject.targetObject);
-                };
-                m_reorderableList.onRemoveCallback = (ReorderableList list) =>
+                },
+
+                onRemoveCallback = (ReorderableList list) =>
                 {
-                    list.serializedProperty.DeleteArrayElementAtIndex(list.index);
-                    serializedObject.ApplyModifiedProperties();
-                    EditorUtility.SetDirty(serializedObject.targetObject);
-                };
-            }
-
-            m_reorderableList.DoLayoutList();
-
-            if (serializedObject.ApplyModifiedProperties())
-            {
-                EditorUtility.SetDirty(serializedObject.targetObject);
-            }
+                    if (EditorUtility.DisplayDialog("确认删除", "确定要删除这条生成规则吗？", "删除", "取消"))
+                    {
+                        ReorderableList.defaultBehaviours.DoRemoveButton(list);
+                        serializedObject.ApplyModifiedProperties();
+                    }
+                }
+            };
         }
 
-        EditorGUILayout.EndFoldoutHeaderGroup();
-        EditorGUILayout.Space();
+        m_reorderableList.DoLayoutList();
+
+        if (serializedObject.ApplyModifiedProperties())
+        {
+            EditorUtility.SetDirty(serializedObject.targetObject);
+        }
+    }
+
+    private static string GetRuleDisplayName(string regex)
+    {
+        if (string.IsNullOrEmpty(regex)) return "新规则";
+
+        // 将常见的正则表达式转换为可读的名称
+        if (regex.Contains("Btn")) return "按钮规则";
+        if (regex.Contains("Text") || regex.Contains("Label")) return "文本规则";
+        if (regex.Contains("Img") || regex.Contains("Image")) return "图片规则";
+        if (regex.Contains("Slider")) return "滑动条规则";
+        if (regex.Contains("Toggle")) return "开关规则";
+        if (regex.Contains("Input")) return "输入框规则";
+
+        return regex.Length > 10 ? regex.Substring(0, 10) + "..." : regex;
     }
 }

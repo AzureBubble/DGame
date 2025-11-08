@@ -17,36 +17,28 @@ namespace DGame
         /// 总是启用
         /// </summary>
         [Tooltip("总是启用")]
-#if ODIN_INSPECTOR && ENABLE_ODIN_INSPECTOR
-        [LabelText("总是启用")]
-#endif
+        [InspectorName("总是启用")]
         AlwaysEnable = 0,
 
         /// <summary>
         /// 仅在开发模式启用
         /// </summary>
         [Tooltip("仅在开发模式启用")]
-#if ODIN_INSPECTOR && ENABLE_ODIN_INSPECTOR
-        [LabelText("仅在开发模式启用")]
-#endif
+        [InspectorName("仅在开发模式启用")]
         OnlyEnableWhenDevelopment,
 
         /// <summary>
         /// 仅在编辑器中启用
         /// </summary>
         [Tooltip("仅在编辑器中启用")]
-#if ODIN_INSPECTOR && ENABLE_ODIN_INSPECTOR
-        [LabelText("仅在编辑器中启用")]
-#endif
+        [InspectorName("仅在编辑器中启用")]
         OnlyEnableInEditor,
 
         /// <summary>
         /// 总是禁用
         /// </summary>
         [Tooltip("总是禁用")]
-#if ODIN_INSPECTOR && ENABLE_ODIN_INSPECTOR
-        [LabelText("总是禁用")]
-#endif
+        [InspectorName("总是禁用")]
         AlwaysDisable,
     }
 
@@ -56,9 +48,6 @@ namespace DGame
     [DisallowMultipleComponent]
     public sealed class MemoryPoolSetting : MonoBehaviour
     {
-#if ODIN_INSPECTOR && ENABLE_ODIN_INSPECTOR
-        [LabelText("内存池强制检查开启模式")]
-#endif
         [SerializeField]
         private MemoryStrictCheckType m_memoryStrictCheckType = MemoryStrictCheckType.OnlyEnableInEditor;
 

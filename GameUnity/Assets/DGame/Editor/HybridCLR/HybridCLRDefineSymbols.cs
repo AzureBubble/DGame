@@ -23,11 +23,8 @@ namespace DGame
 
             if (!HybridCLR.Editor.SettingsUtil.Enable)
             {
-                // HybridCLRSettings.Instance.enable = true;
                 HybridCLR.Editor.SettingsUtil.Enable = true;
                 UpdateSettingsInspector.ForceUpdateAssemblies();
-                EditorUtility.SetDirty(SettingsUtil.HybridCLRSettings);
-                AssetDatabase.SaveAssets();
             }
 
             ScriptingDefineSymbolsTools.EnableScriptingDefineSymbol(ENABLE_HYBRIDCLR_SCRIPTING_DEFINE_SYMBOLS);
@@ -38,10 +35,8 @@ namespace DGame
         {
 #if ENABLE_HYBRIDCLR
 
-            // HybridCLRSettings.Instance.enable = true;
             HybridCLR.Editor.SettingsUtil.Enable = false;
             EditorUtility.SetDirty(SettingsUtil.HybridCLRSettings);
-            // HybridCLR.Editor.SettingsUtil.Save();
             AssetDatabase.SaveAssets();
 
 #endif

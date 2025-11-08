@@ -165,7 +165,7 @@ public static class DGameHotfixSettingsProvider
     {
         EditorGUILayout.BeginVertical("HelpBox");
         {
-            EditorGUILayout.LabelField(new GUIContent("⚡ HybridCLR 设置", "启用或禁用热更新功能"), EditorStyles.boldLabel);
+            EditorGUILayout.LabelField(new GUIContent("HybridCLR 设置", "启用或禁用热更新功能"), EditorStyles.boldLabel);
 
             EditorGUILayout.BeginHorizontal();
             {

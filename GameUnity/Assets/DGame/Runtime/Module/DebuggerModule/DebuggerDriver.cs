@@ -76,6 +76,8 @@ namespace DGame
 
         private GameObject m_eventSystem;
 
+        private bool m_activeWindow;
+
         public bool ActiveWindow
         {
             get => m_debuggerModule.ActiveWindow;
@@ -101,6 +103,30 @@ namespace DGame
 
         private void Awake()
         {
+            switch (activeWindowType)
+            {
+                case DebuggerActiveWindowType.AlwaysOpen:
+                    m_activeWindow = true;
+                    break;
+
+                case DebuggerActiveWindowType.OnlyOpenWhenDevelopment:
+                    m_activeWindow = Debug.isDebugBuild;
+                    break;
+
+                case DebuggerActiveWindowType.OnlyOpenInEditor:
+                    m_activeWindow = Application.isEditor;
+                    break;
+
+                default:
+                    m_activeWindow = false;
+                    break;
+            }
+
+            if (!m_activeWindow)
+            {
+                Destroy(gameObject);
+            }
+
             m_instance = this;
             m_textEditor = new TextEditor();
             m_instance.gameObject.name = $"[{nameof(DebuggerDriver)}]";
@@ -142,24 +168,7 @@ namespace DGame
             RegisterDebuggerWindow("Profiler/Reference Pool", m_memoryPoolPoolInformationWindow);
             RegisterDebuggerWindow("Other/Settings", m_settingsWindow);
 
-            switch (activeWindowType)
-            {
-                case DebuggerActiveWindowType.AlwaysOpen:
-                    ActiveWindow = true;
-                    break;
-
-                case DebuggerActiveWindowType.OnlyOpenWhenDevelopment:
-                    ActiveWindow = Debug.isDebugBuild;
-                    break;
-
-                case DebuggerActiveWindowType.OnlyOpenInEditor:
-                    ActiveWindow = Application.isEditor;
-                    break;
-
-                default:
-                    ActiveWindow = false;
-                    break;
-            }
+            ActiveWindow = m_activeWindow;
         }
 
         private void Update()

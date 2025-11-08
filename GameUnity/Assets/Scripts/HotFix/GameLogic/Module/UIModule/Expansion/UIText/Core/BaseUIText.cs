@@ -11,12 +11,12 @@ namespace GameLogic
         [SerializeField] private UITextSpacingExtend m_uiTextSpacingExtend = new UITextSpacingExtend();
         [SerializeField] private UITextVertexColorExtend m_uiTextVertexColorExtend = new UITextVertexColorExtend();
         [SerializeField] private UITextShadowExtend m_uiTextShadowExtend = new UITextShadowExtend();
-        // [SerializeField] private UITextOutLineExtend m_uiTextOutLineExtend = new UITextOutLineExtend();
         [SerializeField] private UITextOutlineAndGradientExtend m_uiTextOutlineAndGradientExtend = new UITextOutlineAndGradientExtend();
 
         [SerializeField] private bool m_isUseBestFitFont;
 
         public UITextOutlineAndGradientExtend UITextOutlineAndGradientExtend => m_uiTextOutlineAndGradientExtend;
+        public UITextShadowExtend UITextShadowExtend => m_uiTextShadowExtend;
 
         /// <summary>
         /// 当前可见的文字行数
@@ -28,14 +28,22 @@ namespace GameLogic
         {
             base.OnPopulateMesh(toFill);
 
-            if (!OverrideForBestFit(toFill))
+            if (OverrideForBestFit(toFill))
             {
+                if (!UITextOutlineAndGradientExtend.UseTextOutline && !UITextOutlineAndGradientExtend.UseTextGradient)
+                {
+                    m_uiTextShadowExtend?.PopulateMesh(toFill, rectTransform, color);
+                }
+
                 return;
             }
-
+            if (!UITextOutlineAndGradientExtend.UseTextOutline && !UITextOutlineAndGradientExtend.UseTextGradient)
+            {
+                m_uiTextShadowExtend?.PopulateMesh(toFill, rectTransform, color);
+            }
             m_uiTextSpacingExtend?.PopulateMesh(toFill);
             m_uiTextVertexColorExtend?.PopulateMesh(toFill, rectTransform, color);
-            m_uiTextShadowExtend?.PopulateMesh(toFill, rectTransform, color);
+
             // m_uiTextOutLineExtend?.PopulateMesh(toFill);
         }
 

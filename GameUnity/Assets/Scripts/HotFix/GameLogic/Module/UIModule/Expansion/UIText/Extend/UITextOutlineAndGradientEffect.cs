@@ -16,6 +16,7 @@ namespace GameLogic
         public bool UseTextOutline { get => m_isUseTextOutline; set => m_isUseTextOutline = value; }
         public bool UseTextGradient { get => m_isUseTextGradient; set => m_isUseTextGradient = value; }
 
+        private UITextShadowExtend m_uiTextShadow => (m_text as UIText)?.UITextShadowExtend;
         [SerializeField, HideInInspector] private bool m_isOpenShaderOutline = true;
         [SerializeField, HideInInspector] private float m_lerpValue = 0f;
         [SerializeField, HideInInspector] private UITextOutline m_textOutlineEx;
@@ -493,6 +494,10 @@ namespace GameLogic
             {
                 vh.AddTriangle(i + 0, i + 1, i + 2);
                 vh.AddTriangle(i + 2, i + 3, i + 0);
+            }
+            if (UseTextOutline || UseTextGradient)
+            {
+                m_uiTextShadow?.PopulateMesh(vh, m_text.rectTransform, m_text.color);
             }
         }
 

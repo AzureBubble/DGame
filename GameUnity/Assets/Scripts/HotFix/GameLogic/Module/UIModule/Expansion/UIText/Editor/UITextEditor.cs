@@ -18,6 +18,8 @@ namespace GameLogic
         private static bool m_textOutLineAndGradientPanelOpen = false;
         private static bool m_textBestFitFontPanelOpen = false;
         private static bool m_textFontPanelOpen = true;
+        private static bool m_textGradientColorPanelOpen = true;
+        private GradientColorEditor m_gradientColorEditor;
 
         private SerializedProperty m_text;
         private SerializedProperty m_fontData;
@@ -45,19 +47,15 @@ namespace GameLogic
 
         // 描边和渐变
         private SerializedProperty m_isUseTextOutline;
-        private SerializedProperty m_isUseTextGradient;
         private SerializedProperty m_isOpenShaderOutline;
-        private SerializedProperty m_lerpValue;
         private SerializedProperty m_textEffect;
         private SerializedProperty m_outLineWidth;
-        private SerializedProperty m_gradientType;
-        private SerializedProperty m_gradientTopColor;
-        private SerializedProperty m_gradientMiddleColor;
-        private SerializedProperty m_gradientBottomColor;
         private SerializedProperty m_outLineColor;
-        private SerializedProperty m_camera;
         private SerializedProperty m_alpha;
-        private SerializedProperty m_colorOffset;
+
+        // 颜色渐变
+        private SerializedProperty m_isUseGradientColor;
+        private SerializedProperty m_gradientEffect;
 
         // 字体自适应
         private SerializedProperty m_isUseBestFitFont;
@@ -66,6 +64,9 @@ namespace GameLogic
         protected override void OnEnable()
         {
             base.OnEnable();
+            UIText uiText = (UIText)this.target;
+            m_gradientColorEditor = new GradientColorEditor();
+            m_gradientColorEditor?.OnEnable(serializedObject, uiText);
             FindAllFonts();
             m_textSpacingPanelOpen = EditorPrefs.GetBool("UIText.m_textSpacingPanelOpen", m_textSpacingPanelOpen);
             m_vertexColorPanelOpen = EditorPrefs.GetBool("UIText.m_vertexColorPanelOpen", m_vertexColorPanelOpen);
@@ -73,9 +74,10 @@ namespace GameLogic
             m_textOutLineAndGradientPanelOpen = EditorPrefs.GetBool("UIText.m_textOutLineAndGradientPanelOpen", m_textOutLineAndGradientPanelOpen);
             m_textBestFitFontPanelOpen = EditorPrefs.GetBool("UIText.m_textBestFitFontPanelOpen", m_textBestFitFontPanelOpen);
             m_textFontPanelOpen = EditorPrefs.GetBool("UIText.m_textFontPanelOpen", m_textFontPanelOpen);
+            m_textGradientColorPanelOpen = EditorPrefs.GetBool("UIText.m_textGradientColorPanelOpen", m_textGradientColorPanelOpen);
 
-            UIText uiText = (UIText)this.target;
-            uiText.UITextOutlineAndGradientExtend.SaveSerializeData(uiText);
+            uiText.UITextOutlineExtend.SaveSerializeData(uiText);
+            uiText.UITextGradientColorExtend.SaveSerializeData(uiText);
             m_text = serializedObject.FindProperty("m_Text");
             m_fontData = serializedObject.FindProperty("m_FontData");
 
@@ -106,22 +108,20 @@ namespace GameLogic
                 m_effectDistance = serializedObject.FindProperty("m_uiTextShadowExtend.m_effectDistance");
             }
 
-            // 描边和渐变
+            // 描边
             {
-                m_isUseTextOutline = serializedObject.FindProperty("m_uiTextOutlineAndGradientExtend.m_isUseTextOutline");
-                m_isUseTextGradient = serializedObject.FindProperty("m_uiTextOutlineAndGradientExtend.m_isUseTextGradient");
-                m_isOpenShaderOutline = serializedObject.FindProperty("m_uiTextOutlineAndGradientExtend.m_isOpenShaderOutline");
-                m_lerpValue = serializedObject.FindProperty("m_uiTextOutlineAndGradientExtend.m_lerpValue");
-                m_textEffect = serializedObject.FindProperty("m_uiTextOutlineAndGradientExtend.m_textEffect");
-                m_outLineWidth = serializedObject.FindProperty("m_uiTextOutlineAndGradientExtend.m_outLineWidth");
-                m_gradientType = serializedObject.FindProperty("m_uiTextOutlineAndGradientExtend.m_gradientType");
-                m_gradientTopColor = serializedObject.FindProperty("m_uiTextOutlineAndGradientExtend.m_gradientTopColor");
-                m_gradientMiddleColor = serializedObject.FindProperty("m_uiTextOutlineAndGradientExtend.m_gradientMiddleColor");
-                m_gradientBottomColor = serializedObject.FindProperty("m_uiTextOutlineAndGradientExtend.m_gradientBottomColor");
-                m_outLineColor = serializedObject.FindProperty("m_uiTextOutlineAndGradientExtend.m_outLineColor");
-                m_camera = serializedObject.FindProperty("m_uiTextOutlineAndGradientExtend.m_camera");
-                m_alpha = serializedObject.FindProperty("m_uiTextOutlineAndGradientExtend.m_alpha");
-                m_colorOffset = serializedObject.FindProperty("m_uiTextOutlineAndGradientExtend.m_colorOffset");
+                m_isUseTextOutline = serializedObject.FindProperty("m_uiTextOutlineExtend.m_isUseTextOutline");
+                m_isOpenShaderOutline = serializedObject.FindProperty("m_uiTextOutlineExtend.m_isOpenShaderOutline");
+                m_textEffect = serializedObject.FindProperty("m_uiTextOutlineExtend.m_textEffect");
+                m_outLineWidth = serializedObject.FindProperty("m_uiTextOutlineExtend.m_outLineWidth");
+                m_outLineColor = serializedObject.FindProperty("m_uiTextOutlineExtend.m_outLineColor");
+                m_alpha = serializedObject.FindProperty("m_uiTextOutlineExtend.m_alpha");
+            }
+
+            // 渐变
+            {
+                m_isUseGradientColor = serializedObject.FindProperty("m_uiTextGradientColorExtend.m_isUseGradientColor");
+                m_gradientEffect = serializedObject.FindProperty("m_uiTextGradientColorExtend.m_gradientEffect");
             }
 
             // 字体自适应
@@ -129,6 +129,12 @@ namespace GameLogic
                 m_isUseBestFitFont = serializedObject.FindProperty("m_isUseBestFitFont");
                 m_resizeTextForBestFit = serializedObject.FindProperty("m_FontData.m_BestFit");
             }
+        }
+
+        protected override void OnDisable()
+        {
+            m_gradientColorEditor?.OnDisable();
+            base.OnDisable();
         }
 
         public override void OnInspectorGUI()
@@ -150,7 +156,7 @@ namespace GameLogic
             GUI.enabled = false;
             if (m_textEffect.objectReferenceValue != null)
             {
-                EditorGUILayout.ObjectField("Graphic", ((UITextOutlineAndGradientEffect)m_textEffect.objectReferenceValue).TextGraphic, typeof(Text), false);
+                EditorGUILayout.ObjectField("Graphic", ((UITextOutlineEffect)m_textEffect.objectReferenceValue).TextGraphic, typeof(Text), false);
             }
             GUI.enabled = true;
 
@@ -160,9 +166,9 @@ namespace GameLogic
                 m_vertexTopLeftColor, m_vertexTopRightColor, m_vertexBottomLeftColor, m_vertexBottomRightColor, m_vertexColorOffset);
             UITextDrawEditor.DrawTextShadowGUI("字体阴影", ref m_textShadowPanelOpen, m_isUseTextShadow,
                 m_shadowTopLeftColor, m_shadowTopRightColor, m_shadowBottomLeftColor, m_shadowBottomRightColor, m_effectDistance);
-            UITextDrawEditor.DrawTextOutLineAndGradientGUI("字体描边和渐变", ref m_textOutLineAndGradientPanelOpen, m_isUseTextOutline,
-                m_isUseTextGradient, m_gradientType, m_gradientTopColor, m_gradientMiddleColor, m_gradientBottomColor, m_isOpenShaderOutline,
-                m_colorOffset, m_outLineColor, m_outLineWidth, m_lerpValue, m_alpha, (UITextOutlineAndGradientEffect)m_textEffect.objectReferenceValue);
+            UITextDrawEditor.DrawTextOutLineAndGradientGUI("字体描边", ref m_textOutLineAndGradientPanelOpen, m_isUseTextOutline,
+                m_isOpenShaderOutline, m_outLineColor, m_outLineWidth, m_alpha, (UITextOutlineEffect)m_textEffect.objectReferenceValue);
+            UITextDrawEditor.DrawTextGradientColorGUI("字体渐变", ref m_textGradientColorPanelOpen, m_isUseGradientColor, (UITextGradientColor)m_gradientEffect.objectReferenceValue,m_gradientColorEditor);
             UITextDrawEditor.DrawTextBestFitGUI("字体自适应", ref m_textBestFitFontPanelOpen, m_isUseBestFitFont, m_resizeTextForBestFit);
 
             if (GUI.changed)
@@ -173,6 +179,7 @@ namespace GameLogic
                 EditorPrefs.SetBool("UIText.m_textOutLineAndGradientPanelOpen", m_textOutLineAndGradientPanelOpen);
                 EditorPrefs.SetBool("UIText.m_textBestFitFontPanelOpen", m_textBestFitFontPanelOpen);
                 EditorPrefs.SetBool("UIText.m_textFontPanelOpen", m_textFontPanelOpen);
+                EditorPrefs.SetBool("UIText.m_textGradientColorPanelOpen", m_textGradientColorPanelOpen);
             }
         }
 

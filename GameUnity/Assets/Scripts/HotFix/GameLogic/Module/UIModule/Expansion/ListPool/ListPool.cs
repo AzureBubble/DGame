@@ -15,7 +15,7 @@ namespace GameLogic
 
         private static void Clear(List<T> list)
         {
-            list.Clear();
+            list?.Clear();
         }
     }
 }

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace GameLogic
@@ -11,11 +12,13 @@ namespace GameLogic
         [SerializeField] private UITextSpacingExtend m_uiTextSpacingExtend = new UITextSpacingExtend();
         [SerializeField] private UITextVertexColorExtend m_uiTextVertexColorExtend = new UITextVertexColorExtend();
         [SerializeField] private UITextShadowExtend m_uiTextShadowExtend = new UITextShadowExtend();
-        [SerializeField] private UITextOutlineAndGradientExtend m_uiTextOutlineAndGradientExtend = new UITextOutlineAndGradientExtend();
+        [SerializeField] private UITextOutlineExtend m_uiTextOutlineExtend = new UITextOutlineExtend();
+        [SerializeField] private UITextGradientColorExtend m_uiTextGradientColorExtend = new UITextGradientColorExtend();
 
         [SerializeField] private bool m_isUseBestFitFont;
 
-        public UITextOutlineAndGradientExtend UITextOutlineAndGradientExtend => m_uiTextOutlineAndGradientExtend;
+        public UITextOutlineExtend UITextOutlineExtend => m_uiTextOutlineExtend;
+        public UITextGradientColorExtend UITextGradientColorExtend => m_uiTextGradientColorExtend;
         public UITextShadowExtend UITextShadowExtend => m_uiTextShadowExtend;
 
         /// <summary>
@@ -30,21 +33,19 @@ namespace GameLogic
 
             if (OverrideForBestFit(toFill))
             {
-                if (!UITextOutlineAndGradientExtend.UseTextOutline && !UITextOutlineAndGradientExtend.UseTextGradient)
+                if (!UITextOutlineExtend.UseTextOutline)
                 {
                     m_uiTextShadowExtend?.PopulateMesh(toFill, rectTransform, color);
                 }
-
                 return;
             }
 
             m_uiTextSpacingExtend?.PopulateMesh(toFill);
             m_uiTextVertexColorExtend?.PopulateMesh(toFill, rectTransform, color);
-            if (!UITextOutlineAndGradientExtend.UseTextOutline && !UITextOutlineAndGradientExtend.UseTextGradient)
+            if (!UITextOutlineExtend.UseTextOutline)
             {
                 m_uiTextShadowExtend?.PopulateMesh(toFill, rectTransform, color);
             }
-
             // m_uiTextOutLineExtend?.PopulateMesh(toFill);
         }
 
@@ -122,9 +123,9 @@ namespace GameLogic
 
         public void SetTextAlpha(float alpha)
         {
-            if (m_uiTextOutlineAndGradientExtend.UseTextOutline && m_uiTextOutlineAndGradientExtend.UseTextGradient && m_uiTextOutlineAndGradientExtend.GradientType != 0)
+            if (m_uiTextOutlineExtend.UseTextOutline)
             {
-                m_uiTextOutlineAndGradientExtend.SetAlpha(alpha);
+                m_uiTextOutlineExtend.SetAlpha(alpha);
             }
             else
             {
@@ -136,21 +137,27 @@ namespace GameLogic
 
         public void SetOutLineColor(Color32 color32)
         {
-            if (!m_uiTextOutlineAndGradientExtend.UseTextOutline) return;
-            m_uiTextOutlineAndGradientExtend.TextEffect.SetOutLineColor(color32);
-            m_uiTextOutlineAndGradientExtend.UseTextOutline = false;
-            m_uiTextOutlineAndGradientExtend.UseTextOutline = true;
+            if (!m_uiTextOutlineExtend.UseTextOutline) return;
+            m_uiTextOutlineExtend.TextEffect.SetOutLineColor(color32);
+            m_uiTextOutlineExtend.UseTextOutline = false;
+            m_uiTextOutlineExtend.UseTextOutline = true;
         }
 
-        public void SetGradientColor(Color32 topColor, Color32 middleColor, Color32 bottomColor)
+        public void SetGradientColor(Color32 topColor, Color32 bottomColor, Color32 leftColor = default, Color32 rightColor = default, float verticalOffset = 0f, float horizontalOffset = 0f, bool splitTextGradient = false)
         {
-            if (!m_uiTextOutlineAndGradientExtend.UseTextGradient) return;
-            m_uiTextOutlineAndGradientExtend.TextEffect.SetTopColor(topColor);
-            m_uiTextOutlineAndGradientExtend.TextEffect.SetMiddleColor(middleColor);
-            m_uiTextOutlineAndGradientExtend.TextEffect.SetBottomColor(bottomColor);
-            m_uiTextOutlineAndGradientExtend.UseTextGradient = false;
-            m_uiTextOutlineAndGradientExtend.UseTextGradient = true;
+            m_uiTextGradientColorExtend.SetGradientColor(topColor, bottomColor, leftColor, rightColor, verticalOffset, horizontalOffset, splitTextGradient);
         }
+
+        public void SetGradientTop2BottomColor(Color32 topColor, Color32 bottomColor, float verticalOffset = 0f, bool splitTextGradient = false)
+        {
+            m_uiTextGradientColorExtend.SetGradientColor(topColor, bottomColor, Color.white, Color.white, verticalOffset, 0, splitTextGradient);
+        }
+
+        public void SetGradientLeft2RightColor(Color32 leftColor, Color32 rightColor, float horizontalOffset, bool splitTextGradient = false)
+        {
+            m_uiTextGradientColorExtend.SetGradientColor(Color.white, Color.white, leftColor, rightColor, 0, horizontalOffset, splitTextGradient);
+        }
+
 
 #if UNITY_EDITOR
         protected override void OnValidate()

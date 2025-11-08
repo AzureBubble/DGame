@@ -118,24 +118,16 @@ namespace GameLogic
 
         #endregion
 
-        #region 字体描边和渐变
+        #region 字体描边
 
-        public static void DrawTextOutLineAndGradientGUI(string title, ref bool isPanelOpen, SerializedProperty isUseTextOutLine,
-            SerializedProperty isUseTextGradient, SerializedProperty gradientType, SerializedProperty topColor,
-            SerializedProperty middleColor, SerializedProperty bottomColor, SerializedProperty isOpenShaderOutLine,
-            SerializedProperty colorOffset, SerializedProperty outLineColor, SerializedProperty outLineWidth,
-            SerializedProperty lerpValue, SerializedProperty alpha, UITextOutlineAndGradientEffect textEffect)
+        public static void DrawTextOutLineAndGradientGUI(string title, ref bool isPanelOpen,
+            SerializedProperty isUseTextOutLine,
+            SerializedProperty isOpenShaderOutLine, SerializedProperty outLineColor,
+            SerializedProperty outLineWidth, SerializedProperty alpha,
+            UITextOutlineEffect textEffect)
         {
             UnityEditorUtil.LayoutFrameBox(() =>
             {
-                bool isShowAlpha = false;
-                if (isUseTextGradient.boolValue && isUseTextOutLine.boolValue)
-                {
-                    EditorGUILayout.PropertyField(alpha, new GUIContent("透明度"));
-                    EditorGUILayout.PropertyField(colorOffset, new GUIContent("颜色偏移"));
-                    isShowAlpha = true;
-                }
-
                 EditorGUILayout.PropertyField(isUseTextOutLine, new GUIContent("开启字体描边"));
                 textEffect?.SetUseOutLineColor(isUseTextOutLine.boolValue);
 
@@ -143,12 +135,7 @@ namespace GameLogic
                 {
                     EditorGUI.indentLevel++;
 
-                    if (!isShowAlpha)
-                    {
-                        EditorGUILayout.PropertyField(alpha, new GUIContent("透明度"));
-                        EditorGUILayout.PropertyField(colorOffset, new GUIContent("颜色偏移"));
-                    }
-
+                    EditorGUILayout.PropertyField(alpha, new GUIContent("透明度"));
                     EditorGUILayout.PropertyField(isOpenShaderOutLine, new GUIContent("开启Shader描边"));
                     textEffect?.SetShaderOutLine(isOpenShaderOutLine.boolValue);
                     EditorGUILayout.PropertyField(outLineWidth, new GUIContent("描边大小"));
@@ -158,41 +145,7 @@ namespace GameLogic
                     EditorGUI.indentLevel--;
                 }
 
-                EditorGUILayout.PropertyField(isUseTextGradient, new GUIContent("开启字体渐变"));
-                textEffect?.SetUseGradientColor(isUseTextGradient.boolValue);
-                if (isUseTextGradient.boolValue)
-                {
-                    EditorGUI.indentLevel++;
-                    if (!isShowAlpha)
-                    {
-                        EditorGUILayout.PropertyField(alpha, new GUIContent("透明度"));
-                        EditorGUILayout.PropertyField(colorOffset, new GUIContent("颜色偏移"));
-                    }
-                    EditorGUILayout.PropertyField(gradientType, new GUIContent("渐变类型"));
-
-                    switch (gradientType.enumValueIndex)
-                    {
-                        case 1:
-                            EditorGUILayout.PropertyField(topColor, new GUIContent("上渐变"));
-                            EditorGUILayout.PropertyField(bottomColor, new GUIContent("下渐变"));
-                            break;
-                        case 2:
-                            EditorGUILayout.PropertyField(topColor, new GUIContent("上渐变"));
-                            EditorGUILayout.PropertyField(middleColor, new GUIContent("中渐变"));
-                            EditorGUILayout.PropertyField(bottomColor, new GUIContent("下渐变"));
-                            break;
-                        case 3:
-                            break;
-                    }
-                    textEffect?.SetTopColor(topColor.colorValue);
-                    textEffect?.SetMiddleColor(middleColor.colorValue);
-                    textEffect?.SetBottomColor(bottomColor.colorValue);
-                    EditorGUI.indentLevel--;
-                }
-
-                textEffect?.SetGradientType((GradientType)gradientType.enumValueIndex);
                 textEffect?.SetAlpha(alpha.floatValue);
-                textEffect?.SetColorOffset(colorOffset.floatValue);
                 textEffect?.UpdateOutLineInfos();
             }, title, ref isPanelOpen, true);
         }
@@ -210,6 +163,27 @@ namespace GameLogic
                     EditorGUILayout.PropertyField(isUseTextBestFit, new GUIContent("开启字体自适应大小"));
                 }, title, ref isPanelOpen, true);
             }
+        }
+
+        #endregion
+
+        #region 字体渐变
+
+        public static void DrawTextGradientColorGUI(string title, ref bool isPanelOpen, SerializedProperty isUseGradientColor, UITextGradientColor gradientColor, GradientColorEditor gradientColorEditor)
+        {
+            UnityEditorUtil.LayoutFrameBox(() =>
+            {
+                EditorGUILayout.PropertyField(isUseGradientColor, new GUIContent("开启字体渐变"));
+                gradientColor?.SetUseGradientColor(isUseGradientColor.boolValue);
+
+                if (isUseGradientColor.boolValue)
+                {
+                    EditorGUI.indentLevel++;
+
+                    gradientColorEditor?.OnInspectorGUI(gradientColor);
+                    EditorGUI.indentLevel--;
+                }
+            }, title, ref isPanelOpen, true);
         }
 
         #endregion

@@ -11,10 +11,12 @@ using UnityEngine.UI;
 namespace GameLogic
 {
     [AddComponentMenu("UI/Effects/Gradient Color"), RequireComponent(typeof(Graphic))]
-    public class GradientColor : BaseMeshEffect
+    public class UITextGradientColor : BaseMeshEffect
     {
         private const int ONE_TEXT_VERTEX = 6;
 
+        [SerializeField]
+        private bool m_isUseGradientColor = false;
         [SerializeField]
         private Color m_colorTop = Color.white;
         [SerializeField]
@@ -30,19 +32,31 @@ namespace GameLogic
         [SerializeField]
         private bool m_splitTextGradient = false;
 
-        public Color colorTop { get { return m_colorTop; } set { if (m_colorTop != value) { m_colorTop = value; Refresh(); } } }
-        public Color colorBottom { get { return m_colorBottom; } set { if (m_colorBottom != value) { m_colorBottom = value; Refresh(); } } }
-        public Color colorLeft { get { return m_colorLeft; } set { if (m_colorLeft != value) { m_colorLeft = value; Refresh(); } } }
-        public Color colorRight { get { return m_colorRight; } set { if (m_colorRight != value) { m_colorRight = value; Refresh(); } } }
-        public float gradientOffsetVertical { get { return m_gradientOffsetVertical; } set { if (m_gradientOffsetVertical != value) { m_gradientOffsetVertical = Mathf.Clamp(value, -1f, 1f); Refresh(); } } }
-        public float gradientOffsetHorizontal { get { return m_gradientOffsetHorizontal; } set { if (m_gradientOffsetHorizontal != value) { m_gradientOffsetHorizontal = Mathf.Clamp(value, -1f, 1f); Refresh(); } } }
-        public bool splitTextGradient { get { return m_splitTextGradient; } set { if (m_splitTextGradient != value) { m_splitTextGradient = value; Refresh(); } } }
+        public Color colorTop { get => m_colorTop; set { if (m_colorTop != value) { m_colorTop = value; Refresh(); } } }
+        public Color colorBottom { get => m_colorBottom; set { if (m_colorBottom != value) { m_colorBottom = value; Refresh(); } } }
+        public Color colorLeft { get =>m_colorLeft; set { if (m_colorLeft != value) { m_colorLeft = value; Refresh(); } } }
+        public Color colorRight { get => m_colorRight; set { if (m_colorRight != value) { m_colorRight = value; Refresh(); } } }
+        public float gradientOffsetVertical { get => m_gradientOffsetVertical; set { if (m_gradientOffsetVertical != value) { m_gradientOffsetVertical = Mathf.Clamp(value, -1f, 1f); Refresh(); } } }
+        public float gradientOffsetHorizontal { get => m_gradientOffsetHorizontal; set { if (m_gradientOffsetHorizontal != value) { m_gradientOffsetHorizontal = Mathf.Clamp(value, -1f, 1f); Refresh(); } } }
+        public bool splitTextGradient { get => m_splitTextGradient; set { if (m_splitTextGradient != value) { m_splitTextGradient = value; Refresh(); } } }
+        public bool UseGradientColor { get => m_isUseGradientColor; set { if (m_isUseGradientColor != value) { m_isUseGradientColor = value; Refresh(); } } }
 
         public Graphic _Graphic => graphic;
 
+        public void SetUseGradientColor(bool isUseGradientColor)
+        {
+            UseGradientColor = isUseGradientColor;
+        }
+
+        protected override void Awake()
+        {
+            base.Awake();
+            this.hideFlags = HideFlags.HideInInspector;
+        }
+
         public override void ModifyMesh(VertexHelper vh)
         {
-            if (IsActive() == false)
+            if (IsActive() == false || !m_isUseGradientColor)
             {
                 return;
             }
@@ -56,7 +70,10 @@ namespace GameLogic
             vh.Clear();
             vh.AddUIVertexTriangleStream(vList);
 
-            ListPool<UIVertex>.Recycle(vList);
+            if (vList != null)
+            {
+                ListPool<UIVertex>.Recycle(vList);
+            }
         }
 
         private void ModifyVertices(List<UIVertex> vList)
@@ -109,7 +126,7 @@ namespace GameLogic
             }
         }
 
-        private void Refresh()
+        public void Refresh()
         {
             if (graphic != null)
             {

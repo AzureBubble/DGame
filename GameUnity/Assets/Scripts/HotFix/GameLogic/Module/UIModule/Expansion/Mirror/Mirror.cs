@@ -134,7 +134,10 @@ namespace GameLogic
             }
             finally
             {
-                ListPool<UIVertex>.Recycle(output);
+                if (output != null)
+                {
+                    ListPool<UIVertex>.Recycle(output);
+                }
             }
         }
 

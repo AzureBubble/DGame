@@ -6,20 +6,27 @@ using UnityEngine.UI;
 
 namespace GameLogic
 {
-    public class UITextOutline : UIBehaviour
+    public class UITextShaderOutline : UIBehaviour
     {
         [SerializeField] [HideInInspector] public Color OutLineColor = Color.white;
         [SerializeField] [HideInInspector] public Graphic graphic;
         [SerializeField, Range(1, 10)] [HideInInspector] public int OutLineWidth = 1;
-        private static List<UIVertex> m_vertexList = new List<UIVertex>();
-        private bool m_threeColor;
+        private static List<UIVertex> m_vertexList;
         private bool m_openShaderOutLine;
-        private float m_outLineWidth = 1;
+
+        protected override void OnDestroy()
+        {
+            if (m_vertexList != null)
+            {
+                ListPool<UIVertex>.Recycle(m_vertexList);
+            }
+            base.OnDestroy();
+        }
 
         protected override void Awake()
         {
             base.Awake();
-            m_outLineWidth = OutLineWidth;
+            m_vertexList = ListPool<UIVertex>.Get();
         }
 
 #if UNITY_EDITOR
@@ -38,11 +45,6 @@ namespace GameLogic
             {
                 this.graphic.SetVerticesDirty();
             }
-        }
-
-        public void SetUseThree(bool useThree)
-        {
-            this.m_threeColor = useThree;
         }
 
         public void SetOutLineWidth(int setOutlineWidth)
@@ -65,16 +67,21 @@ namespace GameLogic
         public void ModifyMesh(VertexHelper vh)
         {
             if (!this.m_openShaderOutLine) return;
-            vh.GetUIVertexStream(m_vertexList);
 
-            if (!this.m_threeColor)
+            if (m_vertexList == null)
             {
-                this._ProcessVertices();
+                m_vertexList = ListPool<UIVertex>.Get();
             }
-            else
-            {
-                _ProcessVertices2();
-            }
+            vh.GetUIVertexStream(m_vertexList);
+            this._ProcessVertices();
+            // if (!this.m_threeColor)
+            // {
+            //
+            // }
+            // else
+            // {
+            //     _ProcessVertices2();
+            // }
 
             vh.Clear();
             vh.AddUIVertexTriangleStream(m_vertexList);

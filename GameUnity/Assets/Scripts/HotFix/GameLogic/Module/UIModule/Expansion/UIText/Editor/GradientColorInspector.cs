@@ -1,13 +1,13 @@
-﻿using UnityEditor;
+﻿#if UNITY_EDITOR
+
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace GameLogic
 {
-
-
-    [CustomEditor(typeof(GradientColor))]
-    public class GradientColorEditor : Editor
+    // [CustomEditor(typeof(UITextGradientColor))]
+    public class GradientColorEditor
     {
         private SerializedProperty m_colorTop;
         private SerializedProperty m_colorBottom;
@@ -33,47 +33,53 @@ namespace GameLogic
         private Color m_headerColor = new Color(0.1f, 0.5f, 0.8f, 1f);
         private Color m_successColor = new Color(0.2f, 0.8f, 0.3f, 1f);
 
-        private void OnEnable()
+        private SerializedObject serializedObject;
+        private UITextGradientColor m_gradientColor;
+
+        public void OnEnable(SerializedObject _serializedObject, UIText uiText)
         {
-            m_colorTop = serializedObject.FindProperty("m_colorTop");
-            m_colorBottom = serializedObject.FindProperty("m_colorBottom");
-            m_colorLeft = serializedObject.FindProperty("m_colorLeft");
-            m_colorRight = serializedObject.FindProperty("m_colorRight");
-            m_gradientOffsetVertical = serializedObject.FindProperty("m_gradientOffsetVertical");
-            m_gradientOffsetHorizontal = serializedObject.FindProperty("m_gradientOffsetHorizontal");
-            m_splitTextGradient = serializedObject.FindProperty("m_splitTextGradient");
+            serializedObject = _serializedObject;
+            uiText?.TryGetComponent(out m_gradientColor);
+            m_colorTop = serializedObject.FindProperty("m_uiTextGradientColorExtend.m_colorTop");
+            m_colorBottom = serializedObject.FindProperty("m_uiTextGradientColorExtend.m_colorBottom");
+            m_colorLeft = serializedObject.FindProperty("m_uiTextGradientColorExtend.m_colorLeft");
+            m_colorRight = serializedObject.FindProperty("m_uiTextGradientColorExtend.m_colorRight");
+            m_gradientOffsetVertical =
+                serializedObject.FindProperty("m_uiTextGradientColorExtend.m_gradientOffsetVertical");
+            m_gradientOffsetHorizontal =
+                serializedObject.FindProperty("m_uiTextGradientColorExtend.m_gradientOffsetHorizontal");
+            m_splitTextGradient = serializedObject.FindProperty("m_uiTextGradientColorExtend.m_splitTextGradient");
 
             CreatePreviewTextures();
         }
 
-        private void OnDisable()
+        public void OnDisable()
         {
             DestroyPreviewTextures();
         }
 
-        public override void OnInspectorGUI()
+        public void OnInspectorGUI(UITextGradientColor gradientColor)
         {
-            serializedObject.Update();
-
+            // serializedObject.Update();
             // 绘制标题区域
             DrawInspectorHeader();
 
             // 绘制预览区域
-            DrawPreviewSection();
+            DrawPreviewSection(gradientColor);
 
             // 绘制垂直渐变设置
-            DrawVerticalGradientSettings();
+            DrawVerticalGradientSettings(gradientColor);
 
             // 绘制水平渐变设置
-            DrawHorizontalGradientSettings();
+            DrawHorizontalGradientSettings(gradientColor);
 
             // 绘制高级设置
-            DrawAdvancedSettings();
+            DrawAdvancedSettings(gradientColor);
 
             // 绘制操作按钮
-            DrawActionButtons();
+            DrawActionButtons(gradientColor);
 
-            serializedObject.ApplyModifiedProperties();
+            // serializedObject.ApplyModifiedProperties();
         }
 
         private void DrawInspectorHeader()
@@ -87,7 +93,7 @@ namespace GameLogic
 
             // 主标题
             EditorGUILayout.BeginHorizontal();
-            GUILayout.FlexibleSpace();
+            // GUILayout.FlexibleSpace();
 
             var titleStyle = new GUIStyle(EditorStyles.largeLabel)
             {
@@ -100,7 +106,7 @@ namespace GameLogic
             EditorGUILayout.LabelField(new GUIContent("渐变颜色效果", "Gradient Color Effect"),
                 titleStyle, GUILayout.Height(30));
 
-            GUILayout.FlexibleSpace();
+            // GUILayout.FlexibleSpace();
             EditorGUILayout.EndHorizontal();
 
             // 副标题
@@ -118,12 +124,9 @@ namespace GameLogic
             GUILayout.Space(10);
         }
 
-        private void DrawPreviewSection()
+        private void DrawPreviewSection(UITextGradientColor gradientColor)
         {
-            m_showPreview = EditorGUILayout.BeginFoldoutHeaderGroup(m_showPreview,
-                new GUIContent("渐变预览", "实时预览渐变效果"));
-
-            if (m_showPreview)
+            UnityEditorUtil.LayoutFrameBox(() =>
             {
                 EditorGUILayout.BeginVertical("HelpBox");
                 {
@@ -131,7 +134,7 @@ namespace GameLogic
 
                     EditorGUILayout.BeginHorizontal();
                     {
-                        GUILayout.FlexibleSpace();
+                        // GUILayout.FlexibleSpace();
 
                         // 垂直渐变预览
                         EditorGUILayout.BeginVertical();
@@ -164,7 +167,7 @@ namespace GameLogic
                         }
                         EditorGUILayout.EndVertical();
 
-                        GUILayout.FlexibleSpace();
+                        // GUILayout.FlexibleSpace();
                     }
                     EditorGUILayout.EndHorizontal();
 
@@ -174,18 +177,14 @@ namespace GameLogic
                     EditorGUILayout.HelpBox("预览显示当前设置的渐变效果\n组合效果 = 垂直渐变 × 水平渐变", MessageType.Info);
                 }
                 EditorGUILayout.EndVertical();
-            }
+            }, "渐变预览", ref m_showPreview, true);
 
-            EditorGUILayout.EndFoldoutHeaderGroup();
             GUILayout.Space(10);
         }
 
-        private void DrawVerticalGradientSettings()
+        private void DrawVerticalGradientSettings(UITextGradientColor gradientColor)
         {
-            m_showVerticalSettings = EditorGUILayout.BeginFoldoutHeaderGroup(m_showVerticalSettings,
-                new GUIContent("垂直渐变设置", "垂直方向渐变颜色配置"));
-
-            if (m_showVerticalSettings)
+            UnityEditorUtil.LayoutFrameBox(() =>
             {
                 EditorGUILayout.BeginVertical("HelpBox");
                 {
@@ -194,10 +193,12 @@ namespace GameLogic
                     {
                         EditorGUILayout.LabelField("顶部颜色", GUILayout.Width(80));
                         m_colorTop.colorValue = EditorGUILayout.ColorField(m_colorTop.colorValue);
+                        gradientColor.colorTop = m_colorTop.colorValue;
 
                         if (GUILayout.Button("重置", GUILayout.Width(50)))
                         {
                             m_colorTop.colorValue = Color.white;
+                            gradientColor.colorTop = m_colorTop.colorValue;
                         }
                     }
                     EditorGUILayout.EndHorizontal();
@@ -207,10 +208,12 @@ namespace GameLogic
                     {
                         EditorGUILayout.LabelField("底部颜色", GUILayout.Width(80));
                         m_colorBottom.colorValue = EditorGUILayout.ColorField(m_colorBottom.colorValue);
+                        gradientColor.colorBottom = m_colorBottom.colorValue;
 
                         if (GUILayout.Button("重置", GUILayout.Width(50)))
                         {
                             m_colorBottom.colorValue = Color.white;
+                            gradientColor.colorBottom = m_colorBottom.colorValue;
                         }
                     }
                     EditorGUILayout.EndHorizontal();
@@ -223,10 +226,12 @@ namespace GameLogic
                         EditorGUILayout.LabelField("垂直偏移", GUILayout.Width(80));
                         m_gradientOffsetVertical.floatValue =
                             EditorGUILayout.Slider(m_gradientOffsetVertical.floatValue, -1f, 1f);
+                        gradientColor.gradientOffsetVertical = m_gradientOffsetVertical.floatValue;
 
                         if (GUILayout.Button("重置", GUILayout.Width(50)))
                         {
                             m_gradientOffsetVertical.floatValue = 0f;
+                            gradientColor.gradientOffsetVertical = m_gradientOffsetVertical.floatValue;
                         }
                     }
                     EditorGUILayout.EndHorizontal();
@@ -243,28 +248,29 @@ namespace GameLogic
                         if (GUILayout.Button("交换颜色"))
                         {
                             SwapColors(m_colorTop, m_colorBottom);
+                            gradientColor.colorTop = m_colorTop.colorValue;
+                            gradientColor.colorBottom = m_colorBottom.colorValue;
                         }
 
                         if (GUILayout.Button("复制到水平"))
                         {
                             CopyToHorizontal();
+                            gradientColor.colorLeft = m_colorLeft.colorValue;
+                            gradientColor.colorRight = m_colorRight.colorValue;
+                            gradientColor.gradientOffsetHorizontal = m_gradientOffsetVertical.floatValue;
                         }
                     }
                     EditorGUILayout.EndHorizontal();
                 }
                 EditorGUILayout.EndVertical();
-            }
+            }, "垂直渐变设置", ref m_showVerticalSettings, true);
 
-            EditorGUILayout.EndFoldoutHeaderGroup();
             GUILayout.Space(8);
         }
 
-        private void DrawHorizontalGradientSettings()
+        private void DrawHorizontalGradientSettings(UITextGradientColor gradientColor)
         {
-            m_showHorizontalSettings = EditorGUILayout.BeginFoldoutHeaderGroup(m_showHorizontalSettings,
-                new GUIContent("水平渐变设置", "水平方向渐变颜色配置"));
-
-            if (m_showHorizontalSettings)
+            UnityEditorUtil.LayoutFrameBox(() =>
             {
                 EditorGUILayout.BeginVertical("HelpBox");
                 {
@@ -273,10 +279,12 @@ namespace GameLogic
                     {
                         EditorGUILayout.LabelField("左侧颜色", GUILayout.Width(80));
                         m_colorLeft.colorValue = EditorGUILayout.ColorField(m_colorLeft.colorValue);
+                        gradientColor.colorLeft = m_colorLeft.colorValue;
 
                         if (GUILayout.Button("重置", GUILayout.Width(50)))
                         {
                             m_colorLeft.colorValue = Color.white;
+                            gradientColor.colorLeft = m_colorLeft.colorValue;
                         }
                     }
                     EditorGUILayout.EndHorizontal();
@@ -286,10 +294,12 @@ namespace GameLogic
                     {
                         EditorGUILayout.LabelField("右侧颜色", GUILayout.Width(80));
                         m_colorRight.colorValue = EditorGUILayout.ColorField(m_colorRight.colorValue);
+                        gradientColor.colorRight = m_colorRight.colorValue;
 
                         if (GUILayout.Button("重置", GUILayout.Width(50)))
                         {
                             m_colorRight.colorValue = Color.white;
+                            gradientColor.colorRight = m_colorRight.colorValue;
                         }
                     }
                     EditorGUILayout.EndHorizontal();
@@ -302,10 +312,12 @@ namespace GameLogic
                         EditorGUILayout.LabelField("水平偏移", GUILayout.Width(80));
                         m_gradientOffsetHorizontal.floatValue =
                             EditorGUILayout.Slider(m_gradientOffsetHorizontal.floatValue, -1f, 1f);
+                        gradientColor.gradientOffsetHorizontal = m_gradientOffsetHorizontal.floatValue;
 
                         if (GUILayout.Button("重置", GUILayout.Width(50)))
                         {
                             m_gradientOffsetHorizontal.floatValue = 0f;
+                            gradientColor.gradientOffsetHorizontal = m_gradientOffsetHorizontal.floatValue;
                         }
                     }
                     EditorGUILayout.EndHorizontal();
@@ -322,28 +334,28 @@ namespace GameLogic
                         if (GUILayout.Button("交换颜色"))
                         {
                             SwapColors(m_colorLeft, m_colorRight);
+                            gradientColor.colorRight = m_colorLeft.colorValue;
+                            gradientColor.colorLeft = m_colorRight.colorValue;
                         }
 
                         if (GUILayout.Button("复制到垂直"))
                         {
                             CopyToVertical();
+                            gradientColor.colorTop = m_colorLeft.colorValue;
+                            gradientColor.colorBottom = m_colorRight.colorValue;
+                            gradientColor.gradientOffsetVertical = m_gradientOffsetHorizontal.floatValue;
                         }
                     }
                     EditorGUILayout.EndHorizontal();
                 }
                 EditorGUILayout.EndVertical();
-            }
-
-            EditorGUILayout.EndFoldoutHeaderGroup();
+            }, "水平渐变设置", ref m_showHorizontalSettings, true);
             GUILayout.Space(8);
         }
 
-        private void DrawAdvancedSettings()
+        private void DrawAdvancedSettings(UITextGradientColor gradientColor)
         {
-            m_showAdvancedSettings = EditorGUILayout.BeginFoldoutHeaderGroup(m_showAdvancedSettings,
-                new GUIContent("高级设置", "文本渲染和性能配置"));
-
-            if (m_showAdvancedSettings)
+            UnityEditorUtil.LayoutFrameBox(() =>
             {
                 EditorGUILayout.BeginVertical("HelpBox");
                 {
@@ -353,6 +365,7 @@ namespace GameLogic
                         EditorGUILayout.LabelField(new GUIContent("文本分割渐变", "为每个字符单独计算渐变"),
                             GUILayout.Width(120));
                         m_splitTextGradient.boolValue = EditorGUILayout.Toggle(m_splitTextGradient.boolValue);
+                        gradientColor.splitTextGradient = m_splitTextGradient.boolValue;
                     }
                     EditorGUILayout.EndHorizontal();
 
@@ -379,15 +392,13 @@ namespace GameLogic
                         MessageType.None);
                 }
                 EditorGUILayout.EndVertical();
-            }
-
-            EditorGUILayout.EndFoldoutHeaderGroup();
+            }, "高级设置", ref m_showAdvancedSettings, true);
             GUILayout.Space(8);
         }
 
-        private void DrawActionButtons()
+        private void DrawActionButtons(UITextGradientColor gradientColor)
         {
-            EditorGUILayout.BeginVertical("Box");
+            EditorGUILayout.BeginVertical("HelpBox");
             {
                 EditorGUILayout.LabelField("快速操作", EditorStyles.boldLabel);
 
@@ -402,6 +413,13 @@ namespace GameLogic
                             GUILayout.Height(30)))
                     {
                         ResetAllSettings();
+                        gradientColor.colorTop = m_colorTop.colorValue;
+                        gradientColor.colorBottom = m_colorBottom.colorValue;
+                        gradientColor.colorLeft = m_colorLeft.colorValue;
+                        gradientColor.colorRight = m_colorRight.colorValue;
+                        gradientColor.gradientOffsetVertical = m_gradientOffsetVertical.floatValue;
+                        gradientColor.gradientOffsetHorizontal = m_gradientOffsetHorizontal.floatValue;
+                        gradientColor.splitTextGradient = m_splitTextGradient.boolValue;
                     }
 
                     // 应用效果按钮
@@ -411,6 +429,7 @@ namespace GameLogic
                             GUILayout.Height(30)))
                     {
                         RefreshGradient();
+                        gradientColor.Refresh();
                     }
 
                     GUI.color = originalColor;
@@ -426,16 +445,28 @@ namespace GameLogic
                     if (GUILayout.Button("蓝天白云"))
                     {
                         SetSkyGradientPreset();
+                        gradientColor.colorTop = m_colorTop.colorValue;
+                        gradientColor.colorBottom = m_colorBottom.colorValue;
+                        gradientColor.colorLeft = m_colorLeft.colorValue;
+                        gradientColor.colorRight = m_colorRight.colorValue;
                     }
 
                     if (GUILayout.Button("火焰效果"))
                     {
                         SetFireGradientPreset();
+                        gradientColor.colorTop = m_colorTop.colorValue;
+                        gradientColor.colorBottom = m_colorBottom.colorValue;
+                        gradientColor.colorLeft = m_colorLeft.colorValue;
+                        gradientColor.colorRight = m_colorRight.colorValue;
                     }
 
                     if (GUILayout.Button("霓虹灯"))
                     {
                         SetNeonGradientPreset();
+                        gradientColor.colorTop = m_colorTop.colorValue;
+                        gradientColor.colorBottom = m_colorBottom.colorValue;
+                        gradientColor.colorLeft = m_colorLeft.colorValue;
+                        gradientColor.colorRight = m_colorRight.colorValue;
                     }
                 }
                 EditorGUILayout.EndHorizontal();
@@ -445,16 +476,28 @@ namespace GameLogic
                     if (GUILayout.Button("金属质感"))
                     {
                         SetMetalGradientPreset();
+                        gradientColor.colorTop = m_colorTop.colorValue;
+                        gradientColor.colorBottom = m_colorBottom.colorValue;
+                        gradientColor.colorLeft = m_colorLeft.colorValue;
+                        gradientColor.colorRight = m_colorRight.colorValue;
                     }
 
                     if (GUILayout.Button("自然渐变"))
                     {
                         SetNatureGradientPreset();
+                        gradientColor.colorTop = m_colorTop.colorValue;
+                        gradientColor.colorBottom = m_colorBottom.colorValue;
+                        gradientColor.colorLeft = m_colorLeft.colorValue;
+                        gradientColor.colorRight = m_colorRight.colorValue;
                     }
 
                     if (GUILayout.Button("单色渐变"))
                     {
                         SetMonoGradientPreset();
+                        gradientColor.colorTop = m_colorTop.colorValue;
+                        gradientColor.colorBottom = m_colorBottom.colorValue;
+                        gradientColor.colorLeft = m_colorLeft.colorValue;
+                        gradientColor.colorRight = m_colorRight.colorValue;
                     }
                 }
                 EditorGUILayout.EndHorizontal();
@@ -503,11 +546,9 @@ namespace GameLogic
 
         private void RefreshGradient()
         {
-            GradientColor gradientColor = (GradientColor)target;
-
-            if (gradientColor != null && gradientColor._Graphic != null)
+            if (m_gradientColor != null && m_gradientColor._Graphic != null)
             {
-                gradientColor._Graphic.SetVerticesDirty();
+                m_gradientColor._Graphic.SetVerticesDirty();
             }
         }
 
@@ -571,9 +612,9 @@ namespace GameLogic
 
         private void DestroyPreviewTextures()
         {
-            if (m_verticalPreview != null) DestroyImmediate(m_verticalPreview);
-            if (m_horizontalPreview != null) DestroyImmediate(m_horizontalPreview);
-            if (m_combinedPreview != null) DestroyImmediate(m_combinedPreview);
+            if (m_verticalPreview != null) GameObject.DestroyImmediate(m_verticalPreview);
+            if (m_horizontalPreview != null) GameObject.DestroyImmediate(m_horizontalPreview);
+            if (m_combinedPreview != null) GameObject.DestroyImmediate(m_combinedPreview);
         }
 
         private void UpdatePreviewTextures()
@@ -640,3 +681,5 @@ namespace GameLogic
         }
     }
 }
+
+#endif

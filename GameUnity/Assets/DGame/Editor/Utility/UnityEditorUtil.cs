@@ -420,6 +420,23 @@ namespace DGame
             }
         }
 
+        static public string AssetPathToGUID(string assetPath)
+        {
+            if (assetPath.EndsWith("/"))
+            {
+                assetPath = assetPath.Remove(assetPath.Length - 1, 1);
+            }
+
+            if (File.Exists(assetPath) || Directory.Exists(assetPath))
+            {
+                return AssetDatabase.AssetPathToGUID(assetPath);
+            }
+
+            Debug.LogError("资产不存在:" + assetPath);
+
+            return null;
+        }
+
         #endregion
     }
 }

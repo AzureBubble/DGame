@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace DGame
+namespace GameLogic
 {
     public static class UiEffectListPool<T>
     {

@@ -8,7 +8,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.UI;
 
-namespace DGame
+namespace GameLogic
 {
     [AddComponentMenu("UI/Effects/Gradient Color"), RequireComponent(typeof(Graphic))]
     public class GradientColor : BaseMeshEffect

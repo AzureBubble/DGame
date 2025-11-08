@@ -98,38 +98,44 @@ namespace GameLogic
             }
 
             var output = ListPool<UIVertex>.Get();
-            vh.GetUIVertexStream(output);
 
-            int count = output.Count;
-
-            if (graphic is Image)
+            try
             {
-                Image.Type type = (graphic as Image).type;
+                vh.GetUIVertexStream(output);
 
-                switch (type)
+                int count = output.Count;
+
+                if (graphic is Image)
                 {
-                    case Image.Type.Simple:
-                        DrawSimple(output, count);
-                        break;
-                    case Image.Type.Sliced:
-                        DrawSliced(output, count);
-                        break;
-                    case Image.Type.Tiled:
-                        DrawTiled(output, count);
-                        break;
-                    case Image.Type.Filled:
-                        break;
+                    Image.Type type = (graphic as Image).type;
+
+                    switch (type)
+                    {
+                        case Image.Type.Simple:
+                            DrawSimple(output, count);
+                            break;
+                        case Image.Type.Sliced:
+                            DrawSliced(output, count);
+                            break;
+                        case Image.Type.Tiled:
+                            DrawTiled(output, count);
+                            break;
+                        case Image.Type.Filled:
+                            break;
+                    }
                 }
+                else
+                {
+                    DrawSimple(output, count);
+                }
+
+                vh.Clear();
+                vh.AddUIVertexTriangleStream(output);
             }
-            else
+            finally
             {
-                DrawSimple(output, count);
+                ListPool<UIVertex>.Recycle(output);
             }
-
-            vh.Clear();
-            vh.AddUIVertexTriangleStream(output);
-
-            ListPool<UIVertex>.Recycle(output);
         }
 
         /// <summary>

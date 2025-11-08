@@ -4,16 +4,18 @@ namespace GameLogic
 {
     internal static class ListPool<T>
     {
-        private static readonly Pool<List<T>> _listPool = new Pool<List<T>>(null, l => l.Clear());
+        private static readonly Pool<List<T>> m_listPool
+            = new Pool<List<T>>(null, Clear);
 
         public static List<T> Get()
-        {
-            return _listPool.Get();
-        }
+            => m_listPool.Get();
 
         public static void Recycle(List<T> element)
+            => m_listPool.Recycle(element);
+
+        private static void Clear(List<T> list)
         {
-            _listPool.Recycle(element);
+            list.Clear();
         }
     }
 }

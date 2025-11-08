@@ -68,11 +68,18 @@ namespace GameLogic
             Vector2 min = rectTransform.pivot;
             min.Scale(-rectTransform.rect.size);
             Vector2 max = rectTransform.rect.size + min;
-            List<UIVertex> vertexList = new List<UIVertex>();
-            vh.GetUIVertexStream(vertexList);
-            ApplyShadow(vertexList, min, max, color, m_effectDistance.x, m_effectDistance.y);
-            vh.Clear();
-            vh.AddUIVertexTriangleStream(vertexList);
+            List<UIVertex> vertexList = ListPool<UIVertex>.Get();
+            try
+            {
+                vh.GetUIVertexStream(vertexList);
+                ApplyShadow(vertexList, min, max, color, m_effectDistance.x, m_effectDistance.y);
+                vh.Clear();
+                vh.AddUIVertexTriangleStream(vertexList);
+            }
+            finally
+            {
+                ListPool<UIVertex>.Recycle(vertexList);
+            }
         }
 
         private void ApplyShadow(List<UIVertex> verts, Vector2 min, Vector2 max, Color32 color, float x, float y)

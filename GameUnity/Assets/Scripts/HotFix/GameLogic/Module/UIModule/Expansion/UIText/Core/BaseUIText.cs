@@ -37,12 +37,13 @@ namespace GameLogic
 
                 return;
             }
+
+            m_uiTextSpacingExtend?.PopulateMesh(toFill);
+            m_uiTextVertexColorExtend?.PopulateMesh(toFill, rectTransform, color);
             if (!UITextOutlineAndGradientExtend.UseTextOutline && !UITextOutlineAndGradientExtend.UseTextGradient)
             {
                 m_uiTextShadowExtend?.PopulateMesh(toFill, rectTransform, color);
             }
-            m_uiTextSpacingExtend?.PopulateMesh(toFill);
-            m_uiTextVertexColorExtend?.PopulateMesh(toFill, rectTransform, color);
 
             // m_uiTextOutLineExtend?.PopulateMesh(toFill);
         }

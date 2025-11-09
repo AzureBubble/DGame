@@ -62,7 +62,7 @@ namespace GameLogic
         {
             // serializedObject.Update();
             // 绘制标题区域
-            DrawInspectorHeader();
+            // DrawInspectorHeader();
 
             // 绘制预览区域
             DrawPreviewSection(gradientColor);

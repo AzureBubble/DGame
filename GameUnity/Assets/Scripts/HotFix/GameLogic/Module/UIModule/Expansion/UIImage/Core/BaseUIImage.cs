@@ -44,6 +44,12 @@ namespace GameLogic
 
         protected override void OnPopulateMesh(VertexHelper vh)
         {
+            if (!IsActive() || vh.currentVertCount <= 0)
+            {
+                base.OnPopulateMesh(vh);
+                return;
+            }
+
             bool isOverride = false;
             if (m_uiImageMaskExtend.UseMaskImage)
             {

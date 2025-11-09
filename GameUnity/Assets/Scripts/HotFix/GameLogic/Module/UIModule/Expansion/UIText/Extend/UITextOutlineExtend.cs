@@ -29,21 +29,27 @@ namespace GameLogic
         {
             if (!m_isUseTextOutline) return;
 
-            if(!uiText.TryGetComponent(out m_textEffect))
+            if (!uiText.TryGetComponent(out m_textEffect))
             {
-                int instanceID = uiText.GetInstanceID();
-                UIText[] uiTextArray = Transform.FindObjectsOfType<UIText>();
-
-                for (int i = 0; i < uiTextArray.Length; i++)
-                {
-                    if (uiTextArray[i].GetInstanceID() == instanceID)
-                    {
-                        m_textEffect = uiTextArray[i].gameObject.AddComponent<UITextOutlineEffect>();
-                        m_textEffect.hideFlags = HideFlags.HideInInspector;
-                        break;
-                    }
-                }
+                m_textEffect = uiText.gameObject.AddComponent<UITextOutlineEffect>();
+                m_textEffect.hideFlags = HideFlags.HideInInspector;
             }
+
+            // if(!uiText.TryGetComponent(out m_textEffect))
+            // {
+            //     int instanceID = uiText.GetInstanceID();
+            //     UIText[] uiTextArray = Transform.FindObjectsOfType<UIText>();
+            //
+            //     for (int i = 0; i < uiTextArray.Length; i++)
+            //     {
+            //         if (uiTextArray[i].GetInstanceID() == instanceID)
+            //         {
+            //             m_textEffect = uiTextArray[i].gameObject.AddComponent<UITextOutlineEffect>();
+            //             m_textEffect.hideFlags = HideFlags.HideInInspector;
+            //             break;
+            //         }
+            //     }
+            // }
 
             if (m_camera == null)
             {

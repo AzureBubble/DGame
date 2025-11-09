@@ -39,6 +39,7 @@ namespace GameLogic
 
         public void Recycle(T element)
         {
+            if(element == null) return;
             if (m_stack.Count > 0 && ReferenceEquals(m_stack.Peek(), element))
             {
                 throw new Exception("Internal error. Trying to destroy object that is already released to pool.");

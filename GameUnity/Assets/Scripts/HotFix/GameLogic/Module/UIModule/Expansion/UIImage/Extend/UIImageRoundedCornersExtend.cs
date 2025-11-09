@@ -186,5 +186,10 @@ namespace GameLogic
 
             return v;
         }
+
+        public void Refresh()
+        {
+            m_image?.SetVerticesDirty();
+        }
     }
 }

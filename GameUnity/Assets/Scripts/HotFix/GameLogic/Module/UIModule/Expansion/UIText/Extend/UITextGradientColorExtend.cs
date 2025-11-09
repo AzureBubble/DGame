@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEditor.Graphs;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace GameLogic
 {
@@ -26,12 +27,81 @@ namespace GameLogic
         private bool m_splitTextGradient = false;
         [SerializeField]private UITextGradientColor m_gradientEffect;
 
-        public UITextGradientColor GradientEffect => m_gradientEffect;
+        public bool isUseGradientColor
+        {
+            get => m_isUseGradientColor;
+            set { if (m_isUseGradientColor != value) { m_isUseGradientColor = value; Refresh(); } }
+        }
+
+        public Color colorTop
+        {
+            get => m_colorTop;
+            set { if (m_colorTop != value) { m_colorTop = value; Refresh(); } }
+        }
+
+        public Color colorBottom
+        {
+            get => m_colorBottom;
+            set { if (m_colorBottom != value) { m_colorBottom = value; Refresh(); } }
+        }
+
+        public Color colorLeft
+        {
+            get => m_colorLeft;
+            set { if (m_colorLeft != value) { m_colorLeft = value; Refresh(); } }
+        }
+
+        public Color colorRight
+        {
+            get => m_colorRight;
+            set { if (m_colorRight != value) { m_colorRight = value; Refresh(); } }
+        }
+
+        public float gradientOffsetVertical
+        {
+            get => m_gradientOffsetVertical;
+            set { if (m_gradientOffsetVertical != value) { m_gradientOffsetVertical = value; Refresh(); } }
+        }
+
+        public float gradientOffsetHorizontal
+        {
+            get => m_gradientOffsetHorizontal;
+            set { if (m_gradientOffsetHorizontal != value) { m_gradientOffsetHorizontal = value; Refresh(); } }
+        }
+
+        public bool splitTextGradient
+        {
+            get => m_splitTextGradient;
+            set
+            {
+                if (m_splitTextGradient != value)
+                {
+                    m_splitTextGradient = value;
+                    Refresh();
+                }
+            }
+        }
+
+        public UITextGradientColor GradientEffect
+        {
+            get => m_gradientEffect;
+            set
+            {
+                if (m_gradientEffect != value)
+                {
+                    m_gradientEffect = value;
+                    Refresh();
+                }
+            }
+        }
+
+        private Text m_text;
+
 #pragma warning disable 0414
         public void SaveSerializeData(UIText uiText)
         {
-            if (!m_isUseGradientColor) return;
-
+            // if(!m_isUseGradientColor) return;
+            m_text = uiText;
             if(!uiText.TryGetComponent(out m_gradientEffect))
             {
                 m_gradientEffect = uiText.gameObject.AddComponent<UITextGradientColor>();
@@ -57,6 +127,11 @@ namespace GameLogic
             m_gradientEffect.gradientOffsetVertical = verticalOffset;
             m_gradientEffect.gradientOffsetHorizontal = horizontalOffset;
             m_gradientEffect.splitTextGradient = splitTextGradient;
+        }
+
+        private void Refresh()
+        {
+            m_text?.SetVerticesDirty();
         }
     }
 }

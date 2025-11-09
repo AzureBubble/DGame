@@ -285,5 +285,10 @@ namespace GameLogic
 		        }
 	        }
         }
+
+        public void Refresh()
+        {
+	        m_image?.SetVerticesDirty();
+        }
     }
 }

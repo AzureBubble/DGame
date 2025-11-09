@@ -14,6 +14,7 @@ namespace GameLogic
         [SerializeField] private UITextShadowExtend m_uiTextShadowExtend = new UITextShadowExtend();
         [SerializeField] private UITextOutlineExtend m_uiTextOutlineExtend = new UITextOutlineExtend();
         [SerializeField] private UITextGradientColorExtend m_uiTextGradientColorExtend = new UITextGradientColorExtend();
+        [SerializeField] private UITextCircleExtend m_uiTextCircleExtend = new UITextCircleExtend();
 
         [SerializeField] private bool m_isUseBestFitFont;
 
@@ -31,21 +32,21 @@ namespace GameLogic
         {
             base.OnPopulateMesh(toFill);
 
-            if (OverrideForBestFit(toFill))
-            {
-                if (!UITextOutlineExtend.UseTextOutline)
-                {
-                    m_uiTextShadowExtend?.PopulateMesh(toFill, rectTransform, color);
-                }
-                return;
-            }
-
-            m_uiTextSpacingExtend?.PopulateMesh(toFill);
-            m_uiTextVertexColorExtend?.PopulateMesh(toFill, rectTransform, color);
-            if (!UITextOutlineExtend.UseTextOutline)
-            {
-                m_uiTextShadowExtend?.PopulateMesh(toFill, rectTransform, color);
-            }
+            // if (OverrideForBestFit(toFill))
+            // {
+            //     if (!UITextOutlineExtend.UseTextOutline)
+            //     {
+            //         m_uiTextShadowExtend?.PopulateMesh(toFill, rectTransform, color);
+            //     }
+            //     return;
+            // }
+            //
+            // m_uiTextSpacingExtend?.PopulateMesh(toFill);
+            // m_uiTextVertexColorExtend?.PopulateMesh(toFill, rectTransform, color);
+            // if (!UITextOutlineExtend.UseTextOutline)
+            // {
+            //     m_uiTextShadowExtend?.PopulateMesh(toFill, rectTransform, color);
+            // }
             // m_uiTextOutLineExtend?.PopulateMesh(toFill);
         }
 
@@ -119,6 +120,24 @@ namespace GameLogic
 
         public void ModifyMesh(VertexHelper verts)
         {
+            if(!IsActive() || verts.currentVertCount == 0) return;
+            if (OverrideForBestFit(verts))
+            {
+                m_uiTextCircleExtend.ModifyMesh(verts);
+                m_uiTextVertexColorExtend?.PopulateMesh(verts, rectTransform, color);
+                if (!UITextOutlineExtend.UseTextOutline)
+                {
+                    m_uiTextShadowExtend?.PopulateMesh(verts, rectTransform, color);
+                }
+                return;
+            }
+            m_uiTextCircleExtend.ModifyMesh(verts);
+            m_uiTextSpacingExtend?.PopulateMesh(verts);
+            m_uiTextVertexColorExtend?.PopulateMesh(verts, rectTransform, color);
+            if (!UITextOutlineExtend.UseTextOutline)
+            {
+                m_uiTextShadowExtend?.PopulateMesh(verts, rectTransform, color);
+            }
         }
 
         public void SetTextAlpha(float alpha)

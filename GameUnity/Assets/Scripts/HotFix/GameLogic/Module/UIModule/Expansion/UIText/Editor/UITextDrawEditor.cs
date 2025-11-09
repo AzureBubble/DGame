@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace GameLogic
 {
@@ -179,8 +180,28 @@ namespace GameLogic
                 if (isUseGradientColor.boolValue)
                 {
                     EditorGUI.indentLevel++;
-
                     gradientColorEditor?.OnInspectorGUI(gradientColor);
+                    EditorGUI.indentLevel--;
+                }
+            }, title, ref isPanelOpen, true);
+        }
+
+        #endregion
+
+        #region 环形字体
+
+        public static void DrawTextCircleGUI(string title, ref bool isPanelOpen, SerializedProperty useTextCircle, SerializedProperty radius, SerializedProperty spaceCoff, SerializedProperty angleOffset)
+        {
+            UnityEditorUtil.LayoutFrameBox(() =>
+            {
+                EditorGUILayout.PropertyField(useTextCircle, new GUIContent("开启环形字体"));
+
+                if (useTextCircle.boolValue)
+                {
+                    EditorGUI.indentLevel++;
+                    EditorGUILayout.PropertyField(radius, new GUIContent("半径"));
+                    EditorGUILayout.PropertyField(spaceCoff, new GUIContent("字符间距"));
+                    EditorGUILayout.PropertyField(angleOffset, new GUIContent("起始角度偏移"));
                     EditorGUI.indentLevel--;
                 }
             }, title, ref isPanelOpen, true);
@@ -190,7 +211,10 @@ namespace GameLogic
 
         #region 字体快捷按钮区域
 
-        public static void DrawTextFontsGUI(string title, ref bool isPanelOpen, List<Font> fonts, Action<Font> onClick)
+        private static Vector2 m_fontScrollPosition;
+        private static Color m_selectedTextColor =  new Color(0.2f, 0.8f, 0.3f);
+
+        public static void DrawTextFontsGUI(string title, ref bool isPanelOpen, Text text, List<Font> fonts, Action<Font> onClick)
         {
             if (fonts == null || fonts.Count == 0)
             {
@@ -199,14 +223,119 @@ namespace GameLogic
 
             UnityEditorUtil.LayoutFrameBox(() =>
             {
-                for (int i = 0; i < fonts.Count; i++)
+                DrawFontGrid(fonts, onClick, text, 360);
+            }, title, ref isPanelOpen, true);
+        }
+
+        private static void DrawFontGrid(List<Font> fonts, Action<Font> onClick, Text text, int panelWidth)
+        {
+            if (fonts.Count == 0)
+            {
+                EditorGUILayout.HelpBox("未找到匹配的字体", MessageType.Info);
+                return;
+            }
+
+            // 计算网格布局
+            int columns = Mathf.Max(1, Mathf.FloorToInt(panelWidth / 120f));
+            int rows = Mathf.CeilToInt((float)fonts.Count / columns);
+
+            m_fontScrollPosition = EditorGUILayout.BeginScrollView(m_fontScrollPosition);
+
+            int currentIndex = 0;
+
+            for (int row = 0; row < rows; row++)
+            {
+                EditorGUILayout.BeginHorizontal();
                 {
-                    if (UnityEditorUtil.DrawAutoSizeButton(fonts[i].name))
+                    for (int col = 0; col < columns; col++)
                     {
-                        onClick?.Invoke(fonts[i]);
+                        if (currentIndex >= fonts.Count)
+                            break;
+
+                        Font font = fonts[currentIndex];
+
+                        if (DrawAutoSizeButton(font, text, 150))
+                        {
+                            onClick?.Invoke(font);
+                        }
+
+                        currentIndex++;
+                    }
+
+                    for (int col = currentIndex % columns; col < columns && col > 0; col++)
+                    {
+                        GUILayout.Label("", GUILayout.Width(120));
                     }
                 }
-            }, title, ref isPanelOpen, true);
+                EditorGUILayout.EndHorizontal();
+            }
+            GUILayout.Space(5);
+            var tips = "悬停可以查看字体的名字，按钮上的文字和提示均为字体预览样式";
+            if (text != null && text.font != null)
+            {
+                tips += $"\n当前选中字体：{text.font.name}";
+            }
+            DrawCustomStyledHelpBox(tips, text);
+            EditorGUILayout.EndScrollView();
+        }
+
+        private static void DrawCustomStyledHelpBox(string message, Text text, int fontSize = 12, FontStyle fontStyle = FontStyle.Normal)
+        {
+            GUILayout.BeginVertical("HelpBox");
+            {
+                EditorGUILayout.BeginHorizontal();
+                {
+                    GUIStyle iconStyle = new GUIStyle(EditorStyles.label);
+                    iconStyle.padding = new RectOffset(0, 0, 0, 5);
+                    iconStyle.alignment = TextAnchor.MiddleCenter;
+
+                    GUIContent iconContent = EditorGUIUtility.IconContent("console.infoicon");
+                    if (iconContent != null && iconContent.image != null)
+                    {
+                        GUILayout.Label(iconContent, iconStyle, GUILayout.Width(40), GUILayout.Height(40));
+                    }
+                    GUIStyle textStyle = new GUIStyle(EditorStyles.label);
+                    textStyle.normal.textColor = EditorStyles.label.normal.textColor;
+                    textStyle.wordWrap = true;
+                    textStyle.padding = new RectOffset(0, 5, 5, 0);
+                    textStyle.margin = new RectOffset(0, 0, 0, 0);
+                    textStyle.fontSize = fontSize;
+                    if (text != null)
+                    {
+                        textStyle.font = text.font;
+                        textStyle.fontStyle = text.fontStyle;
+                    }
+                    else
+                    {
+                        textStyle.fontStyle = fontStyle;
+                    }
+                    EditorGUILayout.LabelField(message, textStyle);
+                }
+                EditorGUILayout.EndHorizontal();
+            }
+            GUILayout.EndVertical();
+        }
+
+        private static bool DrawAutoSizeButton(Font font, Text text, float width = 120f)
+        {
+            GUIStyle buttonStyle = new GUIStyle(GUI.skin.button);
+            buttonStyle.font = font;
+            var fontName = font.name;
+            if (fontName.Length > 16)
+            {
+                fontName = fontName.Substring(0, 16) + "...";
+            }
+            GUIContent content = new GUIContent(fontName, $"字体名:{font.name}");
+
+            var oriColor = GUI.color;
+            if (text != null && text.font != null && text.font.name == font.name)
+            {
+                GUI.color = m_selectedTextColor;
+            }
+
+            bool isClick = GUILayout.Button(content, buttonStyle, GUILayout.Width(width));
+            GUI.color = oriColor;
+            return isClick;
         }
 
         #endregion

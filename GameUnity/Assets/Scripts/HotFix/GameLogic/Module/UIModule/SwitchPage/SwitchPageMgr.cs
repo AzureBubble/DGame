@@ -7,34 +7,46 @@ namespace GameLogic
 {
     public class SwitchPageMgr
     {
+        // 合并为统一的数据结构
+        private class TabPageInfo
+        {
+            public string TabName { get; set; }
+            public HashSet<Type> PageTypes { get; set; } = new HashSet<Type>(); // 查找更快
+            public GameObject ExistPage { get; set; }
+            public SwitchTabItem TabItem { get; set; }
+        }
+
         /// <summary>
         /// oldTabIndex newTabIndex
         /// </summary>
         private event Action<int, int> m_switchTabAction;
 
         // tab按钮父节点
-        protected Transform m_tfTabParent;
+        protected readonly Transform m_tfTabParent;
         // 子UI父节点
         public Transform TfChildPageParent { get; private set; }
+
+        private readonly Dictionary<int, TabPageInfo> m_tabPageInfoDict = new Dictionary<int, TabPageInfo>();
+        private readonly Dictionary<Type, BaseChildPage> m_childPageDict = new Dictionary<Type, BaseChildPage>();
+        protected readonly List<int> m_idList = new List<int>();
+
         /// <summary>
         /// 存储子UI字典
         /// </summary>
-        private Dictionary<int, List<string>> m_switchPageDict = new Dictionary<int, List<string>>();
-        private Dictionary<int, GameObject> m_existPageDict = new Dictionary<int, GameObject>();
-        private List<string> m_childPageNames = new List<string>();
-        private Dictionary<int, string> m_childPageNamesMap = new Dictionary<int, string>();
-        private Dictionary<string, BaseChildPage> m_childPageDict = new Dictionary<string, BaseChildPage>();
-        private Dictionary<int, SwitchTabItem> m_tabDict = new Dictionary<int, SwitchTabItem>();
-        private Dictionary<int, string> m_tabName = new Dictionary<int, string>();
-        protected List<int> m_idList = new List<int>();
-        private UIWindow m_parentWindow;
+        // private Dictionary<int, List<string>> m_switchPageDict = new Dictionary<int, List<string>>();
+        // private Dictionary<int, GameObject> m_existPageDict = new Dictionary<int, GameObject>();
+        // private List<string> m_childPageNames = new List<string>();
+        // private Dictionary<int, string> m_childPageNamesMap = new Dictionary<int, string>();
+        // // private Dictionary<string, BaseChildPage> m_childPageDict = new Dictionary<string, BaseChildPage>();
+        // private Dictionary<int, SwitchTabItem> m_tabDict = new Dictionary<int, SwitchTabItem>();
+        // private Dictionary<int, string> m_tabName = new Dictionary<int, string>();
+        private readonly UIWindow m_parentWindow;
         protected int m_curSelectChildID = -100;
-        private ChildPageShareData m_shareData = new ChildPageShareData();
+        private readonly ChildPageShareData m_shareData = new ChildPageShareData();
         public object ShareData1 => m_shareData?.ShareData1;
         public object ShareData2 => m_shareData?.ShareData2;
         public object ShareData3 => m_shareData?.ShareData3;
-
-        public int TabCount => m_tabDict.Count;
+        public int TabCount => m_tabPageInfoDict.Count;
 
         public SwitchPageMgr(Transform tfTabParent, Transform tfChildPageParent, UIWindow parentWindow)
         {
@@ -60,41 +72,34 @@ namespace GameLogic
 
         public void BindChildPage<T>(int tabID, string tabName, GameObject goPage = null) where T : BaseChildPage, new()
         {
-            var pageName = typeof(T).Name;
+            var pageType = typeof(T);
 
             if (!m_idList.Contains(tabID))
             {
                 m_idList.Add(tabID);
             }
 
-            if (!m_childPageDict.ContainsKey(pageName))
+            if (!m_childPageDict.ContainsKey(pageType))
             {
-                m_childPageDict.Add(pageName, new T());
-                if (!m_childPageNames.Contains(pageName))
-                {
-                    m_childPageNames.Add(pageName);
-                }
+                m_childPageDict.Add(pageType, new T());
             }
 
-            m_childPageNamesMap[tabID] = pageName;
-
-            if (!m_switchPageDict.TryGetValue(tabID, out var pageList))
+            if (!m_tabPageInfoDict.TryGetValue(tabID, out var tabInfo))
             {
-                pageList = new List<string>();
-                m_switchPageDict[tabID] = pageList;
+                tabInfo = new TabPageInfo();
+                m_tabPageInfoDict[tabID] = tabInfo;
             }
 
-            if (!pageList.Contains(pageName))
+            tabInfo.TabName = tabName;
+            if (!tabInfo.PageTypes.Contains(pageType))
             {
-                pageList.Add(pageName);
+                tabInfo.PageTypes.Add(pageType);
             }
 
             if (goPage != null)
             {
-                m_existPageDict[tabID] = goPage;
+                tabInfo.ExistPage = goPage;
             }
-
-            m_tabName[tabID] = tabName;
         }
 
         public void CreateTab<T>(int tabID, GameObject tabTemp = null, bool needSwitch = true) where T : SwitchTabItem, new()
@@ -104,22 +109,21 @@ namespace GameLogic
 
         public void CreateSingleTab<T>(int tabID, GameObject tabTemp = null, bool needSwitch = true) where T : SwitchTabItem, new()
         {
-            if (!m_tabDict.ContainsKey(tabID))
+            if (!m_tabPageInfoDict.TryGetValue(tabID, out var tabInfo))
             {
-                T tab;
+                return;
+            }
 
-                if (tabTemp != null)
-                {
-                    tab = m_parentWindow.CreateWidgetByPrefab<T>(tabTemp, m_tfTabParent);
-                }
-                else
-                {
-                    tab = m_parentWindow.CreateWidgetByType<T>(m_tfTabParent);
-                }
-                tab.UpdateTabName(m_tabName[tabID]);
+            if (tabInfo.TabItem == null)
+            {
+                T tab = tabTemp != null
+                    ? m_parentWindow.CreateWidgetByPrefab<T>(tabTemp, m_tfTabParent)
+                    : m_parentWindow.CreateWidgetByType<T>(m_tfTabParent);
+
+                tab.UpdateTabName(tabInfo.TabName);
                 tab.BindClickEvent(OnTabClick, tabID);
                 tab.SetSelectedState(m_curSelectChildID == tabID);
-                m_tabDict[tabID] = tab;
+                tabInfo.TabItem = tab;
             }
 
             if (needSwitch)
@@ -172,32 +176,49 @@ namespace GameLogic
             for (int i = 0; i < m_idList.Count; i++)
             {
                 var childID = m_idList[i];
-                if (!m_tabDict.ContainsKey(childID))
+                if (!m_tabPageInfoDict.TryGetValue(childID, out var tabInfo))
+                {
+                    continue;
+                }
+
+                if (tabInfo.TabItem == null)
                 {
                     T tab = tabTemp != null
                         ? m_parentWindow.CreateWidgetByPrefab<T>(tabTemp, m_tfTabParent)
                         : m_parentWindow.CreateWidgetByType<T>(m_tfTabParent);
 
-                    // 统一名称更新逻辑
                     if (setSizeDelta)
                     {
-                        tab.UpdateTabNameChangeSize(m_tabName[childID], true);
+                        tab.UpdateTabNameChangeSize(tabInfo.TabName, true);
                     }
                     else
                     {
-                        tab.UpdateTabName(m_tabName[childID]);
+                        tab.UpdateTabName(tabInfo.TabName);
                     }
-
                     tab.BindClickEvent(OnTabClick, childID);
-
                     if (setSelectedState)
                     {
                         tab.SetSelectedState(m_curSelectChildID == childID);
                     }
-
-                    m_tabDict[childID] = tab;
-                    callback?.Invoke(i, tab);
+                    tabInfo.TabItem = tab;
                 }
+                else
+                {
+                    if (setSizeDelta)
+                    {
+                        tabInfo.TabItem.UpdateTabNameChangeSize(tabInfo.TabName, true);
+                    }
+                    else
+                    {
+                        tabInfo.TabItem.UpdateTabName(tabInfo.TabName);
+                    }
+                    tabInfo.TabItem.BindClickEvent(OnTabClick, childID);
+                    if (setSelectedState)
+                    {
+                        tabInfo.TabItem.SetSelectedState(m_curSelectChildID == childID);
+                    }
+                }
+                callback?.Invoke(i, tabInfo.TabItem as T);
             }
 
             if (needSwitch)
@@ -209,61 +230,63 @@ namespace GameLogic
         public void SetCustomTabClickAction(int tabID, Action<SwitchTabItem> clickAction, object shareData1 = null,
             object shareData2 = null, object shareData3 = null)
         {
-            if (m_tabDict.TryGetValue(tabID, out var tab))
+            if (m_tabPageInfoDict.TryGetValue(tabID, out var tabInfo))
             {
-                tab.BindClickEvent(clickAction, shareData1, shareData2, shareData3);
+                tabInfo.TabItem?.BindClickEvent(clickAction, shareData1, shareData2, shareData3);
             }
         }
 
         public void SwitchPage(int tabID)
         {
-            if (m_curSelectChildID != tabID)
+            if (m_curSelectChildID != tabID && m_tabPageInfoDict.TryGetValue(tabID, out var curTabInfo))
             {
-                List<string> pages = m_switchPageDict[tabID];
-                // 先把绑定的Page创建出来
-                for (int i = 0; i < pages.Count; i++)
+                var pages = curTabInfo.PageTypes;
+                if (pages != null)
                 {
-                    var pageName = pages[i];
-                    var page = GetChildPageByName(pageName);
-                    if (page != null && page.gameObject == null)
+                    foreach (var pageType in pages)
                     {
-                        if (m_existPageDict.TryGetValue(tabID, out var pageObj))
+                        var page = GetChildPageByType(pageType);
+                        if (page != null && page.gameObject == null)
                         {
-                            page.Create(m_parentWindow, pageObj, TfChildPageParent);
-                            page.Init(m_shareData, this);
-                        }
-                        else
-                        {
-                            page.CreateByPath(pageName, m_parentWindow, TfChildPageParent);
-                            page.Init(m_shareData, this);
+                            if (curTabInfo.ExistPage != null)
+                            {
+                                page.Create(m_parentWindow, curTabInfo.ExistPage, TfChildPageParent);
+                                page.Init(m_shareData, this);
+                            }
+                            else
+                            {
+                                page.CreateByPath(pageType.Name, m_parentWindow, TfChildPageParent);
+                                page.Init(m_shareData, this);
+                            }
                         }
                     }
                 }
 
-                // 把相关联的Page全部显示出来
-                for (int i = 0; i < m_childPageNames.Count; i++)
+                foreach (var item in m_childPageDict)
                 {
-                    string pageName = m_childPageNames[i];
-                    var page = GetChildPageByName(pageName);
-                    bool beShow = pages.IndexOf(pageName) > 0;
-                    if (page != null && page.gameObject != null)
+                    var pageType = item.Key;
+                    var page = item.Value;
+                    bool beShow = curTabInfo.PageTypes.Contains(pageType);
+
+                    if (page.gameObject != null)
                     {
                         page.Show(beShow);
                     }
-                    if (page != null && beShow)
+                    if (beShow)
                     {
                         page.OnPageShowed(m_curSelectChildID, tabID);
                     }
                 }
 
-                // 设置tab的状态
-                for (int i = 0; i < m_idList.Count; i++)
-                {
-                    var childID = m_idList[i];
 
-                    if (m_tabDict.TryGetValue(childID, out var tab))
+                // 设置tab的状态
+                for (var index = 0; index < m_idList.Count; index++)
+                {
+                    var childID = m_idList[index];
+
+                    if (m_tabPageInfoDict.TryGetValue(childID, out var tabInfo))
                     {
-                        tab.SetSelectedState(tabID == childID);
+                        tabInfo.TabItem?.SetSelectedState(tabID == childID);
                     }
                 }
             }
@@ -279,16 +302,16 @@ namespace GameLogic
             SwitchPage(tabID);
         }
 
-        public BaseChildPage GetChildPageByName(string pageName)
-            => m_childPageDict.GetValueOrDefault(pageName);
+        public BaseChildPage GetChildPageByType(Type pageType)
+            => m_childPageDict.GetValueOrDefault(pageType);
 
         public void RefreshCurrentChildPage()
         {
-            if (m_switchPageDict.TryGetValue(m_curSelectChildID, out var pageNames))
+            if (m_tabPageInfoDict.TryGetValue(m_curSelectChildID, out var curTabInfo))
             {
-                for (int i = 0; i < pageNames.Count; i++)
+                foreach (var pageType in curTabInfo.PageTypes)
                 {
-                    var page = GetChildPageByName(pageNames[i]);
+                    var page = GetChildPageByType(pageType);
                     if (page != null && page.gameObject != null)
                     {
                         page.RefreshCurrentChildPage();
@@ -299,11 +322,11 @@ namespace GameLogic
 
         public void RefreshChildPage(int tabID)
         {
-            if (m_switchPageDict.TryGetValue(tabID, out var pageNames))
+            if (m_tabPageInfoDict.TryGetValue(tabID, out var curTabInfo))
             {
-                for (int i = 0; i < pageNames.Count; i++)
+                foreach (var pageType in curTabInfo.PageTypes)
                 {
-                    var page = GetChildPageByName(pageNames[i]);
+                    var page = GetChildPageByType(pageType);
                     if (page != null && page.gameObject != null)
                     {
                         page.RefreshCurrentChildPage();
@@ -320,7 +343,7 @@ namespace GameLogic
 
         public T GetChildPage<T>() where T : BaseChildPage
         {
-            return m_childPageDict.TryGetValue(typeof(T).Name, out var page) ? page as T : null;
+            return m_childPageDict.TryGetValue(typeof(T), out var page) ? page as T : null;
         }
 
         public bool ContainsChildPage(int tabID) => m_idList.Contains(tabID);
@@ -334,9 +357,20 @@ namespace GameLogic
 
         public T GetChildPageByTabID<T>(int tabID) where T : BaseChildPage
         {
-            m_childPageNamesMap.TryGetValue(tabID, out var pageName);
-            var page = GetChildPageByName(pageName);
-            return page as T;
+            if (m_tabPageInfoDict.TryGetValue(tabID, out var tabInfo))
+            {
+                foreach (var pageType in tabInfo.PageTypes)
+                {
+                    var page = GetChildPageByType(pageType);
+
+                    if (page != null)
+                    {
+                        return page as T;
+                    }
+                }
+            }
+
+            return null;
         }
 
         public void BindChildPage<T, U>(int tabID, string tabName)
@@ -376,72 +410,71 @@ namespace GameLogic
 
         public void SetTabRedNode(int tabID, bool isShow)
         {
-            if (m_tabDict.TryGetValue(tabID, out var tab))
+            if (m_tabPageInfoDict.TryGetValue(tabID, out var tabInfo))
             {
-                tab.SetSelectedState(isShow);
+                tabInfo.TabItem?.SetSelectedState(isShow);
             }
         }
 
         public void SetTabIcon(int tabID, string selectIconPath, string noSelectIconPath)
         {
-            if (m_tabDict.TryGetValue(tabID, out var tab))
+            if (m_tabPageInfoDict.TryGetValue(tabID, out var tabInfo))
             {
-                tab.SetTabIcon(selectIconPath, noSelectIconPath);
+                tabInfo.TabItem?.SetTabIcon(selectIconPath, noSelectIconPath);
             }
         }
 
         public void SetTabTextFontSize(int tabID, int fontSize)
         {
-            if (m_tabDict.TryGetValue(tabID, out var tab))
+            if (m_tabPageInfoDict.TryGetValue(tabID, out var tabInfo))
             {
-                tab.SetTabTextFontSize(fontSize);
+                tabInfo.TabItem?.SetTabTextFontSize(fontSize);
             }
         }
 
         public void SetTabBg(int tabID, string selectBgPath, string noSelectBgPath)
         {
-            if (m_tabDict.TryGetValue(tabID, out var tab))
+            if (m_tabPageInfoDict.TryGetValue(tabID, out var tabInfo))
             {
-                tab.SetTabBg(selectBgPath, noSelectBgPath);
+                tabInfo.TabItem?.SetTabBg(selectBgPath, noSelectBgPath);
             }
         }
 
         public void SetAllTabBg(string selectBgPath, string noSelectBgPath)
         {
-            foreach (var tab in m_tabDict.Values)
+            foreach (var tabInfo in m_tabPageInfoDict.Values)
             {
-                tab.SetTabBg(selectBgPath, noSelectBgPath);
+                tabInfo.TabItem?.SetTabBg(selectBgPath, noSelectBgPath);
             }
         }
 
         public void SetTabName(int tabID, string tabName)
         {
-            m_tabName[tabID] = tabName;
-            if (m_tabDict.TryGetValue(tabID, out var tab))
+            if (m_tabPageInfoDict.TryGetValue(tabID, out var tabInfo))
             {
-                tab.UpdateTabName(tabName);
+                tabInfo.TabItem?.UpdateTabName(tabName);
             }
         }
 
         public void SetTabTextColor(int tabID, string selectedColor, string noSelectColor)
         {
-            if (m_tabDict.TryGetValue(tabID, out var tab))
+            if (m_tabPageInfoDict.TryGetValue(tabID, out var tabInfo))
             {
-                tab.SetTabTextColor(selectedColor, noSelectColor);
+                tabInfo.TabItem?.SetTabTextColor(selectedColor, noSelectColor);
             }
         }
 
-        public void SetAllTabTextColor(int tabID, string selectedColor, string noSelectColor)
+        public void SetAllTabTextColor(string selectedColor, string noSelectColor)
         {
-            foreach (var tab in m_tabDict.Values)
+            foreach (var tabInfo in m_tabPageInfoDict.Values)
             {
-                tab.SetTabTextColor(selectedColor, noSelectColor);
+                tabInfo.TabItem?.SetTabTextColor(selectedColor, noSelectColor);
             }
         }
 
         public SwitchTabItem GetTabByID(int tabID)
         {
-            return m_tabDict.GetValueOrDefault(tabID);
+            return m_tabPageInfoDict.TryGetValue(tabID, out var tabInfo) ? tabInfo.TabItem : null;
         }
 
         #region 页签从前到后排序
@@ -454,11 +487,11 @@ namespace GameLogic
             m_idListTemp.AddRange(m_idList);
             m_idListTemp.Sort(OnSortTab);
 
-            foreach (var item in m_tabDict)
+            foreach (var item in m_tabPageInfoDict)
             {
                 var tabID = item.Key;
-                var tabItem = item.Value;
-                tabItem.transform.SetSiblingIndex(m_idListTemp.IndexOf(tabID));
+                var tabItem = item.Value.TabItem;
+                tabItem?.transform?.SetSiblingIndex(m_idListTemp.IndexOf(tabID));
             }
         }
 

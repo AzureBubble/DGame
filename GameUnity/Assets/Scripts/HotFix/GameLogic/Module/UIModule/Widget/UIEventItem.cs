@@ -20,7 +20,6 @@ namespace GameLogic
 
         public void BindClickEventEx(Action<T> clickAction, object eParam1 = null, object eParam2 = null, object eParam3 = null,Selectable.Transition transition = Selectable.Transition.ColorTint)
         {
-            m_clickAction = clickAction;
             if (m_clickAction == null)
             {
                 var button = DGame.Utility.UnityUtil.AddMonoBehaviour<UIButton>(gameObject);
@@ -30,12 +29,12 @@ namespace GameLogic
                     m_clickAction?.Invoke(this as T);
                 });
             }
+            m_clickAction = clickAction;
             SetEventParam(eParam1, eParam2, eParam3);
         }
 
         public void BindClickEvent(Action<T> clickAction, object eParam1 = null, object eParam2 = null, object eParam3 = null)
         {
-            m_clickAction = clickAction;
             if (m_clickAction == null)
             {
                 var button = DGame.Utility.UnityUtil.AddMonoBehaviour<UIButton>(gameObject);
@@ -44,12 +43,12 @@ namespace GameLogic
                     m_clickAction?.Invoke(this as T);
                 });
             }
+            m_clickAction = clickAction;
             SetEventParam(eParam1, eParam2, eParam3);
         }
 
         public void BindBeginDragEvent(Action<T, PointerEventData> dragAction, object eParam1 = null, object eParam2 = null, object eParam3 = null)
         {
-            m_beginDragAction = dragAction;
             if (m_beginDragAction == null)
             {
                 var trigger = DGame.Utility.UnityUtil.AddMonoBehaviour<EventTrigger>(gameObject);
@@ -64,12 +63,12 @@ namespace GameLogic
                 });
                 trigger.triggers.Add(entry);
             }
+            m_beginDragAction = dragAction;
             SetEventParam(eParam1, eParam2, eParam3);
         }
 
         public void BindDragEvent(Action<T, PointerEventData> dragAction, object eParam1 = null, object eParam2 = null, object eParam3 = null)
         {
-            m_dragAction = dragAction;
             if (m_dragAction == null)
             {
                 var trigger = DGame.Utility.UnityUtil.AddMonoBehaviour<EventTrigger>(gameObject);
@@ -82,12 +81,12 @@ namespace GameLogic
                 });
                 trigger.triggers.Add(entry);
             }
+            m_dragAction = dragAction;
             SetEventParam(eParam1, eParam2, eParam3);
         }
 
         public void BindEndDragEvent(Action<T, PointerEventData> dragendAction, object eParam1 = null, object eParam2 = null, object eParam3 = null)
         {
-            m_endDragAction = dragendAction;
             if (m_endDragAction == null)
             {
                 m_endDragAction = dragendAction;
@@ -101,12 +100,12 @@ namespace GameLogic
                 });
                 trigger.triggers.Add(entry);
             }
+            m_endDragAction = dragendAction;
             SetEventParam(eParam1, eParam2, eParam3);
         }
 
         public void BindPressEvent(Action<T, bool> pressAction, object eParam1 = null, object eParam2 = null, object eParam3 = null)
         {
-            m_pressAction = pressAction;
             if (m_pressAction == null)
             {
                 var trigger = DGame.Utility.UnityUtil.AddMonoBehaviour<EventTrigger>(gameObject);
@@ -127,12 +126,12 @@ namespace GameLogic
                 });
                 trigger.triggers.Add(entry);
             }
+            m_pressAction = pressAction;
             SetEventParam(eParam1, eParam2, eParam3);
         }
 
         public void BindPressEvent(Action<T, bool> pressAction, object eParam1 = null, object eParam2 = null, object eParam3 = null, float durationThreshold = 1)
         {
-            m_pressAction = pressAction;
             if (m_pressAction == null)
             {
                 var button = DGame.Utility.UnityUtil.AddMonoBehaviour<UIButton>(gameObject);
@@ -141,6 +140,7 @@ namespace GameLogic
                     m_pressAction?.Invoke(this as T, true);
                 }, durationThreshold);
             }
+            m_pressAction = pressAction;
             SetEventParam(eParam1, eParam2, eParam3);
         }
 

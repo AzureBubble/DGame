@@ -47,9 +47,14 @@ namespace GameLogic
                 else
                 {
                     transf.localScale = m_clickScale;
-                    foreach (var child in m_childList)
+
+                    if (m_childList != null && m_childList.Count > 0)
                     {
-                        child.localScale = m_clickScale;
+                        for (var index = 0; index < m_childList.Count; index++)
+                        {
+                            var child = m_childList[index];
+                            child.localScale = m_clickScale;
+                        }
                     }
                 }
             }
@@ -57,22 +62,30 @@ namespace GameLogic
 
         public void OnPointerUp(Transform transf, bool interactable)
         {
+            if (transf == null)
+            {
+                return;
+            }
             if (m_isUseClickScale && interactable)
             {
                 if (m_isUseDoTween)
                 {
-                    transf?.DOKill();
+                    transf.DOKill();
                     transf.DOScale(m_normalScale, m_clickRecoverTime).SetUpdate(true).SetEase(m_reboundEffect ? Ease.OutBack : Ease.Unset).onComplete += () =>
                     {
-                        transf?.DOKill();
+                        transf.DOKill();
                     };
-                    foreach (var child in m_childList)
+
+                    if (m_childList != null && m_childList.Count > 0)
                     {
-                        child?.DOKill();
-                        child.DOScale(m_normalScale, m_clickRecoverTime).SetUpdate(true).SetEase(m_reboundEffect ? Ease.OutBack : Ease.Unset).onComplete += () =>
+                        for (var index = 0; index < m_childList.Count; index++)
                         {
+                            var child = m_childList[index];
                             child?.DOKill();
-                        };
+                            child.DOScale(m_normalScale, m_clickRecoverTime).SetUpdate(true)
+                                    .SetEase(m_reboundEffect ? Ease.OutBack : Ease.Unset).onComplete +=
+                                () => { child?.DOKill(); };
+                        }
                     }
                 }
                 else

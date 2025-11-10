@@ -7,11 +7,10 @@ namespace GameLogic
 {
     public class SwitchPageMgr
     {
-        // 合并为统一的数据结构
         private class TabPageInfo
         {
             public string TabName { get; set; }
-            public HashSet<Type> PageTypes { get; set; } = new HashSet<Type>(); // 查找更快
+            public HashSet<Type> PageTypes { get; set; } = new HashSet<Type>();
             public GameObject ExistPage { get; set; }
             public SwitchTabItem TabItem { get; set; }
         }
@@ -29,17 +28,6 @@ namespace GameLogic
         private readonly Dictionary<int, TabPageInfo> m_tabPageInfoDict = new Dictionary<int, TabPageInfo>();
         private readonly Dictionary<Type, BaseChildPage> m_childPageDict = new Dictionary<Type, BaseChildPage>();
         protected readonly List<int> m_idList = new List<int>();
-
-        /// <summary>
-        /// 存储子UI字典
-        /// </summary>
-        // private Dictionary<int, List<string>> m_switchPageDict = new Dictionary<int, List<string>>();
-        // private Dictionary<int, GameObject> m_existPageDict = new Dictionary<int, GameObject>();
-        // private List<string> m_childPageNames = new List<string>();
-        // private Dictionary<int, string> m_childPageNamesMap = new Dictionary<int, string>();
-        // // private Dictionary<string, BaseChildPage> m_childPageDict = new Dictionary<string, BaseChildPage>();
-        // private Dictionary<int, SwitchTabItem> m_tabDict = new Dictionary<int, SwitchTabItem>();
-        // private Dictionary<int, string> m_tabName = new Dictionary<int, string>();
         private readonly UIWindow m_parentWindow;
         protected int m_curSelectChildID = -100;
         private readonly ChildPageShareData m_shareData = new ChildPageShareData();

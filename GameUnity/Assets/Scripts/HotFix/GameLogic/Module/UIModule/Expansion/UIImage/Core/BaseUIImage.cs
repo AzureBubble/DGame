@@ -11,6 +11,9 @@ namespace GameLogic
     {
         [SerializeField] private UIImageMaskExtend m_uiImageMaskExtend = new UIImageMaskExtend();
         [SerializeField] private UIImageRoundedCornersExtend m_uiImageRoundedCornersExtend = new UIImageRoundedCornersExtend();
+        [SerializeField] private UIImageMirrorExtend m_uiImageMirrorExtend = new UIImageMirrorExtend();
+
+        public UIImageMirrorExtend UIImageMirrorExtend => m_uiImageMirrorExtend;
 
         protected override void Awake()
         {

@@ -12,6 +12,7 @@ namespace GameLogic
     {
         private bool m_isImageMaskPanelOpen = false;
         private bool m_isImageRoundedCornersPanelOpen = false;
+        private bool m_isImageMirrorPanelOpen = false;
 
         SerializedProperty m_sprite;
 
@@ -30,12 +31,21 @@ namespace GameLogic
         private SerializedProperty m_radius;
         private SerializedProperty m_triangleNum;
 
+        // Mirror
+        private SerializedProperty m_isUseImageMirror;
+        private SerializedProperty m_mirrorType;
+        private SerializedProperty m_mirrorExtend;
+
         protected override void OnEnable()
         {
             base.OnEnable();
 
+            var uiImage = (UIImage)target;
+            uiImage.UIImageMirrorExtend.SaveSerializeData(uiImage);
+
             m_isImageMaskPanelOpen = EditorPrefs.GetBool("UIImage.m_isImageMaskPanelOpen", m_isImageMaskPanelOpen);
             m_isImageRoundedCornersPanelOpen = EditorPrefs.GetBool("UIImage.m_isImageRoundedCornersPanelOpen", m_isImageRoundedCornersPanelOpen);
+            m_isImageMirrorPanelOpen = EditorPrefs.GetBool("UIImage.m_isImageMirrorPanelOpen", m_isImageMirrorPanelOpen);
 
             m_sprite = serializedObject.FindProperty("m_Sprite");
 
@@ -57,6 +67,13 @@ namespace GameLogic
                 m_radius = serializedObject.FindProperty("m_uiImageRoundedCornersExtend.m_radius");
                 m_triangleNum = serializedObject.FindProperty("m_uiImageRoundedCornersExtend.m_triangleNum");
             }
+
+            // Mirror
+            {
+                m_isUseImageMirror = serializedObject.FindProperty("m_uiImageMirrorExtend.m_isUseImageMirror");
+                m_mirrorType = serializedObject.FindProperty("m_uiImageMirrorExtend.m_mirrorType");
+                m_mirrorExtend = serializedObject.FindProperty("m_uiImageMirrorExtend.m_mirror");
+            }
         }
 
         public override void OnInspectorGUI()
@@ -71,13 +88,19 @@ namespace GameLogic
 
         private void UIImageGUI()
         {
-            UIImageDrawEditor.DrawImageMaskGUI("不规则图形", ref m_isImageMaskPanelOpen, m_isUseMaskImage, m_fillPercent, m_fill, m_ringWidth, m_segements, m_isUsePercentVert, m_verticesDistances, m_rotation, m_isUseRoundedCorners);
-            UIImageDrawEditor.DrawImageRoundedCornersGUI("圆角图形", ref m_isImageRoundedCornersPanelOpen, m_isUseRoundedCorners, m_radius, m_triangleNum, m_isUseMaskImage);
+            UIImageDrawEditor.DrawImageMaskGUI("不规则图形", ref m_isImageMaskPanelOpen, m_isUseMaskImage, m_fillPercent,
+                m_fill, m_ringWidth, m_segements, m_isUsePercentVert, m_verticesDistances, m_rotation,
+                m_isUseRoundedCorners);
+            UIImageDrawEditor.DrawImageRoundedCornersGUI("圆角图形", ref m_isImageRoundedCornersPanelOpen,
+                m_isUseRoundedCorners, m_radius, m_triangleNum, m_isUseMaskImage);
+            UIImageDrawEditor.DrawImageMirrorGUI("图片镜像", ref m_isImageMirrorPanelOpen, m_isUseImageMirror, m_mirrorType,
+                m_mirrorExtend);
 
             if (GUI.changed)
             {
                 EditorPrefs.SetBool("UIImage.m_isImageMaskPanelOpen", m_isImageMaskPanelOpen);
                 EditorPrefs.SetBool("UIImage.m_isImageRoundedCornersPanelOpen", m_isImageRoundedCornersPanelOpen);
+                EditorPrefs.SetBool("UIImage.m_isImageMirrorPanelOpen", m_isImageMirrorPanelOpen);
             }
         }
     }

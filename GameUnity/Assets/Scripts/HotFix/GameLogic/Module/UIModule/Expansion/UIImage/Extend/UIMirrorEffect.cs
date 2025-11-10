@@ -6,9 +6,9 @@ using UnityEngine.UI;
 
 namespace GameLogic
 {
-    [AddComponentMenu("UI/Effects/Mirror", 20)]
+    // [AddComponentMenu("UI/Effects/Mirror", 20)]
     [RequireComponent(typeof(Graphic))]
-    public class Mirror : BaseMeshEffect
+    public class UIMirrorEffect : BaseMeshEffect
     {
         public enum MirrorType
         {
@@ -29,6 +29,24 @@ namespace GameLogic
             Quarter,
         }
 
+        [SerializeField] private bool m_isUseImageMirror;
+
+        public bool UseImageMirror
+        {
+            get => m_isUseImageMirror;
+            set
+            {
+                if (m_isUseImageMirror != value)
+                {
+                    m_isUseImageMirror = value;
+                    if(graphic != null)
+                    {
+                        graphic.SetVerticesDirty();
+                    }
+                }
+            }
+        }
+
         /// <summary>
         /// 镜像类型
         /// </summary>
@@ -37,13 +55,14 @@ namespace GameLogic
 
         public MirrorType mirrorType
         {
-            get { return m_MirrorType; }
+            get => m_MirrorType;
             set
             {
                 if (m_MirrorType != value)
                 {
                     m_MirrorType = value;
-                    if(graphic != null){
+                    if(graphic != null)
+                    {
                         graphic.SetVerticesDirty();
                     }
                 }
@@ -55,7 +74,22 @@ namespace GameLogic
 
         public RectTransform rectTransform
         {
-            get { return m_RectTransform ?? (m_RectTransform = GetComponent<RectTransform>()); }
+            get
+            {
+                var component = m_RectTransform;
+
+                if (component is not null)
+                {
+                    return component;
+                }
+                return m_RectTransform = GetComponent<RectTransform>();
+            }
+        }
+
+        protected override void Awake()
+        {
+            base.Awake();
+            this.hideFlags = HideFlags.HideInInspector;
         }
 
         /// <summary>
@@ -92,7 +126,7 @@ namespace GameLogic
 
         public override void ModifyMesh(VertexHelper vh)
         {
-            if (!IsActive())
+            if (!IsActive() || !m_isUseImageMirror)
             {
                 return;
             }

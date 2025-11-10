@@ -10,7 +10,8 @@ using UnityEngine.UI;
 
 namespace GameLogic
 {
-    [AddComponentMenu("UI/Effects/Gradient Color"), RequireComponent(typeof(Graphic))]
+    // [AddComponentMenu("UI/Effects/Gradient Color")]
+    [RequireComponent(typeof(Graphic))]
     public class UITextGradientColor : BaseMeshEffect
     {
         private const int ONE_TEXT_VERTEX = 6;

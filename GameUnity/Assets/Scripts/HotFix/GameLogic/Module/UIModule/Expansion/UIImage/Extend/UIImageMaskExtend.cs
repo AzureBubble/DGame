@@ -13,7 +13,13 @@ namespace GameLogic
         private Image m_image;
         private RectTransform m_rectTransform;
         [SerializeField] private bool m_isUseMaskImage;
-        public bool UseMaskImage => m_isUseMaskImage;
+
+        public bool UseMaskImage
+        {
+	        get => m_isUseMaskImage;
+	        set { if (m_isUseMaskImage != value) { m_isUseMaskImage = value; Refresh(); } }
+        }
+
         public Sprite OverrideSprite
         {
             get => m_image?.overrideSprite;
@@ -41,6 +47,48 @@ namespace GameLogic
         [SerializeField, Range(0f, 360f)] private float m_rotation = 0f;
         [SerializeField, Header("顶点距离设置")] private bool m_isUsePercentVert;
         [SerializeField, Range(0f, 1f)] private float[] m_verticesDistances;
+
+        public float fillPercent
+        {
+	        get => m_fillPercent;
+	        set { if (m_fillPercent != value) { m_fillPercent = value; Refresh(); } }
+        }
+
+        public bool fill
+        {
+	        get => m_fill;
+	        set { if (m_fill != value) { m_fill = value; Refresh(); } }
+        }
+
+        public float ringWidth
+        {
+	        get => m_ringWidth;
+	        set { if (m_ringWidth != value) { m_ringWidth = value; Refresh(); } }
+        }
+
+        public int segements
+        {
+	        get => m_segements;
+	        set { if (m_segements != value) { m_segements = value; Refresh(); } }
+        }
+
+        public float rotation
+        {
+	        get => m_rotation;
+	        set { if (m_rotation != value) { m_rotation = value; Refresh(); } }
+        }
+
+        public bool isUsePercentVert
+        {
+	        get => m_isUsePercentVert;
+	        set { if (m_isUsePercentVert != value) { m_isUsePercentVert = value; Refresh(); } }
+        }
+
+        public float[] verticesDistances
+        {
+	        get => m_verticesDistances;
+	        set { if (m_verticesDistances != value) { m_verticesDistances = value; Refresh(); } }
+        }
 
         public void SetFillPercent(float value)
         {
@@ -257,7 +305,7 @@ namespace GameLogic
 	        m_isUseMaskImage = true;
 	        m_isUsePercentVert = true;
 	        m_segements = verCnt;
-	        m_verticesDistances = percents.ToArray();
+	        verticesDistances = percents.ToArray();
         }
 
         /// <summary>

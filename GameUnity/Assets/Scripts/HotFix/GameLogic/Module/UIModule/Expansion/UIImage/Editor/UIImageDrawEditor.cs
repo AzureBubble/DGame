@@ -138,7 +138,6 @@ namespace GameLogic
                 if (EditorGUI.EndChangeCheck())
                 {
                     var mirror = (UIMirrorEffect)mirrorEffect?.objectReferenceValue;
-
                     if (mirror != null)
                     {
                         mirror.mirrorType = (UIMirrorEffect.MirrorType)mirrorType.enumValueIndex;

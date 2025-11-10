@@ -18,13 +18,29 @@ namespace GameLogic
 
 
         [SerializeField] private bool m_isUseRoundedCorners;
-        public bool IsUseRoundedCorners { get => m_isUseRoundedCorners; set => m_isUseRoundedCorners = value; }
+        public bool IsUseRoundedCorners
+        {
+            get => m_isUseRoundedCorners;
+            set { if(m_isUseRoundedCorners != value) { m_isUseRoundedCorners = value; Refresh(); } }
+        }
 
         [SerializeField] private float m_radius = 20;
+
+        public float radius
+        {
+            get => m_radius;
+            set { if(m_radius != value) { m_radius = value; Refresh(); } }
+        }
 
         //使用几个三角形去填充每个角的四分之一圆
         [SerializeField, Range(MinTriangleNum, MaxTriangleNum)]
         private int m_triangleNum = 5;
+
+        public int triangleNum
+        {
+            get => m_triangleNum;
+            set { if(m_triangleNum != value) { m_triangleNum = value; Refresh(); } }
+        }
 
         public void Initialize(Image image)
         {

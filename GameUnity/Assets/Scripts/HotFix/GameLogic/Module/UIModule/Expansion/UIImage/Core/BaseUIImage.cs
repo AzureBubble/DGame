@@ -7,7 +7,7 @@ using UnityEngine.UI;
 namespace GameLogic
 {
     [Serializable]
-    public class BaseUIImage : Image
+    public class BaseUIImage : Image, IMeshModifier
     {
         [SerializeField] private UIImageMaskExtend m_uiImageMaskExtend = new UIImageMaskExtend();
         [SerializeField] private UIImageRoundedCornersExtend m_uiImageRoundedCornersExtend = new UIImageRoundedCornersExtend();
@@ -37,6 +37,7 @@ namespace GameLogic
             base.OnValidate();
             m_uiImageMaskExtend.EditorInitialize(this);
             m_uiImageRoundedCornersExtend.EditorInitialize(this);
+            SetVerticesDirty();
         }
 #endif
 
@@ -53,18 +54,7 @@ namespace GameLogic
                 return;
             }
 
-            bool isOverride = false;
-            if (m_uiImageMaskExtend.UseMaskImage)
-            {
-                m_uiImageMaskExtend.OnPopulateMesh(vh);
-                isOverride = true;
-            }
-
-            if (m_uiImageRoundedCornersExtend.IsUseRoundedCorners)
-            {
-                m_uiImageRoundedCornersExtend.OnPopulateMesh(vh);
-                isOverride = true;
-            }
+            bool isOverride = m_uiImageMaskExtend.UseMaskImage || m_uiImageRoundedCornersExtend.IsUseRoundedCorners;
 
             if (!isOverride)
             {
@@ -90,6 +80,28 @@ namespace GameLogic
         {
             m_uiImageRoundedCornersExtend.IsUseRoundedCorners = false;
             m_uiImageMaskExtend.DrawPolygon(vertCnt, percents, rotation);
+        }
+
+        public void ModifyMesh(Mesh mesh)
+        {
+        }
+
+        public void ModifyMesh(VertexHelper verts)
+        {
+            if (!IsActive() || verts.currentVertCount <= 0)
+            {
+                return;
+            }
+
+            if (m_uiImageMaskExtend.UseMaskImage)
+            {
+                m_uiImageMaskExtend.OnPopulateMesh(verts);
+            }
+
+            if (m_uiImageRoundedCornersExtend.IsUseRoundedCorners)
+            {
+                m_uiImageRoundedCornersExtend.OnPopulateMesh(verts);
+            }
         }
     }
 }

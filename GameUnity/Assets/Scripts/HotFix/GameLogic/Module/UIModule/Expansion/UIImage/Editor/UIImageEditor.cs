@@ -34,7 +34,7 @@ namespace GameLogic
         // Mirror
         private SerializedProperty m_isUseImageMirror;
         private SerializedProperty m_mirrorType;
-        private SerializedProperty m_mirrorExtend;
+        private SerializedProperty m_mirrorEffect;
 
         protected override void OnEnable()
         {
@@ -72,7 +72,7 @@ namespace GameLogic
             {
                 m_isUseImageMirror = serializedObject.FindProperty("m_uiImageMirrorExtend.m_isUseImageMirror");
                 m_mirrorType = serializedObject.FindProperty("m_uiImageMirrorExtend.m_mirrorType");
-                m_mirrorExtend = serializedObject.FindProperty("m_uiImageMirrorExtend.m_mirror");
+                m_mirrorEffect = serializedObject.FindProperty("m_uiImageMirrorExtend.uiMirrorEffect");
             }
         }
 
@@ -94,7 +94,7 @@ namespace GameLogic
             UIImageDrawEditor.DrawImageRoundedCornersGUI("圆角图形", ref m_isImageRoundedCornersPanelOpen,
                 m_isUseRoundedCorners, m_radius, m_triangleNum, m_isUseMaskImage);
             UIImageDrawEditor.DrawImageMirrorGUI("图片镜像", ref m_isImageMirrorPanelOpen, m_isUseImageMirror, m_mirrorType,
-                m_mirrorExtend);
+                m_mirrorEffect);
 
             if (GUI.changed)
             {

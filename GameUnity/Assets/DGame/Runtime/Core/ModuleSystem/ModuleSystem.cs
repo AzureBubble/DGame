@@ -35,7 +35,7 @@ namespace DGame
                 BuildUpdateExecuteList();
             }
 
-            for (int i = 0; i < m_updateModules.Count; i++)
+            for (int i = 0; i < m_updateExecuteList.Count; i++)
             {
                 m_updateExecuteList[i].Update(elapsedTime, realElapsedTime);
             }

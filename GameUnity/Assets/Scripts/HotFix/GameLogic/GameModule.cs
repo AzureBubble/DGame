@@ -62,6 +62,13 @@ namespace GameLogic
         /// </summary>
         public static IGameTimerModule GameTimerModule => m_gameTimerModule == null ? GetModule<IGameTimerModule>() : m_gameTimerModule;
 
+        private static IInputModule m_inputModule;
+
+        /// <summary>
+        /// 输入模块
+        /// </summary>
+        public static IInputModule InputModule => m_inputModule == null ? GetModule<IInputModule>() : m_inputModule;
+
         #endregion
 
         /// <summary>
@@ -86,6 +93,7 @@ namespace GameLogic
             m_animModule = null;
             m_resourceModule = null;
             m_fsmModule = null;
+            m_inputModule = null;
         }
     }
 }

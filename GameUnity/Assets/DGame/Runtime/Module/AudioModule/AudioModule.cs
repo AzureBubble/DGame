@@ -7,7 +7,7 @@ using YooAsset;
 
 namespace DGame
 {
-    public class AudioModule : Module, IAudioModule, IUpdateModule
+    internal sealed class AudioModule : Module, IAudioModule, IUpdateModule
     {
         public const string MUSIC_VOLUME_NAME = "MusicVolume";
         public const string SOUND_VOLUME_NAME = "SoundVolume";

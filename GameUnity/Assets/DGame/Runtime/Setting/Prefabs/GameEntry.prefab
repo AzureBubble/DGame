@@ -267,7 +267,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   stringUtilHelperTypeName: DGame.DGameStringUtilHelper
   logHelperTypeName: DGame.DGameLogHelper
-  jsonHelperTypeName: DGame.DefaultJsonHelper
+  jsonHelperTypeName: DGame.NewtonsoftJsonHelper
   frameRate: 120
   gameSpeed: 1
   runInBackground: 1

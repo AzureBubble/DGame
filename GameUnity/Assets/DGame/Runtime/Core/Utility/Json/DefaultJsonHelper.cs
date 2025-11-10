@@ -10,7 +10,7 @@ namespace DGame
     /// </summary>
     public class DefaultJsonHelper : Utility.IJsonHelper
     {
-        public string ToJson(object obj) => JsonUtility.ToJson(obj);
+        public string ToJson(object obj) => JsonUtility.ToJson(obj, true);
 
         public T ToObject<T>(string json) => JsonUtility.FromJson<T>(json);
 

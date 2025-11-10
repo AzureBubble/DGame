@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace DGame
 {
-    internal partial class MonoDriver : Module, IMonoDriver
+    internal sealed partial class MonoDriver : Module, IMonoDriver
     {
         private GameObject m_monoDriver;
         private MainMonoBehaviour m_monoBehaviour;

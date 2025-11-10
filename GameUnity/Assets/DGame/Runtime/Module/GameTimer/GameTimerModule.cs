@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace DGame
 {
-    internal class GameTimerModule : Module, IUpdateModule, IGameTimerModule
+    internal sealed class GameTimerModule : Module, IUpdateModule, IGameTimerModule
     {
         private int m_timerID = 0;
         public int GlobalTimerID => ++m_timerID;

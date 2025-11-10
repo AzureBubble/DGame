@@ -6,7 +6,7 @@ using YooAsset;
 
 namespace DGame
 {
-    internal class SceneModule : Module, ISceneModule
+    internal sealed class SceneModule : Module, ISceneModule
     {
         private SceneHandle m_currentMainScene;
 

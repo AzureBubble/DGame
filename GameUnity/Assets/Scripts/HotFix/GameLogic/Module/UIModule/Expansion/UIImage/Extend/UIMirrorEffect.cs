@@ -8,6 +8,7 @@ namespace GameLogic
 {
     // [AddComponentMenu("UI/Effects/Mirror", 20)]
     [RequireComponent(typeof(Graphic))]
+    [DisallowMultipleComponent]
     public class UIMirrorEffect : BaseMeshEffect
     {
         public enum MirrorType

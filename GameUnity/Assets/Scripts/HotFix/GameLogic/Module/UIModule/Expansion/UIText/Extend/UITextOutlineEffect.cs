@@ -6,6 +6,7 @@ using UnityEngine.UI;
 
 namespace GameLogic
 {
+    [DisallowMultipleComponent]
     public class UITextOutlineEffect : BaseMeshEffect
     {
         private const string OutLineShaderName = "UGUIPro/UIText";

@@ -137,7 +137,7 @@ namespace GameLogic
                 }
                 if (EditorGUI.EndChangeCheck())
                 {
-                    var mirror = ((UIMirrorEffect)mirrorEffect.objectReferenceValue);
+                    var mirror = (UIMirrorEffect)mirrorEffect?.objectReferenceValue;
 
                     if (mirror != null)
                     {

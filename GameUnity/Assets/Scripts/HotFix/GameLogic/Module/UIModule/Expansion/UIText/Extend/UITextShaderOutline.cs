@@ -6,6 +6,7 @@ using UnityEngine.UI;
 
 namespace GameLogic
 {
+    [DisallowMultipleComponent]
     public class UITextShaderOutline : UIBehaviour
     {
         [SerializeField] [HideInInspector] public Color OutLineColor = Color.white;

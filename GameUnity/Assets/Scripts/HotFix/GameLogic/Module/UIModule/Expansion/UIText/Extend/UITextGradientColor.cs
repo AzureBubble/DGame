@@ -12,6 +12,7 @@ namespace GameLogic
 {
     // [AddComponentMenu("UI/Effects/Gradient Color")]
     [RequireComponent(typeof(Graphic))]
+    [DisallowMultipleComponent]
     public class UITextGradientColor : BaseMeshEffect
     {
         private const int ONE_TEXT_VERTEX = 6;

@@ -20,168 +20,6 @@ namespace DGame
             }
         }
 
-        public class GenerateUIComponentWindow : EditorWindow
-        {
-            private string m_savePath;
-            private bool m_isGenerateUIComponent;
-            private bool m_isUniTask;
-            private static int MIN_WIDTH = 400;
-            private static int MIN_HEIGHT = 60;
-            private static Rect mainWindowPosition => EditorGUIUtility.GetMainWindowPosition();
-
-            [MenuItem("GameObject/ScriptGenerator/BindUIComponent", priority = 81)]
-            public static void GenerateUIComponent()
-            {
-                var window = EditorWindow.GetWindow<GenerateUIComponentWindow>();
-                window.titleContent = new GUIContent("自动生成组件绑定脚本");
-                window.minSize = new Vector2(MIN_WIDTH, MIN_HEIGHT);
-                // window.maxSize = new Vector2(float.MaxValue, 60);
-                var center = new Vector2(mainWindowPosition.x + mainWindowPosition.width / 2,
-                    mainWindowPosition.y + mainWindowPosition.height / 2);
-
-                window.position = new Rect(center.x - MIN_WIDTH / 2, center.y - MIN_HEIGHT / 2, MIN_WIDTH, MIN_HEIGHT);
-                window.m_isGenerateUIComponent = true;
-            }
-
-            [MenuItem("GameObject/ScriptGenerator/BindUIComponent", true)]
-            public static bool ValidateGenerateUIComponent()
-            {
-                return UIScriptGeneratorSettings.Instance.UseBindComponent;
-            }
-
-            [MenuItem("GameObject/ScriptGenerator/GenerateUIProperty", priority = 82)]
-            public static void GenerateUIPropertyBindComponent()
-            {
-                var window = EditorWindow.GetWindow<GenerateUIComponentWindow>();
-                window.titleContent = new GUIContent("自动生成窗口脚本");
-                window.minSize = new Vector2(MIN_WIDTH, MIN_HEIGHT);
-                // window.maxSize = new Vector2(float.MaxValue, 60);
-                var center = new Vector2(mainWindowPosition.x + mainWindowPosition.width / 2,
-                    mainWindowPosition.y + mainWindowPosition.height / 2);
-
-                window.position = new Rect(center.x - MIN_WIDTH / 2, center.y - MIN_HEIGHT / 2, MIN_WIDTH, MIN_HEIGHT);
-                window.m_isGenerateUIComponent = false;
-                window.m_isUniTask = false;
-            }
-
-            [MenuItem("GameObject/ScriptGenerator/GenerateUIProperty", true)]
-            public static bool ValidateGenerateUIPropertyBindComponent()
-            {
-                return UIScriptGeneratorSettings.Instance.UseBindComponent;
-            }
-
-            [MenuItem("GameObject/ScriptGenerator/GenerateUIProperty - UniTask", priority = 83)]
-            public static void GenerateUIPropertyBindComponentUniTask()
-            {
-                var window = EditorWindow.GetWindow<GenerateUIComponentWindow>();
-                window.titleContent = new GUIContent("自动生成窗口脚本");
-                window.minSize = new Vector2(MIN_WIDTH, MIN_HEIGHT);
-                // window.maxSize = new Vector2(float.MaxValue, 60);
-                var center = new Vector2(mainWindowPosition.x + mainWindowPosition.width / 2,
-                    mainWindowPosition.y + mainWindowPosition.height / 2);
-
-                window.position = new Rect(center.x - MIN_WIDTH / 2, center.y - MIN_HEIGHT / 2, MIN_WIDTH, MIN_HEIGHT);
-                window.m_isGenerateUIComponent = false;
-                window.m_isUniTask = true;
-                window.wantsMouseMove = false;
-                window.Show();
-                window.Focus();
-            }
-
-            [MenuItem("GameObject/ScriptGenerator/GenerateUIProperty - UniTask", true)]
-            public static bool ValidateGenerateUIPropertyBindComponentUniTask()
-            {
-                return UIScriptGeneratorSettings.Instance.UseBindComponent;
-            }
-
-            private void OnEnable()
-            {
-                m_savePath = UIScriptGeneratorSettings.GetCodePath();
-            }
-
-            private void OnGUI()
-            {
-                GUILayout.BeginHorizontal();
-                GUILayout.Label($"生成脚本目录预览: ", EditorStyles.boldLabel, GUILayout.Width(150));
-                GUILayout.Label($"{(!string.IsNullOrEmpty(m_savePath) ? m_savePath : UIScriptGeneratorSettings.Instance.CodePath)}", EditorStyles.boldLabel, GUILayout.Width(float.MaxValue));
-                GUILayout.EndHorizontal();
-                // m_savePath = EditorGUILayout.TextField("生成目标目录名", m_savePath);
-                m_savePath = DrawFolderField("生成脚本目录", String.Empty, m_savePath);
-                m_savePath = string.IsNullOrEmpty(m_savePath) ? UIScriptGeneratorSettings.Instance.CodePath : m_savePath;
-                // 横向排列的按钮
-                GUILayout.BeginHorizontal();
-                {
-                    // 取消按钮
-                    if (GUILayout.Button("Cancel", GUILayout.ExpandWidth(true)))
-                    {
-                        Close();
-                    }
-
-                    // 生成按钮
-                    GUI.enabled = !string.IsNullOrEmpty(m_savePath); // 输入为空时禁用生成按钮
-                    if (GUILayout.Button("Generate", GUILayout.ExpandWidth(true)))
-                    {
-                        if (m_isGenerateUIComponent)
-                        {
-                            if (GenerateUIComponentScript(m_savePath))
-                            {
-
-                            }
-                            Close();
-                        }
-                        else
-                        {
-                            if (m_isUniTask)
-                            {
-                                GenerateCSharpScript(true, true, true, m_savePath);
-                            }
-                            else
-                            {
-                                GenerateCSharpScript(true, false, true, m_savePath);
-                            }
-                            Close();
-                        }
-                    }
-                    GUI.enabled = true; // 恢复GUI启用状态
-                }
-                GUILayout.EndHorizontal();
-            }
-
-            private static string DrawFolderField(string label, string labelIcon, string path)
-            {
-                using var horizontalScope = new EditorGUILayout.HorizontalScope();
-
-                var buttonGUIContent = new GUIContent("选择", EditorGUIUtility.IconContent("Folder Icon").image);
-
-                if (!string.IsNullOrEmpty(labelIcon))
-                {
-                    var labelGUIContent = new GUIContent(" " + label, EditorGUIUtility.IconContent(labelIcon).image);
-                    path = EditorGUILayout.TextField(labelGUIContent, path);
-                }
-                else
-                {
-                    path = EditorGUILayout.TextField(label, path);
-                }
-
-                if (GUILayout.Button(buttonGUIContent, GUILayout.Width(60), GUILayout.Height(20)))
-                {
-                    var newPath = EditorUtility.OpenFolderPanel(label, path, string.Empty);
-                    newPath = newPath.Replace(Application.dataPath, "Assets");
-                    if (!string.IsNullOrEmpty(newPath) && newPath.StartsWith(UIScriptGeneratorSettings.GetCodePath()))
-                    {
-                        path = newPath;
-                        // path = "Assets" + newPath.Substring(Application.dataPath.Length);
-                        // Debug.LogError(newPath);
-                    }
-                    else
-                    {
-                        Debug.LogError("路径不在UIScriptGeneratorSettings设置的codePath内: " + newPath);
-                    }
-                }
-                return path;
-            }
-        }
-
         [MenuItem("GameObject/ScriptGenerator/UIPropertyBindComponent", priority = 84)]
         public static void UIPropertyBindComponent()
         {
@@ -330,7 +168,7 @@ namespace DGame
                 string path = savePath?.Replace("\\", "/");
 
                 bool isOk = EditorUtility.DisplayDialog("生成脚本确认", $"将在目录: {path} 生成脚本文件: {fileName}", "确认", "取消");
-                if (!isOk)
+                if (!isOk || string.IsNullOrEmpty(path))
                 {
                     return false;
                 }
@@ -513,7 +351,7 @@ namespace DGame
             string path = savePath.Replace("\\", "/");
 
             bool isOk = EditorUtility.DisplayDialog("生成脚本确认", $"将在目录: {path} 生成脚本文件: {fileName}", "确认", "取消");
-            if (!isOk)
+            if (!isOk || string.IsNullOrEmpty(path))
             {
                 return false;
             }

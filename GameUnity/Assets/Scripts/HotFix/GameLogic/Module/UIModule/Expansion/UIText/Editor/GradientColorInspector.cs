@@ -65,7 +65,7 @@ namespace GameLogic
             // DrawInspectorHeader();
 
             // 绘制预览区域
-            DrawPreviewSection(gradientColor);
+            // DrawPreviewSection(gradientColor);
 
             // 绘制垂直渐变设置
             DrawVerticalGradientSettings(gradientColor);

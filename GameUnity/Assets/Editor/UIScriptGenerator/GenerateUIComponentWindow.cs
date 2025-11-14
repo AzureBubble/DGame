@@ -543,18 +543,12 @@ namespace DGame
 
                 if (success)
                 {
-                    // 显示成功对话框
-                    if (EditorUtility.DisplayDialog("生成成功", message, "打开目录", "确定"))
+                    // 在Project窗口中高亮显示生成的目录
+                    Object obj = AssetDatabase.LoadAssetAtPath<Object>(m_savePath);
+                    if (obj != null)
                     {
-                        // 在Project窗口中高亮显示生成的目录
-                        Object obj = AssetDatabase.LoadAssetAtPath<Object>(m_savePath);
-
-                        if (obj != null)
-                        {
-                            EditorGUIUtility.PingObject(obj);
-                        }
+                        EditorGUIUtility.PingObject(obj);
                     }
-
                     Close();
                 }
                 else

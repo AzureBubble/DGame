@@ -118,9 +118,15 @@ namespace GameLogic
                 {
                     RebindComponents();
                 }
-                if (GUILayout.Button("清除空引用", GUILayout.Height(25)))
+                if (GUILayout.Button("生成脚本窗口", GUILayout.Height(25)))
                 {
-                    RemoveNullComponents();
+                    // RemoveNullComponents();
+                    UIScriptGenerator.GenerateUIComponentWindow.GenerateUIPropertyBindComponent();
+                }
+                if (GUILayout.Button("生成UniTask脚本本窗口", GUILayout.Height(25)))
+                {
+                    // RemoveNullComponents();
+                    UIScriptGenerator.GenerateUIComponentWindow.GenerateUIPropertyBindComponentUniTask();
                 }
             }
             EditorGUILayout.EndHorizontal();

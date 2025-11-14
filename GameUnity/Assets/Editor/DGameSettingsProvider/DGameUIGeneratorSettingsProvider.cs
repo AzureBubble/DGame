@@ -155,27 +155,6 @@ public static class DGameUIGeneratorSettingsProvider
                         codePathProperty.stringValue);
 
                     EditorGUILayout.Space(5);
-
-                    // 脚本后缀名设置
-                    EditorGUILayout.LabelField("脚本命名规范", EditorStyles.boldLabel);
-
-                    var windowComponentSuffixNameProperty = serializedObject.FindProperty("windowComponentSuffixName");
-                    windowComponentSuffixNameProperty.stringValue = EditorGUILayout.TextField(
-                        new GUIContent("窗体组件脚本后缀", "Window类型UI组件的脚本后缀名"),
-                        windowComponentSuffixNameProperty.stringValue);
-
-                    var widgetComponentSuffixNameProperty = serializedObject.FindProperty("widgetComponentSuffixName");
-                    widgetComponentSuffixNameProperty.stringValue = EditorGUILayout.TextField(
-                        new GUIContent("Widget组件脚本后缀", "Widget类型UI组件的脚本后缀名"),
-                        widgetComponentSuffixNameProperty.stringValue);
-
-                    EditorGUILayout.Space(3);
-
-                    // 命名规范提示
-                    string namingTip = $"命名示例:\n" +
-                                      $"• 窗体: MainWindow{windowComponentSuffixNameProperty.stringValue}\n" +
-                                      $"• 组件: HealthBar{widgetComponentSuffixNameProperty.stringValue}";
-                    EditorGUILayout.HelpBox(namingTip, MessageType.Info);
                 }
 
                 EditorGUILayout.Space(5);

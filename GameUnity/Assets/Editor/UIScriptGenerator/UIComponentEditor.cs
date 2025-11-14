@@ -111,6 +111,7 @@ namespace GameLogic
 
         private void DrawTopButtons()
         {
+            EditorGUILayout.BeginVertical("HelpBox");
             EditorGUILayout.BeginHorizontal();
             {
                 if (GUILayout.Button("重新绑定组件", GUILayout.Height(25)))
@@ -123,6 +124,19 @@ namespace GameLogic
                 }
             }
             EditorGUILayout.EndHorizontal();
+            EditorGUILayout.BeginHorizontal();
+            {
+                if (GUILayout.Button("生成标准版绑定代码", GUILayout.Height(25)))
+                {
+                    UIScriptGenerator.GenerateCSharpScript(false);
+                }
+                if (GUILayout.Button("生成UniTask代码", GUILayout.Height(25)))
+                {
+                    UIScriptGenerator.GenerateCSharpScript(false, true);
+                }
+            }
+            EditorGUILayout.EndHorizontal();
+            EditorGUILayout.EndVertical();
         }
 
         private void RebindComponents()

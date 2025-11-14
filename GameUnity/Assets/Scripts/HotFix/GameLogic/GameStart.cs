@@ -35,7 +35,7 @@ public partial class GameStart
 
     private static void StartGame()
     {
-        UIModule.Instance.ShowWindow<TestWindow>();
+        // UIModule.Instance.ShowWindow<TestWindow>();
     }
 
     private static void OnDestroy()

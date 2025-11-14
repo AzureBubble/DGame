@@ -27,7 +27,7 @@ namespace GameLogic
             m_reorderableList.drawHeaderCallback = (Rect rect) =>
             {
                 float width = rect.width - 20;
-                float indexWidth = 50f;
+                float indexWidth = 90f;
                 float nameWidth = 150f;
                 float componentWidth = width - indexWidth - nameWidth - 15f;
 
@@ -44,13 +44,13 @@ namespace GameLogic
 
                 float height = EditorGUIUtility.singleLineHeight;
                 float padding = 2f;
-                float indexWidth = 30f;
+                float indexWidth = 70f;
                 float nameWidth = 150f;
                 float componentWidth = rect.width - indexWidth - nameWidth - 10f;
 
                 // 序号（不可编辑）
                 EditorGUI.BeginDisabledGroup(true);
-                EditorGUI.LabelField(new Rect(rect.x, rect.y + padding, indexWidth, height), (index + 1).ToString());
+                EditorGUI.LabelField(new Rect(rect.x, rect.y + padding, indexWidth, height), $"【{index}】");
                 EditorGUI.EndDisabledGroup();
 
                 // 对象名称（不可编辑）

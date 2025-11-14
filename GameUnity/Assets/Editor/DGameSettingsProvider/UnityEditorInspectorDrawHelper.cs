@@ -11,7 +11,7 @@ using UnityEngine.Events;
 [InitializeOnLoad]
 public static class UnityEditorInspectorDrawHelper
 {
-    private static Dictionary<EditorWindow, VisualElement> bindButtonsByWindow = new();
+    private static Dictionary<EditorWindow, VisualElement> m_bindButtonsByWindow = new();
     public static UnityAction<EditorWindow> OnCreateButton;
     public static UnityAction<EditorWindow> OnDestroyButton;
 
@@ -38,7 +38,7 @@ public static class UnityEditorInspectorDrawHelper
 
         // 清理不存在的窗口引用
         var windowsToRemove = new List<EditorWindow>();
-        foreach (var kvp in bindButtonsByWindow)
+        foreach (var kvp in m_bindButtonsByWindow)
         {
             if (kvp.Key == null)
             {
@@ -47,7 +47,7 @@ public static class UnityEditorInspectorDrawHelper
         }
         foreach (var window in windowsToRemove)
         {
-            bindButtonsByWindow.Remove(window);
+            m_bindButtonsByWindow.Remove(window);
         }
     }
 
@@ -56,7 +56,7 @@ public static class UnityEditorInspectorDrawHelper
         if (window == null || window.rootVisualElement == null) return;
 
         var shouldShowButton = ShouldShowBindButton();
-        var hasButton = bindButtonsByWindow.ContainsKey(window);
+        var hasButton = m_bindButtonsByWindow.ContainsKey(window);
 
         if (shouldShowButton && !hasButton)
         {
@@ -136,16 +136,16 @@ public static class UnityEditorInspectorDrawHelper
                 addComponentParent.Add(buttonHolder);
             }
 
-            bindButtonsByWindow[window] = buttonHolder;
+            m_bindButtonsByWindow[window] = buttonHolder;
         }
     }
 
     static void DestroyButton(EditorWindow window)
     {
-        if (bindButtonsByWindow.TryGetValue(window, out var buttonHolder))
+        if (m_bindButtonsByWindow.TryGetValue(window, out var buttonHolder))
         {
             buttonHolder.RemoveFromHierarchy();
-            bindButtonsByWindow.Remove(window);
+            m_bindButtonsByWindow.Remove(window);
         }
     }
 

@@ -9,6 +9,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using DGame;
 using UnityEngine;
 
 namespace GameLogic
@@ -22,14 +23,14 @@ namespace GameLogic
         {
             if (index < 0 || index >= m_components.Count)
             {
-                Debug.LogError("索引超出范围");
+                Debugger.Error("索引超出范围");
                 return null;
             }
             T c = m_components[index] as T;
 
             if (c == null)
             {
-                Debug.LogError("没有找到对应类型");
+                Debugger.Error($"没有找到对应类型: {typeof(T).FullName}");
                 return null;
             }
             return c;

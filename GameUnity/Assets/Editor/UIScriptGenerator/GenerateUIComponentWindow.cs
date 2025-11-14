@@ -7,6 +7,10 @@ namespace DGame
     {
         public class GenerateUIComponentWindow : EditorWindow
         {
+            private bool m_isAutoDiff = true;
+            private bool m_isWindow;
+            private bool m_isWidget;
+
             private string m_csName;
             private string m_savePath;
             private bool m_isGenerateUIComponent;
@@ -25,17 +29,18 @@ namespace DGame
             private Color m_warningColor = new Color(1f, 0.6f, 0.2f, 1f);
 
             private static int MIN_WIDTH = 850;
-            private static int MIN_HEIGHT = 515;
+            private static int MIN_HEIGHT = 595;
             private static Rect mainWindowPosition => EditorGUIUtility.GetMainWindowPosition();
 
             [MenuItem("GameObject/ScriptGenerator/绑定UI组件", priority = 81)]
             public static void GenerateUIComponent()
             {
-                var window = CreateWindow<GenerateUIComponentWindow>();
-                window.titleContent = new GUIContent("生成UI组件");
-                window.minSize = new Vector2(MIN_WIDTH, MIN_HEIGHT);
-                window.m_isGenerateUIComponent = true;
-                CenterWindow(window);
+                UIScriptGenerator.GenerateUIComponentScript();
+                // var window = CreateWindow<GenerateUIComponentWindow>();
+                // window.titleContent = new GUIContent("生成UI组件");
+                // window.minSize = new Vector2(MIN_WIDTH, MIN_HEIGHT);
+                // window.m_isGenerateUIComponent = true;
+                // CenterWindow(window);
             }
 
             [MenuItem("GameObject/ScriptGenerator/绑定UI组件", true)]
@@ -146,13 +151,12 @@ namespace DGame
             private void DrawConfigurationSection()
             {
                 var root = Selection.activeTransform;
-
+                var widgetPrefix = GetUIWidgetName();
                 if (root != null)
                 {
                     // CheckVariableNames();
                     var windowComSufName = UIScriptGeneratorSettings.Instance.WindowComponentSuffixName;
                     var widgetComSufName = UIScriptGeneratorSettings.Instance.WidgetComponentSuffixName;
-                    var widgetPrefix = GetUIWidgetName();
                     var rootName = m_isGenerateUIComponent ? $"{root.name}{windowComSufName}" : root.name;
 
                     if (root.name.StartsWith(widgetPrefix))
@@ -161,7 +165,27 @@ namespace DGame
                             ? $"{root.name.Replace(GetUIWidgetName(), string.Empty)}{widgetComSufName}"
                             : $"{root.name.Replace(GetUIWidgetName(), string.Empty)}";
                     }
+                    if (!m_isAutoDiff)
+                    {
+                        if (m_isWidget)
+                        {
+                            rootName = m_isGenerateUIComponent
+                                ? $"{root.name}{widgetComSufName}"
+                                : $"{root.name}";
+                        }
+                        else if (m_isWindow)
+                        {
+                            rootName = m_isGenerateUIComponent
+                                ? $"{root.name}{windowComSufName}"
+                                : $"{root.name}";
+                        }
+                    }
                     m_csName = $"{rootName}.cs";
+                    if (!m_isAutoDiff && !m_isWidget && !m_isWindow)
+                    {
+                        m_csName = $"请先选择一种UI类型进行生成";
+                    }
+
                 }
                 EditorGUILayout.BeginVertical("HelpBox");
                 {
@@ -211,6 +235,103 @@ namespace DGame
                     {
                         EditorGUILayout.HelpBox("路径应该以 Assets/ 开头", MessageType.Warning);
                     }
+
+                    // 生成UI类型选项
+                    EditorGUILayout.BeginVertical("Box");
+                    {
+                        GUILayout.Space(5);
+                        EditorGUILayout.BeginHorizontal();
+                        {
+                            EditorGUILayout.LabelField("UI类型", EditorStyles.miniBoldLabel, GUILayout.Width(80));
+
+                            // 自动识别选项
+                            EditorGUILayout.BeginVertical();
+                            m_isAutoDiff = EditorGUILayout.ToggleLeft("自动识别", m_isAutoDiff, GUILayout.Width(80));
+                            EditorGUILayout.EndVertical();
+
+                            // 只有当自动识别为false时才显示Window和Widget选项
+                            if (!m_isAutoDiff)
+                            {
+                                EditorGUILayout.BeginVertical();
+                                bool newIsWindow = EditorGUILayout.ToggleLeft("Window", m_isWindow, GUILayout.Width(80));
+
+                                if (newIsWindow != m_isWindow)
+                                {
+                                    m_isWindow = newIsWindow;
+
+                                    if (m_isWindow)
+                                    {
+                                        m_isWidget = false; // 互斥逻辑
+                                    }
+                                    else
+                                    {
+                                        m_isWidget = true;
+                                    }
+                                }
+
+                                EditorGUILayout.EndVertical();
+
+                                EditorGUILayout.BeginVertical();
+                                bool newIsWidget = EditorGUILayout.ToggleLeft("Widget", m_isWidget, GUILayout.Width(80));
+
+                                if (newIsWidget != m_isWidget)
+                                {
+                                    m_isWidget = newIsWidget;
+
+                                    if (m_isWidget)
+                                    {
+                                        m_isWindow = false; // 互斥逻辑
+                                    }
+                                    else
+                                    {
+                                        m_isWindow = true;
+                                    }
+                                }
+
+                                if (!m_isWindow && !m_isWidget)
+                                {
+                                    m_isWindow = true;
+                                }
+
+                                EditorGUILayout.EndVertical();
+                            }
+                            else
+                            {
+                                // 自动识别为true时，重置Window和Widget状态
+                                m_isWindow = false;
+                                m_isWidget = false;
+                            }
+                        }
+                        EditorGUILayout.EndHorizontal();
+                        GUILayout.Space(5);
+                        string uiType = "未知类型";
+
+                        if (m_isAutoDiff)
+                        {
+                            if (root != null)
+                            {
+                                uiType = root.name.StartsWith(widgetPrefix) ? "Widget" : "Window";
+                                uiType += " （自动识别是根据选中物体命名决定）";
+                            }
+                        }
+                        else
+                        {
+                            if (m_isGenerateUIComponent)
+                            {
+                                if (m_isWidget)
+                                    uiType = "Widget";
+                                else if (m_isWindow)
+                                    uiType = "Window";
+                            }
+                            else
+                            {
+                                uiType = "生成窗口类脚本时，除了自动识别类型外，都将以选中对象名字命名脚本";
+                            }
+                        }
+
+                        EditorGUILayout.HelpBox($"将要生成的UI类型为：{uiType}", MessageType.Info);
+                    }
+                    EditorGUILayout.EndVertical();
 
                     // 生成类型说明
                     EditorGUILayout.BeginVertical("Box");
@@ -329,7 +450,7 @@ namespace DGame
                         {
                             if (GUILayout.Button("打开设置", GUILayout.Height(25)))
                             {
-                                SettingsService.OpenProjectSettings("Project/DGame/UI代码生成器设置");
+                                SettingsService.OpenProjectSettings("Project/TEngine/UISettings");
                             }
 
                             if (GUILayout.Button("验证路径", GUILayout.Height(25)))
@@ -410,13 +531,14 @@ namespace DGame
 
                 if (m_isGenerateUIComponent)
                 {
-                    success = GenerateUIComponentScript(m_savePath);
+                    success = GenerateUIComponentScript();
                     message = success ? "UI组件脚本生成成功！" : "UI组件脚本生成失败";
                 }
                 else
                 {
-                    success = GenerateCSharpScript(true, m_isUniTask, true, m_savePath);
-                    message = $"UI窗口脚本生成成功！({(m_isUniTask ? "UniTask" : "标准")}版本)";
+                    success = GenerateCSharpScript(m_isUniTask, m_savePath);
+                    string succStr = success ? "成功" : "失败";
+                    message = $"UI窗口脚本生成{succStr}！({(m_isUniTask ? "UniTask" : "标准")}版本)";
                 }
 
                 if (success)
@@ -467,17 +589,15 @@ namespace DGame
                 Debug.Log("已重置生成路径为默认设置");
             }
 
-            private bool GenerateUIComponentScript(string savePath)
+            private bool GenerateUIComponentScript()
             {
-                var succ = UIScriptGenerator.GenerateUIComponentScript(savePath);
-                if(succ) Debug.Log($"生成UI组件脚本到: {savePath}");
+                var succ = UIScriptGenerator.GenerateUIComponentScript();
                 return succ;
             }
 
-            private bool GenerateCSharpScript(bool includeProperties, bool useUniTask, bool includeEvents,
-                string savePath)
+            private bool GenerateCSharpScript(bool useUniTask, string savePath)
             {
-                var succ = UIScriptGenerator.GenerateCSharpScript(includeProperties, useUniTask, includeEvents, savePath);
+                var succ = UIScriptGenerator.GenerateCSharpScript(true, useUniTask, true, savePath, m_isAutoDiff, m_isWidget);
                 if(succ) Debug.Log($"生成C#脚本到: {savePath} (UniTask: {useUniTask})");
                 return succ;
             }

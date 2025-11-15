@@ -130,9 +130,9 @@ namespace GameLogic
 
         public void Refresh()
         {
-            if (graphic != null)
+            if (this)
             {
-                graphic.SetVerticesDirty();
+                graphic?.SetVerticesDirty();
             }
         }
     }

@@ -186,7 +186,7 @@ namespace GameLogic
             UITextDrawEditor.DrawTextOutLineAndGradientGUI("字体描边", ref m_textOutLineAndGradientPanelOpen, m_isUseTextOutline,
                 m_isOpenShaderOutline, m_outLineColor, m_outLineWidth, m_alpha, (UITextOutlineEffect)m_textEffect.objectReferenceValue);
             UITextDrawEditor.DrawTextGradientColorGUI("字体渐变", ref m_textGradientColorPanelOpen, m_isUseGradientColor,
-                (UITextGradientColor)m_gradientEffect.objectReferenceValue, m_gradientColorEditor);
+                m_gradientColorEditor, ((UIText)target)?.UITextGradientColorExtend);
             UITextDrawEditor.DrawTextCircleGUI("环形字体", ref m_textCirclePanelOpen, m_useTextCircle, m_radius,
                 m_spaceCoff, m_angleOffset);
             UITextDrawEditor.DrawTextBestFitGUI("字体自适应", ref m_textBestFitFontPanelOpen, m_isUseBestFitFont, m_resizeTextForBestFit);

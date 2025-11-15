@@ -26,6 +26,18 @@ namespace GameLogic
         private bool m_splitTextGradient = false;
         [SerializeField]private UITextGradientColor m_gradientEffect;
 
+        public UITextGradientColor gradientColorEffect
+        {
+            get
+            {
+                if (m_gradientEffect ==null)
+                {
+                    m_gradientEffect = m_text?.GetComponent<UITextGradientColor>();
+                }
+                return m_gradientEffect;
+            }
+        }
+
         public bool isUseGradientColor
         {
             get => m_isUseGradientColor;
@@ -59,8 +71,8 @@ namespace GameLogic
                     }
                 }
 #endif
-
-                Refresh();
+                m_gradientEffect?.SetUseGradientColor(value);
+                // Refresh();
             }
         }
 
@@ -131,13 +143,18 @@ namespace GameLogic
 #pragma warning disable 0414
         public void SaveSerializeData(UIText uiText)
         {
-            // if(!m_isUseGradientColor) return;
             m_text = uiText;
+            if(!m_isUseGradientColor) return;
             if(!uiText.TryGetComponent(out m_gradientEffect))
             {
                 m_gradientEffect = uiText.gameObject.AddComponent<UITextGradientColor>();
                 m_gradientEffect.hideFlags = HideFlags.HideInInspector;
             }
+        }
+
+        public void SetUseGradientColor(bool useGradientColor)
+        {
+            isUseGradientColor = useGradientColor;
         }
 
         public void SetGradientColor(Color32 colorTop, Color32 colorBottom, Color32 colorLeft = default, Color32 colorRight = default, float verticalOffset = 0f, float horizontalOffset = 0f, bool splitTextGradient = false)

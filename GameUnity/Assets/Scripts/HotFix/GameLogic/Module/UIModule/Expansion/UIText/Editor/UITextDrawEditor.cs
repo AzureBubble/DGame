@@ -170,12 +170,21 @@ namespace GameLogic
 
         #region 字体渐变
 
-        public static void DrawTextGradientColorGUI(string title, ref bool isPanelOpen, SerializedProperty isUseGradientColor, UITextGradientColor gradientColor, GradientColorEditor gradientColorEditor)
+        public static void DrawTextGradientColorGUI(string title, ref bool isPanelOpen,
+            SerializedProperty isUseGradientColor, GradientColorEditor gradientColorEditor,
+            UITextGradientColorExtend gradientColorExtend)
         {
             UnityEditorUtil.LayoutFrameBox(() =>
             {
+                EditorGUI.BeginChangeCheck();
                 EditorGUILayout.PropertyField(isUseGradientColor, new GUIContent("开启字体渐变"));
-                gradientColor?.SetUseGradientColor(isUseGradientColor.boolValue);
+                UITextGradientColor gradientColor = null;
+                if (EditorGUI.EndChangeCheck())
+                {
+                    gradientColorExtend?.SetUseGradientColor(isUseGradientColor.boolValue);
+                }
+                gradientColor = gradientColorExtend?.gradientColorEffect;
+                // gradientColor?.SetUseGradientColor(isUseGradientColor.boolValue);
 
                 if (isUseGradientColor.boolValue)
                 {

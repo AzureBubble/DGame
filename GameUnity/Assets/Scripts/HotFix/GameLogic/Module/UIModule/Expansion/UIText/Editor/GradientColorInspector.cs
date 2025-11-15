@@ -60,6 +60,10 @@ namespace GameLogic
 
         public void OnInspectorGUI(UITextGradientColor gradientColor)
         {
+            if (gradientColor == null)
+            {
+                return;
+            }
             // serializedObject.Update();
             // 绘制标题区域
             // DrawInspectorHeader();

@@ -15,9 +15,10 @@ namespace GameLogic
 
         private void LogHandler(string condition, string stacktrace, LogType type)
         {
-            if (type == LogType.Exception)
+            if (type == LogType.Exception || type == LogType.Error || type == LogType.Assert)
             {
                 string des = $"客户端报错, \n#内容#：---{condition} \n#位置#：---{stacktrace}";
+                m_uiModule.ShowWindow<LogUI>(des);
             }
         }
 

@@ -112,6 +112,8 @@ namespace GameLogic
                         }
                     }
                 }
+                m_canvas.sortingOrder = value;
+
                 // 虚函数
                 if (Visible)
                 {

@@ -123,27 +123,16 @@ namespace GameLogic
         #region Mirror
 
         public static void DrawImageMirrorGUI(string title, ref bool isPanelOpen, SerializedProperty isUseMirror,
-            SerializedProperty mirrorType, SerializedProperty mirrorEffect, UIImageMirrorExtend mirrorExtend)
+            SerializedProperty mirrorType)
         {
             UnityEditorUtil.LayoutFrameBox(() =>
             {
-                EditorGUI.BeginChangeCheck();
                 EditorGUILayout.PropertyField(isUseMirror, new GUIContent("开启镜像模式"));
                 if (isUseMirror.boolValue)
                 {
                     EditorGUI.indentLevel++;
                     EditorGUILayout.PropertyField(mirrorType, new GUIContent("镜像模式"));
                     EditorGUI.indentLevel--;
-                }
-                if (EditorGUI.EndChangeCheck())
-                {
-                    var mirror = (UIMirrorEffect)mirrorEffect?.objectReferenceValue;
-                    if (mirror != null)
-                    {
-                        mirror.mirrorType = (UIMirrorEffect.MirrorType)mirrorType.enumValueIndex;
-                        mirror.UseImageMirror = isUseMirror.boolValue;
-                    }
-                    if (mirrorExtend != null) mirrorExtend.isUseImageMirror = isUseMirror.boolValue;
                 }
             }, title, ref isPanelOpen, true);
         }

@@ -92,7 +92,7 @@ namespace GameLogic
 
         public void SetFillPercent(float value)
         {
-	        m_fillPercent = value;
+	        fillPercent = value;
         }
 
         public void Initialize(Image image)

@@ -29,7 +29,7 @@ namespace GameLogic
         public float radius
         {
             get => m_radius;
-            set { if(m_radius != value) { m_radius = value; Refresh(); } }
+            set { if (m_radius != value) { m_radius = value; Refresh(); } }
         }
 
         //使用几个三角形去填充每个角的四分之一圆

@@ -18,8 +18,9 @@ namespace GameLogic
         protected override void Awake()
         {
             base.Awake();
-            m_uiImageMaskExtend.Initialize(this);
-            m_uiImageRoundedCornersExtend.Initialize(this);
+            UIImageMirrorExtend?.Initialize(this);
+            m_uiImageMaskExtend?.Initialize(this);
+            m_uiImageRoundedCornersExtend?.Initialize(this);
         }
 
         private void Update()
@@ -37,6 +38,7 @@ namespace GameLogic
             base.OnValidate();
             m_uiImageMaskExtend.EditorInitialize(this);
             m_uiImageRoundedCornersExtend.EditorInitialize(this);
+            UIImageMirrorExtend.EditorInitialize(this);
             SetVerticesDirty();
         }
 #endif
@@ -102,6 +104,8 @@ namespace GameLogic
             {
                 m_uiImageRoundedCornersExtend.OnPopulateMesh(verts);
             }
+
+            UIImageMirrorExtend?.ModifyMesh(verts);
         }
     }
 }

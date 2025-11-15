@@ -109,7 +109,7 @@ namespace GameLogic
             {
                 m_uiButtonClickSound?.OnPointerUp();
             }
-            EventSystem.current.SetSelectedGameObject(null);
+            EventSystem.current?.SetSelectedGameObject(null);
         }
 
         private void Update()

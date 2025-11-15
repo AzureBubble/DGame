@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   uiRoot: {fileID: 3662584845349564629, guid: 3983b8718d4c6cf4bae119ef45daef58, type: 3}
   useBindComponent: 1
-  codePath: Assets/Scripts/HotFix/GameLogic/UI
+  genCodePath: Assets/Scripts/HotFix/GameLogic/UI/Gen
+  impCodePath: Assets/Scripts/HotFix/GameLogic/UI
   nameSpace: GameLogic
   widgetName: item
   codeStyle: 1

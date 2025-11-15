@@ -71,16 +71,27 @@ namespace DGame
             return UIScriptGeneratorSettings.Instance.UseBindComponent;
         }
 
+        #region GenerateGenCSharp
+
+        public static string GetUITypeName(UIBindComponent.GenUIType uiType, string fileName)
+            => uiType switch
+            {
+                UIBindComponent.GenUIType.UIWidget => UIBindComponent.GenUIType.UIWidget.ToString(),
+                UIBindComponent.GenUIType.UIWindow => UIBindComponent.GenUIType.UIWindow.ToString(),
+                UIBindComponent.GenUIType.UIEventItem => $"{UIBindComponent.GenUIType.UIEventItem.ToString()}<{fileName}>",
+                _ => throw new ArgumentOutOfRangeException(nameof(uiType), uiType, null)
+            };
+
         public static bool GenerateCSharpScript(bool includeListener, bool isUniTask = false,
-            bool isAutoGenerate = false, string savePath = null, bool isAutoDiff = true, bool m_isWidget = false)
+            bool isAutoGenerate = false, string savePath = null, string className = null,
+            UIBindComponent.GenUIType uiType = UIBindComponent.GenUIType.UIWindow, bool isGenImp = false,
+            string impSavePath = null)
         {
             var root = Selection.activeTransform;
-
             if (root == null)
             {
                 return false;
             }
-
             CheckVariableNames();
             StringBuilder strVar = new StringBuilder();
             StringBuilder strBind = new StringBuilder();
@@ -89,26 +100,19 @@ namespace DGame
 
             var widgetPrefix = GetUIWidgetName();
             string fileName = $"{root.name}.cs";
-            string uiType = "UIWindow";
-
-            if (root.name.StartsWith(widgetPrefix))
+            if (!string.IsNullOrEmpty(className))
             {
-                uiType = "UIWidget";
-                fileName = $"{root.name.Replace(GetUIWidgetName(), string.Empty)}.cs";
+                fileName = $"{className}.cs";
             }
-
-            if (!isAutoDiff)
+            string uiTypeName = GetUITypeName(uiType, className);
+            if (!isAutoGenerate)
             {
-                if (m_isWidget)
+                uiTypeName = "UIWindow";
+                if (root.name.StartsWith(widgetPrefix))
                 {
-                    uiType = "UIWidget";
+                    uiTypeName = "UIWidget";
+                    fileName = $"{root.name.Replace(GetUIWidgetName(), string.Empty)}.cs";
                 }
-                else
-                {
-                    uiType = "UIWindow";
-                }
-
-                fileName = $"{root.name}.cs";
             }
 
             strVar.AppendLine($"\t\tprivate UIBindComponent m_bindComponent;");
@@ -142,26 +146,26 @@ namespace DGame
                 strFile.AppendLine($"namespace {UIScriptGeneratorSettings.GetUINameSpace()}");
                 strFile.AppendLine("{");
                 {
-                    if (isAutoDiff)
+                    if (!isAutoGenerate)
                     {
                         if (root.name.StartsWith(widgetPrefix))
                         {
-                            strFile.AppendLine($"\tpublic partial class {fileName.Replace(".cs", "")} : {uiType}");
+                            strFile.AppendLine($"\tpublic partial class {fileName.Replace(".cs", "")} : {uiTypeName}");
                         }
                         else
                         {
                             strFile.AppendLine($"\t[Window(UILayer.UI, location : \"{fileName.Replace(".cs", "")}\")]");
-                            strFile.AppendLine($"\tpublic partial class {fileName.Replace(".cs", "")} : {uiType}");
+                            strFile.AppendLine($"\tpublic partial class {fileName.Replace(".cs", "")} : {uiTypeName}");
                         }
                     }
                     else
                     {
-                        if (!m_isWidget)
+                        if (uiType == UIBindComponent.GenUIType.UIWindow)
                         {
                             strFile.AppendLine($"\t[Window(UILayer.UI, location : \"{fileName.Replace(".cs", "")}\")]");
                         }
 
-                        strFile.AppendLine($"\tpublic partial class {fileName.Replace(".cs", "")} : {uiType}");
+                        strFile.AppendLine($"\tpublic partial class {fileName.Replace(".cs", "")} : {uiTypeName}");
                     }
 
                     strFile.AppendLine("\t{");
@@ -226,6 +230,10 @@ namespace DGame
 
                 File.WriteAllText(filePath, strFile.ToString(), Encoding.UTF8);
                 File.SetAttributes(filePath, File.GetAttributes(filePath) | FileAttributes.ReadOnly);
+                if (isGenImp)
+                {
+                    GenerateImpCSharpScript(isUniTask, fileName, impSavePath);
+                }
                 AssetDatabase.Refresh();
             }
             else
@@ -338,6 +346,163 @@ namespace DGame
                     break;
             }
         }
+
+        #endregion
+
+        #region GenerateImpCSharp
+
+        public static bool GenerateImpCSharpScript(bool isUniTask = false, string fileName = null, string impSavePath = null)
+        {
+            var root = Selection.activeTransform;
+            if (root == null || string.IsNullOrEmpty(fileName))
+            {
+                return false;
+            }
+            CheckVariableNames();
+            StringBuilder strCallback = new StringBuilder();
+
+            var widgetPrefix = GetUIWidgetName();
+            AutoImpErgodic(root, root, ref strCallback, isUniTask);
+            StringBuilder strFile = new StringBuilder();
+
+#if ENABLE_TEXTMESHPRO
+                strFile.AppendLine("using TMPro;");
+#endif
+            if (isUniTask)
+            {
+                strFile.AppendLine("using Cysharp.Threading.Tasks;");
+            }
+
+            strFile.AppendLine("using UnityEngine;");
+            strFile.AppendLine("using UnityEngine.UI;");
+            strFile.AppendLine("using DGame;");
+            strFile.AppendLine();
+            strFile.AppendLine($"namespace {UIScriptGeneratorSettings.GetUINameSpace()}");
+            strFile.AppendLine("{");
+            {
+                strFile.AppendLine($"\tpublic partial class {fileName.Replace(".cs", "")}");
+                strFile.AppendLine("\t{");
+                {
+                    strFile.AppendLine("\t\t#region 事件");
+                    strFile.AppendLine();
+                    strFile.Append(strCallback.ToString());
+                    strFile.AppendLine($"\t\t#endregion");
+                }
+                strFile.AppendLine("\t}");
+            }
+            strFile.AppendLine("}");
+
+            m_textEditor.Delete();
+            m_textEditor.text = strFile.ToString();
+            m_textEditor.SelectAll();
+            m_textEditor.Copy();
+
+            string path = impSavePath?.Replace("\\", "/");
+            if (string.IsNullOrEmpty(path))
+            {
+                return false;
+            }
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+            var filePath = Path.Combine(path, fileName).Replace("\\", "/");
+
+            if (File.Exists(filePath))
+            {
+                return false;
+            }
+
+            File.WriteAllText(filePath, strFile.ToString(), Encoding.UTF8);
+            AssetDatabase.Refresh();
+            return true;
+        }
+
+        public static void AutoImpErgodic(Transform root, Transform transform, ref StringBuilder strCallback, bool isUniTask)
+        {
+            for (int i = 0; i < transform.childCount; i++)
+            {
+                Transform child = transform.GetChild(i);
+                WriteAutoImpScript(root, child, ref strCallback, isUniTask);
+                // 跳过 "m_item"
+                if (child.name.StartsWith(GetUIWidgetName()))
+                {
+                    continue;
+                }
+
+                AutoImpErgodic(root, child, ref strCallback, isUniTask);
+            }
+        }
+
+        private static void WriteAutoImpScript(Transform root, Transform child, ref StringBuilder strCallback, bool isUniTask)
+        {
+            string varName = child.name;
+            // 查找相关的规则定义
+            var rule = UIScriptGeneratorSettings.GetScriptGenerateRulers()
+                .Find(r => varName.StartsWith(r.uiElementRegex));
+
+            if (rule == null)
+            {
+                return;
+            }
+
+            var componentName = rule.componentName.ToString();
+
+            if (string.IsNullOrEmpty(componentName))
+            {
+                return;
+            }
+
+            varName = GetVariableName(varName);
+
+            if (string.IsNullOrEmpty(varName))
+            {
+                return;
+            }
+
+            switch (rule.componentName)
+            {
+                case UIComponentName.Button:
+                    var btnFuncName = GetButtonFuncName(varName);
+
+                    if (isUniTask)
+                    {
+                        strCallback.AppendLine($"\t\tprivate async partial UniTaskVoid {btnFuncName}()");
+                        strCallback.AppendLine("\t\t{");
+                        strCallback.AppendLine("\t\t\tawait UniTask.Yield();");
+                        strCallback.AppendLine("\t\t}");
+                    }
+                    else
+                    {
+                        strCallback.AppendLine($"\t\tprivate partial void {btnFuncName}()");
+                        strCallback.AppendLine("\t\t{");
+                        strCallback.AppendLine("\t\t}");
+                    }
+
+                    strCallback.AppendLine();
+                    break;
+
+                case UIComponentName.Toggle:
+                    var toggleFuncName = GetToggleFuncName(varName);
+                    strCallback.AppendLine($"\t\tprivate partial void {toggleFuncName}(bool isOn)");
+                    strCallback.AppendLine("\t\t{");
+                    strCallback.AppendLine("\t\t}");
+                    strCallback.AppendLine();
+                    break;
+
+                case UIComponentName.Slider:
+                    var sliderFuncName = GetSliderFuncName(varName);
+                    strCallback.AppendLine($"\t\tprivate partial void {sliderFuncName}(float value)");
+                    strCallback.AppendLine("\t\t{");
+                    strCallback.AppendLine("\t\t}");
+                    strCallback.AppendLine();
+                    break;
+            }
+        }
+
+        #endregion
+        
+        #region GenerateUIComponent
 
         public static bool GenerateUIComponentScript()
         {
@@ -572,22 +737,6 @@ namespace DGame
 #endif
         }
 
-        private static Transform FindDeepChild(Transform parent, string childName)
-        {
-            // 先在直接子级中查找
-            Transform result = parent.Find(childName);
-            if (result != null)
-                return result;
-
-            // 递归在子级的子级中查找
-            foreach (Transform child in parent)
-            {
-                result = FindDeepChild(child, childName);
-                if (result != null)
-                    return result;
-            }
-
-            return null;
-        }
+        #endregion
     }
 }

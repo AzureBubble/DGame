@@ -15,13 +15,15 @@ namespace DGame
     {
         [SerializeField] private GameObject uiRoot;
         [SerializeField] private bool useBindComponent;
-        [SerializeField] private string codePath;
+        [SerializeField] private string genCodePath = "Assets/Scripts/HotFix/GameLogic/UI/Gen";
+        [SerializeField] private string impCodePath = "Assets/Scripts/HotFix/GameLogic/UI";
         [SerializeField] private string nameSpace = "GameLogic";
         [SerializeField] private string widgetName = "item";
         [SerializeField] private UIFieldCodeStyle codeStyle = UIFieldCodeStyle.MPrefix;
         public GameObject UIRoot => uiRoot;
         public bool UseBindComponent => useBindComponent;
-        public string CodePath => codePath;
+        public string GenCodePath => genCodePath;
+        public string ImpCodePath => impCodePath;
         public string NameSpace => nameSpace;
         public string WidgetName => widgetName;
         public UIFieldCodeStyle CodeStyle => codeStyle;
@@ -101,7 +103,8 @@ namespace DGame
 
         public static UIFieldCodeStyle GetUIFieldCodeStyle() => Instance != null ? Instance.CodeStyle : UIFieldCodeStyle.MPrefix;
 
-        public static string GetCodePath() => Instance?.CodePath;
+        public static string GetGenCodePath() => Instance?.GenCodePath;
+        public static string GetImpCodePath() => Instance?.ImpCodePath;
 
         public static string GetUIWidgetName() => Instance?.widgetName;
 

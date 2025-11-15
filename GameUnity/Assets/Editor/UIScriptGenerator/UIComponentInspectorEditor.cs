@@ -1,5 +1,6 @@
 ﻿#if UNITY_EDITOR
 
+using System.Collections.Generic;
 using DGame;
 using UnityEditor;
 using UnityEditorInternal;
@@ -8,16 +9,33 @@ using UnityEngine;
 namespace GameLogic
 {
     [CustomEditor(typeof(UIBindComponent))]
-    public class UIComponentEditor : Editor
+    public class UIComponentInspectorEditor : Editor
     {
         private UIBindComponent m_uiBindComponent;
-        private SerializedProperty m_componentsProperty;
         private ReorderableList m_reorderableList;
+
+        private SerializedProperty m_componentsProperty;
+        private SerializedProperty m_genCodePath;
+        private SerializedProperty m_isGenImpClass;
+        private SerializedProperty m_impCodePath;
+        private SerializedProperty m_className;
+        private SerializedProperty m_uiType;
 
         private void OnEnable()
         {
             m_uiBindComponent = (UIBindComponent)target;
             m_componentsProperty = serializedObject.FindProperty("m_components");
+            m_genCodePath = serializedObject.FindProperty("genCodePath");
+            m_isGenImpClass = serializedObject.FindProperty("isGenImpClass");
+            m_impCodePath = serializedObject.FindProperty("impCodePath");
+            m_className = serializedObject.FindProperty("className");
+            m_uiType = serializedObject.FindProperty("uiType");
+
+            serializedObject.Update();
+            m_className.stringValue = target.name;
+            m_genCodePath.stringValue = UIScriptGeneratorSettings.GetGenCodePath();
+            m_impCodePath.stringValue = UIScriptGeneratorSettings.GetImpCodePath();
+            serializedObject.ApplyModifiedProperties();
             CreateReorderableList();
         }
 
@@ -121,12 +139,14 @@ namespace GameLogic
                 if (GUILayout.Button("生成脚本窗口", GUILayout.Height(25)))
                 {
                     // RemoveNullComponents();
-                    UIScriptGenerator.GenerateUIComponentWindow.GenerateUIPropertyBindComponent();
+                    UIScriptGenerator.GenerateCSharpScript(true, false, true, m_genCodePath.stringValue,
+                        m_className.stringValue, (UIBindComponent.GenUIType)m_uiType.enumValueIndex, m_isGenImpClass.boolValue, m_impCodePath.stringValue);
                 }
                 if (GUILayout.Button("生成UniTask脚本本窗口", GUILayout.Height(25)))
                 {
                     // RemoveNullComponents();
-                    UIScriptGenerator.GenerateUIComponentWindow.GenerateUIPropertyBindComponentUniTask();
+                    UIScriptGenerator.GenerateCSharpScript(true, true, true, m_genCodePath.stringValue,
+                        m_className.stringValue, (UIBindComponent.GenUIType)m_uiType.enumValueIndex, m_isGenImpClass.boolValue, m_impCodePath.stringValue);
                 }
             }
             EditorGUILayout.EndHorizontal();
@@ -142,7 +162,41 @@ namespace GameLogic
                 }
             }
             EditorGUILayout.EndHorizontal();
+
             EditorGUILayout.EndVertical();
+
+            EditorGUILayout.Space();
+
+            EditorGUILayout.BeginVertical("HelpBox");
+            {
+                // 绘制序列化属性字段
+                EditorGUILayout.LabelField("代码生成设置", EditorStyles.boldLabel);
+                EditorGUILayout.PropertyField(m_uiType, new GUIContent("UI类型"));
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.PropertyField(m_className, new GUIContent("类名"));
+                if(GUILayout.Button("物体名", GUILayout.Width(60), GUILayout.Height(18)))
+                {
+                    m_className.stringValue = target.name;
+                }
+                EditorGUILayout.EndHorizontal();
+
+                DrawFolderField("生成组件代码路径", string.Empty, m_genCodePath);
+
+                // 是否生成实现类
+                EditorGUILayout.PropertyField(m_isGenImpClass, new GUIContent("生成实现类", "是否同时生成实现类文件"));
+
+                // 如果启用了生成实现类，显示实现类路径
+                if (m_isGenImpClass.boolValue)
+                {
+                    DrawFolderField("生成实现类路径", string.Empty, m_impCodePath);
+                }
+            }
+            EditorGUILayout.EndVertical();
+
+            if (serializedObject.hasModifiedProperties)
+            {
+                serializedObject.ApplyModifiedProperties();
+            }
         }
 
         private void RebindComponents()
@@ -151,7 +205,6 @@ namespace GameLogic
             m_uiBindComponent.Clear();
             UIScriptGenerator.GenerateUIComponentScript();
             UIScriptGenerator.GenerateCSharpScript(false);
-            Debug.Log("重新绑定组件，如需生成脚本请使用MenuItem里的方法");
         }
 
         private void RemoveNullComponents()
@@ -168,6 +221,75 @@ namespace GameLogic
             }
             serializedObject.ApplyModifiedProperties();
             Debug.Log($"已清除空引用，剩余组件数量: {m_componentsProperty.arraySize}");
+        }
+
+        private static void DrawFolderField(string label, string labelIcon, SerializedProperty pathProperty)
+        {
+            EditorGUILayout.BeginHorizontal();
+            string path = pathProperty.stringValue;
+            var buttonGUIContent = new GUIContent("选择", EditorGUIUtility.IconContent("Folder Icon").image);
+
+            if (!string.IsNullOrEmpty(labelIcon))
+            {
+                var labelGUIContent = new GUIContent(" " + label, EditorGUIUtility.IconContent(labelIcon).image);
+                path = EditorGUILayout.TextField(labelGUIContent, path);
+            }
+            else
+            {
+                path = EditorGUILayout.TextField(label, path);
+            }
+            if (path != pathProperty.stringValue)
+            {
+                pathProperty.stringValue = path;
+            }
+            if (GUILayout.Button(buttonGUIContent, GUILayout.Width(60), GUILayout.Height(20)))
+            {
+                string currentPath = pathProperty.stringValue;
+
+                EditorApplication.delayCall += () =>
+                {
+                    var newPath = EditorUtility.OpenFolderPanel(label, currentPath, string.Empty);
+                    if (!string.IsNullOrEmpty(newPath))
+                    {
+                        newPath = newPath.Replace(Application.dataPath, "Assets");
+                        if (newPath.StartsWith("Assets"))
+                        {
+                            pathProperty.stringValue = newPath;
+                            pathProperty.serializedObject.ApplyModifiedProperties();
+                        }
+                    }
+                };
+            }
+            if (GUILayout.Button("默认", GUILayout.Width(60), GUILayout.Height(20)))
+            {
+                // 根据不同的属性类型获取不同的默认路径
+                string defaultPath = GetDefaultPathByPropertyType(pathProperty);
+                if (!string.IsNullOrEmpty(defaultPath))
+                {
+                    pathProperty.stringValue = defaultPath;
+                }
+            }
+            EditorGUILayout.EndHorizontal();
+        }
+
+        private static string GetDefaultPathByPropertyType(SerializedProperty property)
+        {
+            // 通过属性名称来判断类型
+            switch (property.name)
+            {
+                case "m_genCodePath":
+                case "genCodePath":
+                    return UIScriptGeneratorSettings.GetGenCodePath();
+
+                case "m_impCodePath":
+                case "impCodePath":
+                    return UIScriptGeneratorSettings.GetImpCodePath();
+
+                default:
+                    // 如果无法识别属性类型，返回空字符串或当前值
+                    Debug.LogWarning($"未知的属性类型: {property.name}，无法获取默认路径");
+                    return property.stringValue;
+            }
         }
     }
 #endif

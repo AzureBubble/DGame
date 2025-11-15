@@ -15,7 +15,7 @@ using UnityEngine;
 namespace GameLogic
 {
     [DisallowMultipleComponent]
-    public class UIBindComponent : MonoBehaviour
+    public partial class UIBindComponent : MonoBehaviour
     {
         [SerializeField] private List<Component> m_components = new List<Component>();
 
@@ -35,22 +35,5 @@ namespace GameLogic
             }
             return c;
         }
-
-#if UNITY_EDITOR
-
-        public void AddComponent(Component component)
-        {
-            if (m_components != null && !m_components.Contains(component))
-            {
-                m_components.Add(component);
-            }
-        }
-
-        public void Clear()
-        {
-            m_components?.Clear();
-        }
-
-#endif
     }
 }

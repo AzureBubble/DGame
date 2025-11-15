@@ -147,12 +147,17 @@ public static class DGameUIGeneratorSettingsProvider
                 if (useBindComponentProperty.boolValue)
                 {
                     // 代码生成路径
-                    EditorGUILayout.LabelField("代码生成路径", EditorStyles.boldLabel);
-                    var codePathProperty = serializedObject.FindProperty("codePath");
-                    codePathProperty.stringValue = DrawEnhancedFolderField(
-                        "代码文件生成路径",
-                        "代码将生成到此目录",
-                        codePathProperty.stringValue);
+                    EditorGUILayout.LabelField("自动代码生成路径", EditorStyles.boldLabel);
+                    var genCodePathProperty = serializedObject.FindProperty("genCodePath");
+                    genCodePathProperty.stringValue = DrawEnhancedFolderField(
+                        "组件代码文件生成路径",
+                        "组件代码将生成到此目录",
+                        genCodePathProperty.stringValue);
+                    var impCodePathProperty = serializedObject.FindProperty("impCodePath");
+                    impCodePathProperty.stringValue = DrawEnhancedFolderField(
+                        "实现类代码文件生成路径",
+                        "实现类代码将生成到此目录",
+                        impCodePathProperty.stringValue);
 
                     EditorGUILayout.Space(5);
                 }
@@ -262,10 +267,21 @@ public static class DGameUIGeneratorSettingsProvider
 
                 EditorGUILayout.BeginHorizontal();
                 {
-                    EditorGUILayout.LabelField("代码路径:", GUILayout.Width(80));
-                    string codePath = string.IsNullOrEmpty(uiScriptGeneratorSettings.CodePath) ?
-                        "未设置" : uiScriptGeneratorSettings.CodePath;
-                    EditorGUILayout.LabelField(codePath, EditorStyles.miniLabel);
+                    EditorGUILayout.LabelField("组件代码路径:", GUILayout.Width(80));
+                    string genCodePath = string.IsNullOrEmpty(uiScriptGeneratorSettings.GenCodePath) ?
+                        "未设置" : uiScriptGeneratorSettings.GenCodePath;
+                    EditorGUILayout.LabelField(genCodePath, EditorStyles.miniLabel);
+
+                }
+                EditorGUILayout.EndHorizontal();
+
+                EditorGUILayout.BeginHorizontal();
+                {
+                    EditorGUILayout.LabelField("实现类代码路径:", GUILayout.Width(80));
+                    string impCodePath = string.IsNullOrEmpty(uiScriptGeneratorSettings.ImpCodePath) ?
+                        "未设置" : uiScriptGeneratorSettings.ImpCodePath;
+                    EditorGUILayout.LabelField(impCodePath, EditorStyles.miniLabel);
+
                 }
                 EditorGUILayout.EndHorizontal();
             }

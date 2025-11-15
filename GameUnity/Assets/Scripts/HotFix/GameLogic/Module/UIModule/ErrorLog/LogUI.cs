@@ -1,8 +1,6 @@
 ﻿using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
-using UnityEngine;
 using UnityEngine.UI;
-using DGame;
 
 namespace GameLogic
 {
@@ -12,16 +10,17 @@ namespace GameLogic
 		#region 脚本工具生成的代码
 
 		private UIBindComponent m_bindComponent;
-		private Text m_textError;
 		private Button m_btnClose;
+		private Text m_textError;
 
 		protected override void ScriptGenerator()
 		{
 			m_bindComponent = gameObject.GetComponent<UIBindComponent>();
-			m_textError = m_bindComponent.GetComponent<Text>(0);
-			m_btnClose = m_bindComponent.GetComponent<Button>(1);
+			m_btnClose = m_bindComponent.GetComponent<Button>(0);
+			m_textError = m_bindComponent.GetComponent<Text>(1);
 			m_btnClose.onClick.AddListener(UniTask.UnityAction(OnClickCloseBtn));
 		}
+
 		#endregion
 
 

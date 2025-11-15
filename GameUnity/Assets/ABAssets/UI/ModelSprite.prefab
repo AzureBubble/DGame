@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 5914360141537282539}
   - component: {fileID: 5579700132370961154}
   - component: {fileID: 5040741183299667554}
-  - component: {fileID: 7853177702019457144}
   m_Layer: 0
   m_Name: ModelSprite
   m_TagString: Untagged
@@ -175,18 +174,3 @@ MonoBehaviour:
   m_uiImageMirrorExtend:
     m_isUseImageMirror: 0
     m_mirrorType: 0
-    uiMirrorEffect: {fileID: 7853177702019457144}
---- !u!114 &7853177702019457144
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8559732537497035612}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b8388f423f9e7474abff04dae79aa2d1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_isUseImageMirror: 0
-  m_MirrorType: 0

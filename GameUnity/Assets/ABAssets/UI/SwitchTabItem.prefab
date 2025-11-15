@@ -164,6 +164,9 @@ MonoBehaviour:
     m_isUseRoundedCorners: 0
     m_radius: 20
     m_triangleNum: 5
+  m_uiImageMirrorExtend:
+    m_isUseImageMirror: 0
+    m_mirrorType: 0
 --- !u!1 &3171213799941301051
 GameObject:
   m_ObjectHideFlags: 0
@@ -262,30 +265,27 @@ MonoBehaviour:
     m_shadowBottomLeftColor: {r: 1, g: 1, b: 1, a: 1}
     m_shadowBottomRightColor: {r: 1, g: 1, b: 1, a: 1}
     m_effectDistance: {x: 1, y: -1}
-  m_uiTextOutlineAndGradientExtend:
+  m_uiTextOutlineExtend:
     m_isUseTextOutline: 0
-    m_isUseTextGradient: 0
-    m_isOpenShaderOutline: 1
-    m_lerpValue: 0
-    m_textOutlineEx: {fileID: 0}
+    m_isOpenShaderOutline: 0
     m_outLineWidth: 1
-    m_gradientType: 1
-    m_gradientTopColor:
-      serializedVersion: 2
-      rgba: 4294967295
-    m_gradientMiddleColor:
-      serializedVersion: 2
-      rgba: 4294967295
-    m_gradientBottomColor:
-      serializedVersion: 2
-      rgba: 4294967295
-    m_outLineColor:
-      serializedVersion: 2
-      rgba: 4278190080
+    m_outLineColor: {r: 1, g: 1, b: 1, a: 1}
     m_camera: {fileID: 0}
     m_alpha: 1
-    m_colorOffset: 0.5
-    m_textEffect: {fileID: 0}
+  m_uiTextGradientColorExtend:
+    m_isUseGradientColor: 0
+    m_colorTop: {r: 1, g: 1, b: 1, a: 1}
+    m_colorBottom: {r: 1, g: 1, b: 1, a: 1}
+    m_colorLeft: {r: 1, g: 1, b: 1, a: 1}
+    m_colorRight: {r: 1, g: 1, b: 1, a: 1}
+    m_gradientOffsetVertical: 0
+    m_gradientOffsetHorizontal: 0
+    m_splitTextGradient: 0
+  m_uiTextCircleExtend:
+    m_useTextCircle: 0
+    m_radius: 100
+    m_spaceCoff: 1
+    m_angleOffset: 0
   m_isUseBestFitFont: 0
 --- !u!1 &3613131319769772451
 GameObject:
@@ -376,6 +376,9 @@ MonoBehaviour:
     m_isUseRoundedCorners: 0
     m_radius: 20
     m_triangleNum: 5
+  m_uiImageMirrorExtend:
+    m_isUseImageMirror: 0
+    m_mirrorType: 0
 --- !u!1 &5932372308995885573
 GameObject:
   m_ObjectHideFlags: 0
@@ -474,30 +477,27 @@ MonoBehaviour:
     m_shadowBottomLeftColor: {r: 1, g: 1, b: 1, a: 1}
     m_shadowBottomRightColor: {r: 1, g: 1, b: 1, a: 1}
     m_effectDistance: {x: 1, y: -1}
-  m_uiTextOutlineAndGradientExtend:
+  m_uiTextOutlineExtend:
     m_isUseTextOutline: 0
-    m_isUseTextGradient: 0
-    m_isOpenShaderOutline: 1
-    m_lerpValue: 0
-    m_textOutlineEx: {fileID: 0}
+    m_isOpenShaderOutline: 0
     m_outLineWidth: 1
-    m_gradientType: 1
-    m_gradientTopColor:
-      serializedVersion: 2
-      rgba: 4294967295
-    m_gradientMiddleColor:
-      serializedVersion: 2
-      rgba: 4294967295
-    m_gradientBottomColor:
-      serializedVersion: 2
-      rgba: 4294967295
-    m_outLineColor:
-      serializedVersion: 2
-      rgba: 4278190080
+    m_outLineColor: {r: 1, g: 1, b: 1, a: 1}
     m_camera: {fileID: 0}
     m_alpha: 1
-    m_colorOffset: 0.5
-    m_textEffect: {fileID: 0}
+  m_uiTextGradientColorExtend:
+    m_isUseGradientColor: 0
+    m_colorTop: {r: 1, g: 1, b: 1, a: 1}
+    m_colorBottom: {r: 1, g: 1, b: 1, a: 1}
+    m_colorLeft: {r: 1, g: 1, b: 1, a: 1}
+    m_colorRight: {r: 1, g: 1, b: 1, a: 1}
+    m_gradientOffsetVertical: 0
+    m_gradientOffsetHorizontal: 0
+    m_splitTextGradient: 0
+  m_uiTextCircleExtend:
+    m_useTextCircle: 0
+    m_radius: 100
+    m_spaceCoff: 1
+    m_angleOffset: 0
   m_isUseBestFitFont: 0
 --- !u!1 &7289501538341033656
 GameObject:
@@ -627,6 +627,9 @@ MonoBehaviour:
     m_isUseRoundedCorners: 0
     m_radius: 20
     m_triangleNum: 5
+  m_uiImageMirrorExtend:
+    m_isUseImageMirror: 0
+    m_mirrorType: 0
 --- !u!1 &8403620793410525131
 GameObject:
   m_ObjectHideFlags: 0
@@ -716,6 +719,9 @@ MonoBehaviour:
     m_isUseRoundedCorners: 0
     m_radius: 20
     m_triangleNum: 5
+  m_uiImageMirrorExtend:
+    m_isUseImageMirror: 0
+    m_mirrorType: 0
 --- !u!1 &8496671859178539129
 GameObject:
   m_ObjectHideFlags: 0

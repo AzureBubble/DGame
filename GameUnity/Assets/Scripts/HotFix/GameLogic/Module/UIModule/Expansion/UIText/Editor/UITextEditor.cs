@@ -50,14 +50,12 @@ namespace GameLogic
         // 描边和渐变
         private SerializedProperty m_isUseTextOutline;
         private SerializedProperty m_isOpenShaderOutline;
-        private SerializedProperty m_textEffect;
         private SerializedProperty m_outLineWidth;
         private SerializedProperty m_outLineColor;
         private SerializedProperty m_alpha;
 
         // 颜色渐变
         private SerializedProperty m_isUseGradientColor;
-        private SerializedProperty m_gradientEffect;
 
         // 字体自适应
         private SerializedProperty m_isUseBestFitFont;
@@ -85,8 +83,8 @@ namespace GameLogic
             m_textGradientColorPanelOpen = EditorPrefs.GetBool("UIText.m_textGradientColorPanelOpen", m_textGradientColorPanelOpen);
             m_textCirclePanelOpen = EditorPrefs.GetBool("UIText.m_textCirclePanelOpen", m_textCirclePanelOpen);
 
-            m_uiText.UITextOutlineExtend.SaveSerializeData(m_uiText);
-            m_uiText.UITextGradientColorExtend.SaveSerializeData(m_uiText);
+            m_uiText.UITextOutlineExtend.Initialize(m_uiText);
+            m_uiText.UITextGradientColorExtend.Initialize(m_uiText);
             m_text = serializedObject.FindProperty("m_Text");
             m_fontData = serializedObject.FindProperty("m_FontData");
 
@@ -121,7 +119,6 @@ namespace GameLogic
             {
                 m_isUseTextOutline = serializedObject.FindProperty("m_uiTextOutlineExtend.m_isUseTextOutline");
                 m_isOpenShaderOutline = serializedObject.FindProperty("m_uiTextOutlineExtend.m_isOpenShaderOutline");
-                m_textEffect = serializedObject.FindProperty("m_uiTextOutlineExtend.m_textEffect");
                 m_outLineWidth = serializedObject.FindProperty("m_uiTextOutlineExtend.m_outLineWidth");
                 m_outLineColor = serializedObject.FindProperty("m_uiTextOutlineExtend.m_outLineColor");
                 m_alpha = serializedObject.FindProperty("m_uiTextOutlineExtend.m_alpha");
@@ -130,7 +127,6 @@ namespace GameLogic
             // 渐变
             {
                 m_isUseGradientColor = serializedObject.FindProperty("m_uiTextGradientColorExtend.m_isUseGradientColor");
-                m_gradientEffect = serializedObject.FindProperty("m_uiTextGradientColorExtend.m_gradientEffect");
             }
 
             // 环形字体
@@ -170,12 +166,13 @@ namespace GameLogic
 
         private void UITextGUI()
         {
-            GUI.enabled = false;
-            if (m_textEffect.objectReferenceValue != null)
-            {
-                EditorGUILayout.ObjectField("Graphic", ((UITextOutlineEffect)m_textEffect.objectReferenceValue).TextGraphic, typeof(Text), false);
-            }
-            GUI.enabled = true;
+            // var outlineExtend = ((UIText)target)?.UITextOutlineExtend;
+            // GUI.enabled = false;
+            // if (outlineExtend?.TextEffect != null)
+            // {
+            //     EditorGUILayout.ObjectField("Graphic", outlineExtend.TextEffect.TextGraphic, typeof(Text), false);
+            // }
+            // GUI.enabled = true;
 
             UITextDrawEditor.DrawTextFontsGUI("字体选择",ref m_textFontPanelOpen, m_uiText, m_allFonts, OnClickFontBtnAction);
             UITextDrawEditor.DrawTextSpacingGUI("字符间距",ref m_textSpacingPanelOpen, m_isUseTextSpacing, m_textSpacing);
@@ -184,9 +181,8 @@ namespace GameLogic
             UITextDrawEditor.DrawTextShadowGUI("字体阴影", ref m_textShadowPanelOpen, m_isUseTextShadow,
                 m_shadowTopLeftColor, m_shadowTopRightColor, m_shadowBottomLeftColor, m_shadowBottomRightColor, m_effectDistance);
             UITextDrawEditor.DrawTextOutLineAndGradientGUI("字体描边", ref m_textOutLineAndGradientPanelOpen, m_isUseTextOutline,
-                m_isOpenShaderOutline, m_outLineColor, m_outLineWidth, m_alpha, (UITextOutlineEffect)m_textEffect.objectReferenceValue);
-            UITextDrawEditor.DrawTextGradientColorGUI("字体渐变", ref m_textGradientColorPanelOpen, m_isUseGradientColor,
-                m_gradientColorEditor, ((UIText)target)?.UITextGradientColorExtend);
+                m_isOpenShaderOutline, m_outLineColor, m_outLineWidth, m_alpha);
+            UITextDrawEditor.DrawTextGradientColorGUI("字体渐变", ref m_textGradientColorPanelOpen, m_isUseGradientColor, m_gradientColorEditor);
             UITextDrawEditor.DrawTextCircleGUI("环形字体", ref m_textCirclePanelOpen, m_useTextCircle, m_radius,
                 m_spaceCoff, m_angleOffset);
             UITextDrawEditor.DrawTextBestFitGUI("字体自适应", ref m_textBestFitFontPanelOpen, m_isUseBestFitFont, m_resizeTextForBestFit);

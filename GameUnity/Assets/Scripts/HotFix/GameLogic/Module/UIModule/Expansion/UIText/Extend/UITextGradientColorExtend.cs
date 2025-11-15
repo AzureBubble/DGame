@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,9 +8,11 @@ namespace GameLogic
     [Serializable]
     public class UITextGradientColorExtend
     {
+        private const int ONE_TEXT_VERTEX = 6;
+
 #pragma warning disable 0414
         [SerializeField]
-        private bool m_isUseGradientColor = false;
+        private bool m_isUseGradientColor;
         [SerializeField]
         private Color m_colorTop = Color.white;
         [SerializeField]
@@ -24,19 +27,6 @@ namespace GameLogic
         private float m_gradientOffsetHorizontal = 0f;
         [SerializeField]
         private bool m_splitTextGradient = false;
-        [SerializeField]private UITextGradientColor m_gradientEffect;
-
-        public UITextGradientColor gradientColorEffect
-        {
-            get
-            {
-                if (m_gradientEffect ==null)
-                {
-                    m_gradientEffect = m_text?.GetComponent<UITextGradientColor>();
-                }
-                return m_gradientEffect;
-            }
-        }
 
         public bool isUseGradientColor
         {
@@ -48,31 +38,7 @@ namespace GameLogic
                     return;
                 }
                 m_isUseGradientColor = value;
-
-#if UNITY_EDITOR
-
-                if (m_text != null)
-                {
-                    if (value)
-                    {
-                        if (!m_text.TryGetComponent(out m_gradientEffect))
-                        {
-                            m_gradientEffect = m_text.gameObject.AddComponent<UITextGradientColor>();
-                            m_gradientEffect.hideFlags = HideFlags.HideInInspector;
-                        }
-                    }
-                    else
-                    {
-                        if (m_gradientEffect != null || m_text.TryGetComponent(out m_gradientEffect))
-                        {
-                            GameObject.DestroyImmediate(m_gradientEffect);
-                        }
-                        m_gradientEffect = null;
-                    }
-                }
-#endif
-                m_gradientEffect?.SetUseGradientColor(value);
-                // Refresh();
+                Refresh();
             }
         }
 
@@ -125,32 +91,20 @@ namespace GameLogic
             }
         }
 
-        public UITextGradientColor GradientEffect
-        {
-            get => m_gradientEffect;
-            set
-            {
-                if (m_gradientEffect != value)
-                {
-                    m_gradientEffect = value;
-                    Refresh();
-                }
-            }
-        }
-
         private Text m_text;
 
 #pragma warning disable 0414
-        public void SaveSerializeData(UIText uiText)
+        public void Initialize(Text text)
         {
-            m_text = uiText;
-            if(!m_isUseGradientColor) return;
-            if(!uiText.TryGetComponent(out m_gradientEffect))
-            {
-                m_gradientEffect = uiText.gameObject.AddComponent<UITextGradientColor>();
-                m_gradientEffect.hideFlags = HideFlags.HideInInspector;
-            }
+            m_text = text;
         }
+
+#if UNITY_EDITOR
+        public void EditorInitialize(Text text)
+        {
+            m_text = text;
+        }
+#endif
 
         public void SetUseGradientColor(bool useGradientColor)
         {
@@ -159,8 +113,7 @@ namespace GameLogic
 
         public void SetGradientColor(Color32 colorTop, Color32 colorBottom, Color32 colorLeft = default, Color32 colorRight = default, float verticalOffset = 0f, float horizontalOffset = 0f, bool splitTextGradient = false)
         {
-            m_isUseGradientColor = true;
-            m_gradientEffect.UseGradientColor = m_isUseGradientColor;
+            SetUseGradientColor(true);
             m_colorTop = colorTop;
             m_colorBottom = colorBottom;
             m_colorLeft = colorLeft;
@@ -168,18 +121,88 @@ namespace GameLogic
             m_splitTextGradient = splitTextGradient;
             m_gradientOffsetVertical = verticalOffset;
             m_gradientOffsetHorizontal = horizontalOffset;
-            m_gradientEffect.colorTop = colorTop;
-            m_gradientEffect.colorBottom = colorBottom;
-            m_gradientEffect.colorLeft = colorLeft;
-            m_gradientEffect.colorRight = colorRight;
-            m_gradientEffect.gradientOffsetVertical = verticalOffset;
-            m_gradientEffect.gradientOffsetHorizontal = horizontalOffset;
-            m_gradientEffect.splitTextGradient = splitTextGradient;
+            Refresh();
         }
 
-        private void Refresh()
+        public void Refresh()
         {
             m_text?.SetVerticesDirty();
         }
+
+        #region GradientColor
+
+        public void ModifyMesh(VertexHelper vh)
+        {
+            if (m_text?.IsActive() == false || !m_isUseGradientColor)
+            {
+                return;
+            }
+
+            List<UIVertex> vList = ListPool<UIVertex>.Get();
+
+            vh.GetUIVertexStream(vList);
+
+            ModifyVertices(vList);
+
+            vh.Clear();
+            vh.AddUIVertexTriangleStream(vList);
+
+            if (vList != null)
+            {
+                ListPool<UIVertex>.Recycle(vList);
+            }
+        }
+
+        private void ModifyVertices(List<UIVertex> vList)
+        {
+            if (m_text?.IsActive() == false || vList == null || vList.Count == 0)
+            {
+                return;
+            }
+
+            float minX = 0f, minY = 0f, maxX = 0f, maxY = 0f, width = 0f, height = 0;
+
+            UIVertex newVertex;
+            for (int i = 0; i < vList.Count; i++)
+            {
+                if (i == 0 || (m_splitTextGradient && i % ONE_TEXT_VERTEX == 0))
+                {
+                    minX = vList[i].position.x;
+                    minY = vList[i].position.y;
+                    maxX = vList[i].position.x;
+                    maxY = vList[i].position.y;
+
+                    int vertNum = m_splitTextGradient ? i + ONE_TEXT_VERTEX : vList.Count;
+
+                    for (int k = i; k < vertNum; k++)
+                    {
+                        if (k >= vList.Count)
+                        {
+                            break;
+                        }
+                        UIVertex vertex = vList[k];
+                        minX = Mathf.Min(minX, vertex.position.x);
+                        minY = Mathf.Min(minY, vertex.position.y);
+                        maxX = Mathf.Max(maxX, vertex.position.x);
+                        maxY = Mathf.Max(maxY, vertex.position.y);
+                    }
+
+                    width = maxX - minX;
+                    height = maxY - minY;
+                }
+
+                newVertex = vList[i];
+
+                Color colorOriginal = newVertex.color;
+                Color colorVertical = Color.Lerp(m_colorBottom, m_colorTop, (height > 0 ? (newVertex.position.y - minY) / height : 0) + m_gradientOffsetVertical);
+                Color colorHorizontal = Color.Lerp(m_colorLeft, m_colorRight, (width > 0 ? (newVertex.position.x - minX) / width : 0) + m_gradientOffsetHorizontal);
+
+                newVertex.color = colorOriginal * colorVertical * colorHorizontal;
+
+                vList[i] = newVertex;
+            }
+        }
+
+        #endregion
     }
 }

@@ -28,6 +28,13 @@ namespace GameLogic
         public int VisibleLines { get; private set; }
         private readonly UIVertex[] m_tmpVerts = new UIVertex[4];
 
+        protected override void Awake()
+        {
+            base.Awake();
+            UITextOutlineExtend?.Initialize(this);
+            UITextGradientColorExtend?.Initialize(this);
+        }
+
         protected override void OnPopulateMesh(VertexHelper toFill)
         {
             base.OnPopulateMesh(toFill);
@@ -124,42 +131,48 @@ namespace GameLogic
             if (OverrideForBestFit(verts))
             {
                 m_uiTextCircleExtend.ModifyMesh(verts);
+                UITextOutlineExtend.NormalOutLineModifyMesh(verts);
                 m_uiTextVertexColorExtend?.PopulateMesh(verts, rectTransform, color);
-                if (!UITextOutlineExtend.UseTextOutline)
-                {
-                    m_uiTextShadowExtend?.PopulateMesh(verts, rectTransform, color);
-                }
+                UITextGradientColorExtend?.ModifyMesh(verts);
+                m_uiTextShadowExtend?.PopulateMesh(verts, rectTransform, color);
                 return;
             }
-            m_uiTextCircleExtend.ModifyMesh(verts);
+
             m_uiTextSpacingExtend?.PopulateMesh(verts);
+            m_uiTextCircleExtend.ModifyMesh(verts);
+            UITextOutlineExtend.NormalOutLineModifyMesh(verts);
             m_uiTextVertexColorExtend?.PopulateMesh(verts, rectTransform, color);
-            if (!UITextOutlineExtend.UseTextOutline)
-            {
-                m_uiTextShadowExtend?.PopulateMesh(verts, rectTransform, color);
-            }
+            UITextGradientColorExtend?.ModifyMesh(verts);
+            m_uiTextShadowExtend?.PopulateMesh(verts, rectTransform, color);
         }
 
-        public void SetTextAlpha(float alpha)
+        public void SetUseOutLine(bool useOutLine)
         {
-            if (m_uiTextOutlineExtend.UseTextOutline)
-            {
-                m_uiTextOutlineExtend.SetAlpha(alpha);
-            }
-            else
-            {
-                Color32 color32 = color;
-                color32.a = (byte)(alpha * 255);
-                color = color32;
-            }
+            m_uiTextOutlineExtend.SetUseTextOutline(useOutLine);
         }
 
-        public void SetOutLineColor(Color32 color32)
+        public void SetOutLineAlpha(float alpha)
         {
-            if (!m_uiTextOutlineExtend.UseTextOutline) return;
-            m_uiTextOutlineExtend.TextEffect.SetOutLineColor(color32);
-            m_uiTextOutlineExtend.UseTextOutline = false;
-            m_uiTextOutlineExtend.UseTextOutline = true;
+            m_uiTextOutlineExtend.SetAlpha(alpha);
+        }
+
+        public void SetOutLineColor(Color32 color32, bool isOpenShaderOutline = true)
+        {
+            SetOutLineColor(color32, 1, isOpenShaderOutline);
+        }
+
+        public void SetOutLineColor(Color32 color32, int outlineWidth, bool isOpenShaderOutline = true)
+        {
+            if (m_uiTextOutlineExtend == null)
+            {
+                return;
+            }
+            m_uiTextOutlineExtend.SetOutLineColor(color32);
+            m_uiTextOutlineExtend.SetOutLineWidth(outlineWidth);
+            if (!isOpenShaderOutline)
+            {
+                m_uiTextOutlineExtend.isOpenShaderOutline = false;
+            }
         }
 
         public void SetGradientColor(Color32 topColor, Color32 bottomColor, Color32 leftColor = default, Color32 rightColor = default, float verticalOffset = 0f, float horizontalOffset = 0f, bool splitTextGradient = false)
@@ -182,7 +195,17 @@ namespace GameLogic
         protected override void OnValidate()
         {
             base.OnValidate();
+            UITextGradientColorExtend?.EditorInitialize(this);
+            UITextOutlineExtend?.EditorInitialize(this);
+            UITextOutlineExtend?.OnValidate();
+            this.SetAllDirty();
         }
 #endif
+
+        protected override void OnDestroy()
+        {
+            UITextOutlineExtend?.OnDestroy();
+            base.OnDestroy();
+        }
     }
 }

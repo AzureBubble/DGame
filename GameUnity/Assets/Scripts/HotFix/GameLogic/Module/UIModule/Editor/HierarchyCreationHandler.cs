@@ -19,6 +19,8 @@ namespace GameLogic
         private static void OnHierarchyCreateUIComponent()
         {
             // 监听Hierarchy窗口中的对象创建事件
+            EditorApplication.hierarchyChanged -= OnComponentCreated;
+            EditorApplication.hierarchyChanged -= LoadUIWindowCamera;
             EditorApplication.hierarchyChanged += OnComponentCreated;
             EditorApplication.hierarchyChanged += LoadUIWindowCamera;
         }
@@ -108,8 +110,38 @@ namespace GameLogic
                     obj.name = "m_img";
                     if (!(image is UIImage))
                     {
-                        DestroyImmediate(image);
-                        obj.AddComponent<UIImage>();
+                        var sprite = image.sprite;
+                        var color = image.color;
+                        var material = image.material;
+                        var raycastTarget = image.raycastTarget;
+                        var maskable = image.maskable;
+                        var raycastPadding = image.raycastPadding;
+                        var imageType = image.type;
+                        var imgUseSpriteMesh = image.useSpriteMesh;
+                        var imgPreserveAspect = image.preserveAspect;
+                        var fillCenter = image.fillCenter;
+                        var pixelsPerUnitMultiplier = image.pixelsPerUnitMultiplier;
+                        var fillMethod = image.fillMethod;
+                        var fillOrigin = image.fillOrigin;
+                        var fillClockwise = image.fillClockwise;
+                        var fillAmount = image.fillAmount;
+                        GameObject.DestroyImmediate(image);
+                        var img = obj.AddComponent<UIImage>();
+                        img.sprite = sprite;
+                        img.color = color;
+                        img.material = material;
+                        img.raycastTarget = raycastTarget;
+                        img.maskable = maskable;
+                        img.raycastPadding = raycastPadding;
+                        img.type = imageType;
+                        img.useSpriteMesh = imgUseSpriteMesh;
+                        img.pixelsPerUnitMultiplier = pixelsPerUnitMultiplier;
+                        img.fillMethod = fillMethod;
+                        img.fillOrigin = fillOrigin;
+                        img.fillClockwise = fillClockwise;
+                        img.fillAmount = fillAmount;
+                        img.preserveAspect = imgPreserveAspect;
+                        img.fillCenter = fillCenter;
                     }
                 }
 
@@ -518,40 +550,41 @@ namespace GameLogic
 
             #region 替换手动添加的UI组件
 
-            if (obj.TryGetComponent(out Button btn))
-            {
-                if (!(btn is UIButton))
-                {
-                    DestroyImmediate(btn);
-                    var uiBtn = obj.AddComponent<UIButton>();
-                    uiBtn.transition = Selectable.Transition.None;
-                }
-                else
-                {
-                    btn.transition = Selectable.Transition.None;
-                }
-            }
-            if (obj.TryGetComponent(out Text tmpT))
-            {
-                if (!(tmpT is UIText))
-                {
-                    DestroyImmediate(tmpT);
-                    var uiText = obj.AddComponent<UIText>();
-                    uiText.raycastTarget = false;
-                }
-                else
-                {
-                    tmpT.raycastTarget = false;
-                }
-            }
-            if (obj.TryGetComponent(out Image tmpImg))
-            {
-                if (!(tmpImg is UIImage))
-                {
-                    DestroyImmediate(tmpImg);
-                    obj.AddComponent<UIImage>();
-                }
-            }
+
+            // if (obj.TryGetComponent(out Button btn))
+            // {
+            //     if (!(btn is UIButton))
+            //     {
+            //         DestroyImmediate(btn);
+            //         var uiBtn = obj.AddComponent<UIButton>();
+            //         uiBtn.transition = Selectable.Transition.None;
+            //     }
+            //     else
+            //     {
+            //         btn.transition = Selectable.Transition.None;
+            //     }
+            // }
+            // if (obj.TryGetComponent(out Text tmpT))
+            // {
+            //     if (!(tmpT is UIText))
+            //     {
+            //         DestroyImmediate(tmpT);
+            //         var uiText = obj.AddComponent<UIText>();
+            //         uiText.raycastTarget = false;
+            //     }
+            //     else
+            //     {
+            //         tmpT.raycastTarget = false;
+            //     }
+            // }
+            // if (obj.TryGetComponent(out Image tmpImg))
+            // {
+            //     if (!(tmpImg is UIImage))
+            //     {
+            //         DestroyImmediate(tmpImg);
+            //         obj.AddComponent<UIImage>();
+            //     }
+            // }
 
             #endregion
         }

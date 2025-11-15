@@ -94,7 +94,7 @@ namespace GameLogic
             UIImageDrawEditor.DrawImageRoundedCornersGUI("圆角图形", ref m_isImageRoundedCornersPanelOpen,
                 m_isUseRoundedCorners, m_radius, m_triangleNum, m_isUseMaskImage);
             UIImageDrawEditor.DrawImageMirrorGUI("图片镜像", ref m_isImageMirrorPanelOpen, m_isUseImageMirror, m_mirrorType,
-                m_mirrorEffect);
+                m_mirrorEffect, ((UIImage)target).UIImageMirrorExtend);
 
             if (GUI.changed)
             {

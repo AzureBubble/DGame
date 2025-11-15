@@ -11,7 +11,7 @@ namespace DGame
         private const string ENABLE_HYBRIDCLR_SCRIPTING_DEFINE_SYMBOLS = "ENABLE_HYBRIDCLR";
         private const string ENABLE_OBFUZ_SCRIPTING_DEFINE_SYMBOLS = "ENABLE_OBFUZ";
 
-        [MenuItem("DGame Tools/HybridCLR/启用HybridCLR")]
+        [MenuItem("DGame Tools/HybridCLR/启用HybridCLR", priority = 220)]
         public static void EnableHybridCLR()
         {
             var controller = new InstallerController();
@@ -30,7 +30,7 @@ namespace DGame
             ScriptingDefineSymbolsTools.EnableScriptingDefineSymbol(ENABLE_HYBRIDCLR_SCRIPTING_DEFINE_SYMBOLS);
         }
 
-        [MenuItem("DGame Tools/HybridCLR/禁用HybridCLR")]
+        [MenuItem("DGame Tools/HybridCLR/禁用HybridCLR", priority = 221)]
         public static void DisableHybridCLR()
         {
 #if ENABLE_HYBRIDCLR

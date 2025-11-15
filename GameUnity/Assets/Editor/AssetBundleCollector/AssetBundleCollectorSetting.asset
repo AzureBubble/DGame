@@ -19,6 +19,7 @@ MonoBehaviour:
   - PackageName: DefaultPackage
     PackageDesc: 
     EnableAddressable: 1
+    SupportExtensionless: 1
     LocationToLower: 0
     IncludeAssetGUID: 0
     AutoCollectShaders: 1
@@ -43,7 +44,15 @@ MonoBehaviour:
       GroupDesc: 
       AssetTags: 
       ActiveRuleName: EnableGroup
-      Collectors: []
+      Collectors:
+      - CollectPath: Assets/ABAssets/DLL
+        CollectorGUID: 0e6503722ae073344a9a3234c32c9d81
+        CollectorType: 0
+        AddressRuleName: AddressByFileName
+        PackRuleName: PackRawFile
+        FilterRuleName: CollectAll
+        AssetTags: 
+        UserData: 
     - GroupName: Effects
       GroupDesc: 
       AssetTags: 
@@ -109,6 +118,7 @@ MonoBehaviour:
   - PackageName: TestPackage
     PackageDesc: 
     EnableAddressable: 0
+    SupportExtensionless: 1
     LocationToLower: 0
     IncludeAssetGUID: 0
     AutoCollectShaders: 1

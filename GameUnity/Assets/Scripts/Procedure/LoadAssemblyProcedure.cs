@@ -214,6 +214,8 @@ namespace Procedure
                 m_loadMetadataAssetCnt++;
                 m_resourceModule.LoadAssetAsync<TextAsset>(assetLocation, LoadMetadataAssetSuccess);
             }
+
+            m_loadMetadataAssetWait = true;
         }
 
         private void LoadMetadataAssetSuccess(TextAsset textAsset)

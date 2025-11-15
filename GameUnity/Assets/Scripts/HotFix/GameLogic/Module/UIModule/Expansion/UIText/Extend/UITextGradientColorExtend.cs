@@ -29,7 +29,39 @@ namespace GameLogic
         public bool isUseGradientColor
         {
             get => m_isUseGradientColor;
-            set { if (m_isUseGradientColor != value) { m_isUseGradientColor = value; Refresh(); } }
+            set
+            {
+                if (m_isUseGradientColor == value)
+                {
+                    return;
+                }
+                m_isUseGradientColor = value;
+
+#if UNITY_EDITOR
+
+                if (m_text != null)
+                {
+                    if (value)
+                    {
+                        if (!m_text.TryGetComponent(out m_gradientEffect))
+                        {
+                            m_gradientEffect = m_text.gameObject.AddComponent<UITextGradientColor>();
+                            m_gradientEffect.hideFlags = HideFlags.HideInInspector;
+                        }
+                    }
+                    else
+                    {
+                        if (m_gradientEffect != null || m_text.TryGetComponent(out m_gradientEffect))
+                        {
+                            GameObject.DestroyImmediate(m_gradientEffect);
+                        }
+                        m_gradientEffect = null;
+                    }
+                }
+#endif
+
+                Refresh();
+            }
         }
 
         public Color colorTop

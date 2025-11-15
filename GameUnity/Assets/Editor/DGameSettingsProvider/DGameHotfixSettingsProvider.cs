@@ -380,7 +380,7 @@ public static class DGameHotfixSettingsProvider
             {
                 // 自动复制设置
                 bool isAutoAssetCopyToBuildAddress = EditorGUILayout.ToggleLeft(
-                    new GUIContent("自动复制资源到StreamingAssets", "构建时自动复制资源文件"),
+                    new GUIContent("自动复制内嵌资源到存放路径", "构建时自动复制StreamingAssets资源文件"),
                     m_isAutoAssetCopyToBuildAddress.boolValue);
 
                 if (isAutoAssetCopyToBuildAddress != m_isAutoAssetCopyToBuildAddress.boolValue)
@@ -392,17 +392,17 @@ public static class DGameHotfixSettingsProvider
 
                 // 构建地址
                 EditorGUILayout.PropertyField(m_buildAddress,
-                    new GUIContent("打包程序资源地址", "构建输出的资源路径"));
+                    new GUIContent("内嵌资源存放路径", "StreamingAssets资源文件复制目标地址"));
 
                 EditorGUILayout.Space(3);
 
                 if (m_isAutoAssetCopyToBuildAddress.boolValue)
                 {
-                    EditorGUILayout.HelpBox("构建时将自动复制资源到StreamingAssets目录", MessageType.Info);
+                    EditorGUILayout.HelpBox("构建时将自动复制StreamingAssets资源到存放路径", MessageType.Info);
                 }
                 else
                 {
-                    EditorGUILayout.HelpBox("需要手动处理资源文件部署", MessageType.Warning);
+                    EditorGUILayout.HelpBox("需要手动处理StreamingAssets资源文件部署", MessageType.Info);
                 }
             }
             EditorGUILayout.EndVertical();

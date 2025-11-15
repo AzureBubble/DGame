@@ -123,7 +123,7 @@ namespace GameLogic
         #region Mirror
 
         public static void DrawImageMirrorGUI(string title, ref bool isPanelOpen, SerializedProperty isUseMirror,
-            SerializedProperty mirrorType, SerializedProperty mirrorEffect)
+            SerializedProperty mirrorType, SerializedProperty mirrorEffect, UIImageMirrorExtend mirrorExtend)
         {
             UnityEditorUtil.LayoutFrameBox(() =>
             {
@@ -143,6 +143,7 @@ namespace GameLogic
                         mirror.mirrorType = (UIMirrorEffect.MirrorType)mirrorType.enumValueIndex;
                         mirror.UseImageMirror = isUseMirror.boolValue;
                     }
+                    if (mirrorExtend != null) mirrorExtend.isUseImageMirror = isUseMirror.boolValue;
                 }
             }, title, ref isPanelOpen, true);
         }

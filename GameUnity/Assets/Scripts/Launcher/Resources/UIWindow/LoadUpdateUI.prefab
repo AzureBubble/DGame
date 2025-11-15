@@ -87,7 +87,7 @@ GameObject:
   - component: {fileID: 2347891492826839465}
   - component: {fileID: 3565553526528554398}
   - component: {fileID: 2835083178279248017}
-  - component: {fileID: 5851295841352025669}
+  - component: {fileID: 2937480325885365090}
   m_Layer: 5
   m_Name: m_scrollbar
   m_TagString: Untagged
@@ -173,7 +173,7 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &5851295841352025669
+--- !u!114 &2937480325885365090
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -182,19 +182,19 @@ MonoBehaviour:
   m_GameObject: {fileID: 952437499883445590}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 90965ee72503b2f498c1c6c8e63e2231, type: 3}
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 0
+  m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
-  m_Type: 1
+  m_Sprite: {fileID: 0}
+  m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -203,16 +203,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
-  m_uiImageMaskExtend:
-    m_isUseMaskImage: 0
-    m_fillPercent: 1
-    m_fill: 1
-    m_ringWidth: 5
-    m_segements: 20
-  m_uiImageRoundedCornersExtend:
-    m_isUseRoundedCorners: 0
-    m_radius: 20
-    m_triangleNum: 5
 --- !u!1 &3947545286821712907
 GameObject:
   m_ObjectHideFlags: 0
@@ -654,7 +644,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3254196395727856927}
   - component: {fileID: 7553620620009672016}
-  - component: {fileID: 1454249475898219221}
+  - component: {fileID: 5212725535533828820}
   m_Layer: 5
   m_Name: Handle
   m_TagString: Untagged
@@ -690,7 +680,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8606204063644072871}
   m_CullTransparentMesh: 0
---- !u!114 &1454249475898219221
+--- !u!114 &5212725535533828820
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -699,7 +689,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 8606204063644072871}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 90965ee72503b2f498c1c6c8e63e2231, type: 3}
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
@@ -710,7 +700,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  m_Sprite: {fileID: 10917, guid: 0000000000000000f000000000000000, type: 0}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -720,16 +710,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
-  m_uiImageMaskExtend:
-    m_isUseMaskImage: 0
-    m_fillPercent: 1
-    m_fill: 1
-    m_ringWidth: 5
-    m_segements: 20
-  m_uiImageRoundedCornersExtend:
-    m_isUseRoundedCorners: 0
-    m_radius: 20
-    m_triangleNum: 5
 --- !u!1 &9130266365217219149
 GameObject:
   m_ObjectHideFlags: 0

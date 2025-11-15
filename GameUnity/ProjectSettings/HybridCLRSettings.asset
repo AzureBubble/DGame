@@ -30,6 +30,7 @@ MonoBehaviour:
   - DGame.Runtime.dll
   - UniTask.dll
   - YooAsset.dll
+  - UnityEngine.CoreModule.dll
   outputLinkFile: HybridCLRGenerate/link.xml
   outputAOTGenericReferenceFile: HybridCLRGenerate/AOTGenericReferences.cs
   maxGenericReferenceIteration: 10

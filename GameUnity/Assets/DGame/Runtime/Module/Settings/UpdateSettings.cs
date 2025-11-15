@@ -1,7 +1,5 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using UnityEngine;
 
@@ -49,22 +47,17 @@ namespace DGame
         [SerializeField]
         private string projectName = "Demo";
 
-#if UNITY_EDITOR
-#pragma warning disable 0162
-#endif
         public bool Enable
         {
              get
              {
 #if ENABLE_HYBRIDCLR
                 return true;
-#endif
+#else
                 return false;
+#endif
              }
         }
-#if UNITY_EDITOR
-#pragma warning disable 0162
-#endif
 
         [Header("自动同步 [HybridCLRGlobalSettings]")]
         public List<string> HotUpdateAssemblies = new List<string>() { "GameProto.dll", "GameLogic.dll" };

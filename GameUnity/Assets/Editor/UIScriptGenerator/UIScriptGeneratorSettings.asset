@@ -19,6 +19,13 @@ MonoBehaviour:
   nameSpace: GameLogic
   widgetName: item
   codeStyle: 1
+  uiGenTypes:
+  - uiTypeName: UIWindow
+    isGeneric: 0
+  - uiTypeName: UIWidget
+    isGeneric: 0
+  - uiTypeName: UIEventItem
+    isGeneric: 1
   scriptGenerateRulers:
   - uiElementRegex: m_go
     componentName: 0

@@ -20,6 +20,12 @@ namespace DGame
         [SerializeField] private string nameSpace = "GameLogic";
         [SerializeField] private string widgetName = "item";
         [SerializeField] private UIFieldCodeStyle codeStyle = UIFieldCodeStyle.MPrefix;
+        [SerializeField] private List<UIGenType> uiGenTypes = new List<UIGenType>()
+        {
+            new UIGenType("UIWindow", false),
+            new UIGenType("UIWidget", false),
+        };
+        public List<UIGenType> UIGenTypes => uiGenTypes;
         public GameObject UIRoot => uiRoot;
         public bool UseBindComponent => useBindComponent;
         public string GenCodePath => genCodePath;
@@ -135,6 +141,25 @@ namespace DGame
                 UIFieldCodeStyle.MPrefix => "m_",
                 _ => "m_"
             };
+        }
+
+        public static UIGenType GetUIGenType(string uiGenTypeName)
+        {
+            if (string.IsNullOrEmpty(uiGenTypeName))
+            {
+                return null;
+            }
+            var tempList = Instance.UIGenTypes;
+            for (int i = 0; i < tempList.Count; i++)
+            {
+                var uiGenType = tempList[i];
+
+                if (string.Equals(uiGenTypeName, uiGenType.uiTypeName, StringComparison.Ordinal))
+                {
+                    return uiGenType;
+                }
+            }
+            return null;
         }
     }
 }

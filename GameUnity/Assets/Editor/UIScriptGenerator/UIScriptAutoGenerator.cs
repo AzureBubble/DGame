@@ -73,18 +73,20 @@ namespace DGame
 
         #region GenerateGenCSharp
 
-        public static string GetUITypeName(UIBindComponent.GenUIType uiType, string fileName)
-            => uiType switch
+        private static string GetUITypeName(string uiGenTypeName, string fileName)
+        {
+            var uiGenType = UIScriptGeneratorSettings.GetUIGenType(uiGenTypeName);
+
+            if (uiGenType == null)
             {
-                UIBindComponent.GenUIType.UIWidget => UIBindComponent.GenUIType.UIWidget.ToString(),
-                UIBindComponent.GenUIType.UIWindow => UIBindComponent.GenUIType.UIWindow.ToString(),
-                UIBindComponent.GenUIType.UIEventItem => $"{UIBindComponent.GenUIType.UIEventItem.ToString()}<{fileName}>",
-                _ => throw new ArgumentOutOfRangeException(nameof(uiType), uiType, null)
-            };
+                return "UIWindow";
+            }
+            return !uiGenType.isGeneric ? uiGenType.uiTypeName : $"{uiGenType.uiTypeName}<{fileName}>";
+        }
 
         public static bool GenerateCSharpScript(bool includeListener, bool isUniTask = false,
             bool isAutoGenerate = false, string savePath = null, string className = null,
-            UIBindComponent.GenUIType uiType = UIBindComponent.GenUIType.UIWindow, bool isGenImp = false,
+            string uiGenTypeName = null, bool isGenImp = false,
             string impSavePath = null)
         {
             var root = Selection.activeTransform;
@@ -104,7 +106,7 @@ namespace DGame
             {
                 fileName = $"{className}.cs";
             }
-            string uiTypeName = GetUITypeName(uiType, className);
+            string uiTypeName = GetUITypeName(uiGenTypeName, className);
             if (!isAutoGenerate)
             {
                 uiTypeName = "UIWindow";
@@ -160,7 +162,7 @@ namespace DGame
                     }
                     else
                     {
-                        if (uiType == UIBindComponent.GenUIType.UIWindow)
+                        if (string.Equals(uiTypeName, "UIWindow", StringComparison.Ordinal))
                         {
                             strFile.AppendLine($"\t[Window(UILayer.UI, location : \"{fileName.Replace(".cs", "")}\")]");
                         }
@@ -410,6 +412,7 @@ namespace DGame
 
             if (File.Exists(filePath))
             {
+                Debug.LogWarning("相关实现类脚本已生成，再次生成跳过");
                 return false;
             }
 

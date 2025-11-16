@@ -18,8 +18,13 @@ public static class DGameUIGeneratorSettingsProvider
     private static bool m_showBasicSettings = true;
     private static bool m_showCodeSettings = true;
     private static bool m_showRuleSettings = true;
+    private static bool m_showuiGenTypeList = true;
     private static ReorderableList m_reorderableList;
+    private static ReorderableList m_uiGenTypeRecoedList;
     private static Vector2 m_scrollPosition;
+
+    private static SerializedProperty m_useBindComponentProperty;
+    private static SerializedObject m_serializedObject;
 
     [SettingsProvider]
     public static SettingsProvider CreateUIGeneratorSettingsProvider()
@@ -27,6 +32,12 @@ public static class DGameUIGeneratorSettingsProvider
         return new SettingsProvider(settingsPath, SettingsScope.Project)
         {
             label = "[DGame] UI代码生成器",
+            activateHandler = (searchContext, rootElement)=>
+            {
+                var uiScriptGeneratorSettings = UIScriptGeneratorSettings.Instance;
+                m_serializedObject = new SerializedObject(uiScriptGeneratorSettings);
+                m_useBindComponentProperty = m_serializedObject.FindProperty("useBindComponent");
+            },
             guiHandler = (searchContext) =>
             {
                 var uiScriptGeneratorSettings = UIScriptGeneratorSettings.Instance;
@@ -36,17 +47,16 @@ public static class DGameUIGeneratorSettingsProvider
                     return;
                 }
 
-                var serializedObject = new SerializedObject(uiScriptGeneratorSettings);
-
                 // 绘制标题区域
                 DrawHeader();
 
                 m_scrollPosition = EditorGUILayout.BeginScrollView(m_scrollPosition);
                 {
-                    DrawBasicSettings(serializedObject);
-                    DrawCodeSettings(serializedObject);
-                    DrawRuleSettings(serializedObject);
-                    DrawStatistics(serializedObject);
+                    DrawBasicSettings(m_serializedObject);
+                    DrawCodeSettings(m_serializedObject);
+                    DrawUIGenTypesSettings(m_serializedObject);
+                    DrawRuleSettings(m_serializedObject);
+                    DrawStatistics(m_serializedObject);
                 }
                 EditorGUILayout.EndScrollView();
 
@@ -112,13 +122,13 @@ public static class DGameUIGeneratorSettingsProvider
 
                 // 组件绑定设置
                 EditorGUILayout.LabelField("组件绑定设置", EditorStyles.boldLabel);
-                var useBindComponentProperty = serializedObject.FindProperty("useBindComponent");
-                EditorGUILayout.PropertyField(useBindComponentProperty,
+                // var useBindComponentProperty = serializedObject.FindProperty("useBindComponent");
+                EditorGUILayout.PropertyField(m_useBindComponentProperty,
                     new GUIContent("启用组件绑定", "是否自动生成组件绑定代码"));
 
                 EditorGUILayout.Space(3);
 
-                if (useBindComponentProperty.boolValue)
+                if (m_useBindComponentProperty.boolValue)
                 {
                     EditorGUILayout.HelpBox("已启用自动组件绑定功能", MessageType.Info);
                 }
@@ -137,14 +147,13 @@ public static class DGameUIGeneratorSettingsProvider
     {
         m_showCodeSettings = EditorGUILayout.BeginFoldoutHeaderGroup(m_showCodeSettings,
             new GUIContent("代码设置", "代码生成路径和命名规范"));
-
         if (m_showCodeSettings)
         {
             EditorGUILayout.BeginVertical("HelpBox");
             {
-                var useBindComponentProperty = serializedObject.FindProperty("useBindComponent");
+                // var useBindComponentProperty = serializedObject.FindProperty("useBindComponent");
 
-                if (useBindComponentProperty.boolValue)
+                if (m_useBindComponentProperty.boolValue)
                 {
                     // 代码生成路径
                     EditorGUILayout.LabelField("自动代码生成路径", EditorStyles.boldLabel);
@@ -159,7 +168,7 @@ public static class DGameUIGeneratorSettingsProvider
                         "实现类代码将生成到此目录",
                         impCodePathProperty.stringValue);
 
-                    EditorGUILayout.Space(5);
+                    EditorGUILayout.Space(10);
                 }
 
                 EditorGUILayout.Space(5);
@@ -186,6 +195,36 @@ public static class DGameUIGeneratorSettingsProvider
         }
         EditorGUILayout.EndFoldoutHeaderGroup();
         GUILayout.Space(8);
+    }
+
+    private static void DrawUIGenTypesSettings(SerializedObject serializedObject)
+    {
+        if (m_useBindComponentProperty.boolValue)
+        {
+            m_showuiGenTypeList = EditorGUILayout.BeginFoldoutHeaderGroup(m_showuiGenTypeList,
+                new GUIContent("UI类型"));
+
+            if (m_showuiGenTypeList)
+            {
+                EditorGUILayout.BeginVertical("HelpBox");
+                {
+                    // 规则说明
+                    EditorGUILayout.HelpBox(
+                        "• 非泛型: public class TestWindow : UIWindow\n" +
+                        "• 泛型: public class TestEventItem : UIEventItem<TestEventItem>",
+                        MessageType.Info);
+
+                    EditorGUILayout.Space(5);
+
+                    DrawUIGenTypesReorderableList(serializedObject);
+
+                    EditorGUILayout.Space(3);
+                }
+                EditorGUILayout.EndVertical();
+            }
+            EditorGUILayout.EndFoldoutHeaderGroup();
+            GUILayout.Space(8);
+        }
     }
 
     private static void DrawRuleSettings(SerializedObject serializedObject)
@@ -289,47 +328,6 @@ public static class DGameUIGeneratorSettingsProvider
         EditorGUILayout.EndVertical();
     }
 
-    private static void DrawActionButtons(SerializedObject serializedObject)
-    {
-        GUILayout.Space(15);
-
-        EditorGUILayout.BeginHorizontal();
-        {
-            GUILayout.FlexibleSpace();
-
-            // 测试生成按钮
-            var originalColor = GUI.color;
-            GUI.color = new Color(0.2f, 0.8f, 0.3f, 1f);
-            if (GUILayout.Button(new GUIContent("测试代码生成", "测试当前配置的代码生成效果"),
-                GUILayout.Width(140), GUILayout.Height(35)))
-            {
-                // 这里可以添加测试代码生成的逻辑
-                Debug.Log("UI代码生成测试完成");
-            }
-
-            GUILayout.Space(10);
-
-            // 保存配置按钮
-            GUI.color = new Color(0.1f, 0.5f, 0.8f, 1f);
-            if (GUILayout.Button(new GUIContent("保存配置", "保存所有UI生成器设置"),
-                GUILayout.Width(100), GUILayout.Height(35)))
-            {
-                if (serializedObject.ApplyModifiedProperties())
-                {
-                    EditorUtility.SetDirty(serializedObject.targetObject);
-                    AssetDatabase.SaveAssets();
-                    Debug.Log("UI代码生成器配置已保存");
-                }
-            }
-
-            GUI.color = originalColor;
-
-            GUILayout.FlexibleSpace();
-        }
-        EditorGUILayout.EndHorizontal();
-        GUILayout.Space(10);
-    }
-
     private static string DrawEnhancedFolderField(string label, string tooltip, string path)
     {
         EditorGUILayout.BeginVertical();
@@ -346,23 +344,26 @@ public static class DGameUIGeneratorSettingsProvider
                 if (GUILayout.Button(buttonGUIContent, GUILayout.Width(60), GUILayout.Height(18)))
                 {
                     string newPath = EditorUtility.OpenFolderPanel(label, Application.dataPath, string.Empty);
-                    if (!string.IsNullOrEmpty(newPath) && newPath.StartsWith(Application.dataPath))
+                    if (string.IsNullOrEmpty(newPath))
                     {
-                        path = "Assets" + newPath.Substring(Application.dataPath.Length);
-                        GUI.FocusControl(null); // 移除焦点以立即更新
+                        Debug.LogError("路径不能为空");
                     }
-                    else if (!string.IsNullOrEmpty(newPath))
+                    else
                     {
-                        Debug.LogError("路径不在Unity项目内: " + newPath);
+                        if (newPath.StartsWith(Application.dataPath))
+                        {
+                            newPath = newPath.Replace(Application.dataPath, "Assets");
+                        }
+                        path = newPath;
                     }
                 }
             }
             EditorGUILayout.EndHorizontal();
 
             // 路径验证
-            if (!string.IsNullOrEmpty(path) && !path.StartsWith("Assets/"))
+            if (string.IsNullOrEmpty(path))
             {
-                EditorGUILayout.HelpBox("路径应该以 Assets/ 开头", MessageType.Warning);
+                EditorGUILayout.HelpBox("路径不能为空", MessageType.Warning);
             }
         }
         EditorGUILayout.EndVertical();
@@ -462,6 +463,97 @@ public static class DGameUIGeneratorSettingsProvider
         }
 
         m_reorderableList.DoLayoutList();
+
+        if (serializedObject.ApplyModifiedProperties())
+        {
+            EditorUtility.SetDirty(serializedObject.targetObject);
+        }
+    }
+
+    private static void DrawUIGenTypesReorderableList(SerializedObject serializedObject)
+    {
+        SerializedProperty ruleListProperty = serializedObject.FindProperty("uiGenTypes");
+        if (ruleListProperty == null) return;
+
+        if (m_uiGenTypeRecoedList == null)
+        {
+            m_uiGenTypeRecoedList = new ReorderableList(serializedObject, ruleListProperty, true, true, true, true)
+            {
+                drawHeaderCallback = (Rect rect) =>
+                {
+                    float padding = 5f;
+                    float columnWidth = (rect.width - padding * 3) / 4f;
+
+                    GUI.Label(new Rect(rect.x, rect.y, columnWidth, rect.height), "UI类型名称", EditorStyles.boldLabel);
+                    GUI.Label(new Rect(rect.x + columnWidth + padding + 20, rect.y, columnWidth, rect.height), "自动生成的UI类继承的类名", EditorStyles.boldLabel);
+                    GUI.Label(new Rect(rect.x + (columnWidth + padding) * 3, rect.y, columnWidth, rect.height), "是否是泛型", EditorStyles.boldLabel);
+                },
+
+                drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
+                {
+                    EditorGUI.BeginChangeCheck();
+                    SerializedProperty element = ruleListProperty.GetArrayElementAtIndex(index);
+                    rect.y += 2;
+
+                    float padding = 5f;
+                    float fieldHeight = EditorGUIUtility.singleLineHeight;
+                    float columnWidth = (rect.width - padding * 3) / 4f;
+
+                    // UI类型名称
+                    SerializedProperty regexProperty = element.FindPropertyRelative("uiTypeName");
+                    string ruleName = GetRuleDisplayName(regexProperty.stringValue);
+                    Rect nameRect = new Rect(rect.x, rect.y, columnWidth, fieldHeight);
+                    EditorGUI.LabelField(nameRect, ruleName);
+
+                    Rect regexRect = new Rect(rect.x + columnWidth + padding, rect.y, columnWidth, fieldHeight);
+                    EditorGUI.PropertyField(regexRect, regexProperty, GUIContent.none);
+
+                    // 是否Widget
+                    Rect widgetRect = new Rect(rect.x + (columnWidth + padding) * 3 + 10, rect.y, columnWidth, fieldHeight);
+                    SerializedProperty widgetProperty = element.FindPropertyRelative("isGeneric");
+                    EditorGUI.PropertyField(widgetRect, widgetProperty, GUIContent.none);
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        serializedObject.ApplyModifiedProperties();
+                        EditorUtility.SetDirty(serializedObject.targetObject);
+                        AssetDatabase.SaveAssets();
+                    }
+                },
+
+                elementHeight = EditorGUIUtility.singleLineHeight + 6,
+
+                onChangedCallback = (ReorderableList list) =>
+                {
+                    serializedObject.ApplyModifiedProperties();
+                    EditorUtility.SetDirty(serializedObject.targetObject);
+                },
+
+                onAddCallback = (ReorderableList list) =>
+                {
+                    int newIndex = list.serializedProperty.arraySize;
+                    list.serializedProperty.arraySize++;
+                    list.index = newIndex;
+
+                    // 设置默认值
+                    SerializedProperty newElement = list.serializedProperty.GetArrayElementAtIndex(newIndex);
+                    newElement.FindPropertyRelative("uiTypeName").stringValue = "UIWindow";
+                    newElement.FindPropertyRelative("isGeneric").boolValue = false;
+
+                    serializedObject.ApplyModifiedProperties();
+                },
+
+                onRemoveCallback = (ReorderableList list) =>
+                {
+                    if (EditorUtility.DisplayDialog("确认删除", "确定要删除这条生成规则吗？", "删除", "取消"))
+                    {
+                        ReorderableList.defaultBehaviours.DoRemoveButton(list);
+                        serializedObject.ApplyModifiedProperties();
+                    }
+                }
+            };
+        }
+
+        m_uiGenTypeRecoedList.DoLayoutList();
 
         if (serializedObject.ApplyModifiedProperties())
         {

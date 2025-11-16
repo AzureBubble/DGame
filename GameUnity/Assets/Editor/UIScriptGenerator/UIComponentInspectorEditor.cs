@@ -1,6 +1,7 @@
 ﻿#if UNITY_EDITOR
 
 using System.Collections.Generic;
+using System.Linq;
 using DGame;
 using UnityEditor;
 using UnityEditorInternal;
@@ -20,6 +21,10 @@ namespace GameLogic
         private SerializedProperty m_impCodePath;
         private SerializedProperty m_className;
         private SerializedProperty m_uiType;
+
+        private List<UIGenType> m_uiGenTypes = new List<UIGenType>();
+        private string[] m_uiTypeOptions;
+        private int m_selectedIndex = 0;
 
         private void OnEnable()
         {
@@ -140,13 +145,13 @@ namespace GameLogic
                 {
                     // RemoveNullComponents();
                     UIScriptGenerator.GenerateCSharpScript(true, false, true, m_genCodePath.stringValue,
-                        m_className.stringValue, (UIBindComponent.GenUIType)m_uiType.enumValueIndex, m_isGenImpClass.boolValue, m_impCodePath.stringValue);
+                        m_className.stringValue, m_uiTypeOptions[m_selectedIndex], m_isGenImpClass.boolValue, m_impCodePath.stringValue);
                 }
                 if (GUILayout.Button("生成UniTask脚本本窗口", GUILayout.Height(25)))
                 {
                     // RemoveNullComponents();
                     UIScriptGenerator.GenerateCSharpScript(true, true, true, m_genCodePath.stringValue,
-                        m_className.stringValue, (UIBindComponent.GenUIType)m_uiType.enumValueIndex, m_isGenImpClass.boolValue, m_impCodePath.stringValue);
+                        m_className.stringValue, m_uiTypeOptions[m_selectedIndex], m_isGenImpClass.boolValue, m_impCodePath.stringValue);
                 }
             }
             EditorGUILayout.EndHorizontal();
@@ -171,7 +176,20 @@ namespace GameLogic
             {
                 // 绘制序列化属性字段
                 EditorGUILayout.LabelField("代码生成设置", EditorStyles.boldLabel);
-                EditorGUILayout.PropertyField(m_uiType, new GUIContent("UI类型"));
+
+                m_uiGenTypes = UIScriptGeneratorSettings.Instance.UIGenTypes;
+                // 获取所有的 uiTypeName
+                m_uiTypeOptions = m_uiGenTypes.Select(t => t.uiTypeName).ToArray();
+                // 确保有选项时才显示 Popup
+                if (m_uiTypeOptions.Length > 0)
+                {
+                    m_selectedIndex = EditorGUILayout.Popup("UI类型", m_selectedIndex, m_uiTypeOptions);
+                }
+                else
+                {
+                    EditorGUILayout.HelpBox("请先去UISetting中设置UI类型规则", MessageType.Info);
+                }
+                // EditorGUILayout.PropertyField(m_uiType, new GUIContent("UI类型"));
                 EditorGUILayout.BeginHorizontal();
                 EditorGUILayout.PropertyField(m_className, new GUIContent("类名"));
                 if(GUILayout.Button("物体名", GUILayout.Width(60), GUILayout.Height(18)))
@@ -249,15 +267,22 @@ namespace GameLogic
                 EditorApplication.delayCall += () =>
                 {
                     var newPath = EditorUtility.OpenFolderPanel(label, currentPath, string.Empty);
-                    if (!string.IsNullOrEmpty(newPath))
+                    if (string.IsNullOrEmpty(newPath))
                     {
-                        newPath = newPath.Replace(Application.dataPath, "Assets");
-                        if (newPath.StartsWith("Assets"))
-                        {
-                            pathProperty.stringValue = newPath;
-                            pathProperty.serializedObject.ApplyModifiedProperties();
-                        }
+                        Debug.LogError("路径不能为空" + newPath);
+                        string defaultPath = GetDefaultPathByPropertyType(pathProperty);
+                        pathProperty.stringValue = defaultPath;
+
                     }
+                    else
+                    {
+                        if (newPath.StartsWith(Application.dataPath))
+                        {
+                            newPath = newPath.Replace(Application.dataPath, "Assets");
+                        }
+                        pathProperty.stringValue = newPath;
+                    }
+                    pathProperty.serializedObject.ApplyModifiedProperties();
                 };
             }
             if (GUILayout.Button("默认", GUILayout.Width(60), GUILayout.Height(20)))

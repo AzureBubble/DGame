@@ -6,18 +6,11 @@ namespace GameLogic
 {
     public partial class UIBindComponent
     {
-        public enum GenUIType
-        {
-            UIWindow,
-            UIWidget,
-            UIEventItem,
-        }
-        
         [SerializeField, HideInInspector] private string genCodePath;
         [SerializeField, HideInInspector] private string className;
         [SerializeField, HideInInspector] private string impCodePath;
         [SerializeField, HideInInspector] private bool isGenImpClass;
-        [SerializeField, HideInInspector] private GenUIType uiType;
+        [SerializeField, HideInInspector] private string uiType;
 
         public void AddComponent(Component component)
         {

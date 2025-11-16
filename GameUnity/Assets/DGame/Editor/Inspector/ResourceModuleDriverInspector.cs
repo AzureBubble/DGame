@@ -450,7 +450,7 @@ namespace DGame
 
                     EditorGUILayout.Space(3);
                     string tips = $"每帧最多处理 {milliseconds}ms 的资源操作，避免卡顿\n" +
-                                  $"自动释放资源引用计数为0的资源包: {m_autoUnloadBundleWhenUnused.boolValue}";
+                                  $"自动释放资源引用计数为0的资源包: {(m_autoUnloadBundleWhenUnused.boolValue ? "启用" : "禁用")}";
                     EditorGUILayout.HelpBox(tips, MessageType.Info);
                 }
                 EditorGUILayout.EndVertical();

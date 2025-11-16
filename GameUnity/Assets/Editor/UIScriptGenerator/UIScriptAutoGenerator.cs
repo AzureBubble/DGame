@@ -216,7 +216,7 @@ namespace DGame
                 {
                     Directory.CreateDirectory(path);
                 }
-                var saveFileName = fileName.Replace(".cs", ".g.cs");
+                var saveFileName = fileName.Replace(".cs", "_Gen.g.cs");
                 var filePath = Path.Combine(path, saveFileName).Replace("\\", "/");
 
                 if (File.Exists(filePath))
@@ -291,7 +291,6 @@ namespace DGame
                 return;
             }
 
-            // string varPath = GetRelativePath(child, root);
             strVar.AppendLine($"\t\tprivate {componentName} {varName};");
 
             if (rule.componentName == UIComponentName.GameObject)
@@ -314,16 +313,11 @@ namespace DGame
                         strOnCreate.AppendLine(
                             $"\t\t\t{varName}.onClick.AddListener(UniTask.UnityAction({btnFuncName}));");
                         strCallback.AppendLine($"\t\tprivate partial UniTaskVoid {btnFuncName}();");
-                        // strCallback.AppendLine("\t\t{");
-                        // strCallback.AppendLine("\t\t\tawait UniTask.Yield();");
-                        // strCallback.AppendLine("\t\t}");
                     }
                     else
                     {
                         strOnCreate.AppendLine($"\t\t\t{varName}.onClick.AddListener({btnFuncName});");
                         strCallback.AppendLine($"\t\tprivate partial void {btnFuncName}();");
-                        // strCallback.AppendLine("\t\t{");
-                        // strCallback.AppendLine("\t\t}");
                     }
 
                     strCallback.AppendLine();
@@ -333,8 +327,6 @@ namespace DGame
                     var toggleFuncName = GetToggleFuncName(varName);
                     strOnCreate.AppendLine($"\t\t\t{varName}.onValueChanged.AddListener({toggleFuncName});");
                     strCallback.AppendLine($"\t\tprivate partial void {toggleFuncName}(bool isOn);");
-                    // strCallback.AppendLine("\t\t{");
-                    // strCallback.AppendLine("\t\t}");
                     strCallback.AppendLine();
                     break;
 
@@ -342,8 +334,6 @@ namespace DGame
                     var sliderFuncName = GetSliderFuncName(varName);
                     strOnCreate.AppendLine($"\t\t\t{varName}.onValueChanged.AddListener({sliderFuncName});");
                     strCallback.AppendLine($"\t\tprivate partial void {sliderFuncName}(float value);");
-                    // strCallback.AppendLine("\t\t{");
-                    // strCallback.AppendLine("\t\t}");
                     strCallback.AppendLine();
                     break;
             }
@@ -353,7 +343,7 @@ namespace DGame
 
         #region GenerateImpCSharp
 
-        public static bool GenerateImpCSharpScript(bool isUniTask = false, string fileName = null, string impSavePath = null)
+        private static bool GenerateImpCSharpScript(bool isUniTask = false, string fileName = null, string impSavePath = null)
         {
             var root = Selection.activeTransform;
             if (root == null || string.IsNullOrEmpty(fileName))
@@ -363,7 +353,6 @@ namespace DGame
             CheckVariableNames();
             StringBuilder strCallback = new StringBuilder();
 
-            var widgetPrefix = GetUIWidgetName();
             AutoImpErgodic(root, root, ref strCallback, isUniTask);
             StringBuilder strFile = new StringBuilder();
 

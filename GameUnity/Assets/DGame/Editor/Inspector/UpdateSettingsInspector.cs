@@ -25,6 +25,7 @@ namespace DGame
         private SerializedProperty m_loadResWayWebGL;
         private SerializedProperty m_isAutoAssetCopyToBuildAddress;
         private SerializedProperty m_buildAddress;
+        private SerializedProperty m_replaceAssetPathWithAddress;
 
         public static List<string> HotUpdateAssembliesList;
         public static List<string> AotMetaAssembliesList;
@@ -61,6 +62,7 @@ namespace DGame
             m_loadResWayWebGL = serializedObject.FindProperty("m_loadResWayWebGL");
             m_isAutoAssetCopyToBuildAddress = serializedObject.FindProperty("m_isAutoAssetCopyToBuildAddress");
             m_buildAddress = serializedObject.FindProperty("m_buildAddress");
+            m_replaceAssetPathWithAddress = serializedObject.FindProperty("m_replaceAssetPathWithAddress");
 
             UpdateSettings updateSettings = (UpdateSettings)target;
 
@@ -282,6 +284,15 @@ namespace DGame
                     m_isAutoAssetCopyToBuildAddress.boolValue = isAutoAssetCopyToBuildAddress;
                 }
 
+                bool replaceAssetPathWithAddress = EditorGUILayout.ToggleLeft(
+                    new GUIContent("是否使用可寻址资源代替资源路径", "说明：开启此项可以节省运行时清单占用的内存！"),
+                    m_replaceAssetPathWithAddress.boolValue);
+
+                if (replaceAssetPathWithAddress != m_replaceAssetPathWithAddress.boolValue)
+                {
+                    m_replaceAssetPathWithAddress.boolValue = replaceAssetPathWithAddress;
+                }
+
                 EditorGUILayout.Space(3);
 
                 // 构建地址
@@ -290,14 +301,27 @@ namespace DGame
 
                 EditorGUILayout.Space(3);
 
+                string tips = string.Empty;
+
                 if (m_isAutoAssetCopyToBuildAddress.boolValue)
                 {
-                    EditorGUILayout.HelpBox("构建时将自动复制StreamingAssets资源到存放路径", MessageType.Info);
+                    tips = "构建时将自动复制StreamingAssets资源到存放路径";
                 }
                 else
                 {
-                    EditorGUILayout.HelpBox("需要手动处理StreamingAssets资源文件部署", MessageType.Info);
+                    tips = "需要手动处理StreamingAssets资源文件部署";
                 }
+
+                if (m_replaceAssetPathWithAddress.boolValue)
+                {
+                    tips += "\n启用可寻址资源代替资源路径(说明：开启此项可以节省运行时清单占用的内存！)";
+                }
+                else
+                {
+                    tips += "\n禁用可寻址资源代替资源路径";
+                }
+
+                EditorGUILayout.HelpBox(tips, MessageType.Info);
             }
             EditorGUILayout.EndVertical();
             GUILayout.Space(8);

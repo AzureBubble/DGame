@@ -33,3 +33,4 @@ MonoBehaviour:
   m_loadResWayWebGL: 1
   m_isAutoAssetCopyToBuildAddress: 0
   m_buildAddress: ../../Builds/Unity_Data/StreamingAssets
+  m_replaceAssetPathWithAddress: 0

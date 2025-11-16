@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace DGame
 {
@@ -92,8 +93,17 @@ namespace DGame
 
         [SerializeField]
         private string m_buildAddress = "../../Builds/Unity_Data/StreamingAssets";
+        /// <summary>
+        /// 是否使用可寻址资源代替资源路径
+        /// 说明：开启此项可以节省运行时清单占用的内存！
+        /// </summary>
+        [SerializeField]
+        private bool m_replaceAssetPathWithAddress = false;
 
         public string GetBuildAddress() => m_buildAddress;
+
+        public bool GetReplaceAssetPathWithAddress()
+                => m_replaceAssetPathWithAddress;
 
         public string GetResDownloadPath() => Path.Combine(m_resDownloadPath, projectName, GetPlatformName()).Replace("\\", "/");
 

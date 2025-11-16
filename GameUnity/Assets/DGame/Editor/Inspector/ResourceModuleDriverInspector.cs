@@ -417,7 +417,7 @@ namespace DGame
                 EditorGUILayout.BeginVertical("HelpBox");
                 {
                     int milliseconds = EditorGUILayout.IntSlider(
-                        new GUIContent("帧时间限制(毫秒)", "每帧处理资源操作的最大时间"),
+                        new GUIContent("异步帧时间限制(毫秒)", "每帧异步处理资源操作的最大时间"),
                         m_milliseconds.intValue, 1, 100);
 
                     if (milliseconds != m_milliseconds.intValue)
@@ -449,7 +449,7 @@ namespace DGame
                     }
 
                     EditorGUILayout.Space(3);
-                    string tips = $"每帧最多处理 {milliseconds}ms 的资源操作，避免卡顿\n" +
+                    string tips = $"异步操作每帧最多处理 {milliseconds}ms 的资源操作，避免卡顿\n" +
                                   $"自动释放资源引用计数为0的资源包: {(m_autoUnloadBundleWhenUnused.boolValue ? "启用" : "禁用")}";
                     EditorGUILayout.HelpBox(tips, MessageType.Info);
                 }

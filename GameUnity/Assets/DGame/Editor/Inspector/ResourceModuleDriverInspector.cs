@@ -105,7 +105,7 @@ namespace DGame
                 normal = { textColor = Color.white }
             };
 
-            EditorGUILayout.LabelField(new GUIContent("资源模块配置", "Resource Module Configuration"),
+            EditorGUILayout.LabelField(new GUIContent("DGame资源模块配置", "Resource Module Configuration"),
                 titleStyle, GUILayout.Height(30));
 
             GUILayout.FlexibleSpace();

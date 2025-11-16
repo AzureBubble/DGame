@@ -124,7 +124,7 @@ namespace DGame
                 normal = { textColor = Color.white }
             };
 
-            EditorGUILayout.LabelField(new GUIContent("热更新配置系统", "Hot Update Configuration System"),
+            EditorGUILayout.LabelField(new GUIContent("DGame热更新配置系统", "Hot Update Configuration System"),
                 titleStyle, GUILayout.Height(30));
 
             GUILayout.FlexibleSpace();

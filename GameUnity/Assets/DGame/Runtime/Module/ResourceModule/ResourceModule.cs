@@ -23,6 +23,7 @@ namespace DGame
         public int FailedTryAgainCnt { get; set; }
         public string DefaultPackageName { get; set; } = "DefaultPackage";
         public long Milliseconds { get; set; } = 30;
+        public bool AutoUnloadBundleWhenUnused { get; set; } = false;
         public string HostServerURl { get; set; }
         public string FallbackHostServerURL { get; set; }
         public LoadResWayWebGL LoadResWayWebGL { get; set; }
@@ -119,6 +120,7 @@ namespace DGame
                 var packageRoot = buildResult.PackageRootDirectory;
                 var createParam = new EditorSimulateModeParameters();
                 createParam.EditorFileSystemParameters = FileSystemParameters.CreateDefaultEditorFileSystemParameters(packageRoot);
+                createParam.AutoUnloadBundleWhenUnused = AutoUnloadBundleWhenUnused;
                 initOperation = package.InitializeAsync(createParam);
             }
 
@@ -130,6 +132,7 @@ namespace DGame
                 var createParam = new OfflinePlayModeParameters();
                 createParam.BuildinFileSystemParameters =
                     FileSystemParameters.CreateDefaultBuildinFileSystemParameters(decryptionServices);
+                createParam.AutoUnloadBundleWhenUnused = AutoUnloadBundleWhenUnused;
                 initOperation = package.InitializeAsync(createParam);
             }
 
@@ -142,6 +145,7 @@ namespace DGame
                     FileSystemParameters.CreateDefaultBuildinFileSystemParameters(decryptionServices);
                 createParam.CacheFileSystemParameters =
                     FileSystemParameters.CreateDefaultCacheFileSystemParameters(remoteServices, decryptionServices);
+                createParam.AutoUnloadBundleWhenUnused = AutoUnloadBundleWhenUnused;
                 initOperation = package.InitializeAsync(createParam);
             }
 
@@ -165,6 +169,7 @@ namespace DGame
                 }
                 createParam.WebServerFileSystemParameters = FileSystemParameters.CreateDefaultWebServerFileSystemParameters(webDecryptionServices);
 #endif
+                createParam.AutoUnloadBundleWhenUnused = AutoUnloadBundleWhenUnused;
                 initOperation = package.InitializeAsync(createParam);
             }
 

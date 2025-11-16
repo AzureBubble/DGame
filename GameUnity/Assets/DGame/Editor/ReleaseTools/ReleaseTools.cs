@@ -138,6 +138,7 @@ namespace DGame
                 scriptableBuildParameters.CompressOption = ECompressOption.LZ4;
                 // 设置内置着色器资源包名称，避免重复打包着色器
                 scriptableBuildParameters.BuiltinShadersBundleName = GetBuiltinShaderBundleName("DefaultPackage");
+                scriptableBuildParameters.ReplaceAssetPathWithAddress = true;
             }
 
             // 配置构建参数

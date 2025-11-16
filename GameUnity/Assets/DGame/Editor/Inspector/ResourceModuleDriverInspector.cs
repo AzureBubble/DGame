@@ -29,6 +29,7 @@ namespace DGame
         private SerializedProperty m_encryptionType;
         private SerializedProperty m_updatableWhilePlaying;
         private SerializedProperty m_milliseconds;
+        private SerializedProperty m_autoUnloadBundleWhenUnused;
         private SerializedProperty m_minUnloadUnusedAssetsInterval;
         private SerializedProperty m_maxUnloadUnusedAssetsInterval;
         private SerializedProperty m_useSystemUnloadUnusedAssets;
@@ -431,8 +432,26 @@ namespace DGame
                         }
                     }
 
+                    bool autoUnloadBundleWhenUnused = EditorGUILayout.ToggleLeft(
+                        new GUIContent("自动释放资源引用计数为0的资源包", "自动释放资源引用计数为0的资源包"),
+                        m_autoUnloadBundleWhenUnused.boolValue);
+
+                    if (autoUnloadBundleWhenUnused != m_autoUnloadBundleWhenUnused.boolValue)
+                    {
+                        if (EditorApplication.isPlaying)
+                        {
+                            t.autoUnloadBundleWhenUnused = autoUnloadBundleWhenUnused;
+                        }
+                        else
+                        {
+                            m_autoUnloadBundleWhenUnused.boolValue = autoUnloadBundleWhenUnused;
+                        }
+                    }
+
                     EditorGUILayout.Space(3);
-                    EditorGUILayout.HelpBox($"每帧最多处理 {milliseconds}ms 的资源操作，避免卡顿", MessageType.Info);
+                    string tips = $"每帧最多处理 {milliseconds}ms 的资源操作，避免卡顿\n" +
+                                  $"自动释放资源引用计数为0的资源包: {m_autoUnloadBundleWhenUnused.boolValue}";
+                    EditorGUILayout.HelpBox(tips, MessageType.Info);
                 }
                 EditorGUILayout.EndVertical();
             }
@@ -579,6 +598,7 @@ namespace DGame
             m_encryptionType = serializedObject.FindProperty("encryptionType");
             m_updatableWhilePlaying = serializedObject.FindProperty("updatableWhilePlaying");
             m_milliseconds = serializedObject.FindProperty("milliseconds");
+            m_autoUnloadBundleWhenUnused = serializedObject.FindProperty("autoUnloadBundleWhenUnused");
             m_minUnloadUnusedAssetsInterval = serializedObject.FindProperty("minUnloadUnusedAssetsInterval");
             m_maxUnloadUnusedAssetsInterval = serializedObject.FindProperty("maxUnloadUnusedAssetsInterval");
             m_useSystemUnloadUnusedAssets = serializedObject.FindProperty("useSystemUnloadUnusedAssets");

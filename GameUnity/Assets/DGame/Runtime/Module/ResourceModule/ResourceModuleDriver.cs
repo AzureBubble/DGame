@@ -78,6 +78,12 @@ namespace DGame
         [SerializeField]
         public long milliseconds = 30;
 
+        /// <summary>
+        /// 自动释放资源引用计数为0的资源包
+        /// </summary>
+        [SerializeField]
+        public bool autoUnloadBundleWhenUnused = false;
+
         [SerializeField]
         private int downloadingMaxNum = 10;
         public int DownloadingMaxNum { get => downloadingMaxNum; set => downloadingMaxNum = value; }
@@ -130,6 +136,7 @@ namespace DGame
             m_resourceModule.PlayMode = PlayMode;
             m_resourceModule.EncryptionType = EncryptionType;
             m_resourceModule.Milliseconds = milliseconds;
+            m_resourceModule.AutoUnloadBundleWhenUnused = autoUnloadBundleWhenUnused;
             // TODO：设置资源热更地址
             // m_resourceModule.HostServerURl =
             // m_resourceModule.FallbackHostServerURL =

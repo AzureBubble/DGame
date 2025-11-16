@@ -78,6 +78,11 @@ namespace DGame
         long Milliseconds  { get; set; }
 
         /// <summary>
+        /// 自动释放资源引用计数为0的资源包
+        /// </summary>
+        bool AutoUnloadBundleWhenUnused { get; set; }
+
+        /// <summary>
         /// 热更服务器链接URL
         /// </summary>
         string HostServerURl { get; set; }

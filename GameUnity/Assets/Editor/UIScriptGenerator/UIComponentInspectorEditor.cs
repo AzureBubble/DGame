@@ -141,13 +141,13 @@ namespace GameLogic
                 {
                     RebindComponents();
                 }
-                if (GUILayout.Button("生成脚本窗口", GUILayout.Height(25)))
+                if (GUILayout.Button("自动生成脚本", GUILayout.Height(25)))
                 {
                     // RemoveNullComponents();
                     UIScriptGenerator.GenerateCSharpScript(true, false, true, m_genCodePath.stringValue,
                         m_className.stringValue, m_uiTypeOptions[m_selectedIndex], m_isGenImpClass.boolValue, m_impCodePath.stringValue);
                 }
-                if (GUILayout.Button("生成UniTask脚本本窗口", GUILayout.Height(25)))
+                if (GUILayout.Button("自动生成UniTask脚本", GUILayout.Height(25)))
                 {
                     // RemoveNullComponents();
                     UIScriptGenerator.GenerateCSharpScript(true, true, true, m_genCodePath.stringValue,
@@ -157,11 +157,11 @@ namespace GameLogic
             EditorGUILayout.EndHorizontal();
             EditorGUILayout.BeginHorizontal();
             {
-                if (GUILayout.Button("生成标准版绑定代码", GUILayout.Height(25)))
+                if (GUILayout.Button("生成标准版粘贴板代码", GUILayout.Height(25)))
                 {
                     UIScriptGenerator.GenerateCSharpScript(false);
                 }
-                if (GUILayout.Button("生成UniTask代码", GUILayout.Height(25)))
+                if (GUILayout.Button("生成UniTask粘贴板代码", GUILayout.Height(25)))
                 {
                     UIScriptGenerator.GenerateCSharpScript(false, true);
                 }

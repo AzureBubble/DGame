@@ -452,3 +452,8 @@ MonoBehaviour:
   m_components:
   - {fileID: 7118409505170531040}
   - {fileID: 6805831647112239378}
+  genCodePath: Assets/Scripts/HotFix/GameLogic/UI/Gen
+  className: LogUI
+  impCodePath: Assets/Scripts/HotFix/GameLogic/UI
+  isGenImpClass: 0
+  uiType: 

@@ -31,6 +31,7 @@
 /[Aa]ssets/StreamingAssets/
 /[Bb]undles/
 /[Hh]ybridCLRData/
+/[Bb]uild/
 
 # Visual Studio cache directory
 .vs/

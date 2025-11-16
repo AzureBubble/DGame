@@ -87,7 +87,7 @@ MonoBehaviour:
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
   m_Interactable: 1
-  m_TargetGraphic: {fileID: 0}
+  m_TargetGraphic: {fileID: 256277001519125034}
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
@@ -452,3 +452,8 @@ MonoBehaviour:
   m_components:
   - {fileID: 7118409505170531040}
   - {fileID: 6805831647112239378}
+  genCodePath: Assets/Scripts/HotFix/GameLogic/UI/Gen
+  className: LogUI
+  impCodePath: Assets/Scripts/HotFix/GameLogic/UI
+  isGenImpClass: 0
+  uiType: 

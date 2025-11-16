@@ -273,13 +273,10 @@ public class AOTGenericReferences : UnityEngine.MonoBehaviour
 	// System.ValueTuple<byte,System.ValueTuple<byte,object>>
 	// System.ValueTuple<byte,object>
 	// System.ValueTuple<float,float>
-	// UnityEngine.Events.InvokableCall<byte>
 	// UnityEngine.Events.InvokableCall<float>
 	// UnityEngine.Events.InvokableCall<object>
-	// UnityEngine.Events.UnityAction<byte>
 	// UnityEngine.Events.UnityAction<float>
 	// UnityEngine.Events.UnityAction<object>
-	// UnityEngine.Events.UnityEvent<byte>
 	// UnityEngine.Events.UnityEvent<float>
 	// UnityEngine.Events.UnityEvent<object>
 	// }}
@@ -330,7 +327,6 @@ public class AOTGenericReferences : UnityEngine.MonoBehaviour
 		// string DGame.Utility.StringUtil.IStringUtilHelper.Format<object>(string,object)
 		// object DGame.Utility.UnityUtil.AddMonoBehaviour<object>(UnityEngine.GameObject)
 		// object System.Activator.CreateInstance<object>()
-		// object[] System.Array.Empty<object>()
 		// object System.Collections.Generic.CollectionExtensions.GetValueOrDefault<object,object>(System.Collections.Generic.IReadOnlyDictionary<object,object>,object)
 		// object System.Collections.Generic.CollectionExtensions.GetValueOrDefault<object,object>(System.Collections.Generic.IReadOnlyDictionary<object,object>,object,object)
 		// int System.Linq.Enumerable.Count<object>(System.Collections.Generic.IEnumerable<object>)

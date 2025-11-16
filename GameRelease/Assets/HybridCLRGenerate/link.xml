@@ -162,7 +162,6 @@
     <type fullname="UnityEngine.UI.Slider" preserve="all" />
     <type fullname="UnityEngine.UI.Text" preserve="all" />
     <type fullname="UnityEngine.UI.Toggle" preserve="all" />
-    <type fullname="UnityEngine.UI.Toggle/ToggleEvent" preserve="all" />
     <type fullname="UnityEngine.UI.VertexHelper" preserve="all" />
   </assembly>
   <assembly fullname="UnityEngine.UIModule">
@@ -192,7 +191,6 @@
     <type fullname="System.Action`5" preserve="all" />
     <type fullname="System.Action`6" preserve="all" />
     <type fullname="System.Activator" preserve="all" />
-    <type fullname="System.Array" preserve="all" />
     <type fullname="System.Attribute" preserve="all" />
     <type fullname="System.Boolean" preserve="all" />
     <type fullname="System.Collections.Generic.CollectionExtensions" preserve="all" />

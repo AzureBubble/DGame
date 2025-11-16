@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 618f730fcd14941fab38169a7dde8c64
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 255470
+  packageName: vFolders 2
+  packageVersion: 2.1.7
+  assetPath: Assets/vFolders/VFoldersPalette.cs
+  uploadId: 765419

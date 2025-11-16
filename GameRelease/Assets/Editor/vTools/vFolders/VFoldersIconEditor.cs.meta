@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: fc2d205dd3ec1446d843e566b05c2eda
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 255470
+  packageName: vFolders 2
+  packageVersion: 2.1.7
+  assetPath: Assets/vFolders/VFoldersIconEditor.cs
+  uploadId: 765419

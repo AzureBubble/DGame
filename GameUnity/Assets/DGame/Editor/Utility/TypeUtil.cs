@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace DGame
 {
-    public static class TypeUtil
+    internal static class TypeUtil
     {
         private static readonly string[] m_runtimeAssemblyNames = new string[]
         {
@@ -29,7 +29,7 @@ namespace DGame
         /// </summary>
         /// <param name="typeBase">基类类型。</param>
         /// <returns>指定基类的所有子类的名称。</returns>
-        public static string[] GetRuntimeTypeNames(System.Type typeBase)
+        internal static string[] GetRuntimeTypeNames(System.Type typeBase)
         {
             return GetTypeNames(typeBase, m_runtimeAssemblyNames);
         }

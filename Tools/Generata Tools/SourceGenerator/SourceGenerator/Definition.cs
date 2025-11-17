@@ -16,4 +16,13 @@ public class Definition
     public const string NameSpace = "GameLogic";//"DGame";
     public const string AttributeName = "EventInterface";
     public const string StringToHash = "StringId.StringToHash";
+
+    /// <summary>
+    /// RuntimeInitialize文件生成的命名空间
+    /// </summary>
+    public static readonly List<string> RuntimeInitializeTargetNameSpaces = ["GameLogic"]; //"DGame", "GameProto", "GameBattle"
+    public static readonly string[] RuntimeInitializeUsingNameSpace = ["UnityEngine"];
+    public const string RuntimeInitializeNameSpace = "AOT";//"DGame";
+    public const string RuntimeInitializeAttributeName = "RuntimeInitializeOnLoadMethod";
+    public const string DefaultAssemblyName = "GameLogic";
 }

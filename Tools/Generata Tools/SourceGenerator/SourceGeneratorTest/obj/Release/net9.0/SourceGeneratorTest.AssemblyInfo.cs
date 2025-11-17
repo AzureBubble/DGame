@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SourceGeneratorTest")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ec26b849979647efb43de781b6648058720bb780")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5dfc8a5ab093862aa70a307cffc3323b25bae46e")]
 [assembly: System.Reflection.AssemblyProductAttribute("SourceGeneratorTest")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SourceGeneratorTest")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

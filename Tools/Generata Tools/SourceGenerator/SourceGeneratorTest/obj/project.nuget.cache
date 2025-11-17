@@ -1,8 +1,13 @@
 {
   "version": 2,
-  "dgSpecHash": "PffxCMNaJwk=",
+  "dgSpecHash": "ckRupsqlb/8=",
   "success": true,
   "projectFilePath": "D:\\Unity\\GitHub Project\\DGame\\Tools\\Generata Tools\\SourceGenerator\\SourceGeneratorTest\\SourceGeneratorTest.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "C:\\Users\\QZJ\\.nuget\\packages\\microsoft.netcore.app.ref\\9.0.9\\microsoft.netcore.app.ref.9.0.9.nupkg.sha512",
+    "C:\\Users\\QZJ\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\9.0.9\\microsoft.windowsdesktop.app.ref.9.0.9.nupkg.sha512",
+    "C:\\Users\\QZJ\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\9.0.9\\microsoft.aspnetcore.app.ref.9.0.9.nupkg.sha512",
+    "C:\\Users\\QZJ\\.nuget\\packages\\microsoft.netcore.app.host.win-x64\\9.0.9\\microsoft.netcore.app.host.win-x64.9.0.9.nupkg.sha512"
+  ],
   "logs": []
 }

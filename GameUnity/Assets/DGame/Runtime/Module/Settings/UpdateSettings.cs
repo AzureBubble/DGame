@@ -100,10 +100,15 @@ namespace DGame
         [SerializeField]
         private bool m_replaceAssetPathWithAddress = false;
 
+        [SerializeField]
+        private bool m_forceGenerateAtlas = false;
+
         public string GetBuildAddress() => m_buildAddress;
 
         public bool GetReplaceAssetPathWithAddress()
                 => m_replaceAssetPathWithAddress;
+
+        public bool ForceGenerateAtlas => m_forceGenerateAtlas;
 
         public string GetResDownloadPath() => Path.Combine(m_resDownloadPath, projectName, GetPlatformName()).Replace("\\", "/");
 

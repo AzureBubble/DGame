@@ -26,6 +26,7 @@ namespace DGame
         private SerializedProperty m_isAutoAssetCopyToBuildAddress;
         private SerializedProperty m_buildAddress;
         private SerializedProperty m_replaceAssetPathWithAddress;
+        private SerializedProperty m_forceGenerateAtlas;
 
         public static List<string> HotUpdateAssembliesList;
         public static List<string> AotMetaAssembliesList;
@@ -63,6 +64,7 @@ namespace DGame
             m_isAutoAssetCopyToBuildAddress = serializedObject.FindProperty("m_isAutoAssetCopyToBuildAddress");
             m_buildAddress = serializedObject.FindProperty("m_buildAddress");
             m_replaceAssetPathWithAddress = serializedObject.FindProperty("m_replaceAssetPathWithAddress");
+            m_forceGenerateAtlas = serializedObject.FindProperty("m_forceGenerateAtlas");
 
             UpdateSettings updateSettings = (UpdateSettings)target;
 
@@ -274,6 +276,8 @@ namespace DGame
         {
             EditorGUILayout.BeginVertical("HelpBox");
             {
+                GUILayout.Label(new GUIContent("打包设置", "构建和部署相关设置"));
+                GUILayout.Space(5);
                 // 自动复制设置
                 bool isAutoAssetCopyToBuildAddress = EditorGUILayout.ToggleLeft(
                     new GUIContent("自动复制内嵌资源到存放路径", "构建时自动复制StreamingAssets资源文件"),
@@ -291,6 +295,15 @@ namespace DGame
                 if (replaceAssetPathWithAddress != m_replaceAssetPathWithAddress.boolValue)
                 {
                     m_replaceAssetPathWithAddress.boolValue = replaceAssetPathWithAddress;
+                }
+
+                bool forceGenerateAtlas = EditorGUILayout.ToggleLeft(
+                    new GUIContent("是否在打AB包前强制刷新图集"),
+                    m_forceGenerateAtlas.boolValue);
+
+                if (forceGenerateAtlas != m_forceGenerateAtlas.boolValue)
+                {
+                    m_forceGenerateAtlas.boolValue = forceGenerateAtlas;
                 }
 
                 EditorGUILayout.Space(3);
@@ -314,11 +327,20 @@ namespace DGame
 
                 if (m_replaceAssetPathWithAddress.boolValue)
                 {
-                    tips += "\n启用可寻址资源代替资源路径(说明：开启此项可以节省运行时清单占用的内存！)";
+                    tips += "\n可寻址资源代替资源路径：启用 (说明：开启此项可以节省运行时清单占用的内存！)";
                 }
                 else
                 {
-                    tips += "\n禁用可寻址资源代替资源路径";
+                    tips += "\n可寻址资源代替资源路径：禁用";
+                }
+
+                if (m_forceGenerateAtlas.boolValue)
+                {
+                    tips += "\n打AB包前强制刷新所有图集：启用";
+                }
+                else
+                {
+                    tips += "\n打AB包前强制刷新所有图集：禁用";
                 }
 
                 EditorGUILayout.HelpBox(tips, MessageType.Info);

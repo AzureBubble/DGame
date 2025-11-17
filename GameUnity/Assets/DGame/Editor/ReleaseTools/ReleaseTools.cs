@@ -114,6 +114,12 @@ namespace DGame
         private static void BuildInternal(BuildTarget buildTarget, string outputRoot, string packageVersion = "1.0",
             EBuildPipeline buildPipeline = EBuildPipeline.ScriptableBuildPipeline)
         {
+            if (Settings.UpdateSettings.ForceGenerateAtlas)
+            {
+                Debug.Log($"[BuildInternal] 强制重新生成所有图集");
+                EditorSpriteSaveInfo.ForceGenerateAll(true);
+            }
+
             Debug.Log($"[BuildInternal] 开始构建AssetBundle: {buildTarget}");
 
             IBuildPipeline pipeline = null;

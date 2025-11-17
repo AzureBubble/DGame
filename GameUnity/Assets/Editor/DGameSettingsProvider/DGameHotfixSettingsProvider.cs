@@ -23,6 +23,7 @@ public static class DGameHotfixSettingsProvider
     private static SerializedProperty m_isAutoAssetCopyToBuildAddress;
     private static SerializedProperty m_buildAddress;
     private static SerializedProperty m_replaceAssetPathWithAddress;
+    private static SerializedProperty m_forceGenerateAtlas;
     private static int m_logicMainDllNameIndex;
     private static SerializedObject m_serializedObject;
 
@@ -126,6 +127,7 @@ public static class DGameHotfixSettingsProvider
         m_isAutoAssetCopyToBuildAddress = m_serializedObject.FindProperty("m_isAutoAssetCopyToBuildAddress");
         m_buildAddress = m_serializedObject.FindProperty("m_buildAddress");
         m_replaceAssetPathWithAddress = m_serializedObject.FindProperty("m_replaceAssetPathWithAddress");
+        m_forceGenerateAtlas = m_serializedObject.FindProperty("m_forceGenerateAtlas");
     }
 
     private static void DrawHeader()
@@ -374,7 +376,7 @@ public static class DGameHotfixSettingsProvider
     private static void DrawAdvancedSettings()
     {
         m_showAdvancedSettings = EditorGUILayout.BeginFoldoutHeaderGroup(m_showAdvancedSettings,
-            new GUIContent("高级设置", "构建和部署相关设置"));
+            new GUIContent("打包设置", "构建和部署相关设置"));
 
         if (m_showAdvancedSettings)
         {
@@ -399,6 +401,15 @@ public static class DGameHotfixSettingsProvider
                     m_replaceAssetPathWithAddress.boolValue = replaceAssetPathWithAddress;
                 }
 
+                bool forceGenerateAtlas = EditorGUILayout.ToggleLeft(
+                    new GUIContent("是否在打AB包前强制刷新图集"),
+                    m_forceGenerateAtlas.boolValue);
+
+                if (forceGenerateAtlas != m_forceGenerateAtlas.boolValue)
+                {
+                    m_forceGenerateAtlas.boolValue = forceGenerateAtlas;
+                }
+
                 EditorGUILayout.Space(3);
 
                 // 构建地址
@@ -420,11 +431,20 @@ public static class DGameHotfixSettingsProvider
 
                 if (m_replaceAssetPathWithAddress.boolValue)
                 {
-                    tips += "\n启用可寻址资源代替资源路径(说明：开启此项可以节省运行时清单占用的内存！)";
+                    tips += "\n可寻址资源代替资源路径：启用 (说明：开启此项可以节省运行时清单占用的内存！)";
                 }
                 else
                 {
-                    tips += "\n禁用可寻址资源代替资源路径";
+                    tips += "\n可寻址资源代替资源路径：禁用";
+                }
+
+                if (m_forceGenerateAtlas.boolValue)
+                {
+                    tips += "\n打AB包前强制刷新所有图集：启用";
+                }
+                else
+                {
+                    tips += "\n打AB包前强制刷新所有图集：禁用";
                 }
 
                 EditorGUILayout.HelpBox(tips, MessageType.Info);

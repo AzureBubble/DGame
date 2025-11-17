@@ -15,7 +15,8 @@ MonoBehaviour:
   outputAtlasDir: Assets/AssetArt/Atlas
   sourceAtlasRootDir:
   - Assets/ABAssets/UIRaw/Atlas
-  rootChildAtlasDir: []
+  rootChildAtlasDir:
+  - Assets/ABAssets/FrameSprite
   singleAtlasDir:
   - Assets/ABAssets/UIRaw/Atlas/Background
   excludeFolder:

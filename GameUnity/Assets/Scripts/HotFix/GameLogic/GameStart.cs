@@ -1,12 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using GameLogic;
 using DGame;
 using UnityEngine;
-using YooAsset;
 using AOT;
 
 #if ENABLE_OBFUZ
@@ -34,6 +32,7 @@ public partial class GameStart
         ExecuteRuntimeInitializeOnLoadMethodSubsystemRegistration();
         ExecuteRuntimeInitializeOnLoadMethodBeforeScene();
         ExecuteRuntimeInitializeOnLoadMethodAfterSceneLoad();
+        ExecuteRequireComponentCollector();
         Debugger.Warning("======= 看到此条日志代表你成功运行了热更新代码 =======");
         Debugger.Warning("======= Entrance GameStart =======");
         DGame.Utility.UnityUtil.AddDestroyListener(OnDestroy);
@@ -60,61 +59,36 @@ public partial class GameStart
         return allAssemblies.First(assembly => assembly.FullName.Contains(assemblyName));
     }
 
+    private static void ExecuteRequireComponentCollector()
+    {
+        RequireComponentCollector.ExecuteMethods();
+    }
+
     #region ExecuteRuntimeInitializeOnLoadMethod
 
     private static void ExecuteRuntimeInitializeOnLoadMethodBeforeSplash()
     {
-#if !UNITY_EDITOR
-        if (!Settings.UpdateSettings.Enable)
-        {
-            return;
-        }
         RuntimeInitializeOnLoadMethodCollector.ExecuteMethods(RuntimeInitializeLoadType.BeforeSplashScreen);
-#endif
     }
 
     private static void ExecuteRuntimeInitializeOnLoadMethodAfterAssembliesLoaded()
     {
-#if !UNITY_EDITOR
-        if (!Settings.UpdateSettings.Enable)
-        {
-            return;
-        }
         RuntimeInitializeOnLoadMethodCollector.ExecuteMethods(RuntimeInitializeLoadType.AfterAssembliesLoaded);
-#endif
     }
 
     private static void ExecuteRuntimeInitializeOnLoadMethodSubsystemRegistration()
     {
-#if !UNITY_EDITOR
-        if (!Settings.UpdateSettings.Enable)
-        {
-            return;
-        }
         RuntimeInitializeOnLoadMethodCollector.ExecuteMethods(RuntimeInitializeLoadType.SubsystemRegistration);
-#endif
     }
 
     private static void ExecuteRuntimeInitializeOnLoadMethodBeforeScene()
     {
-#if !UNITY_EDITOR
-        if (!Settings.UpdateSettings.Enable)
-        {
-            return;
-        }
         RuntimeInitializeOnLoadMethodCollector.ExecuteMethods(RuntimeInitializeLoadType.BeforeSceneLoad);
-#endif
     }
 
     private static void ExecuteRuntimeInitializeOnLoadMethodAfterSceneLoad()
     {
-#if !UNITY_EDITOR
-        if (!Settings.UpdateSettings.Enable)
-        {
-            return;
-        }
         RuntimeInitializeOnLoadMethodCollector.ExecuteMethods(RuntimeInitializeLoadType.AfterSceneLoad);
-#endif
     }
 
     #endregion

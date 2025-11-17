@@ -9,6 +9,7 @@ public class Definition
     /// </summary>
     public static readonly List<string> TargetNameSpaces = ["GameLogic"]; //"DGame", "GameProto", "GameBattle"
     public static readonly string[] UsingNameSpace = ["UnityEngine", "UnityEngine.UI", "DGame"];//"UnityEngine", "UnityEngine.UI", "DGame"
+    public const string DefaultAssemblyName = "GameLogic";
 
     /// <summary>
     /// 文件生成的命名空间
@@ -24,5 +25,12 @@ public class Definition
     public static readonly string[] RuntimeInitializeUsingNameSpace = ["UnityEngine"];
     public const string RuntimeInitializeNameSpace = "AOT";//"DGame";
     public const string RuntimeInitializeAttributeName = "RuntimeInitializeOnLoadMethod";
-    public const string DefaultAssemblyName = "GameLogic";
+
+    /// <summary>
+    /// RequireComponent文件生成的命名空间
+    /// </summary>
+    public static readonly List<string> RequireComponentTargetNameSpaces = ["GameLogic"]; //"DGame", "GameProto", "GameBattle"
+    public static readonly string[] RequireComponentUsingNameSpace = ["UnityEngine"];
+    public const string RequireComponentNameSpace = "AOT";//"DGame";
+    public const string RequireComponentAttributeName = "RequireComponent";
 }

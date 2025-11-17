@@ -20,6 +20,7 @@ public class DEventInterfaceGenerator : ISourceGenerator
         var syntaxTrees = context.Compilation.SyntaxTrees;
         GenerateGameEventExecute(context, syntaxTrees);
         GenerateRuntimeInitializeOnLoadMethodExecute(context, syntaxTrees);
+        GenerateRequireComponentExecute(context, syntaxTrees);
     }
 
     #region GenerateGameEvent
@@ -561,6 +562,168 @@ public class DEventInterfaceGenerator : ISourceGenerator
             .Concat([tempMethodName])
             .Aggregate((a, b) => $"{a}.{b}");
         return fullName;
+    }
+
+    #endregion
+
+    #region GenerateRuntimeInitializeOnLoadMethod
+
+    private void GenerateRequireComponentExecute(GeneratorExecutionContext context,
+        IEnumerable<SyntaxTree> syntaxTrees)
+    {
+        var className = $"RequireComponentCollector_Gen";
+        var requiredTypes = new List<TypeInfo>();
+        var requiredTypeNames = new List<string>();
+        // 获取编译对象
+        var compilation = context.Compilation;
+        foreach (var tree in syntaxTrees)
+        {
+            var semanticModel = compilation.GetSemanticModel(tree);
+            // 获取语法树的根节点
+            var root = tree.GetRoot();
+
+            // 获取当前语法树中的所有命名空间节点
+            var namespaces = root.DescendantNodes().OfType<NamespaceDeclarationSyntax>();
+
+            // 判断语法树是否在指定检测的命名空间下
+            if (namespaces.All(ns => !Definition.RequireComponentTargetNameSpaces.Contains(ns.Name.ToString())))
+            {
+                continue;
+            }
+
+            var classes = GetMatchClasses(root);
+            foreach (var classDecl in classes)
+            {
+                var requireComponentAttributes = classDecl.AttributeLists
+                    .SelectMany(al => al.Attributes)
+                    .Where(attr =>
+                        attr.Name.ToString() == Definition.RequireComponentAttributeName)
+                    .ToList();
+                foreach (var attribute in requireComponentAttributes)
+                {
+                    if (attribute.ArgumentList == null) continue;
+                    foreach (var argument in attribute.ArgumentList.Arguments)
+                    {
+                        if (argument.Expression is TypeOfExpressionSyntax typeOfExpression)
+                        {
+                            // 使用语义模型获取完整的类型信息
+                            var typeInfo = semanticModel.GetTypeInfo(typeOfExpression.Type);
+                            if (typeInfo.Type != null)
+                            {
+                                // 获取完整的类型名称（包括命名空间）
+                                var fullTypeName = typeInfo.Type.ToDisplayString();
+                                requiredTypes.Add(typeInfo);
+                            }
+                            else
+                            {
+                                // 回退到语法分析
+                                requiredTypeNames.Add(typeOfExpression.Type.ToString());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (requiredTypes.Count > 0)
+        {
+            var str = GenerateRequireComponentFile(requiredTypes, requiredTypeNames);
+            context.AddSource($"{className}.g.cs", str);
+        }
+    }
+
+    private string GenerateRequireComponentFile(List<TypeInfo> requiredTypes,List<string> requiredTypeNames)
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.AppendLine("using System;");
+        sb.AppendLine("using System.Collections.Generic;");
+        sb.AppendLine("using UnityEngine;");
+        sb.AppendLine("using DGame;");
+        // sb.AppendLine("using UnityEngine.UI;");
+
+        // for (int i = 0; i < requiredTypes.Count; i++)
+        // {
+        //     var typeInfo = requiredTypes[i];
+        //     var namespaceName = typeInfo.Type?.ContainingNamespace?.ToDisplayString();
+        //     if (!string.IsNullOrEmpty(namespaceName))
+        //     {
+        //         sb.AppendLine($"using {namespaceName};");
+        //     }
+        // }
+        sb.AppendLine();
+        sb.AppendLine($"namespace {Definition.RequireComponentNameSpace}");
+        sb.AppendLine("{");
+        {
+            sb.AppendLine("\tpublic static class RequireComponentCollector_Gen");
+            sb.AppendLine("\t{");
+            {
+                sb.AppendLine(
+                    "\t\tpublic static readonly IReadOnlyList<Type> RequireComponentTypes = new List<Type>");
+                sb.AppendLine("\t\t{");
+                {
+                    for (int i = 0; i < requiredTypes.Count; i++)
+                    {
+                        var typeInfo = requiredTypes[i];
+                        if (typeInfo.Type != null)
+                        {
+                            sb.AppendLine($"\t\t\ttypeof({typeInfo.Type.ToDisplayString()}),");
+                        }
+                    }
+                    for (int i = 0; i < requiredTypeNames.Count; i++)
+                    {
+                        var typeName = requiredTypeNames[i];
+                        if (!string.IsNullOrEmpty(typeName))
+                        {
+                            sb.AppendLine($"\t\t\ttypeof({typeName}),");
+                        }
+                    }
+                }
+                sb.AppendLine("\t\t};");
+                sb.AppendLine("");
+                sb.AppendLine("\t\tpublic static void AddComponents()");
+                sb.AppendLine("\t\t{");
+                {
+                    sb.AppendLine("\t\t\tvar go = new GameObject(\"[RequireComponentCollector]\");");
+                    sb.AppendLine("\t\t\tfor(int i = 0; i < RequireComponentTypes.Count; i++)");
+                    sb.AppendLine("\t\t\t{");
+                    {
+                        sb.AppendLine("\t\t\t\tvar tempType = RequireComponentTypes[i];");
+                        sb.AppendLine("\t\t\t\tif (!go.TryGetComponent(tempType, out _))");
+                        sb.AppendLine("\t\t\t\t{");
+                        {
+                            sb.AppendLine("\t\t\t\t\tvar mono = go.AddComponent(tempType) as MonoBehaviour;");
+                            sb.AppendLine("\t\t\t\t\tif (mono != null)");
+                            sb.AppendLine("\t\t\t\t\t{");
+                            {
+                                sb.AppendLine("\t\t\t\t\t\tmono.enabled = false;");
+                            }
+                            sb.AppendLine("\t\t\t\t\t}");
+                        }
+                        sb.AppendLine("\t\t\t\t}");
+                        sb.AppendLine("\t\t\t\tDebugger.Info(\"RequireComponentCollector: \" + go.TryGetComponent(tempType, out _));");
+                    }
+                    sb.AppendLine("\t\t\t}");
+                    sb.AppendLine("\t\t\tgo.SetActive(false);");
+                }
+                sb.AppendLine("\t\t}");
+            }
+            sb.AppendLine("\t}");
+        }
+        sb.AppendLine("}");
+
+        return sb.ToString();
+    }
+
+    /// <summary>
+    /// 获取匹配的方法声明
+    /// </summary>
+    /// <param name="root"></param>
+    /// <returns></returns>
+    private IEnumerable<ClassDeclarationSyntax> GetMatchClasses(SyntaxNode root)
+    {
+        return root.DescendantNodes().OfType<ClassDeclarationSyntax>()
+            .Where(i => i.AttributeLists.Count > 0
+                        && i.AttributeLists.Any(attrList => attrList.Attributes
+                            .Any(attr => attr.Name.ToString().Equals(Definition.RequireComponentAttributeName))));
     }
 
     #endregion

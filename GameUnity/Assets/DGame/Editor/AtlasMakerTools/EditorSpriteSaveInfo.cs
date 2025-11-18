@@ -16,32 +16,58 @@ namespace DGame
         private static readonly HashSet<string> m_dirtyAtlasNames = new HashSet<string>();
         private static readonly HashSet<string> m_dirtyAtlasNamesNeedCreateNew = new HashSet<string>();
         private static readonly Dictionary<string, List<string>> m_atlasMap = new Dictionary<string, List<string>>();
+        private static readonly Dictionary<string, string> m_atlasPathMap = new Dictionary<string, string>();
         private static bool m_intialized;
+        private static bool m_isInScanExistingSprites;
+        private static bool m_isBuildChange = false;
         private static AtlasConfig Config => AtlasConfig.Instance;
 
         static EditorSpriteSaveInfo()
         {
+            EditorApplication.update -= OnUpdate;
             EditorApplication.update += OnUpdate;
             Initialize();
         }
 
-        [MenuItem("DGame Tools/图集工具/ForceGenerateAll")]
-        private static void ForceGenerateAll()
+        [MenuItem("DGame Tools/图集工具/立即重新生成变动的图集数据")]
+        public static void ForceGenerateAll()
         {
+            m_isBuildChange = true;
             ForceGenerateAll(false);
+            m_isBuildChange = false;
         }
 
-        public static void ForceGenerateAll(bool isClearAll = false)
+        public static void ForceGenerateAll(bool isClearAll)
         {
+            m_isInScanExistingSprites = true;
             if (isClearAll)
             {
+                m_atlasPathMap.Clear();
                 ClearCache();
                 ClearAllAtlas();
             }
             m_atlasMap.Clear();
             ScanExistingSprites();
-            m_dirtyAtlasNamesNeedCreateNew.UnionWith(m_atlasMap.Keys);
+            if (m_isBuildChange)
+            {
+                foreach (var item in m_atlasMap)
+                {
+                    if (GetLatestAtlasTime(item.Key) >= GetLatestSpriteTime(item.Key))
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        m_dirtyAtlasNamesNeedCreateNew.Add(item.Key);
+                    }
+                }
+            }
+            else
+            {
+                m_dirtyAtlasNamesNeedCreateNew.UnionWith(m_atlasMap.Keys);
+            }
             ProcessDirtyAtlases(true);
+            m_isInScanExistingSprites = false;
         }
 
         private static void ClearAllAtlas()
@@ -205,6 +231,10 @@ namespace DGame
             EditorUtility.SetDirty(atlas);
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
+            if (File.Exists(outputPath))
+            {
+                m_atlasPathMap[atlasName] = outputPath;
+            }
             if (Config.enableLogging)
             {
                 Debug.Log($"<b>[Generate Atlas]</b>: {atlasName} ({sprites.Count} sprites)");
@@ -404,20 +434,27 @@ namespace DGame
         {
             var currentPath = Path.GetDirectoryName(spritePath)?.Replace("\\", "/");
 
+            if(string.IsNullOrEmpty(currentPath)) return;
             var tempRootDirArr = new List<string>(Config.sourceAtlasRootDir);
             tempRootDirArr.AddRange(Config.rootChildAtlasDir);
             foreach (var rootPath in tempRootDirArr)
             {
                 var tempPath = rootPath.Replace("\\", "/").TrimEnd('/');
-                while (currentPath != null && currentPath.StartsWith(tempPath))
+                var tempCurrentPath = currentPath;
+
+                if (!tempCurrentPath.StartsWith(tempPath))
                 {
-                    var parentAtlasName = GetAtlasNameForDirectory(currentPath);
+                    continue;
+                }
+                while (tempCurrentPath != null && tempCurrentPath.StartsWith(tempPath))
+                {
+                    var parentAtlasName = GetAtlasNameForDirectory(tempCurrentPath);
 
                     if (!string.IsNullOrEmpty(parentAtlasName))
                     {
                         MarkDirty(parentAtlasName, isCreateNew);
                     }
-                    currentPath = Path.GetDirectoryName(spritePath);
+                    tempCurrentPath = Path.GetDirectoryName(tempCurrentPath)?.Replace("\\", "/");
                 }
             }
         }
@@ -459,6 +496,7 @@ namespace DGame
 
         private static void OnUpdate()
         {
+            if (m_isInScanExistingSprites) return;
             if (m_dirtyAtlasNames.Count > 0 || m_dirtyAtlasNamesNeedCreateNew.Count > 0)
             {
                 ProcessDirtyAtlases();
@@ -588,6 +626,13 @@ namespace DGame
 
         private static void MarkDirty(string atlasName, bool isCreateNew = false)
         {
+            if (m_isBuildChange)
+            {
+                if (GetLatestAtlasTime(atlasName) > GetLatestSpriteTime(atlasName))
+                {
+                    return;
+                }
+            }
             if (isCreateNew)
             {
                 m_dirtyAtlasNamesNeedCreateNew.Add(atlasName);
@@ -608,9 +653,23 @@ namespace DGame
 
         private static DateTime GetLatestSpriteTime(string atlasName)
         {
-            // 查找图集中最新的修改时间
-            return m_atlasMap[atlasName]
-                .Select(p => new FileInfo(p).LastWriteTime).DefaultIfEmpty().Max();
+            if (m_atlasMap.TryGetValue(atlasName, out List<string> list))
+            {
+                return list
+                    .Select(p => new FileInfo(p).LastWriteTime)
+                    .DefaultIfEmpty()
+                    .Max();
+            }
+            return DateTime.MinValue;
+        }
+
+        private static DateTime GetLatestAtlasTime(string atlasName)
+        {
+            if (m_atlasPathMap.TryGetValue(atlasName, out var atlasPath))
+            {
+                return new FileInfo(atlasPath).LastWriteTime;
+            }
+            return DateTime.MinValue;
         }
 
         private static void DeleteAtlas(string atlasPath)

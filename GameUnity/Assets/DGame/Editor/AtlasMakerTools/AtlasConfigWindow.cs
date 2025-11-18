@@ -106,6 +106,11 @@ namespace DGame
             }
             GUI.color = originalColor;
 
+            if (GUILayout.Button(new GUIContent("重新生成有变动的图集数据", EditorGUIUtility.IconContent("Refresh").image), GUILayout.ExpandWidth(true), GUILayout.Height(30)))
+            {
+                EditorSpriteSaveInfo.ForceGenerateAll();
+            }
+
             if (GUILayout.Button(new GUIContent(" 清空缓存", EditorGUIUtility.IconContent("TreeEditor.Trash").image), GUILayout.ExpandWidth(true), GUILayout.Height(30)))
             {
                 EditorSpriteSaveInfo.ClearCache();

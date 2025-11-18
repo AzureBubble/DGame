@@ -6,6 +6,8 @@ using GameLogic;
 using DGame;
 using UnityEngine;
 using AOT;
+using Cysharp.Threading.Tasks;
+using UnityEngine.UI;
 
 #if ENABLE_OBFUZ
 using Obfuz;
@@ -26,16 +28,11 @@ public partial class GameStart
     public static void Entrance(object[] objects)
     {
         m_hotfixAssembly = (List<Assembly>)objects[0];
-        ExecuteRuntimeInitializeOnLoadMethodBeforeSplash();
-        ExecuteRuntimeInitializeOnLoadMethodAfterAssembliesLoaded();
         GameEventLauncher.Init();
-        ExecuteRuntimeInitializeOnLoadMethodSubsystemRegistration();
-        ExecuteRuntimeInitializeOnLoadMethodBeforeScene();
-        ExecuteRuntimeInitializeOnLoadMethodAfterSceneLoad();
-        ExecuteRequireComponentCollector();
+        RuntimeInitializeOnLoadMethodCollector.ExecuteMethods();
+        DGame.Utility.UnityUtil.AddDestroyListener(OnDestroy);
         Debugger.Warning("======= 看到此条日志代表你成功运行了热更新代码 =======");
         Debugger.Warning("======= Entrance GameStart =======");
-        DGame.Utility.UnityUtil.AddDestroyListener(OnDestroy);
         Debugger.Warning("======= 开始游戏 =======");
         StartGame();
     }
@@ -58,38 +55,4 @@ public partial class GameStart
             Settings.UpdateSettings.Enable ? m_hotfixAssembly : AppDomain.CurrentDomain.GetAssemblies();
         return allAssemblies.First(assembly => assembly.FullName.Contains(assemblyName));
     }
-
-    private static void ExecuteRequireComponentCollector()
-    {
-        RequireComponentCollector.ExecuteMethods();
-    }
-
-    #region ExecuteRuntimeInitializeOnLoadMethod
-
-    private static void ExecuteRuntimeInitializeOnLoadMethodBeforeSplash()
-    {
-        RuntimeInitializeOnLoadMethodCollector.ExecuteMethods(RuntimeInitializeLoadType.BeforeSplashScreen);
-    }
-
-    private static void ExecuteRuntimeInitializeOnLoadMethodAfterAssembliesLoaded()
-    {
-        RuntimeInitializeOnLoadMethodCollector.ExecuteMethods(RuntimeInitializeLoadType.AfterAssembliesLoaded);
-    }
-
-    private static void ExecuteRuntimeInitializeOnLoadMethodSubsystemRegistration()
-    {
-        RuntimeInitializeOnLoadMethodCollector.ExecuteMethods(RuntimeInitializeLoadType.SubsystemRegistration);
-    }
-
-    private static void ExecuteRuntimeInitializeOnLoadMethodBeforeScene()
-    {
-        RuntimeInitializeOnLoadMethodCollector.ExecuteMethods(RuntimeInitializeLoadType.BeforeSceneLoad);
-    }
-
-    private static void ExecuteRuntimeInitializeOnLoadMethodAfterSceneLoad()
-    {
-        RuntimeInitializeOnLoadMethodCollector.ExecuteMethods(RuntimeInitializeLoadType.AfterSceneLoad);
-    }
-
-    #endregion
 }

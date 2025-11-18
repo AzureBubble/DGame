@@ -100,6 +100,7 @@ public class DEventInterfaceGenerator : ISourceGenerator
                     {
                         sb.AppendLine($"\t\t\tvar m_{className} = new {className}(GameEvent.EventMgr.Dispatcher);");
                     }
+                    // sb.AppendLine("\t\t\tDGame.Debugger.Info(\"事件中心初始化\");");
                     sb.AppendLine("\t\t}");
                 }
                 sb.AppendLine("\t}");
@@ -377,6 +378,7 @@ public class DEventInterfaceGenerator : ISourceGenerator
                     strFile.AppendLine("\t\t\t{");
                     strFile.AppendLine("\t\t\t\treturn;");
                     strFile.AppendLine("\t\t\t}");
+                    // strFile.AppendLine("\t\t\tDGame.Debugger.Info($\"RuntimeInitializeLoadType: {loadType}\");");
                     strFile.AppendLine("\t\t\tfor(int i = 0; i < methods.Count; i++)");
                     strFile.AppendLine("\t\t\t{");
                     {
@@ -387,7 +389,7 @@ public class DEventInterfaceGenerator : ISourceGenerator
                             strFile.AppendLine("\t\t\t\t\tif (assembly == null)");
                             strFile.AppendLine("\t\t\t\t\t{");
                             {
-                                strFile.AppendLine("\t\t\t\t\t\tDebug.LogError($\"没有找到程序集: {methods[i].AssemblyName}\");");
+                                strFile.AppendLine("\t\t\t\t\t\tDGame.Debugger.Error($\"没有找到程序集: {methods[i].AssemblyName}\");");
                                 strFile.AppendLine("\t\t\t\t\t\treturn;");
                             }
                             strFile.AppendLine("\t\t\t\t\t}");
@@ -401,18 +403,30 @@ public class DEventInterfaceGenerator : ISourceGenerator
                             strFile.AppendLine("\t\t\t\t\t}");
                             strFile.AppendLine("\t\t\t\t\telse");
                             strFile.AppendLine("\t\t\t\t\t{");
-                            strFile.AppendLine("\t\t\t\t\t\tDebug.LogError($\"没找到类型{methods[i].TypeName}\");");
+                            strFile.AppendLine("\t\t\t\t\t\tDGame.Debugger.Error($\"没找到类型{methods[i].TypeName}\");");
                             strFile.AppendLine("\t\t\t\t\t}");
                         }
                         strFile.AppendLine("\t\t\t\t}");
                         strFile.AppendLine("\t\t\t\tcatch (Exception ex)");
                         strFile.AppendLine("\t\t\t\t{");
                         {
-                            strFile.AppendLine("\t\t\t\t\tDebug.LogError($\"执行RuntimeInitializeOnLoadMethod方法失败: {methods[i].FullName}, 错误: {ex.Message}\");");
+                            strFile.AppendLine("\t\t\t\t\tDGame.Debugger.Error($\"执行RuntimeInitializeOnLoadMethod方法失败: {methods[i].FullName}, 错误: {ex.Message}\");");
                         }
                         strFile.AppendLine("\t\t\t\t}");
                     }
                     strFile.AppendLine("\t\t\t}");
+                }
+                strFile.AppendLine("\t\t}");
+
+                strFile.AppendLine("");
+                strFile.AppendLine("\t\tpublic static void ExecuteAllMethods()");
+                strFile.AppendLine("\t\t{");
+                {
+                    strFile.AppendLine("\t\t\tExecuteMethods(RuntimeInitializeLoadType.BeforeSplashScreen);");
+                    strFile.AppendLine("\t\t\tExecuteMethods(RuntimeInitializeLoadType.AfterAssembliesLoaded);");
+                    strFile.AppendLine("\t\t\tExecuteMethods(RuntimeInitializeLoadType.SubsystemRegistration);");
+                    strFile.AppendLine("\t\t\tExecuteMethods(RuntimeInitializeLoadType.BeforeSceneLoad);");
+                    strFile.AppendLine("\t\t\tExecuteMethods(RuntimeInitializeLoadType.AfterSceneLoad);");
                 }
                 strFile.AppendLine("\t\t}");
             }
@@ -610,9 +624,13 @@ public class DEventInterfaceGenerator : ISourceGenerator
                             var typeInfo = semanticModel.GetTypeInfo(typeOfExpression.Type);
                             if (typeInfo.Type != null)
                             {
-                                // 获取完整的类型名称（包括命名空间）
-                                var fullTypeName = typeInfo.Type.ToDisplayString();
-                                requiredTypes.Add(typeInfo);
+                                // 检查是否为抽象类且尚未存在
+                                if (!typeInfo.Type.IsAbstract && requiredTypes.All(t => t.Type?.ToDisplayString() != typeInfo.Type.ToDisplayString()))
+                                {
+                                    // 获取完整的类型名称（包括命名空间）
+                                    var fullTypeName = typeInfo.Type.ToDisplayString();
+                                    requiredTypes.Add(typeInfo);
+                                }
                             }
                             else
                             {
@@ -631,14 +649,14 @@ public class DEventInterfaceGenerator : ISourceGenerator
         }
     }
 
-    private string GenerateRequireComponentFile(List<TypeInfo> requiredTypes,List<string> requiredTypeNames)
+    private string GenerateRequireComponentFile(List<TypeInfo> requiredTypes, List<string> requiredTypeNames)
     {
         StringBuilder sb = new StringBuilder();
         sb.AppendLine("using System;");
         sb.AppendLine("using System.Collections.Generic;");
-        sb.AppendLine("using UnityEngine;");
-        sb.AppendLine("using DGame;");
-        // sb.AppendLine("using UnityEngine.UI;");
+        // sb.AppendLine("using UnityEngine;");
+        // sb.AppendLine("using DGame;");
+        sb.AppendLine("using Cysharp.Threading.Tasks;");
 
         // for (int i = 0; i < requiredTypes.Count; i++)
         // {
@@ -679,30 +697,41 @@ public class DEventInterfaceGenerator : ISourceGenerator
                 }
                 sb.AppendLine("\t\t};");
                 sb.AppendLine("");
-                sb.AppendLine("\t\tpublic static void AddComponents()");
+                sb.AppendLine("\t\tpublic static void StartAddComponents()");
                 sb.AppendLine("\t\t{");
                 {
-                    sb.AppendLine("\t\t\tvar go = new GameObject(\"[RequireComponentCollector]\");");
+                    sb.AppendLine("\t\t\tAddComponents().Forget();");
+                }
+                sb.AppendLine("\t\t}");
+                sb.AppendLine("");
+                sb.AppendLine("\t\tpublic static async UniTaskVoid AddComponents()");
+                sb.AppendLine("\t\t{");
+                {
+                    sb.AppendLine("\t\t\tvar go = new UnityEngine.GameObject(\"[RequireComponentCollector]\");");
                     sb.AppendLine("\t\t\tfor(int i = 0; i < RequireComponentTypes.Count; i++)");
                     sb.AppendLine("\t\t\t{");
                     {
                         sb.AppendLine("\t\t\t\tvar tempType = RequireComponentTypes[i];");
+                        // sb.AppendLine("\t\t\t\tif(tempType.IsAbstract || tempType.IsInterface) continue;");
                         sb.AppendLine("\t\t\t\tif (!go.TryGetComponent(tempType, out _))");
                         sb.AppendLine("\t\t\t\t{");
                         {
-                            sb.AppendLine("\t\t\t\t\tvar mono = go.AddComponent(tempType) as MonoBehaviour;");
-                            sb.AppendLine("\t\t\t\t\tif (mono != null)");
+                            sb.AppendLine("\t\t\t\t\tvar comp = go.AddComponent(tempType);");
+                            sb.AppendLine("\t\t\t\t\tif (comp != null)");
                             sb.AppendLine("\t\t\t\t\t{");
                             {
-                                sb.AppendLine("\t\t\t\t\t\tmono.enabled = false;");
+                                sb.AppendLine("\t\t\t\t\t\tUnityEngine.GameObject.Destroy(comp);");
+                                sb.AppendLine("\t\t\t\t\t\tawait UniTask.Yield();");
                             }
                             sb.AppendLine("\t\t\t\t\t}");
                         }
                         sb.AppendLine("\t\t\t\t}");
-                        sb.AppendLine("\t\t\t\tDebugger.Info(\"RequireComponentCollector: \" + go.TryGetComponent(tempType, out _));");
+                        // sb.AppendLine("\t\t\t\tDGame.Debugger.Info(\"RequireComponentCollector: \" + go.TryGetComponent(tempType, out _));");
                     }
                     sb.AppendLine("\t\t\t}");
-                    sb.AppendLine("\t\t\tgo.SetActive(false);");
+                    sb.AppendLine("\t\t\tUnityEngine.GameObject.Destroy(go);");
+                    sb.AppendLine("\t\t\tawait UniTask.Yield();");
+                    // sb.AppendLine("\t\t\tDGame.Debugger.Info($\"RequireComponentCollector DestroyImmediate: {UnityEngine.GameObject.Find(\"[RequireComponentCollector]\")}\");");
                 }
                 sb.AppendLine("\t\t}");
             }

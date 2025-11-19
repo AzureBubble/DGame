@@ -19,7 +19,7 @@
                 {
                     if (value <= 0)
                     {
-                        Debugger.Error("更新间隔无效");
+                        DLogger.Error("更新间隔无效");
                         return;
                     }
                     m_updateInterval = value;
@@ -31,7 +31,7 @@
             {
                 if (updateInterval < 0)
                 {
-                    Debugger.Error("更新间隔无效");
+                    DLogger.Error("更新间隔无效");
                     return;
                 }
                 m_updateInterval = updateInterval;

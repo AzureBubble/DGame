@@ -88,7 +88,7 @@ namespace DGame
 
             // 编辑器模式下
             EPlayMode playMode = (EPlayMode)UnityEditor.EditorPrefs.GetInt("EditorPlayMode");
-            Debugger.Warning($"======== 编辑器模式下使用的资源加载模式：{playMode} ========");
+            DLogger.Warning($"======== 编辑器模式下使用的资源加载模式：{playMode} ========");
 
 #else
             EPlayMode playMode = (EPlayMode)PlayMode;
@@ -97,7 +97,7 @@ namespace DGame
             {
                 if (resourcePackage.InitializeStatus is EOperationStatus.Processing or EOperationStatus.Succeed)
                 {
-                    Debugger.Error($"资源系统已经初始化过资源包：{customPackageName}");
+                    DLogger.Error($"资源系统已经初始化过资源包：{customPackageName}");
                     return null;
                 }
                 else
@@ -162,7 +162,7 @@ namespace DGame
                 string packageRoot = $"{WeChatWASM.WX.env.USER_DATA_PATH}/__GAME_FILE_CACHE";
                 createParam.WebServerFileSystemParameters = WechatFileSystemCreater.CreateFileSystemParameters(packageRoot, remoteServices, webDecryptionServices);
 #else
-                Debugger.Info("======================= UNITY_WEBGL =======================");
+                DLogger.Info("======================= UNITY_WEBGL =======================");
                 if (LoadResWayWebGL == LoadResWayWebGL.Remote)
                 {
                     createParam.WebRemoteFileSystemParameters = FileSystemParameters.CreateDefaultWebRemoteFileSystemParameters(remoteServices, webDecryptionServices);
@@ -174,7 +174,7 @@ namespace DGame
             }
 
             await initOperation.ToUniTask();
-            Debugger.Info($"======== 初始化资源包版本：{initOperation?.Status} ========");
+            DLogger.Info($"======== 初始化资源包版本：{initOperation?.Status} ========");
             return initOperation;
         }
 
@@ -273,7 +273,7 @@ namespace DGame
 
         public void OnLowMemory()
         {
-            Debugger.Warning("Low memory reported...");
+            DLogger.Warning("Low memory reported...");
             m_forceUnloadUnusedAssetsAction?.Invoke(true);
         }
 
@@ -449,7 +449,7 @@ namespace DGame
         {
             if (string.IsNullOrEmpty(location))
             {
-                Debugger.Error("资源地址无效");
+                DLogger.Error("资源地址无效");
                 return;
             }
             if (loadAssetCallbacks == null)
@@ -526,7 +526,7 @@ namespace DGame
         {
             if (string.IsNullOrEmpty(location))
             {
-                Debugger.Error("资源地址无效");
+                DLogger.Error("资源地址无效");
                 return;
             }
             if (loadAssetCallbacks == null)
@@ -619,7 +619,7 @@ namespace DGame
         {
             if (string.IsNullOrEmpty(location))
             {
-                Debugger.Error("资源地址无效");
+                DLogger.Error("资源地址无效");
                 return;
             }
 
@@ -737,7 +737,7 @@ namespace DGame
                 {
                     if (m_timeoutController.IsTimeout())
                     {
-                        Debugger.Error($"异步等待加载资源超时： {assetObjectKey} msg:{ex.Message}");
+                        DLogger.Error($"异步等待加载资源超时： {assetObjectKey} msg:{ex.Message}");
                     }
                 }
             }

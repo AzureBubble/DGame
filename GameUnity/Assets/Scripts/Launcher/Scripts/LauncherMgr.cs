@@ -19,12 +19,12 @@ namespace Launcher
 
             if (m_uiRoot == null)
             {
-                Debugger.Error($"======== 找不到 UIRoot 节点 请检查资源路径或Hierarchy窗口中的游戏对象 ========");
+                DLogger.Error($"======== 找不到 UIRoot 节点 请检查资源路径或Hierarchy窗口中的游戏对象 ========");
                 return;
             }
 
             RegisterUI();
-            Debugger.Info("======== 初始化 LauncherMgr 完成 ========");
+            DLogger.Info("======== 初始化 LauncherMgr 完成 ========");
         }
 
         private static void RegisterUI()
@@ -36,13 +36,13 @@ namespace Launcher
         {
             if (string.IsNullOrEmpty(uiName))
             {
-                Debugger.Warning($"======== LauncherMgr.ShowUI UIName 为空 ========");
+                DLogger.Warning($"======== LauncherMgr.ShowUI UIName 为空 ========");
                 return;
             }
 
             if (!m_uiDict.ContainsKey(uiName))
             {
-                Debugger.Error($"======== LauncherMgr.ShowUI 找不到UI窗口: {uiName} ========");
+                DLogger.Error($"======== LauncherMgr.ShowUI 找不到UI窗口: {uiName} ========");
                 return;
             }
 
@@ -85,7 +85,7 @@ namespace Launcher
         {
             if (string.IsNullOrEmpty(uiName))
             {
-                Debugger.Warning($"======== LauncherMgr.HideUI UIName 为空 ========");
+                DLogger.Warning($"======== LauncherMgr.HideUI UIName 为空 ========");
                 return;
             }
 

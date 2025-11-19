@@ -18,7 +18,7 @@ namespace DGame
         private void OnLoadAssetFailure(string assetName, LoadResourceStatus status, string errormessage, object userdata)
         {
             m_loadingAssetList.Remove(assetName);
-            Debugger.Error("加载资源失败 '{0}' 错误信息： '{1}'.", assetName, errormessage);
+            DLogger.Error("加载资源失败 '{0}' 错误信息： '{1}'.", assetName, errormessage);
         }
 
         private void OnLoadAssetSuccess(string assetName, object asset, float duration, object userdata)
@@ -33,7 +33,7 @@ namespace DGame
             }
             else
             {
-                Debugger.Error($"加载资源失败 资源类型： {asset.GetType()}.");
+                DLogger.Error($"加载资源失败 资源类型： {asset.GetType()}.");
             }
         }
 

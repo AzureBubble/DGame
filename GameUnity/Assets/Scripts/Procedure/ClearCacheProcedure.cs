@@ -10,7 +10,7 @@ namespace Procedure
 
         public override void OnEnter()
         {
-            Debugger.Info("======== 8-清理未使用的缓存文件 ========");
+            DLogger.Info("======== 8-清理未使用的缓存文件 ========");
             LauncherMgr.ShowUI(UIDefine.LoadUpdateUI, "清理未使用的缓存文件...");
             var operation = m_resourceModule.ClearCacheFilesAsync();
             operation.Completed += Operation_Complete;

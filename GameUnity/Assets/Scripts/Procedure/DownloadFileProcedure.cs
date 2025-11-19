@@ -32,7 +32,7 @@ namespace Procedure
 
         public override void OnEnter()
         {
-            Debugger.Info("======== 6-开始下载更新资源文件 ========");
+            DLogger.Info("======== 6-开始下载更新资源文件 ========");
             LauncherMgr.ShowUI(UIDefine.LoadUpdateUI, "开始下载更新文件...");
             BeginDownload().Forget();
         }
@@ -68,7 +68,7 @@ namespace Procedure
             LauncherMgr.UpdateUIProgress(m_resourceModule.Downloader.Progress);
             LauncherMgr.ShowUI(UIDefine.LoadUpdateUI, $"{line1}\n{line2}\n{line3}");
 
-            Debugger.Info($"{line1} {line2} {line3}");
+            DLogger.Info($"{line1} {line2} {line3}");
         }
 
         private string GetRemainingTime(long totalDownloadBytes, long currentDownloadBytes, float speed)

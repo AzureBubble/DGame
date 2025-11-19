@@ -31,9 +31,9 @@ public partial class GameStart
         GameEventLauncher.Init();
         RuntimeInitializeOnLoadMethodCollector.ExecuteMethods();
         DGame.Utility.UnityUtil.AddDestroyListener(OnDestroy);
-        Debugger.Warning("======= 看到此条日志代表你成功运行了热更新代码 =======");
-        Debugger.Warning("======= Entrance GameStart =======");
-        Debugger.Warning("======= 开始游戏 =======");
+        DLogger.Warning("======= 看到此条日志代表你成功运行了热更新代码 =======");
+        DLogger.Warning("======= Entrance GameStart =======");
+        DLogger.Warning("======= 开始游戏 =======");
         StartGame();
     }
 
@@ -45,7 +45,7 @@ public partial class GameStart
     private static void OnDestroy()
     {
         SingletonSystem.Destroy();
-        Debugger.Warning("====== Destroy GameStart =======");
+        DLogger.Warning("====== Destroy GameStart =======");
     }
 
     public static Assembly GetAssembly(string assemblyName)

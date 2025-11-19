@@ -17,7 +17,7 @@ namespace Procedure
 
         public override void OnEnter()
         {
-            Debugger.Info("======== 3-进入资源初始化 InitResourceProcedure 流程 ========");
+            DLogger.Info("======== 3-进入资源初始化 InitResourceProcedure 流程 ========");
             m_initResourcesComplete = false;
             LauncherMgr.ShowUI(UIDefine.LoadUpdateUI, "初始化资源中...");
 
@@ -27,7 +27,7 @@ namespace Procedure
 
         private async UniTaskVoid InitResources()
         {
-            Debugger.Info("======== 更新资源清单 ========");
+            DLogger.Info("======== 更新资源清单 ========");
             LauncherMgr.ShowUI(UIDefine.LoadUpdateUI, "更新清单文件...");
             // 1.获取资源清单的版本信息
             var operation1 = m_resourceModule.RequestPackageVersionAsync();
@@ -47,7 +47,7 @@ namespace Procedure
                 Utility.PlayerPrefsUtil.SetString("GAME_VERSION", m_resourceModule.PackageVersion);
             }
 
-            Debugger.Info($"======== 初始化资源版本 : {packageVersion} ========");
+            DLogger.Info($"======== 初始化资源版本 : {packageVersion} ========");
             var operation2 = m_resourceModule.UpdatePackageManifestAsync(packageVersion);
             await operation2.ToUniTask();
 
@@ -73,14 +73,14 @@ namespace Procedure
                 else
                 {
                     // 需要强制更新才能进游戏
-                    Debugger.Error(message);
+                    DLogger.Error(message);
                     LauncherMgr.ShowMessageBox($"获取远程版本失败！点击确认重试\n <color=#FF0000>{message}</color>",
                         MessageShowType.TwoButton, InitResources().Forget, Application.Quit);
                 }
             }
 
             // WebGL模式
-            Debugger.Error(message);
+            DLogger.Error(message);
             LauncherMgr.ShowMessageBox($"初始化资源失败！点击确认重试\n <color=#FF0000>{message}</color>",
                 MessageShowType.TwoButton, InitResources().Forget, Application.Quit);
         }
@@ -130,7 +130,7 @@ namespace Procedure
                 m_resourceModule.PlayMode == EPlayMode.WebPlayMode)
             {
                 //线上最新版本 operation1.PackageVersion
-                Debugger.Log($"======== 更新资源版本: {m_resourceModule.GetPacketVersion()} => {m_resourceModule.PackageVersion}");
+                DLogger.Log($"======== 更新资源版本: {m_resourceModule.GetPacketVersion()} => {m_resourceModule.PackageVersion}");
                 // 注意：保存资源版本号作为下次默认启动的版本
                 // 如果当前是WebGL或者边玩边下直接进入预加载阶段
                 if (m_resourceModule.PlayMode == EPlayMode.WebPlayMode || m_resourceModule.UpdatableWhilePlaying)

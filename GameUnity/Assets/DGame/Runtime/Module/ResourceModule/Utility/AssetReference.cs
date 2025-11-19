@@ -53,7 +53,7 @@ namespace DGame
             }
             else
             {
-                Debugger.Warning("游戏对象无效");
+                DLogger.Warning("游戏对象无效");
             }
         }
 

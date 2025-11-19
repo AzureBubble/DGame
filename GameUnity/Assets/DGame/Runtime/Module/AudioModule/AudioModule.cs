@@ -244,7 +244,7 @@ namespace DGame
             }
             catch (Exception e)
             {
-                Debugger.Error(e.ToString());
+                DLogger.Error(e.ToString());
             }
 
 #endif

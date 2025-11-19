@@ -21,7 +21,7 @@ namespace DGame
 
                 if (m_debuggerDriver == null)
                 {
-                    Debugger.Fatal("[DGame] DebuggerDriver is null");
+                    DLogger.Fatal("[DGame] DebuggerDriver is null");
                     return;
                 }
 

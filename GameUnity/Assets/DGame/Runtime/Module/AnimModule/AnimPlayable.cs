@@ -162,7 +162,7 @@ namespace DGame
 
             if (animClip == null)
             {
-                Debugger.Warning($"没有找到动画：{animName}");
+                DLogger.Warning($"没有找到动画：{animName}");
                 return;
             }
 
@@ -187,7 +187,7 @@ namespace DGame
             var animClip = GetAnimClip(animName);
             if (animClip == null)
             {
-                Debugger.Warning($"没有找到动画：{animName}");
+                DLogger.Warning($"没有找到动画：{animName}");
                 return;
             }
 
@@ -231,7 +231,7 @@ namespace DGame
 
             if (ContainsAnimationClip(name))
             {
-                Debugger.Warning($"动画片段已经存在{name}");
+                DLogger.Warning($"动画片段已经存在{name}");
                 return false;
             }
 
@@ -244,7 +244,7 @@ namespace DGame
         {
             if (!ContainsAnimationClip(name))
             {
-                Debugger.Warning($"动画片段不存在{name}");
+                DLogger.Warning($"动画片段不存在{name}");
                 return false;
             }
             AnimClip animClip = GetAnimClip(name);

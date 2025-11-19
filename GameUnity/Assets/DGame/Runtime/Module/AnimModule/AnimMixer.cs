@@ -180,7 +180,7 @@ namespace DGame
                 }
             }
 
-            Debugger.Warning($"{nameof(AnimClip)} 不存在：{animHashCode}");
+            DLogger.Warning($"{nameof(AnimClip)} 不存在：{animHashCode}");
             return null;
         }
 

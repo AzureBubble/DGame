@@ -22,7 +22,7 @@ namespace Procedure
 
         public override void OnEnter()
         {
-            Debugger.Info("======== 5-创建热更资源下载器 ========");
+            DLogger.Info("======== 5-创建热更资源下载器 ========");
             LauncherMgr.ShowUI(UIDefine.LoadUpdateUI, "创建补丁下载器...");
             CreateDownloader().Forget();
         }
@@ -35,12 +35,12 @@ namespace Procedure
 
             if (m_downloader.TotalDownloadCount == 0)
             {
-                Debugger.Info("======== 没有资源需要下载 ========");
+                DLogger.Info("======== 没有资源需要下载 ========");
                 SwitchState<DownloadOverProcedure>();
             }
             else
             {
-                Debugger.Info($"======== 总共找到了 {m_downloader.TotalDownloadCount} 个资源文件需要下载 ========");
+                DLogger.Info($"======== 总共找到了 {m_downloader.TotalDownloadCount} 个资源文件需要下载 ========");
 
                 // 需要下载新文件 则挂起流程系统
                 // 开发者需要在下载前检查磁盘空间

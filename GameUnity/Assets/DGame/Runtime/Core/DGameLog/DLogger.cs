@@ -9,7 +9,7 @@ namespace DGame
     /// <summary>
     /// 日志工具集
     /// </summary>
-    public static class Debugger
+    public static class DLogger
     {
 
         #region Debug

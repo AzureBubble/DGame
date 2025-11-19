@@ -100,7 +100,7 @@ public class DEventInterfaceGenerator : ISourceGenerator
                     {
                         sb.AppendLine($"\t\t\tvar m_{className} = new {className}(GameEvent.EventMgr.Dispatcher);");
                     }
-                    // sb.AppendLine("\t\t\tDGame.Debugger.Info(\"事件中心初始化\");");
+                    // sb.AppendLine($"\t\t\tDGame.{Definition.DefaultDebugName}.Info(\"事件中心初始化\");");
                     sb.AppendLine("\t\t}");
                 }
                 sb.AppendLine("\t}");
@@ -378,7 +378,7 @@ public class DEventInterfaceGenerator : ISourceGenerator
                     strFile.AppendLine("\t\t\t{");
                     strFile.AppendLine("\t\t\t\treturn;");
                     strFile.AppendLine("\t\t\t}");
-                    // strFile.AppendLine("\t\t\tDGame.Debugger.Info($\"RuntimeInitializeLoadType: {loadType}\");");
+                    // strFile.AppendLine($"\t\t\tDGame.{Definition.DefaultDebugName}.Info($\"RuntimeInitializeLoadType: {loadType}\");");
                     strFile.AppendLine("\t\t\tfor(int i = 0; i < methods.Count; i++)");
                     strFile.AppendLine("\t\t\t{");
                     {
@@ -389,7 +389,7 @@ public class DEventInterfaceGenerator : ISourceGenerator
                             strFile.AppendLine("\t\t\t\t\tif (assembly == null)");
                             strFile.AppendLine("\t\t\t\t\t{");
                             {
-                                strFile.AppendLine("\t\t\t\t\t\tDGame.Debugger.Error($\"没有找到程序集: {methods[i].AssemblyName}\");");
+                                strFile.AppendLine($"\t\t\t\t\t\tDGame.{Definition.DefaultDebugName}.Error($\"没有找到程序集: {{methods[i].AssemblyName}}\");");
                                 strFile.AppendLine("\t\t\t\t\t\treturn;");
                             }
                             strFile.AppendLine("\t\t\t\t\t}");
@@ -403,14 +403,14 @@ public class DEventInterfaceGenerator : ISourceGenerator
                             strFile.AppendLine("\t\t\t\t\t}");
                             strFile.AppendLine("\t\t\t\t\telse");
                             strFile.AppendLine("\t\t\t\t\t{");
-                            strFile.AppendLine("\t\t\t\t\t\tDGame.Debugger.Error($\"没找到类型{methods[i].TypeName}\");");
+                            strFile.AppendLine($"\t\t\t\t\t\tDGame.{Definition.DefaultDebugName}.Error($\"没找到类型{{methods[i].TypeName}}\");");
                             strFile.AppendLine("\t\t\t\t\t}");
                         }
                         strFile.AppendLine("\t\t\t\t}");
                         strFile.AppendLine("\t\t\t\tcatch (Exception ex)");
                         strFile.AppendLine("\t\t\t\t{");
                         {
-                            strFile.AppendLine("\t\t\t\t\tDGame.Debugger.Error($\"执行RuntimeInitializeOnLoadMethod方法失败: {methods[i].FullName}, 错误: {ex.Message}\");");
+                            strFile.AppendLine($"\t\t\t\t\tDGame.{Definition.DefaultDebugName}.Error($\"执行RuntimeInitializeOnLoadMethod方法失败: {{methods[i].FullName}}, 错误: {{ex.Message}}\");");
                         }
                         strFile.AppendLine("\t\t\t\t}");
                     }
@@ -726,12 +726,12 @@ public class DEventInterfaceGenerator : ISourceGenerator
                             sb.AppendLine("\t\t\t\t\t}");
                         }
                         sb.AppendLine("\t\t\t\t}");
-                        // sb.AppendLine("\t\t\t\tDGame.Debugger.Info(\"RequireComponentCollector: \" + go.TryGetComponent(tempType, out _));");
+                        // sb.AppendLine($"\t\t\t\tDGame.{Definition.DefaultDebugName}.Info(\"RequireComponentCollector: \" + go.TryGetComponent(tempType, out _));");
                     }
                     sb.AppendLine("\t\t\t}");
                     sb.AppendLine("\t\t\tUnityEngine.GameObject.Destroy(go);");
                     sb.AppendLine("\t\t\tawait UniTask.Yield();");
-                    // sb.AppendLine("\t\t\tDGame.Debugger.Info($\"RequireComponentCollector DestroyImmediate: {UnityEngine.GameObject.Find(\"[RequireComponentCollector]\")}\");");
+                    // sb.AppendLine($"\t\t\tDGame.{Definition.DefaultDebugName}.Info($\"RequireComponentCollector DestroyImmediate: {UnityEngine.GameObject.Find(\"[RequireComponentCollector]\")}\");");
                 }
                 sb.AppendLine("\t\t}");
             }

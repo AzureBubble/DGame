@@ -23,14 +23,14 @@ namespace GameLogic
         {
             if (index < 0 || index >= m_components.Count)
             {
-                Debugger.Error("索引超出范围");
+                DLogger.Error("索引超出范围");
                 return null;
             }
             T c = m_components[index] as T;
 
             if (c == null)
             {
-                Debugger.Error($"没有找到对应类型: {typeof(T).FullName}");
+                DLogger.Error($"没有找到对应类型: {typeof(T).FullName}");
                 return null;
             }
             return c;

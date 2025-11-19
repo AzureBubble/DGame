@@ -41,7 +41,7 @@ namespace GameLogic
 
                     if (m_instance == null)
                     {
-                        Debugger.Fatal($"无法创建 MonoSingleton<{typeof(T)}>");
+                        DLogger.Fatal($"无法创建 MonoSingleton<{typeof(T)}>");
                     }
                     SingletonSystem.Register(go, m_instance);
                 }

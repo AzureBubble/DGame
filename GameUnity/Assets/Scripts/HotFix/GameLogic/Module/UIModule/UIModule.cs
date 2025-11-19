@@ -53,7 +53,7 @@ namespace GameLogic
             }
             else
             {
-                Debugger.Fatal("不存在UIRoot");
+                DLogger.Fatal("不存在UIRoot");
                 return;
             }
 
@@ -120,7 +120,7 @@ namespace GameLogic
 
             if (scaler == null)
             {
-                Debugger.Error($"没有找到 {nameof(CanvasScaler)}");
+                DLogger.Error($"没有找到 {nameof(CanvasScaler)}");
                 return;
             }
 

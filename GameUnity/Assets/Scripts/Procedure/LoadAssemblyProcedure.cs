@@ -44,7 +44,7 @@ namespace Procedure
 
         public override void OnEnter()
         {
-            Debugger.Info("======== 10-加载DLL流程 ========");
+            DLogger.Info("======== 10-加载DLL流程 ========");
 
 #if ENABLE_HYBRIDCLR
 
@@ -92,7 +92,7 @@ namespace Procedure
                                 Path.Combine("Assets", m_updateSettings.AssemblyTextAssetPath,
                                     $"{hotfixDllName}{m_updateSettings.AssemblyTextAssetExtension}"));
                         }
-                        Debugger.Log($"======== 加载DLL资源: {assetLocation} ========");
+                        DLogger.Log($"======== 加载DLL资源: {assetLocation} ========");
                         m_loadAssetCnt++;
                         var result = await m_resourceModule.LoadAssetAsync<TextAsset>(assetLocation);
                         LoadAssetSuccess(result);
@@ -117,11 +117,11 @@ namespace Procedure
 
             if (textAsset == null)
             {
-                Debugger.Warning("加载热更DLL失败");
+                DLogger.Warning("加载热更DLL失败");
                 return;
             }
             var assetName = textAsset.name;
-            Debugger.Log($"加载热更DLL资源成功: [{assetName}]");
+            DLogger.Log($"加载热更DLL资源成功: [{assetName}]");
 
             try
             {
@@ -133,12 +133,12 @@ namespace Procedure
                 }
 
                 m_hotfixAssemblyList.Add(assembly);
-                Debugger.Log($"热更DLL加载成功: [{assembly.GetName().Name}]");
+                DLogger.Log($"热更DLL加载成功: [{assembly.GetName().Name}]");
             }
             catch (Exception e)
             {
                 m_failureAssetCnt++;
-                Debugger.Fatal(e);
+                DLogger.Fatal(e);
                 throw;
             }
             finally
@@ -210,7 +210,7 @@ namespace Procedure
                         Path.Combine("Assets", m_updateSettings.AssemblyTextAssetPath,
                             $"{aotDllName}{m_updateSettings.AssemblyTextAssetExtension}"));
                 }
-                Debugger.Log($"加载AOT程序集: [{assetLocation}]");
+                DLogger.Log($"加载AOT程序集: [{assetLocation}]");
                 m_loadMetadataAssetCnt++;
                 m_resourceModule.LoadAssetAsync<TextAsset>(assetLocation, LoadMetadataAssetSuccess);
             }
@@ -224,11 +224,11 @@ namespace Procedure
 
             if (textAsset == null)
             {
-                Debugger.Log("LoadMetadataAssetSuccess: 加载元数据资源失败");
+                DLogger.Log("LoadMetadataAssetSuccess: 加载元数据资源失败");
                 return;
             }
             string assetName = textAsset.name;
-            Debugger.Log($"LoadMetadataAssetSuccess: 加载元数据资源成功: [{assetName}]");
+            DLogger.Log($"LoadMetadataAssetSuccess: 加载元数据资源成功: [{assetName}]");
 
             try
             {
@@ -238,14 +238,14 @@ namespace Procedure
 
                 var mode = HomologousImageMode.SuperSet;
                 var err = (LoadImageErrorCode)HybridCLR.RuntimeApi.LoadMetadataForAOTAssembly(bytes, mode);
-                Debugger.Warning($"LoadMetadataAssetSuccess: [{assetName}] mode:{mode} err:{err}");
+                DLogger.Warning($"LoadMetadataAssetSuccess: [{assetName}] mode:{mode} err:{err}");
 
 #endif
             }
             catch (Exception e)
             {
                 m_failureMetadataAssetCnt++;
-                Debugger.Fatal(e.Message);
+                DLogger.Fatal(e.Message);
                 throw;
             }
             finally
@@ -278,20 +278,20 @@ namespace Procedure
 #endif
             if (m_mainLogicAssembly == null)
             {
-                Debugger.Fatal($"主业务逻辑DLL丢失 请检查设置里的宏定义 \'ENABLE_HYBRIDCLR\' 和是否存在文件=>{m_updateSettings.LogicMainDllName}.bytes");
+                DLogger.Fatal($"主业务逻辑DLL丢失 请检查设置里的宏定义 \'ENABLE_HYBRIDCLR\' 和是否存在文件=>{m_updateSettings.LogicMainDllName}.bytes");
                 return;
             }
 
             var entryType = m_mainLogicAssembly.GetType("GameStart");
             if (entryType == null)
             {
-                Debugger.Fatal("游戏主入口文件 'GameStart' 丢失");
+                DLogger.Fatal("游戏主入口文件 'GameStart' 丢失");
                 return;
             }
             var entryMethod = entryType.GetMethod("Entrance", BindingFlags.Static | BindingFlags.Public);
             if (entryMethod == null)
             {
-                Debugger.Fatal("游戏主入口方法 'GameStart.Entrance' 丢失");
+                DLogger.Fatal("游戏主入口方法 'GameStart.Entrance' 丢失");
                 return;
             }
             // await UniTask.Yield();

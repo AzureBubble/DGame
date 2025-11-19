@@ -12,7 +12,7 @@ namespace Launcher
         {
             if (list == null)
             {
-                Debugger.Error("======== UI窗口List为空 ========");
+                DLogger.Error("======== UI窗口List为空 ========");
                 return;
             }
 

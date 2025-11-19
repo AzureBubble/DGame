@@ -21,7 +21,7 @@ namespace DGame
         {
             if (m_existList.Contains(handler))
             {
-                Debugger.Fatal("重复添加事件");
+                DLogger.Fatal("重复添加事件");
                 return false;
             }
 
@@ -48,7 +48,7 @@ namespace DGame
             {
                 if (!m_existList.Contains(handler))
                 {
-                    Debugger.Fatal("删除事件失败，事件不存在，请检查事件ID：{0}", StringId.HashToString(m_eventID));
+                    DLogger.Fatal("删除事件失败，事件不存在，请检查事件ID：{0}", StringId.HashToString(m_eventID));
                     return false;
                 }
                 m_existList.Remove(handler);

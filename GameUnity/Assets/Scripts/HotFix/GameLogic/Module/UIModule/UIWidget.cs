@@ -197,7 +197,7 @@ namespace GameLogic
             transform = go.GetComponent<Transform>();
             rectTransform = transform as RectTransform;
             gameObject = go;
-            Debugger.Assert(rectTransform != null, $"{go.name} UI元素必须具有 RectTransform");
+            DLogger.Assert(rectTransform != null, $"{go.name} UI元素必须具有 RectTransform");
             return true;
         }
 

@@ -14,7 +14,7 @@ namespace DGame
                 m_objectPool = ModuleSystem.GetModule<IObjectPoolModule>();
                 if (m_objectPool == null)
                 {
-                    Debugger.Fatal("Object pool component is invalid.");
+                    DLogger.Fatal("Object pool component is invalid.");
                 }
             }
 

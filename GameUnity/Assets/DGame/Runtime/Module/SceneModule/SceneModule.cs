@@ -48,7 +48,7 @@ namespace DGame
         {
             if (!m_handlingScene.Add(location))
             {
-                Debugger.Error($"场景正在加载中... Scene: {location}");
+                DLogger.Error($"场景正在加载中... Scene: {location}");
                 return default;
             }
 
@@ -117,7 +117,7 @@ namespace DGame
         {
             if (!m_handlingScene.Add(location))
             {
-                Debugger.Error($"场景正在加载中... Scene: {location}");
+                DLogger.Error($"场景正在加载中... Scene: {location}");
                 return;
             }
 
@@ -125,7 +125,7 @@ namespace DGame
             {
                 if (m_subScenes.TryGetValue(location, out SceneHandle subScene))
                 {
-                    Debugger.Warning($"子场景已经加载过了... Scene: {location}");
+                    DLogger.Warning($"子场景已经加载过了... Scene: {location}");
                     return;
                 }
 
@@ -148,7 +148,7 @@ namespace DGame
             {
                 if (m_currentMainScene != null && !m_currentMainScene.IsDone)
                 {
-                    Debugger.Warning($"当前场景正在加载中... CurrentMainScene: {CurrentMainSceneName}.");
+                    DLogger.Warning($"当前场景正在加载中... CurrentMainScene: {CurrentMainSceneName}.");
                     return;
                 }
 
@@ -204,7 +204,7 @@ namespace DGame
                 return subScene.ActivateScene();
             }
 
-            Debugger.Warning($"主场景无效资源路径:{location}");
+            DLogger.Warning($"主场景无效资源路径:{location}");
             return false;
         }
 
@@ -226,7 +226,7 @@ namespace DGame
                 return subScene.UnSuspend();
             }
 
-            Debugger.Warning($"主场景无效资源路径:{location}");
+            DLogger.Warning($"主场景无效资源路径:{location}");
             return false;
         }
 
@@ -234,7 +234,7 @@ namespace DGame
         {
             if (m_currentMainScene == null)
             {
-                Debugger.Warning($"主场景未设置: {location}");
+                DLogger.Warning($"主场景未设置: {location}");
                 return false;
             }
 
@@ -254,13 +254,13 @@ namespace DGame
             {
                 if (subScene.SceneObject == default)
                 {
-                    Debugger.Error($"无法卸载没有加载的场景对象. Scene: {location}");
+                    DLogger.Error($"无法卸载没有加载的场景对象. Scene: {location}");
                     return false;
                 }
 
                 if (!m_handlingScene.Add(location))
                 {
-                    Debugger.Warning($"无法卸载正在加载的场景对象. Scene: {location}");
+                    DLogger.Warning($"无法卸载正在加载的场景对象. Scene: {location}");
                     return false;
                 }
 
@@ -285,7 +285,7 @@ namespace DGame
 
                 return true;
             }
-            Debugger.Warning($"无效的资源地址，卸载场景失败:{location}");
+            DLogger.Warning($"无效的资源地址，卸载场景失败:{location}");
             return false;
         }
 
@@ -295,13 +295,13 @@ namespace DGame
             {
                 if (subScene.SceneObject == default)
                 {
-                    Debugger.Error($"无法卸载没有加载的场景对象. Scene: {location}");
+                    DLogger.Error($"无法卸载没有加载的场景对象. Scene: {location}");
                     return;
                 }
 
                 if (!m_handlingScene.Add(location))
                 {
-                    Debugger.Warning($"无法卸载正在加载的场景对象. Scene: {location}");
+                    DLogger.Warning($"无法卸载正在加载的场景对象. Scene: {location}");
                     return;
                 }
 
@@ -321,7 +321,7 @@ namespace DGame
                 return;
             }
 
-            Debugger.Warning($"无效的资源地址，卸载场景失败:{location}");
+            DLogger.Warning($"无效的资源地址，卸载场景失败:{location}");
         }
 
         public bool IsContainScene(string location)

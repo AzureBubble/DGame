@@ -31,7 +31,7 @@ namespace DGame
 
         public override void OnCreate()
         {
-            Debugger.Info("======== 对象池系统初始化 ========");
+            DLogger.Info("======== 对象池系统初始化 ========");
         }
 
         public override void OnDestroy()
@@ -746,7 +746,7 @@ namespace DGame
 
         public void ReleaseCanRecycleObject()
         {
-            Debugger.Info("对象池释放中...");
+            DLogger.Info("对象池释放中...");
             GetAllObjectPools(true, m_cachedAllObjectPools);
 
             foreach (var pool in m_cachedAllObjectPools)
@@ -757,7 +757,7 @@ namespace DGame
 
         public void ReleaseAllUnusedToMemoryPool()
         {
-            Debugger.Info("对象池释放所有未使用的对象中...");
+            DLogger.Info("对象池释放所有未使用的对象中...");
             GetAllObjectPools(true, m_cachedAllObjectPools);
 
             foreach (var pool in m_cachedAllObjectPools)

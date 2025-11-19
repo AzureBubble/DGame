@@ -124,7 +124,7 @@ namespace GameLogic
         {
             if (tabTemp == null)
             {
-                Debugger.Fatal("CreatTabByPrefab failed, prefab is null: {0}", typeof(T).Name);
+                DLogger.Fatal("CreatTabByPrefab failed, prefab is null: {0}", typeof(T).Name);
                 return;
             }
 

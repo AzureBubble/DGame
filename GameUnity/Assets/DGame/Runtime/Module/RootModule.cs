@@ -83,7 +83,7 @@ namespace DGame
                 MemoryPool.EnableStrictCheck = value;
                 if (value)
                 {
-                    Debugger.Info("内存池已启用严格检查，这将极大程序影响性能。");
+                    DLogger.Info("内存池已启用严格检查，这将极大程序影响性能。");
                 }
             }
         }
@@ -91,12 +91,12 @@ namespace DGame
         private void Awake()
         {
             InitMemoryPoolSetting();
-            Debugger.Info($"======== RootModule Awake() ========");
+            DLogger.Info($"======== RootModule Awake() ========");
             m_instance = this;
             InitStringUtilHelper();
             InitLogHelper();
             InitJsonHelper();
-            Debugger.Info($"======== Unity Version: {Application.unityVersion} ========");
+            DLogger.Info($"======== Unity Version: {Application.unityVersion} ========");
 
             Utility.Converter.ScreenDpi = Screen.dpi;
             if (Utility.Converter.ScreenDpi <= 0)
@@ -137,7 +137,7 @@ namespace DGame
 
         private void OnLowMemory()
         {
-            Debugger.Warning("======== 内存不足 自动清理缓存... ========");
+            DLogger.Warning("======== 内存不足 自动清理缓存... ========");
             var objectPoolModule = ModuleSystem.GetModule<IObjectPoolModule>();
             objectPoolModule?.ReleaseAllUnusedToMemoryPool();
             var resourceModule = ModuleSystem.GetModule<IResourceModule>();
@@ -160,7 +160,7 @@ namespace DGame
 
             if (logHelperType == null)
             {
-                Debugger.Error("查找不到默认的ILogHelper类型：'{0}'", logHelperTypeName);
+                DLogger.Error("查找不到默认的ILogHelper类型：'{0}'", logHelperTypeName);
                 return;
             }
 
@@ -168,7 +168,7 @@ namespace DGame
 
             if (logHelper == null)
             {
-                Debugger.Error("无法创建ILogHelper类型实例：'{0}'", logHelperTypeName);
+                DLogger.Error("无法创建ILogHelper类型实例：'{0}'", logHelperTypeName);
                 return;
             }
 
@@ -190,7 +190,7 @@ namespace DGame
 
             if (type == null)
             {
-                Debugger.Error("查找不到默认的IStringUtilHelper类型：'{0}'", stringUtilHelperTypeName);
+                DLogger.Error("查找不到默认的IStringUtilHelper类型：'{0}'", stringUtilHelperTypeName);
                 return;
             }
 
@@ -198,7 +198,7 @@ namespace DGame
 
             if (stringUtilHelper == null)
             {
-                Debugger.Error("无法创建IStringUtilHelper类型实例：'{0}'", stringUtilHelperTypeName);
+                DLogger.Error("无法创建IStringUtilHelper类型实例：'{0}'", stringUtilHelperTypeName);
                 return;
             }
 
@@ -221,7 +221,7 @@ namespace DGame
 
             if (jsonHelperType == null)
             {
-                Debugger.Error("查找不到默认的IJsonHelper类型：'{0}'", jsonHelperTypeName);
+                DLogger.Error("查找不到默认的IJsonHelper类型：'{0}'", jsonHelperTypeName);
                 return;
             }
 
@@ -229,7 +229,7 @@ namespace DGame
 
             if (jsonHelper == null)
             {
-                Debugger.Error("无法创建IJsonHelper类型实例：'{0}'", jsonHelperTypeName);
+                DLogger.Error("无法创建IJsonHelper类型实例：'{0}'", jsonHelperTypeName);
                 return;
             }
 

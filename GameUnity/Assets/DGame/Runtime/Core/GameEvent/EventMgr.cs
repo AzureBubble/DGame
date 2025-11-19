@@ -34,7 +34,7 @@ namespace DGame
         {
             if (interfaceWrap == null)
             {
-                Debugger.Fatal("Wrap接口类型无效");
+                DLogger.Fatal("Wrap接口类型无效");
                 return;
             }
             string interfaceName = typeof(T).FullName;
@@ -45,7 +45,7 @@ namespace DGame
         {
             if (interfaceWrap == null)
             {
-                Debugger.Fatal("Wrap接口类型无效");
+                DLogger.Fatal("Wrap接口类型无效");
                 return;
             }
             if (!string.IsNullOrEmpty(interfaceName))

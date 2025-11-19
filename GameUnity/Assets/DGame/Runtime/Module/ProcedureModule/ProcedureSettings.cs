@@ -26,7 +26,7 @@ namespace DGame
 
             if (m_procedureModule == null)
             {
-                Debugger.Fatal("流程模块无效");
+                DLogger.Fatal("流程模块无效");
                 return;
             }
 
@@ -38,7 +38,7 @@ namespace DGame
 
                 if (procedureType == null)
                 {
-                    Debugger.Error($"无法找到流程状态类型: {availableProcedureTypeNames[i]}");
+                    DLogger.Error($"无法找到流程状态类型: {availableProcedureTypeNames[i]}");
                     return;
                 }
 
@@ -46,7 +46,7 @@ namespace DGame
 
                 if (procedures[i] == null)
                 {
-                    Debugger.Error($"无法创建流程状态实例对象: {availableProcedureTypeNames[i]}");
+                    DLogger.Error($"无法创建流程状态实例对象: {availableProcedureTypeNames[i]}");
                     return;
                 }
 
@@ -58,7 +58,7 @@ namespace DGame
 
             if (m_startProcedure == null)
             {
-                Debugger.Error("流程启动状态无效");
+                DLogger.Error("流程启动状态无效");
                 return;
             }
 

@@ -28,7 +28,7 @@ namespace Procedure
 
         public override void OnEnter()
         {
-            Debugger.Info("======== 9-预加载流程 ========");
+            DLogger.Info("======== 9-预加载流程 ========");
             m_loadFlag.Clear();
             LauncherMgr.ShowUI(UIDefine.LoadUpdateUI, Utility.StringUtil.Format("正在载入...{0}%", 0));
 
@@ -152,13 +152,13 @@ namespace Procedure
 
         private void OnPreLoadAssetFailure(string assetName, LoadResourceStatus status, string errormessage, object userdata)
         {
-            Debugger.Warning("无法预加载资源文件 '{0}' 错误信息: '{1}'.", assetName, errormessage);
+            DLogger.Warning("无法预加载资源文件 '{0}' 错误信息: '{1}'.", assetName, errormessage);
             m_loadFlag[assetName] = true;
         }
 
         private void OnPreloadAssetSuccess(string assetName, object asset, float duration, object userdata)
         {
-            Debugger.Log("成功预加载资源文件 '{0}' 持续时间: '{1}'.", assetName, duration);
+            DLogger.Log("成功预加载资源文件 '{0}' 持续时间: '{1}'.", assetName, duration);
             m_loadFlag[assetName] = true;
         }
     }

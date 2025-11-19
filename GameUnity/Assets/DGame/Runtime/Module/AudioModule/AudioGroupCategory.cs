@@ -164,7 +164,7 @@ namespace DGame
             }
             else
             {
-                Debugger.Error($"当前没有空闲的音频组件播放音频：{path}");
+                DLogger.Error($"当前没有空闲的音频组件播放音频：{path}");
                 return null;
             }
         }

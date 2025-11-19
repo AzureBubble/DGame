@@ -18,7 +18,7 @@ namespace DGame
 
             if (image == null)
             {
-                Debugger.Warning($"SetSubAssets Image is null");
+                DLogger.Warning($"SetSubAssets Image is null");
                 return;
             }
 
@@ -36,7 +36,7 @@ namespace DGame
 
             if (spriteRenderer == null)
             {
-                Debugger.Warning($"SetSubAssets Image is null");
+                DLogger.Warning($"SetSubAssets Image is null");
                 return;
             }
 

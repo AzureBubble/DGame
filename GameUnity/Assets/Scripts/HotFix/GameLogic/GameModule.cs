@@ -79,13 +79,13 @@ namespace GameLogic
         private static T GetModule<T>() where T : class
         {
             T module = ModuleSystem.GetModule<T>();
-            Debugger.Assert(condition: module != null, $"{typeof(T)} is null");
+            DLogger.Assert(condition: module != null, $"{typeof(T)} is null");
             return module;
         }
 
         public static void Destroy()
         {
-            Debugger.Info("GameModule Destroy");
+            DLogger.Info("GameModule Destroy");
             m_rootModule = null;
             m_gameTimerModule = null;
             m_audioModule = null;

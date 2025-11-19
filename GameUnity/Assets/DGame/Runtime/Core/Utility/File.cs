@@ -29,7 +29,7 @@ namespace DGame
                         }
                         else
                         {
-                            Debugger.Error($"文件夹不存在: {dir}");
+                            DLogger.Error($"文件夹不存在: {dir}");
                             return false;
                         }
                     }
@@ -60,7 +60,7 @@ namespace DGame
 #if UNITY_EDITOR
                             EditorUtility.DisplayDialog("CreateFileTips", $"文件夹{dir}不存在", "Cancel");
 #endif
-                            Debugger.Error($"文件夹不存在: {dir}");
+                            DLogger.Error($"文件夹不存在: {dir}");
                             return false;
                         }
                     }
@@ -118,7 +118,7 @@ namespace DGame
                 }
                 catch (Exception e)
                 {
-                    Debugger.Error("转换MD5失败: " + e.Message);
+                    DLogger.Error("转换MD5失败: " + e.Message);
                     return "Error";
                 }
             }

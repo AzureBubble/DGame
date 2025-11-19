@@ -24,7 +24,7 @@ namespace DGame
             {
                 if (bindBehaviour == null)
                 {
-                    Debugger.Error("StartCoroutine {0} failed, bindBehaviour is null", name);
+                    DLogger.Error("StartCoroutine {0} failed, bindBehaviour is null", name);
                     return null;
                 }
 
@@ -36,7 +36,7 @@ namespace DGame
             {
                 if (bindGo == null)
                 {
-                    Debugger.Error("StartCoroutine {0} failed, BindGo is null", name);
+                    DLogger.Error("StartCoroutine {0} failed, BindGo is null", name);
                     return null;
                 }
 

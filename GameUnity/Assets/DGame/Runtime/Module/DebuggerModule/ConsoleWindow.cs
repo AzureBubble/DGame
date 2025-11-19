@@ -280,7 +280,7 @@ namespace DGame
             {
                 if (result == null)
                 {
-                    Debugger.Error("result无效");
+                    DLogger.Error("result无效");
                     return;
                 }
                 result.Clear();
@@ -295,13 +295,13 @@ namespace DGame
             {
                 if (results == null)
                 {
-                    Debugger.Error("result无效");
+                    DLogger.Error("result无效");
                     return;
                 }
 
                 if (count <= 0)
                 {
-                    Debugger.Error("数量无效");
+                    DLogger.Error("数量无效");
                     return;
                 }
 
@@ -358,7 +358,7 @@ namespace DGame
                 }
                 string filePath = Application.persistentDataPath + "/game_logs.txt";
                 List<string> fileContentsList = new List<string>();
-                Debugger.Info("Saving logs to " + filePath);
+                DLogger.Info("Saving logs to " + filePath);
                 File.Delete(filePath);
                 for (int i = 0; i < m_logNodes.Count; i++)
                 {

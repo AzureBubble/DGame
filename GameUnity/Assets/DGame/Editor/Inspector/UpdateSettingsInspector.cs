@@ -483,14 +483,14 @@ namespace DGame
                     SettingsUtil.HybridCLRSettings.hotUpdateAssemblies[i] = assemblyNameWithoutExtension;
                 }
 
-                Debugger.Info("======== HybridCLR => 热更程序集发生变化 ========");
+                DLogger.Info("======== HybridCLR => 热更程序集发生变化 ========");
             }
 
             if (isAOTChanged)
             {
                 AotMetaAssembliesList = new List<string>(updateSettings.AOTMetaAssemblies);
                 SettingsUtil.HybridCLRSettings.patchAOTAssemblies = updateSettings.AOTMetaAssemblies.ToArray();
-                Debugger.Info("======== HybridCLR => AOT程序集发生变化 ========");
+                DLogger.Info("======== HybridCLR => AOT程序集发生变化 ========");
             }
 
             if (isAOTChanged || isHotChanged)
@@ -514,7 +514,7 @@ namespace DGame
 
             if (updateSettings == null)
             {
-                Debugger.Error("======== 没有找到 updateSettings SO 文件 ========");
+                DLogger.Error("======== 没有找到 updateSettings SO 文件 ========");
                 return;
             }
 
@@ -528,7 +528,7 @@ namespace DGame
             }
 
             HybridCLRSettings.Instance.patchAOTAssemblies = updateSettings.AOTMetaAssemblies.ToArray();
-            Debugger.Info("======== HybridCLR => AOT和热更程序集发生变化 ========");
+            DLogger.Info("======== HybridCLR => AOT和热更程序集发生变化 ========");
             EditorUtility.SetDirty(HybridCLRSettings.Instance);
             EditorUtility.SetDirty(updateSettings);
             HybridCLRSettings.Save();
@@ -548,7 +548,7 @@ namespace DGame
 
             if (updateSettings == null)
             {
-                Debugger.Error("======== 没有找到 updateSettings SO 文件 ========");
+                DLogger.Error("======== 没有找到 updateSettings SO 文件 ========");
                 return;
             }
 
@@ -562,7 +562,7 @@ namespace DGame
             }
 
             updateSettings.AOTMetaAssemblies = HybridCLRSettings.Instance.patchAOTAssemblies.ToList();
-            Debugger.Info("======== 同步HybridCLR的设置 ========");
+            DLogger.Info("======== 同步HybridCLR的设置 ========");
             EditorUtility.SetDirty(updateSettings);
             AssetDatabase.SaveAssets();
         }

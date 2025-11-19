@@ -15,7 +15,7 @@ namespace Procedure
 
         public override void OnEnter()
         {
-            Debugger.Info("======== 2-进入游戏闪屏流程 ========");
+            DLogger.Info("======== 2-进入游戏闪屏流程 ========");
         }
 
         public override void OnUpdate(float elapseSeconds, float realElapseSeconds)

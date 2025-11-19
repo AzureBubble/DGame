@@ -318,7 +318,7 @@ namespace DGame
 
             if (m_debuggerModule == null)
             {
-                Debugger.Fatal("DebuggerModule无效");
+                DLogger.Fatal("DebuggerModule无效");
                 return;
             }
 

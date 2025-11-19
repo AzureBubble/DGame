@@ -4,22 +4,22 @@ namespace DGame
     {
         public void Log(string message)
         {
-            Debugger.Info(message);
+            DLogger.Info(message);
         }
 
         public void Warning(string message)
         {
-            Debugger.Warning(message);
+            DLogger.Warning(message);
         }
 
         public void Error(string message)
         {
-            Debugger.Error(message);
+            DLogger.Error(message);
         }
 
         public void Exception(System.Exception exception)
         {
-            Debugger.Fatal(exception.Message);
+            DLogger.Fatal(exception.Message);
         }
     }
 }

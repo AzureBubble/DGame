@@ -120,13 +120,13 @@ namespace DGame
             m_resourceModule = ModuleSystem.GetModule<IResourceModule>();
             if (m_resourceModule == null)
             {
-                Debugger.Fatal("资源模块无效！");
+                DLogger.Fatal("资源模块无效！");
                 return;
             }
 
             if (PlayMode == EPlayMode.EditorSimulateMode)
             {
-                Debugger.Info("在此模式下运行，资源模块会优先使用编辑器资源，应该首先验证这些资源是否有效");
+                DLogger.Info("在此模式下运行，资源模块会优先使用编辑器资源，应该首先验证这些资源是否有效");
 #if !UNITY_EDITOR
                 PlayMode = EPlayMode.OfflinePlayMode;
 #endif
@@ -150,7 +150,7 @@ namespace DGame
             m_resourceModule.AssetExpireTime = assetExpireTime;
             m_resourceModule.AssetPoolPriority = assetPoolPriority;
             m_resourceModule.SetForceUnloadUnusedAssetsAction(ForceUnloadUnusedAssets);
-            Debugger.Info($"======== 资源加载模式: {PlayMode} ========");
+            DLogger.Info($"======== 资源加载模式: {PlayMode} ========");
         }
 
         #region 资源自动释放
@@ -181,7 +181,7 @@ namespace DGame
                  m_preorderUnloadUnusedAssets &&
                  m_lastUnloadUnusedAssetsOperationElapsedSeconds >= minUnloadUnusedAssetsInterval))
             {
-                Debugger.Info("======== 自动卸载释放没有使用的资源 ========");
+                DLogger.Info("======== 自动卸载释放没有使用的资源 ========");
                 m_forceUnloadUnusedAssets = false;
                 m_preorderUnloadUnusedAssets = false;
                 m_lastUnloadUnusedAssetsOperationElapsedSeconds = 0f;
@@ -199,7 +199,7 @@ namespace DGame
 
                 if (m_performGCCollect)
                 {
-                    Debugger.Info("======== GC.Collect ========");
+                    DLogger.Info("======== GC.Collect ========");
                     m_performGCCollect = false;
                     GC.Collect();
                 }

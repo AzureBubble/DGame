@@ -131,7 +131,7 @@ namespace DGame
                 {
                     if (m_timeoutController.IsTimeout())
                     {
-                        Debugger.Error($"等待加载资源超时：{assetObjectKey}. 原因：{ex.Message}");
+                        DLogger.Error($"等待加载资源超时：{assetObjectKey}. 原因：{ex.Message}");
                     }
                 }
             }

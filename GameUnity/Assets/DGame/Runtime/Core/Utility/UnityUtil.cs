@@ -609,6 +609,44 @@ namespace DGame
 
 
             #endregion
+
+            #region ResolutionHelper
+
+            private static Resolution[] s_resolutions;
+
+            public static Resolution[] GetResolutions() => s_resolutions != null ? s_resolutions : s_resolutions = Screen.resolutions;
+
+            public static void SetScreenResolution(int width, int height, bool fullscreen)
+            {
+                Screen.SetResolution(width, height, fullscreen);
+            }
+
+            public static void SetScreenResolutionWithMode(int width, int height, FullScreenMode mode)
+            {
+                Screen.SetResolution(width, height, mode);
+            }
+
+            public static void SetScreenResolution(int index, bool fullscreen)
+            {
+                if (index < 0 || index >= Screen.resolutions.Length)
+                {
+                    return;
+                }
+                var resolution = Screen.resolutions[index];
+                Screen.SetResolution(resolution.width, resolution.height, fullscreen);
+            }
+
+            public static void SetScreenResolutionWithMode(int index, FullScreenMode mode)
+            {
+                if (index < 0 || index >= Screen.resolutions.Length)
+                {
+                    return;
+                }
+                var resolution = Screen.resolutions[index];
+                Screen.SetResolution(resolution.width, resolution.height, mode);
+            }
+
+            #endregion
         }
 
         public class GameCoroutine

@@ -372,7 +372,7 @@ namespace DGame
             strFile.AppendLine($"namespace {UIScriptGeneratorSettings.GetUINameSpace()}");
             strFile.AppendLine("{");
             {
-                if (!string.IsNullOrEmpty(uiTypeName) && string.Equals(uiTypeName, "UIWindow", StringComparison.Ordinal)))
+                if (!string.IsNullOrEmpty(uiTypeName) && string.Equals(uiTypeName, "UIWindow", StringComparison.Ordinal))
                 {
                     strFile.AppendLine($"\t[Window(UILayer.UI, location : \"{fileName.Replace(".cs", "")}\")]");
                 }

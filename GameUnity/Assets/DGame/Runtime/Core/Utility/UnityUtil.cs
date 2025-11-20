@@ -606,8 +606,6 @@ namespace DGame
             public static int GetHashCodeByString(string str)
                 => str.GetHashCode();
 
-
-
             #endregion
 
             #region ResolutionHelper

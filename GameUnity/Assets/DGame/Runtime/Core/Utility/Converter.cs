@@ -874,7 +874,7 @@ namespace DGame
 
                 if (length != 6 && length != 8)
                 {
-                    Debug.LogWarning("Invalid hex color format. Expected 6 or 8 characters after optional #.");
+                    DLogger.Warning("Invalid hex color format. Expected 6 or 8 characters after optional #.");
                     return Color.white;
                 }
 

@@ -12,33 +12,33 @@ namespace Launcher
 
         public virtual bool NeedTween => true;
         public virtual bool FullScreen => false;
-        private bool m_isTweenning = false;
+        private bool m_isInTween = false;
 
-        protected object Param;
+        protected object m_param;
 
         protected virtual void ScriptGenerator(){}
 
         public void TweenPop()
         {
-            if (FullScreen || !NeedTween || m_isTweenning || !transform)
+            if (FullScreen || !NeedTween || m_isInTween || !transform)
             {
                 return;
             }
 
-            m_isTweenning = true;
+            m_isInTween = true;
             transform.localScale = Vector3.one * 0.8f;
             transform.DOScale(Vector3.one, NORMAL_TWEEN_POP_TIME).SetEase(Ease.OutBack).SetUpdate(true).SetAutoKill(true).onComplete += OnTweenPopComplete;
         }
 
         private void OnTweenPopComplete()
         {
-            m_isTweenning = false;
+            m_isInTween = false;
         }
 
         public virtual void OnInit(object param)
         {
             ScriptGenerator();
-            Param = param;
+            m_param = param;
         }
 
         public void Show()

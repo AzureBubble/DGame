@@ -9,8 +9,8 @@ namespace Launcher
 {
     public static class LauncherMgr
     {
+        private static string UI_WINDOW_PATH = "UIWindow/";
         private static Transform m_uiRoot;
-        private static readonly Dictionary<string, string> m_uiDict = new Dictionary<string, string>();
         private static readonly Dictionary<string, UIBase> m_uiMapDict = new Dictionary<string, UIBase>();
 
         public static void Initialize()
@@ -23,13 +23,12 @@ namespace Launcher
                 return;
             }
 
-            RegisterUI();
             DLogger.Info("======== 初始化 LauncherMgr 完成 ========");
         }
 
-        private static void RegisterUI()
+        public static void ShowUI<T>(object param = null) where T : UIBase
         {
-            UIDefine.RegisterUI(m_uiDict);
+            ShowUI(typeof(T).Name, param);
         }
 
         public static void ShowUI(string uiName, object param = null)
@@ -40,48 +39,44 @@ namespace Launcher
                 return;
             }
 
-            if (!m_uiDict.ContainsKey(uiName))
+            if (!m_uiMapDict.TryGetValue(uiName, out var uiBase))
             {
-                DLogger.Error($"======== LauncherMgr.ShowUI 找不到UI窗口: {uiName} ========");
-                return;
-            }
-
-            GameObject uiWindow = null;
-
-            if (!m_uiMapDict.ContainsKey(uiName))
-            {
-                Object obj = Resources.Load(m_uiDict[uiName]);
+                Object obj = Resources.Load(UI_WINDOW_PATH + uiName);
                 if (obj != null)
                 {
-                    uiWindow = Object.Instantiate(obj) as GameObject;
+                    var uiWindow = Object.Instantiate(obj) as GameObject;
+
                     if (uiWindow != null)
                     {
                         uiWindow.transform.SetParent(m_uiRoot.transform);
+                        uiWindow.name = uiName;
                         uiWindow.transform.localScale = Vector3.one;
                         uiWindow.transform.localPosition = Vector3.zero;
                         uiWindow.transform.localRotation = Quaternion.identity;
                         RectTransform rectTransform = uiWindow.GetComponent<RectTransform>();
                         rectTransform.sizeDelta = Vector2.zero;
+
+                        uiBase = new UIBase();
+                        uiBase.gameObject = uiWindow;
+                        m_uiMapDict[uiName] = uiBase;
                     }
                 }
-
-                UIBase component = uiWindow?.GetComponent<UIBase>();
-
-                if (component != null)
-                {
-                    m_uiMapDict.Add(uiName, component);
-                }
             }
-
-            m_uiMapDict[uiName].gameObject.SetActive(true);
-
-            if (param != null)
-            {
-                m_uiMapDict[uiName]?.OnEnter(param);
-            }
+            uiBase?.Show();
+            uiBase?.OnInit(param);
         }
 
-        public static void HideUI(string uiName)
+        public static void CloseUI(UIBase uiWindow)
+        {
+            CloseUI(uiWindow.GetType().Name);
+        }
+
+        public static void CloseUI<T>() where T : UIBase
+        {
+            ShowUI(typeof(T).Name);
+        }
+
+        public static void CloseUI(string uiName)
         {
             if (string.IsNullOrEmpty(uiName))
             {
@@ -89,14 +84,19 @@ namespace Launcher
                 return;
             }
 
-            if (!m_uiMapDict.TryGetValue(uiName, out UIBase uiWindow))
+            if (!m_uiMapDict.TryGetValue(uiName, out var uiWindow))
             {
                 return;
             }
 
-            uiWindow?.gameObject.SetActive(false);
+            uiWindow?.Hide();
             Object.DestroyImmediate(uiWindow?.gameObject);
             m_uiMapDict.Remove(uiName);
+        }
+
+        public static T GetActiveUI<T>() where T : UIBase
+        {
+            return GetActiveUI(typeof(T).Name) as T;
         }
 
         public static UIBase GetActiveUI(string uiName)
@@ -118,8 +118,8 @@ namespace Launcher
         public static void ShowMessageBox(string desc, MessageShowType showType = MessageShowType.OneButton,
             Action onOk = null, Action onCancel = null, Action onPackage = null)
         {
-            ShowUI(UIDefine.LoadTipsUI, desc);
-            var ui = GetActiveUI(UIDefine.LoadTipsUI) as LoadTipsUI;
+            ShowUI<LoadTipsUI>(desc);
+            var ui = GetActiveUI<LoadTipsUI>();
 
             if (ui == null)
             {
@@ -133,8 +133,8 @@ namespace Launcher
 
         public static void UpdateUIProgress(float progress)
         {
-            ShowUI(UIDefine.LoadUpdateUI);
-            var ui = GetActiveUI(UIDefine.LoadUpdateUI) as LoadUpdateUI;
+            ShowUI<LoadUpdateUI>();
+            var ui = GetActiveUI<LoadUpdateUI>();
             ui?.OnUpdateUIProgress(progress);
         }
 

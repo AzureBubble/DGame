@@ -5,36 +5,47 @@ namespace Launcher
 {
     public class LoadUpdateUI : UIBase
     {
-        public Button BtnClear;
-        public Scrollbar SliderProgress;
-        public Text TextDesc;
-        public Text TextAppID;
-        public Text TextResID;
+        #region 脚本工具生成的代码
 
-        private void Start()
+        private Button m_btnClear;
+        private Scrollbar m_scrollBarProgress;
+        private Text m_textLabelDesc;
+        private Text m_textLabelAppid;
+        private Text m_textLabelResid;
+
+        protected override void ScriptGenerator()
         {
-            BtnClear.onClick.AddListener(OnClear);
-            BtnClear.gameObject.SetActive(true);
-            OnUpdateUIProgress(0f);
+            m_btnClear = FindChildComponent<Button>("m_btnClear");
+            m_scrollBarProgress = FindChildComponent<Scrollbar>("m_scrollBarProgress");
+            m_textLabelDesc = FindChildComponent<Text>("m_textLabelDesc");
+            m_textLabelAppid = FindChildComponent<Text>("m_textLabelAppid");
+            m_textLabelResid = FindChildComponent<Text>("m_textLabelResid");
+            m_btnClear.onClick.AddListener(OnClickClearBtn);
         }
 
-        public override void OnEnter(object param)
+        #endregion
+
+        public override bool FullScreen => true;
+        public override bool NeedTween => false;
+
+        public override void OnInit(object param)
         {
             if (param == null)
             {
                 return;
             }
-            base.OnEnter(param);
-            TextDesc.text = param.ToString();
+            base.OnInit(param);
+            m_textLabelDesc.text = param.ToString();
+            OnUpdateUIProgress(0f);
         }
 
         internal void OnUpdateUIProgress(float progress)
         {
-            SliderProgress.gameObject.SetActive(true);
-            SliderProgress.size = progress;
+            m_scrollBarProgress.gameObject.SetActive(true);
+            m_scrollBarProgress.size = progress;
         }
 
-        public void OnClear()
+        public void OnClickClearBtn()
         {
 
         }

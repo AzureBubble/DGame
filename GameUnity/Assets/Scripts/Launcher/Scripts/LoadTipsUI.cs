@@ -13,70 +13,80 @@ namespace Launcher
 
     public class LoadTipsUI : UIBase
     {
-        public Button BtnUpdate;
-        public Button BtnIgnore;
-        public Button BtnPackage;
-        public Text TextDesc;
+        #region 脚本工具生成的代码
+
+        private Button m_btnPackage;
+        private Text m_textPackage;
+        private Text m_textDesc;
+        private Button m_btnUpdate;
+        private Text m_textUpdate;
+        private Button m_btnIgnore;
+        private Text m_textIgnore;
+
+        protected override void ScriptGenerator()
+        {
+            m_btnPackage = FindChildComponent<Button>("m_btnPackage/m_btnPackage");
+            m_textPackage = FindChildComponent<Text>("m_textPackage/m_textPackage/m_textPackage");
+            m_textDesc = FindChildComponent<Text>("m_textDesc/m_textDesc");
+            m_btnUpdate = FindChildComponent<Button>("m_btnUpdate/m_btnUpdate/m_btnUpdate");
+            m_textUpdate = FindChildComponent<Text>("m_textUpdate/m_textUpdate/m_textUpdate/m_textUpdate");
+            m_btnIgnore = FindChildComponent<Button>("m_btnIgnore/m_btnIgnore/m_btnIgnore");
+            m_textIgnore = FindChildComponent<Text>("m_textIgnore/m_textIgnore/m_textIgnore/m_textIgnore");
+            m_btnPackage.onClick.AddListener(OnClickPackageBtn);
+            m_btnUpdate.onClick.AddListener(OnClickUpdateBtn);
+            m_btnIgnore.onClick.AddListener(OnClickIgnoreBtn);
+        }
+
+        #endregion
 
         public Action OnOk;
         public Action OnCancel;
         public MessageShowType ButtonShowType = MessageShowType.None;
 
-        private void Start()
-        {
-            BtnUpdate.onClick.AddListener(OnGameUpdate);
-            BtnIgnore.onClick.AddListener(OnGameIgnore);
-            BtnPackage.onClick.AddListener(OnGameInvoke);
-        }
 
-        public override void OnEnter(object data)
+        public override void OnInit(object data)
         {
-            BtnUpdate.gameObject.SetActive(false);
-            BtnIgnore.gameObject.SetActive(false);
-            BtnPackage.gameObject.SetActive(false);
+            m_btnUpdate.gameObject.SetActive(false);
+            m_btnIgnore.gameObject.SetActive(false);
+            m_btnPackage.gameObject.SetActive(false);
 
             switch (ButtonShowType)
             {
                 case MessageShowType.OneButton:
-                    BtnUpdate.gameObject.SetActive(true);
+                    m_btnUpdate.gameObject.SetActive(true);
                     break;
 
                 case MessageShowType.TwoButton:
-                    BtnUpdate.gameObject.SetActive(true);
-                    BtnIgnore.gameObject.SetActive(true);
+                    m_btnUpdate.gameObject.SetActive(true);
+                    m_btnIgnore.gameObject.SetActive(true);
                     break;
 
                 case MessageShowType.ThreeButton:
-                    BtnUpdate.gameObject.SetActive(true);
-                    BtnIgnore.gameObject.SetActive(true);
-                    BtnPackage.gameObject.SetActive(true);
+                    m_btnUpdate.gameObject.SetActive(true);
+                    m_btnIgnore.gameObject.SetActive(true);
+                    m_btnPackage.gameObject.SetActive(true);
                     break;
             }
 
-            TextDesc.text = data?.ToString();
+            m_textDesc.text = data?.ToString();
         }
 
-        private void OnGameInvoke()
+        private void OnClickPackageBtn()
         {
             OnOk?.Invoke();
-            OnClose();
+            Close();
         }
 
-        private void OnGameIgnore()
+        private void OnClickIgnoreBtn()
         {
             OnCancel?.Invoke();
-            OnClose();
+            Close();
         }
 
-        private void OnGameUpdate()
+        private void OnClickUpdateBtn()
         {
             OnOk?.Invoke();
-            OnClose();
-        }
-
-        private void OnClose()
-        {
-            LauncherMgr.HideUI(UIDefine.LoadTipsUI);
+            Close();
         }
     }
 }

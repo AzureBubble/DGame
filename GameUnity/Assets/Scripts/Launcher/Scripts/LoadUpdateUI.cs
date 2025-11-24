@@ -7,20 +7,19 @@ namespace Launcher
     {
         #region 脚本工具生成的代码
 
-        private Button m_btnClear;
+        private Image m_imgBg;
         private Scrollbar m_scrollBarProgress;
         private Text m_textLabelDesc;
+        private Text m_textVersion;
         private Text m_textLabelAppid;
-        private Text m_textLabelResid;
 
         protected override void ScriptGenerator()
         {
-            m_btnClear = FindChildComponent<Button>("m_btnClear");
+            m_imgBg = FindChildComponent<Image>("m_imgBg");
             m_scrollBarProgress = FindChildComponent<Scrollbar>("m_scrollBarProgress");
-            m_textLabelDesc = FindChildComponent<Text>("m_textLabelDesc");
+            m_textLabelDesc = FindChildComponent<Text>("m_textLabelDesc/m_textLabelDesc");
+            m_textVersion = FindChildComponent<Text>("m_textVersion");
             m_textLabelAppid = FindChildComponent<Text>("m_textLabelAppid");
-            m_textLabelResid = FindChildComponent<Text>("m_textLabelResid");
-            m_btnClear.onClick.AddListener(OnClickClearBtn);
         }
 
         #endregion
@@ -36,18 +35,23 @@ namespace Launcher
             }
             base.OnInit(param);
             m_textLabelDesc.text = param.ToString();
-            OnUpdateUIProgress(0f);
+            RefreshProgress(0f);
         }
 
-        internal void OnUpdateUIProgress(float progress)
+        internal void RefreshProgress(float progress)
         {
             m_scrollBarProgress.gameObject.SetActive(true);
             m_scrollBarProgress.size = progress;
         }
 
-        public void OnClickClearBtn()
+        internal void RefreshVersion(string version)
         {
+            m_textVersion.text = version;
+        }
 
+        internal void RefreshAppid(string appid)
+        {
+            m_textLabelAppid.text = appid;
         }
     }
 }

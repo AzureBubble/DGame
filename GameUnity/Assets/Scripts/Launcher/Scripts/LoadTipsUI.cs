@@ -3,89 +3,92 @@ using UnityEngine.UI;
 
 namespace Launcher
 {
-    public enum MessageShowType : byte
-    {
-        None = 0,
-        OneButton = 1,
-        TwoButton = 2,
-        ThreeButton = 3,
-    }
-
     public class LoadTipsUI : UIBase
     {
         #region 脚本工具生成的代码
 
-        private Button m_btnPackage;
-        private Text m_textPackage;
         private Text m_textDesc;
+        private Button m_btnConfirm;
+        private Text m_textConfirm;
         private Button m_btnUpdate;
         private Text m_textUpdate;
-        private Button m_btnIgnore;
-        private Text m_textIgnore;
+        private Button m_btnCancel;
+        private Text m_textCancel;
 
         protected override void ScriptGenerator()
         {
-            m_btnPackage = FindChildComponent<Button>("m_btnPackage/m_btnPackage");
-            m_textPackage = FindChildComponent<Text>("m_textPackage/m_textPackage/m_textPackage");
             m_textDesc = FindChildComponent<Text>("m_textDesc/m_textDesc");
+            m_btnConfirm = FindChildComponent<Button>("m_btnConfirm/m_btnConfirm/m_btnConfirm");
+            m_textConfirm = FindChildComponent<Text>("m_textConfirm/m_textConfirm/m_textConfirm/m_textConfirm");
             m_btnUpdate = FindChildComponent<Button>("m_btnUpdate/m_btnUpdate/m_btnUpdate");
             m_textUpdate = FindChildComponent<Text>("m_textUpdate/m_textUpdate/m_textUpdate/m_textUpdate");
-            m_btnIgnore = FindChildComponent<Button>("m_btnIgnore/m_btnIgnore/m_btnIgnore");
-            m_textIgnore = FindChildComponent<Text>("m_textIgnore/m_textIgnore/m_textIgnore/m_textIgnore");
-            m_btnPackage.onClick.AddListener(OnClickPackageBtn);
+            m_btnCancel = FindChildComponent<Button>("m_btnCancel/m_btnCancel/m_btnCancel");
+            m_textCancel = FindChildComponent<Text>("m_textCancel/m_textCancel/m_textCancel/m_textCancel");
+            m_btnConfirm.onClick.AddListener(OnClickConfirmBtn);
             m_btnUpdate.onClick.AddListener(OnClickUpdateBtn);
-            m_btnIgnore.onClick.AddListener(OnClickIgnoreBtn);
+            m_btnCancel.onClick.AddListener(OnClickCancelBtn);
         }
 
         #endregion
 
-        public Action OnOk;
-        public Action OnCancel;
-        public MessageShowType ButtonShowType = MessageShowType.None;
+        private const string m_cancelText = "Cancel";
+        private const string m_confirmText = "Confirm";
+        private const string m_updateText = "Update";
 
+        public Action OnConfirmClick { get; set; }
+        public Action OnUpdateClick { get; set; }
+        public Action OnCancelClick { get; set; }
 
         public override void OnInit(object data)
         {
+            m_textCancel.text = m_cancelText;
+            m_textUpdate.text = m_updateText;
+            m_textConfirm.text = m_confirmText;
+
             m_btnUpdate.gameObject.SetActive(false);
-            m_btnIgnore.gameObject.SetActive(false);
-            m_btnPackage.gameObject.SetActive(false);
-
-            switch (ButtonShowType)
-            {
-                case MessageShowType.OneButton:
-                    m_btnUpdate.gameObject.SetActive(true);
-                    break;
-
-                case MessageShowType.TwoButton:
-                    m_btnUpdate.gameObject.SetActive(true);
-                    m_btnIgnore.gameObject.SetActive(true);
-                    break;
-
-                case MessageShowType.ThreeButton:
-                    m_btnUpdate.gameObject.SetActive(true);
-                    m_btnIgnore.gameObject.SetActive(true);
-                    m_btnPackage.gameObject.SetActive(true);
-                    break;
-            }
+            m_btnCancel.gameObject.SetActive(false);
+            m_btnConfirm.gameObject.SetActive(false);
 
             m_textDesc.text = data?.ToString();
         }
 
-        private void OnClickPackageBtn()
+        public void SetAllCallback(Action onConfirm, Action onUpdate, Action onCancel)
         {
-            OnOk?.Invoke();
-            Close();
-        }
-
-        private void OnClickIgnoreBtn()
-        {
-            OnCancel?.Invoke();
-            Close();
+            m_btnUpdate.gameObject.SetActive(false);
+            m_btnCancel.gameObject.SetActive(false);
+            m_btnConfirm.gameObject.SetActive(false);
+            if (onConfirm != null)
+            {
+                OnConfirmClick = onConfirm;
+                m_btnConfirm.gameObject.SetActive(true);
+            }
+            if (onUpdate != null)
+            {
+                OnUpdateClick = onUpdate;
+                m_btnUpdate.gameObject.SetActive(true);
+            }
+            if (onCancel != null)
+            {
+                OnCancelClick = onCancel;
+                m_btnCancel.gameObject.SetActive(true);
+            }
         }
 
         private void OnClickUpdateBtn()
         {
-            OnOk?.Invoke();
+            OnUpdateClick?.Invoke();
+            Close();
+        }
+
+        private void OnClickCancelBtn()
+        {
+            OnCancelClick?.Invoke();
+            Close();
+        }
+
+        private void OnClickConfirmBtn()
+        {
+            OnConfirmClick?.Invoke();
             Close();
         }
     }

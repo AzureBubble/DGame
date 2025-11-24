@@ -9,13 +9,14 @@ namespace Launcher
 {
     public static class LauncherMgr
     {
+        private static string UI_ROOT_PATH = "UIRoot/UICanvas";
         private static string UI_WINDOW_PATH = "UIWindow/";
         private static Transform m_uiRoot;
-        private static readonly Dictionary<string, UIBase> m_uiMapDict = new Dictionary<string, UIBase>();
+        private static readonly Dictionary<string, UIBase> m_uiMapDict = new Dictionary<string, UIBase>(4);
 
         public static void Initialize()
         {
-            m_uiRoot = GameObject.Find("UIRoot/UICanvas")?.transform;
+            m_uiRoot = GameObject.Find(UI_ROOT_PATH)?.transform;
 
             if (m_uiRoot == null)
             {
@@ -115,27 +116,19 @@ namespace Launcher
 
         #region UI调用
 
-        public static void ShowMessageBox(string desc, MessageShowType showType = MessageShowType.OneButton,
-            Action onOk = null, Action onCancel = null, Action onPackage = null)
+        public static void ShowMessageBox(string desc, Action onConfirm = null,
+            Action onCancel = null, Action onUpdate = null)
         {
             ShowUI<LoadTipsUI>(desc);
             var ui = GetActiveUI<LoadTipsUI>();
-
-            if (ui == null)
-            {
-                return;
-            }
-
-            ui.OnOk = onOk;
-            ui.OnCancel = onCancel;
-            // ui.OnEnter(desc);
+            ui?.SetAllCallback(onConfirm, onCancel, onUpdate);
         }
 
-        public static void UpdateUIProgress(float progress)
+        public static void RefreshProgress(float progress)
         {
             ShowUI<LoadUpdateUI>();
             var ui = GetActiveUI<LoadUpdateUI>();
-            ui?.OnUpdateUIProgress(progress);
+            ui?.RefreshProgress(progress);
         }
 
         #endregion

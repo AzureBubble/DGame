@@ -29,11 +29,11 @@ namespace Procedure
         public override void OnEnter()
         {
             DLogger.Info("======== 9-预加载流程 ========");
+            m_progress = 0;
             m_loadFlag.Clear();
-            LauncherMgr.ShowUI(UIDefine.LoadUpdateUI, Utility.StringUtil.Format("正在载入...{0}%", 0));
-
+            // 正在载入...{0}%
+            LauncherMgr.ShowUI<LoadUpdateUI>(Utility.StringUtil.Format(UIDefine.Instance.Preload_Loading_Tips, 0));
             GameEvent.Send("UILoadUpdate.RefreshVersion");
-
             PreloadResources();
         }
 
@@ -52,6 +52,7 @@ namespace Procedure
                 return;
             }
 
+            // 获取预载标签资源的资源信息
             AssetInfo[] assetInfos = m_resourceModule.GetAssetInfos("PRELOAD");
             foreach (var assetInfo in assetInfos)
             {
@@ -88,32 +89,33 @@ namespace Procedure
                 {
                     break;
                 }
-                else
-                {
-                    loadCnt++;
-                }
+                loadCnt++;
             }
 
             if (m_loadFlag.Count != 0)
             {
-                LauncherMgr.ShowUI(UIDefine.LoadUpdateUI,
-                    Utility.StringUtil.Format("正在载入...{0}%",
-                        (float)loadCnt / totalCnt * 100));
+                // 正在载入...{0}%
+                m_progress = (float)loadCnt / totalCnt;
+                LauncherMgr.ShowUI<LoadUpdateUI>(Utility.StringUtil.Format(UIDefine.Instance.Preload_Loading_Tips,
+                    m_progress * 100));
             }
             else
             {
-                LauncherMgr.UpdateUIProgress(m_progress);
                 string progressStr = $"{m_progress * 100:f1}";
 
                 if (Mathf.Abs(m_progress - 1f) < 0.001f)
                 {
-                    LauncherMgr.ShowUI(UIDefine.LoadUpdateUI, "载入完成");
+                    // 载入完成
+                    LauncherMgr.ShowUI<LoadUpdateUI>(UIDefine.Instance.Preload_Loading_Success_Tips);
                 }
                 else
                 {
-                    LauncherMgr.ShowUI(UIDefine.LoadUpdateUI, Utility.StringUtil.Format("正在载入...{0}%", progressStr));
+                    // 正在载入...{0}%
+                    LauncherMgr.ShowUI<LoadUpdateUI>(Utility.StringUtil.Format(UIDefine.Instance.Preload_Loading_Tips, progressStr));
                 }
             }
+
+            LauncherMgr.RefreshProgress(m_progress);
 
             if (loadCnt < totalCnt)
             {

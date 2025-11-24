@@ -23,7 +23,7 @@ namespace Procedure
         public override void OnEnter()
         {
             DLogger.Info("======== 5-创建热更资源下载器 ========");
-            LauncherMgr.ShowUI(UIDefine.LoadUpdateUI, "创建补丁下载器...");
+            LauncherMgr.ShowUI<LoadUpdateUI>("创建补丁下载器...");
             CreateDownloader().Forget();
         }
 
@@ -49,7 +49,7 @@ namespace Procedure
                 float sizeMB = totalDownloadBytes / 1048576f;
                 m_totalSizeMb = Mathf.Clamp(sizeMB, 0.1f, float.MaxValue);
                 LauncherMgr.ShowMessageBox($"总共找到了 {m_totalDownloadCnt} 个补丁文件, 总大小为 {m_totalSizeMb}MB",
-                    MessageShowType.TwoButton, StartDownloadFiles, Application.Quit);
+                    StartDownloadFiles, Application.Quit);
             }
         }
 

@@ -33,7 +33,7 @@ namespace Procedure
         public override void OnEnter()
         {
             DLogger.Info("======== 6-开始下载更新资源文件 ========");
-            LauncherMgr.ShowUI(UIDefine.LoadUpdateUI, "开始下载更新文件...");
+            LauncherMgr.ShowUI<LoadUpdateUI>("开始下载更新文件...");
             BeginDownload().Forget();
         }
 
@@ -65,8 +65,8 @@ namespace Procedure
                 GetRemainingTime(data.TotalDownloadBytes, data.CurrentDownloadBytes,
                     CurrentSpeed));
 
-            LauncherMgr.UpdateUIProgress(m_resourceModule.Downloader.Progress);
-            LauncherMgr.ShowUI(UIDefine.LoadUpdateUI, $"{line1}\n{line2}\n{line3}");
+            LauncherMgr.RefreshProgress(m_resourceModule.Downloader.Progress);
+            LauncherMgr.ShowUI<LoadUpdateUI>($"{line1}\n{line2}\n{line3}");
 
             DLogger.Info($"{line1} {line2} {line3}");
         }
@@ -86,7 +86,7 @@ namespace Procedure
         private void OnDownloadErrorCallback(DownloadErrorData data)
         {
             LauncherMgr.ShowMessageBox($"下载补丁文件失败: {data.FileName}",
-                MessageShowType.TwoButton, SwitchState<CreateDownloaderProcedure>, Application.Quit);
+                SwitchState<CreateDownloaderProcedure>, Application.Quit);
         }
 
         public override void OnUpdate(float elapseSeconds, float realElapseSeconds)

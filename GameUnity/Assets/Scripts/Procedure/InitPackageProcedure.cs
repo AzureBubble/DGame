@@ -8,16 +8,14 @@ using YooAsset;
 namespace Procedure
 {
     /// <summary>
-    /// 3 - 初始化 Yooasset Package
+    /// 3 - 初始化 YooAsset Package
     /// </summary>
     public class InitPackageProcedure : ProcedureBase
     {
         public override bool UseNativeDialog { get; }
 
-        private const string INIT_PACKAGE_ERROR_TIPS =
+        private readonly string INIT_PACKAGE_ERROR_TIPS =
             "PackageManifest_DefaultPackage.version Error : HTTP/1.1 404 Not Found";
-        private const string INIT_PACKAGE_ERROR_TRUE_TIPS =
-            "请检查StreamingAssets/package/DefaultPackage/PackageManifest_DefaultPackage.version是否存在";
 
         public override void OnEnter()
         {
@@ -50,8 +48,10 @@ namespace Procedure
 
                 if (initOperation.Status == EOperationStatus.Succeed)
                 {
-                    var playMode = m_resourceModule.PlayMode;
+                    // 热更新文本初始化
+                    UIDefine.Instance.InitConfigData(null);
 
+                    var playMode = m_resourceModule.PlayMode;
                     switch (playMode)
                     {
                         case EPlayMode.EditorSimulateMode:
@@ -66,22 +66,23 @@ namespace Procedure
 
                         case EPlayMode.HostPlayMode:
                         case EPlayMode.WebPlayMode:
-                            LauncherMgr.ShowUI(UIDefine.LoadUpdateUI);
+                            LauncherMgr.ShowUI<LoadUpdateUI>();
                             DLogger.Info("======== 当前处于联机/WebGL资源模式 ========");
                             SwitchState<InitResourceProcedure>();
                             break;
                         default:
-                            DLogger.Info("======== 未知的资源模式 请检查 ResourcesModuleDriver 中的设置 ========");
+                            DLogger.Error("======== 未知的资源模式 请检查 ResourcesModuleDriver 中的设置 ========");
                             break;
                     }
                 }
                 else
                 {
-                    LauncherMgr.ShowUI(UIDefine.LoadUpdateUI);
                     DLogger.Error($"======== InitPackage 失败 ========> {initOperation.Error}");
-                    LauncherMgr.ShowUI(UIDefine.LoadUpdateUI, "初始化资源失败！");
-                    LauncherMgr.ShowMessageBox($"资源初始化失败！点击确认重试 \n \n <color=#FF0000>原因: {initOperation.Error}</color>",
-                        MessageShowType.TwoButton, Retry, Application.Quit);
+                    // 资源初始化失败！
+                    LauncherMgr.ShowUI<LoadUpdateUI>(UIDefine.Instance.Init_Package_Failed_Tips);
+                    // 资源初始化失败！点击确认重试 \n \n <color=#FF0000>原因: {0}</color>
+                    LauncherMgr.ShowMessageBox(Utility.StringUtil.Format(UIDefine.Instance.Init_Package_Failed_Try_Again_Tips, initOperation.Error),
+                        Retry, Application.Quit);
                 }
             }
             catch (Exception e)
@@ -93,16 +94,18 @@ namespace Procedure
 
         private void OnInitPackageFailed(string message)
         {
-            LauncherMgr.ShowUI(UIDefine.LoadUpdateUI);
             DLogger.Error($"======== OnInitPackageFailed ========> {message}");
-            LauncherMgr.ShowUI(UIDefine.LoadUpdateUI, "资源初始化失败！");
+            // 资源初始化失败！
+            LauncherMgr.ShowUI<LoadUpdateUI>(UIDefine.Instance.Init_Package_Failed_Tips);
+            // PackageManifest_DefaultPackage.version Error : HTTP/1.1 404 Not Found
             if (message.Contains(INIT_PACKAGE_ERROR_TIPS))
             {
-                message = $"======== {INIT_PACKAGE_ERROR_TRUE_TIPS} ========";
+                // 请检查StreamingAssets/package/DefaultPackage/PackageManifest_DefaultPackage.version是否存在
+                message = UIDefine.Instance.Init_Package_Error_Tips;
             }
-
-            LauncherMgr.ShowMessageBox($"资源初始化失败！点击确认重试 \n \n <color=#FF0000>原因: {message}</color>",
-                MessageShowType.TwoButton, Retry, Application.Quit);
+            // 资源初始化失败！点击确认重试 \n \n <color=#FF0000>原因: {0}</color>
+            LauncherMgr.ShowMessageBox(Utility.StringUtil.Format(UIDefine.Instance.Init_Package_Failed_Try_Again_Tips, message),
+                Retry, Application.Quit);
         }
 
         /// <summary>
@@ -111,7 +114,8 @@ namespace Procedure
         private void Retry()
         {
             DLogger.Error($"======== 重新尝试 InitPackage ========");
-            LauncherMgr.ShowUI(UIDefine.LoadUpdateUI, "重新初始化资源中...");
+            // 重新初始化资源中...
+            LauncherMgr.ShowUI<LoadUpdateUI>(UIDefine.Instance.Init_Package_Retry_Tips);
             InitPackage().Forget();
         }
     }

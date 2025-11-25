@@ -109,6 +109,7 @@ namespace Launcher
         {
             foreach (var ui in m_uiMapDict.Values)
             {
+                ui?.Hide();
                 Object.Destroy(ui?.gameObject);
             }
             m_uiMapDict.Clear();

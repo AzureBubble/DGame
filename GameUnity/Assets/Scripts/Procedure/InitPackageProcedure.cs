@@ -12,6 +12,7 @@ namespace Procedure
     /// </summary>
     public class InitPackageProcedure : ProcedureBase
     {
+        private readonly string UpdateUIDefineFilePath = "Config/UpdateUIDefine";
         public override bool UseNativeDialog { get; }
 
         private readonly string INIT_PACKAGE_ERROR_TIPS =
@@ -48,8 +49,9 @@ namespace Procedure
 
                 if (initOperation.Status == EOperationStatus.Succeed)
                 {
+                    var updateUIDefineTextAsset = Resources.Load<TextAsset>(UpdateUIDefineFilePath);
                     // 热更新文本初始化
-                    UIDefine.Instance.InitConfigData(null);
+                    UpdateUIDefine.Instance.InitConfigData(updateUIDefineTextAsset);
 
                     var playMode = m_resourceModule.PlayMode;
                     switch (playMode)
@@ -79,9 +81,9 @@ namespace Procedure
                 {
                     DLogger.Error($"======== InitPackage 失败 ========> {initOperation.Error}");
                     // 资源初始化失败！
-                    LauncherMgr.ShowUI<LoadUpdateUI>(UIDefine.Instance.Init_Package_Failed_Tips);
+                    LauncherMgr.ShowUI<LoadUpdateUI>(UpdateUIDefine.Instance.Init_Package_Failed_Tips);
                     // 资源初始化失败！点击确认重试 \n \n <color=#FF0000>原因: {0}</color>
-                    LauncherMgr.ShowMessageBox(Utility.StringUtil.Format(UIDefine.Instance.Init_Package_Failed_Try_Again_Tips, initOperation.Error),
+                    LauncherMgr.ShowMessageBox(Utility.StringUtil.Format(UpdateUIDefine.Instance.Init_Package_Failed_Try_Again_Tips, initOperation.Error),
                         Retry, Application.Quit);
                 }
             }
@@ -96,15 +98,15 @@ namespace Procedure
         {
             DLogger.Error($"======== OnInitPackageFailed ========> {message}");
             // 资源初始化失败！
-            LauncherMgr.ShowUI<LoadUpdateUI>(UIDefine.Instance.Init_Package_Failed_Tips);
+            LauncherMgr.ShowUI<LoadUpdateUI>(UpdateUIDefine.Instance.Init_Package_Failed_Tips);
             // PackageManifest_DefaultPackage.version Error : HTTP/1.1 404 Not Found
             if (message.Contains(INIT_PACKAGE_ERROR_TIPS))
             {
                 // 请检查StreamingAssets/package/DefaultPackage/PackageManifest_DefaultPackage.version是否存在
-                message = UIDefine.Instance.Init_Package_Error_Tips;
+                message = UpdateUIDefine.Instance.Init_Package_Error_Tips;
             }
             // 资源初始化失败！点击确认重试 \n \n <color=#FF0000>原因: {0}</color>
-            LauncherMgr.ShowMessageBox(Utility.StringUtil.Format(UIDefine.Instance.Init_Package_Failed_Try_Again_Tips, message),
+            LauncherMgr.ShowMessageBox(Utility.StringUtil.Format(UpdateUIDefine.Instance.Init_Package_Failed_Try_Again_Tips, message),
                 Retry, Application.Quit);
         }
 
@@ -115,7 +117,7 @@ namespace Procedure
         {
             DLogger.Error($"======== 重新尝试 InitPackage ========");
             // 重新初始化资源中...
-            LauncherMgr.ShowUI<LoadUpdateUI>(UIDefine.Instance.Init_Package_Retry_Tips);
+            LauncherMgr.ShowUI<LoadUpdateUI>(UpdateUIDefine.Instance.Init_Package_Retry_Tips);
             InitPackage().Forget();
         }
     }

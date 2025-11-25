@@ -123,7 +123,7 @@ namespace DGame
                 }
             }
 
-            public static string GertLengthString(long length)
+            public static string GetLengthString(long length)
             {
                 const long KB = 1024;
                 const long MB = KB * 1024;
@@ -151,7 +151,7 @@ namespace DGame
                 return $"{(length / (float)GB):F2} GB";
             }
 
-            public static string GertByteLengthString(long byteLength)
+            public static string GetByteLengthString(long byteLength)
             {
                 if (byteLength < 0)
                 {

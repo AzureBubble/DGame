@@ -12,9 +12,10 @@ namespace Procedure
         public override void OnEnter()
         {
             DLogger.Info("======== 7-下载热更补丁完成 ========");
-            LauncherMgr.ShowUI<LoadUpdateUI>("下载完成...");
+            // 下载完成...
+            LauncherMgr.ShowUI<LoadUpdateUI>(UpdateUIDefine.Instance.Download_Over_Tips);
             // 下载完成保存一下本地资源版本号
-            Utility.PlayerPrefsUtil.SetString("GAME_VERSION", m_resourceModule.PackageVersion);
+            Utility.PlayerPrefsUtil.SetString(UpdateUIDefine.Instance.Game_Version_Key, m_resourceModule.PackageVersion);
         }
 
         public override void OnUpdate(float elapseSeconds, float realElapseSeconds)

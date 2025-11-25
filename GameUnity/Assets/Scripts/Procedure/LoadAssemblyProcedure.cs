@@ -22,7 +22,7 @@ namespace Procedure
     public class LoadAssemblyProcedure : ProcedureBase
     {
         public override bool UseNativeDialog => true;
-        private bool m_enableAddressable = true;
+        private readonly bool m_enableAddressable = true;
         private int m_loadAssetCnt;
         private int m_loadMetadataAssetCnt;
         private int m_failureAssetCnt;

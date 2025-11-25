@@ -32,8 +32,8 @@ namespace Procedure
             m_progress = 0;
             m_loadFlag.Clear();
             // 正在载入...{0}%
-            LauncherMgr.ShowUI<LoadUpdateUI>(Utility.StringUtil.Format(UIDefine.Instance.Preload_Loading_Tips, 0));
-            GameEvent.Send("UILoadUpdate.RefreshVersion");
+            LauncherMgr.ShowUI<LoadUpdateUI>(Utility.StringUtil.Format(UpdateUIDefine.Instance.Preload_Loading_Tips, 0));
+            // GameEvent.Send("UILoadUpdate.RefreshVersion");
             PreloadResources();
         }
 
@@ -96,7 +96,7 @@ namespace Procedure
             {
                 // 正在载入...{0}%
                 m_progress = (float)loadCnt / totalCnt;
-                LauncherMgr.ShowUI<LoadUpdateUI>(Utility.StringUtil.Format(UIDefine.Instance.Preload_Loading_Tips,
+                LauncherMgr.ShowUI<LoadUpdateUI>(Utility.StringUtil.Format(UpdateUIDefine.Instance.Preload_Loading_Tips,
                     m_progress * 100));
             }
             else
@@ -106,12 +106,12 @@ namespace Procedure
                 if (Mathf.Abs(m_progress - 1f) < 0.001f)
                 {
                     // 载入完成
-                    LauncherMgr.ShowUI<LoadUpdateUI>(UIDefine.Instance.Preload_Loading_Success_Tips);
+                    LauncherMgr.ShowUI<LoadUpdateUI>(UpdateUIDefine.Instance.Preload_Loading_Success_Tips);
                 }
                 else
                 {
                     // 正在载入...{0}%
-                    LauncherMgr.ShowUI<LoadUpdateUI>(Utility.StringUtil.Format(UIDefine.Instance.Preload_Loading_Tips, progressStr));
+                    LauncherMgr.ShowUI<LoadUpdateUI>(Utility.StringUtil.Format(UpdateUIDefine.Instance.Preload_Loading_Tips, progressStr));
                 }
             }
 

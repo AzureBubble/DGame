@@ -479,6 +479,11 @@ namespace DGame
                 for (int i = 0; i < updateSettings.HotUpdateAssemblies.Count; i++)
                 {
                     var assemblyName = updateSettings.HotUpdateAssemblies[i];
+
+                    if (assemblyName.Length <= 0)
+                    {
+                        continue;
+                    }
                     string assemblyNameWithoutExtension = assemblyName.Substring(0, assemblyName.LastIndexOf('.'));
                     SettingsUtil.HybridCLRSettings.hotUpdateAssemblies[i] = assemblyNameWithoutExtension;
                 }
@@ -523,6 +528,10 @@ namespace DGame
             for (int i = 0; i < updateSettings.HotUpdateAssemblies.Count; i++)
             {
                 var assemblyName = updateSettings.HotUpdateAssemblies[i];
+                if (assemblyName.Length <= 0)
+                {
+                    continue;
+                }
                 string assemblyNameWithoutExtension = assemblyName.Substring(0, assemblyName.LastIndexOf('.'));
                 HybridCLRSettings.Instance.hotUpdateAssemblies[i] = assemblyNameWithoutExtension;
             }

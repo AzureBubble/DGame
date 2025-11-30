@@ -13,14 +13,26 @@ namespace GameLogic
         /// 矩阵位置组件
         /// </summary>
         public override RectTransform rectTransform => m_rectTransform != null
-            ? m_rectTransform : m_rectTransform = gameObject.transform as RectTransform;
+            ? m_rectTransform : m_rectTransform = transform as RectTransform;
 
         private Transform m_transform;
         /// <summary>
         /// 位置组件
         /// </summary>
-        public override Transform transform => m_transform != null
-            ? m_transform : m_transform = gameObject.transform;
+        public override Transform transform
+        {
+            get
+            {
+                if (m_transform != null)
+                    return m_transform;
+
+                if (gameObject == null)
+                    return null;
+
+                m_transform = gameObject.transform;
+                return m_transform;
+            }
+        }
 
         public override UIType Type => UIType.Widget;
 

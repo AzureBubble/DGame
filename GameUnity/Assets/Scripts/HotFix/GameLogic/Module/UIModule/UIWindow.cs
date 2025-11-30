@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using DGame;
@@ -13,9 +14,9 @@ namespace GameLogic
     {
         #region Propreties
 
+        private static uint s_nextWindowId = 0;
+        private readonly string m_modelSpritePath = "ModelSprite";
         private System.Action<UIWindow> m_prepareCallback;
-        private bool m_isCreated = false;
-        private GameObject m_windowGo;
         private Canvas m_canvas;
         public Canvas Canvas => m_canvas;
         private Canvas[] m_childCanvas;
@@ -25,56 +26,94 @@ namespace GameLogic
         private bool m_isChildCanvasDirty = false;
         public override UIType Type => UIType.Window;
         private const float NORMAL_TWEEN_POP_TIME = 0.3f;
-        private const float NORMAL_MODEL_ALPHA = 1f;
+        private const float NORMAL_MODEL_ALPHA = 0.85f;
         private float m_curModelAlpha;
         private float m_manualAlpha;
         private Image m_modelSprite;
         private UIButton m_modelCloseBtn;
 
+        public uint WindowID { get; set; }
+
+        private CanvasGroup m_canvasGroup;
+
+        public CanvasGroup CanvasGroup
+        {
+            get
+            {
+                if (m_canvasGroup == null)
+                {
+                    m_canvasGroup = DGame.Utility.UnityUtil.AddMonoBehaviour<CanvasGroup>(gameObject);
+                }
+                return m_canvasGroup;
+            }
+        }
+
+        private readonly CancellationTokenSource m_cancellationTokenSource = new CancellationTokenSource();
+
+        private Transform m_transform;
+
         /// <summary>
         /// 窗口位置组件
         /// </summary>
-        public override Transform transform => m_windowGo.transform;
+        public override Transform transform
+        {
+            get
+            {
+                if (m_transform != null)
+                    return m_transform;
+
+                if (gameObject == null)
+                    return null;
+
+                m_transform = gameObject.transform;
+                return m_transform;
+            }
+        }
+
+        private RectTransform m_rectTransform;
 
         /// <summary>
         /// 窗口矩阵位置组件
         /// </summary>
-        public override RectTransform rectTransform => m_windowGo.transform as RectTransform;
+        public override RectTransform rectTransform => m_rectTransform != null
+            ? m_rectTransform : m_rectTransform = transform as RectTransform;
 
         /// <summary>
         /// 窗口实例化资源对象
         /// </summary>
-        public override GameObject gameObject => m_windowGo;
+        public override GameObject gameObject { get; protected set; }
 
         /// <summary>
         /// 窗口名称
         /// </summary>
-        public string WindowName { get; private set; }
+        public string WindowFullName { get; private set; }
+
+        protected virtual UILayer windowLayer => UILayer.UI;
 
         /// <summary>
         /// 窗口层级
         /// </summary>
-        public int WindowLayer { get; private set; }
+        public int WindowLayer => (int)windowLayer;
 
         /// <summary>
         /// 资源定位地址
         /// </summary>
-        public string AssetLocation { get; private set; }
+        public virtual string AssetLocation { get; private set; }
 
         /// <summary>
         /// 是否全屏窗口
         /// </summary>
-        public virtual bool FullScreen { get; private set; } = false;
+        public virtual bool FullScreen => false;
 
         /// <summary>
         /// 是否是Resources资源 无需AB包加载
         /// </summary>
-        public bool FromResources { get; private set; }
+        public virtual bool FromResources => false;
 
         /// <summary>
         /// 隐藏窗口关闭时间
         /// </summary>
-        public int HideTimeToClose { get; set; }
+        public virtual int HideTimeToClose => 10;
 
         /// <summary>
         /// 隐藏窗口关闭时间计时器句柄
@@ -117,7 +156,7 @@ namespace GameLogic
                 // 虚函数
                 if (Visible)
                 {
-                    _OnSortDepth();
+                    _OnSortingOrderChange();
                 }
                 else
                 {
@@ -126,38 +165,36 @@ namespace GameLogic
             }
         }
 
-        public bool Visible
+        protected override bool Visible
         {
-            get => m_canvas != null && gameObject.layer == UIModule.WINDOW_SHOW_LAYER;
+            get => m_canvas != null && m_canvasGroup?.alpha >= 1;
             set
             {
-                if (m_canvas == null)
+                if (m_canvas == null || m_canvasGroup == null || !IsPrepared || IsDestroyed)
                 {
                     return;
                 }
 
-                int setLayer = value ? UIModule.WINDOW_SHOW_LAYER : UIModule.WINDOW_HIDE_LAYER;
-                if (gameObject.layer == setLayer)
+                int alpha = value ? 1 : 0;
+                if (m_canvasGroup.alpha == alpha)
                 {
                     return;
                 }
-                
-                gameObject.layer = setLayer;
-                for (int i = 0; i < m_childCanvas.Length; i++)
-                {
-                    m_childCanvas[i].gameObject.layer = setLayer;
-                }
-
-                if (m_isSortingOrderDirty && m_isCreated)
-                {
-                    _OnSortDepth();
-                }
-
+                m_canvasGroup.alpha = alpha;
                 Interactable = value;
 
-                if (m_isCreated)
+                if (m_isSortingOrderDirty)
                 {
-                    OnSetVisible(value);
+                    _OnSortingOrderChange();
+                }
+
+                if (value)
+                {
+                    OnVisible();
+                }
+                else
+                {
+                    OnHidden();
                 }
             }
         }
@@ -173,9 +210,12 @@ namespace GameLogic
                 }
                 m_graphicRaycaster.enabled = value;
 
-                for (int i = 0; i < m_childGraphicRaycasters.Length; i++)
+                if (m_childGraphicRaycasters != null)
                 {
-                    m_childGraphicRaycasters[i].enabled = value;
+                    for (int i = 0; i < m_childGraphicRaycasters.Length; i++)
+                    {
+                        m_childGraphicRaycasters[i].enabled = value;
+                    }
                 }
             }
         }
@@ -186,30 +226,30 @@ namespace GameLogic
         internal bool IsLoadDone = false;
 
         /// <summary>
-        /// 是否被销毁
-        /// </summary>
-        internal bool IsDestroyed = false;
-
-        /// <summary>
         /// UI是否隐藏
         /// </summary>
         public bool IsHide { get; internal set; } = false;
 
-        public bool NeedTweenPop { get; internal set; } = false;
+        protected virtual bool NeedTweenPop => true;
 
-        private bool m_isTweenPoping = false;
+        private bool m_isTweenPopping = false;
 
         #endregion
 
-        public void Init(string windowName, int layer, bool fullScreen, string assetLocation, bool fromResources, bool needTweenPop, int hideTimeToClose)
+        public void Init(string windowName, string assetLocation)
         {
-            WindowName = windowName;
-            WindowLayer = layer;
-            FullScreen = fullScreen;
+            WindowFullName = windowName;
             AssetLocation = assetLocation;
-            FromResources = fromResources;
-            HideTimeToClose = hideTimeToClose;
-            NeedTweenPop = needTweenPop;
+        }
+
+        public void AllocWindowId()
+        {
+            if (s_nextWindowId == 0)
+            {
+                s_nextWindowId++;
+            }
+
+            WindowID = s_nextWindowId++;
         }
 
         public void SetModelAlphaManually(float alpha)
@@ -245,42 +285,42 @@ namespace GameLogic
         internal async UniTaskVoid InternalLoad(string location, System.Action<UIWindow> prepareCallback, bool isAsync, System.Object[] userData)
         {
             m_prepareCallback = prepareCallback;
-            base.m_userDatas = userData;
+            m_userDatas = userData;
 
             if (!FromResources)
             {
                 if (isAsync)
                 {
-                    var uiInstance = await UIModule.ResourceLoader.LoadGameObjectAsync(location, UIModule.UICanvas);
-                    Handle_Complete(uiInstance);
+                    var uiInstance = await UIModule.ResourceLoader.LoadGameObjectAsync(location, UIModule.UICanvas, gameObject.GetCancellationTokenOnDestroy());
+                    Handle_Completed(uiInstance);
                 }
                 else
                 {
                     var uiInstance = UIModule.ResourceLoader.LoadGameObject(location, UIModule.UICanvas);
-                    Handle_Complete(uiInstance);
+                    Handle_Completed(uiInstance);
                 }
             }
             else
             {
                 var uiInstance = Object.Instantiate(Resources.Load<GameObject>(location), UIModule.UICanvas);
-                Handle_Complete(uiInstance);
+                Handle_Completed(uiInstance);
             }
         }
 
         internal void InternalCreate()
         {
-            if (!m_isCreated)
+            if (IsDestroyed)
             {
-                m_isCreated = true;
-                ScriptGenerator();
-                BindMemberProperty();
-                RegisterEvent();
-                OnCreate();
-                SetModelState(GetModelType());
-                if (NeedTweenPop)
-                {
-                    TweenPop();
-                }
+                return;
+            }
+            ScriptGenerator();
+            BindMemberProperty();
+            RegisterEvent();
+            OnCreate();
+            SetModelState(GetModelType());
+            if (NeedTweenPop && !FullScreen)
+            {
+                TweenPop();
             }
         }
 
@@ -326,54 +366,38 @@ namespace GameLogic
             {
                 return;
             }
-            string modelSpritePath = "ModelSprite";
-            GameObject modelObj = UIModule.ResourceLoader.LoadGameObject(modelSpritePath, transform);
+            GameObject modelObj = UIModule.ResourceLoader.LoadGameObject(m_modelSpritePath, transform);
             modelObj.transform.SetAsFirstSibling();
             modelObj.transform.localScale = Vector3.one;
             modelObj.transform.localPosition = Vector3.zero;
-            modelObj.name = modelSpritePath;
+            modelObj.name = m_modelSpritePath;
             if (canClose)
             {
                 m_modelCloseBtn = DGame.Utility.UnityUtil.AddMonoBehaviour<UIButton>(modelObj);
                 m_modelCloseBtn.onClick.AddListener(Close);
             }
             m_modelSprite = DGame.Utility.UnityUtil.AddMonoBehaviour<UIImage>(modelObj);
-
-            if (m_isTweenPoping)
-            {
-                m_modelSprite.color = new Color(0, 0, 0, 0);
-            }
-            else
-            {
-                m_modelSprite.color = new Color(0, 0, 0, m_curModelAlpha);
-            }
+            m_modelSprite.color = new Color(0, 0, 0, m_curModelAlpha);
         }
 
         private void TweenPop()
         {
-            if (m_isTweenPoping || this.gameObject == null)
+            if (m_isTweenPopping || gameObject == null)
             {
                 return;
             }
-
-            m_isTweenPoping = true;
-            this.transform.localScale = Vector3.one * 0.8f;
-            this.transform.DOScale(Vector3.one, NORMAL_TWEEN_POP_TIME).SetEase(Ease.OutBack).SetUpdate(true).SetAutoKill(true).onComplete += OnTweenPopComplete;
-
-            if (m_modelSprite != null)
-            {
-                m_modelSprite.color = new Color(0f, 0f, 0f, 0f);
-                m_modelSprite.DOFade(m_curModelAlpha, NORMAL_TWEEN_POP_TIME).SetUpdate(true).SetAutoKill(true).onComplete +=
-                    () =>
-                    {
-                        m_modelSprite.color = new Color(0f, 0f, 0f, m_curModelAlpha);
-                    };
-            }
+            m_isTweenPopping = true;
+            transform.localScale = Vector3.one * 0.8f;
+            transform.DOScale(Vector3.one, NORMAL_TWEEN_POP_TIME)
+                .SetEase(Ease.OutBack)
+                .SetUpdate(true)
+                .SetAutoKill(true)
+                .onComplete += OnTweenPopComplete;
         }
 
         private void OnTweenPopComplete()
         {
-            m_isTweenPoping = false;
+            m_isTweenPopping = false;
         }
 
         internal bool InternalUpdate()
@@ -447,25 +471,30 @@ namespace GameLogic
             return needUpdate;
         }
 
-        internal void InternalDestroy()
+        public void Destroy()
         {
-            m_isCreated = false;
+            if (IsDestroyed)
+            {
+                return;
+            }
+
+            transform?.DOKill();
+            m_cancellationTokenSource?.Cancel();
             RemoveAllUIEvents();
 
             for (int i = 0; i < ChildList.Count; i++)
             {
                 var uiChild = ChildList[i];
-                uiChild.CallDestroy();
-                uiChild.OnDestroyWidget();
+                uiChild?.Destroy();
             }
 
             m_prepareCallback = null;
             OnDestroy();
 
-            if (m_windowGo != null)
+            if (gameObject != null)
             {
-                Object.Destroy(m_windowGo);
-                m_windowGo = null;
+                Object.Destroy(gameObject);
+                gameObject = null;
             }
 
             IsDestroyed = true;
@@ -473,7 +502,7 @@ namespace GameLogic
             CancelHideToCloseTimer();
         }
 
-        private void Handle_Complete(GameObject windowGo)
+        private void Handle_Completed(GameObject windowGo)
         {
             if (windowGo == null)
             {
@@ -489,39 +518,44 @@ namespace GameLogic
             }
 
             windowGo.name = GetType().Name;
-            m_windowGo = windowGo;
-            m_windowGo.transform.localPosition = Vector3.zero;
+            gameObject = windowGo;
+            windowGo.transform.localPosition = Vector3.zero;
 
-            UIDebugBehaviour.AddUIDebugBehaviour(windowGo);
+            // UIDebugBehaviour.AddUIDebugBehaviour(windowGo);
 
-            m_canvas = m_windowGo.GetComponent<Canvas>();
+            m_canvas = windowGo.GetComponent<Canvas>();
             if (m_canvas == null)
             {
-                throw new DGameException($"在UI窗口 {WindowName} 没有找到 {nameof(Canvas)}");
+                throw new DGameException($"在UI窗口 {WindowFullName} 没有找到 {nameof(Canvas)}");
             }
             m_canvas.overrideSorting = true;
             m_canvas.sortingOrder = 0;
             m_canvas.sortingLayerName = "Default";
-            m_graphicRaycaster = m_windowGo.GetComponent<GraphicRaycaster>();
-            m_childCanvas = m_windowGo.GetComponentsInChildren<Canvas>(true);
-            m_childGraphicRaycasters = m_windowGo.GetComponentsInChildren<GraphicRaycaster>(true);
+            m_graphicRaycaster = windowGo.GetComponent<GraphicRaycaster>();
+            m_childCanvas = windowGo.GetComponentsInChildren<Canvas>(true);
+            m_childGraphicRaycasters = windowGo.GetComponentsInChildren<GraphicRaycaster>(true);
 
             m_isChildCanvasDirty = false;
 
             IsPrepared = true;
+            IsDestroyed = false;
             m_prepareCallback?.Invoke(this);
         }
 
         internal void CancelHideToCloseTimer()
         {
             IsHide = false;
-            ModuleSystem.GetModule<IGameTimerModule>().DestroyGameTimer(HideTimer);
+
+            if (!GameTimer.IsNull(HideTimer))
+            {
+                ModuleSystem.GetModule<IGameTimerModule>().DestroyGameTimer(HideTimer);
+            }
             HideTimer = null;
         }
 
-        public void Show(bool visible)
+        public void Show(bool isVisible = true)
         {
-            // UIModule.Instance.ShowWindow(this);
+            Visible = isVisible;
         }
 
         public void MakeChildCanvasDirty()

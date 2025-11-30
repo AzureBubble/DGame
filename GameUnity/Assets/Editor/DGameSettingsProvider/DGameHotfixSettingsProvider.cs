@@ -6,6 +6,7 @@ using HybridCLR.Editor.Settings;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
+using YooAsset.Editor;
 
 public static class DGameHotfixSettingsProvider
 {
@@ -24,8 +25,14 @@ public static class DGameHotfixSettingsProvider
     private static SerializedProperty m_buildAddress;
     private static SerializedProperty m_replaceAssetPathWithAddress;
     private static SerializedProperty m_forceGenerateAtlas;
+    private static SerializedProperty m_updateUIDefineConfigPath;
+    private static SerializedProperty m_enableAddressable;
+    private static SerializedProperty m_packageName;
+
     private static int m_logicMainDllNameIndex;
     private static SerializedObject m_serializedObject;
+    private static int m_packageNameIndex;
+    private static string[] m_packageNames;
 
     // UI状态
     private static Vector2 m_scrollPosition;
@@ -97,6 +104,7 @@ public static class DGameHotfixSettingsProvider
                     DrawUpdateSettings();
                     DrawResourceSettings();
                     DrawAdvancedSettings();
+                    DrawUpdateProcedureSettings();
                     DrawStatistics(updateSettings);
                 }
                 EditorGUI.EndDisabledGroup();
@@ -128,6 +136,9 @@ public static class DGameHotfixSettingsProvider
         m_buildAddress = m_serializedObject.FindProperty("m_buildAddress");
         m_replaceAssetPathWithAddress = m_serializedObject.FindProperty("m_replaceAssetPathWithAddress");
         m_forceGenerateAtlas = m_serializedObject.FindProperty("m_forceGenerateAtlas");
+        m_updateUIDefineConfigPath = m_serializedObject.FindProperty("updateUIDefineConfigPath");
+        m_enableAddressable = m_serializedObject.FindProperty("m_enableAddressable");
+        m_packageName = m_serializedObject.FindProperty("packageName");
     }
 
     private static void DrawHeader()
@@ -454,6 +465,115 @@ public static class DGameHotfixSettingsProvider
         EditorGUILayout.EndFoldoutHeaderGroup();
         GUILayout.Space(8);
     }
+
+    private static void DrawUpdateProcedureSettings()
+    {
+        EditorGUILayout.BeginVertical("HelpBox");
+        {
+            GUILayout.Label(new GUIContent("热更流程文本设置"));
+            GUILayout.Space(5);
+
+            // 资源包名
+            EditorGUILayout.LabelField("资源包配置", EditorStyles.boldLabel);
+            m_packageNames = GetBuildPackageNames().ToArray();
+            m_packageNameIndex = Array.IndexOf(m_packageNames, m_packageName.stringValue);
+            var setting = AssetBundleCollectorSettingData.Setting;
+
+            if (m_packageNameIndex < 0)
+            {
+                m_packageNameIndex = 0;
+            }
+
+            m_packageNameIndex = EditorGUILayout.Popup("资源包名", m_packageNameIndex, m_packageNames);
+
+            if (m_packageName.stringValue != m_packageNames[m_packageNameIndex])
+            {
+                m_packageName.stringValue = m_packageNames[m_packageNameIndex];
+
+                var package = setting.GetPackage(m_packageName.stringValue);
+
+                if (package != null)
+                {
+                    m_enableAddressable.boolValue = package.EnableAddressable;
+                }
+            }
+
+            bool enableAddressable = EditorGUILayout.ToggleLeft(
+                new GUIContent("AB资源是否支持可寻址"), m_enableAddressable.boolValue);
+
+            if (enableAddressable != m_enableAddressable.boolValue)
+            {
+                m_enableAddressable.boolValue = enableAddressable;
+                var package = setting.GetPackage(m_packageName.stringValue);
+
+                if (package != null)
+                {
+                    package.EnableAddressable = m_enableAddressable.boolValue;
+                }
+            }
+
+            EditorGUILayout.Space(3);
+
+            // 构建地址
+            EditorGUILayout.PropertyField(m_updateUIDefineConfigPath,
+                new GUIContent("热更新流程文本配置路径"));
+
+            EditorGUILayout.Space(3);
+
+            string tips = string.Empty;
+
+            if (m_enableAddressable.boolValue)
+            {
+                tips += $"{m_packageName.stringValue}资源包是否支持可寻址：启用";
+            }
+            else
+            {
+                tips += $"{m_packageName.stringValue}资源包是否支持可寻址：禁用";
+            }
+
+            bool isEmptyPath = false;
+            bool isExit = false;
+
+            if (!string.IsNullOrEmpty(m_updateUIDefineConfigPath.stringValue))
+            {
+                string path = Application.dataPath + "/Resources/" + m_updateUIDefineConfigPath.stringValue + ".json";
+                isExit = System.IO.File.Exists(path);
+
+                if (!isExit)
+                {
+                    tips += $"\n热更新流程文本配置路径: 没有找到相关的配置文件'Resources/{m_updateUIDefineConfigPath.stringValue}.json'";
+                }
+                else
+                {
+                    tips += $"\n热更新流程文本配置路径: Resources/{m_updateUIDefineConfigPath.stringValue}.json";
+                }
+            }
+            else
+            {
+                tips += $"\n热更新流程文本配置路径: 未配置";
+                isEmptyPath = true;
+            }
+
+            MessageType type = isEmptyPath || !isExit || !m_enableAddressable.boolValue
+                ? MessageType.Warning
+                : MessageType.Info;
+            EditorGUILayout.HelpBox(tips, type);
+        }
+        EditorGUILayout.EndVertical();
+        GUILayout.Space(8);
+    }
+
+    private static List<string> GetBuildPackageNames()
+    {
+        List<string> packageNames = new List<string>();
+
+        foreach (var package in AssetBundleCollectorSettingData.Setting.Packages)
+        {
+            packageNames.Add(package.PackageName);
+        }
+        return packageNames;
+    }
+
 
     private static void DrawStatistics(UpdateSettings updateSettings)
     {

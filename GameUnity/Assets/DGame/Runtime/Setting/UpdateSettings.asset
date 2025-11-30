@@ -36,3 +36,6 @@ MonoBehaviour:
   m_buildAddress: ../../Builds/Unity_Data/StreamingAssets
   m_replaceAssetPathWithAddress: 0
   m_forceGenerateAtlas: 0
+  packageName: DefaultPackage
+  updateUIDefineConfigPath: Config/UpdateUIDefine
+  m_enableAddressable: 1

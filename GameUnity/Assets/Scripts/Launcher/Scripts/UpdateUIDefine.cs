@@ -128,9 +128,16 @@ namespace Launcher
             {
                 System.IO.Directory.CreateDirectory(dirPath);
             }
+
+            if (System.IO.File.Exists(filePath))
+            {
+                Debug.LogWarning($"配置文件已经存在: {filePath}");
+                return;
+            }
             var jsonStr = JsonUtility.ToJson(Instance, true);
             System.IO.File.WriteAllText(filePath, jsonStr, Encoding.UTF8);
             UnityEditor.AssetDatabase.Refresh();
+            Debug.Log($"配置文件已生成: {filePath}");
         }
 
 #endif

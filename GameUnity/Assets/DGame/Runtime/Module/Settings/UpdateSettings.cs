@@ -114,6 +114,23 @@ namespace DGame
 
         public string GetFallbackResDownloadPath() => Path.Combine(m_fallbackResDownloadPath, projectName, GetPlatformName()).Replace("\\", "/");
 
+        [SerializeField]
+        public string packageName = "DefaultPackage";
+
+        public string PackageName { get => packageName; set => packageName = value; }
+
+        /// <summary>
+        /// 热更新流程文本配置路径
+        /// </summary>
+        public string updateUIDefineConfigPath = "Config/UpdateUIDefine";
+        public string UpdateUIDefineConfigPath => updateUIDefineConfigPath;
+
+        /// <summary>
+        /// AB资源是否支持可寻址
+        /// </summary>
+        [SerializeField] private bool m_enableAddressable = true;
+        public bool EnableAddressable => m_enableAddressable;
+
         /// <summary>
         /// 获取当前平台名称
         /// </summary>

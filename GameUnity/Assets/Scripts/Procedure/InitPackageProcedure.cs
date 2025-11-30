@@ -12,7 +12,6 @@ namespace Procedure
     /// </summary>
     public class InitPackageProcedure : ProcedureBase
     {
-        private readonly string UpdateUIDefineFilePath = "Config/UpdateUIDefine";
         public override bool UseNativeDialog { get; }
 
         private readonly string INIT_PACKAGE_ERROR_TIPS =
@@ -49,7 +48,7 @@ namespace Procedure
 
                 if (initOperation.Status == EOperationStatus.Succeed)
                 {
-                    var updateUIDefineTextAsset = Resources.Load<TextAsset>(UpdateUIDefineFilePath);
+                    var updateUIDefineTextAsset = Resources.Load<TextAsset>(Settings.UpdateSettings.UpdateUIDefineConfigPath);
                     // 热更新文本初始化
                     UpdateUIDefine.Instance.InitConfigData(updateUIDefineTextAsset);
 

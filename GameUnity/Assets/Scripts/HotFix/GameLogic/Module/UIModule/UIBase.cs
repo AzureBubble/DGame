@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using DGame;
 using UnityEngine;
@@ -60,6 +61,13 @@ namespace GameLogic
         public bool IsPrepared { get; protected set; }
 
         /// <summary>
+        /// 资源是否被销毁
+        /// </summary>
+        internal bool IsDestroyed { get; set; }
+
+        protected virtual bool Visible { get; set; }
+
+        /// <summary>
         /// UI子组件列表
         /// </summary>
         internal readonly List<UIWidget> ChildList =  new List<UIWidget>();
@@ -73,6 +81,11 @@ namespace GameLogic
         /// 是否重建更新列表
         /// </summary>
         protected bool m_updateListDirty = true;
+
+        /// <summary>
+        /// 是否标记脏排序
+        /// </summary>
+        protected bool m_isSortingOrderDirty = false;
 
         /// <summary>
         /// 代码自动生成绑定
@@ -99,19 +112,12 @@ namespace GameLogic
         /// </summary>
         protected bool m_hasOverrideUpdate = true;
 
-        protected bool m_isSortingOrderDirty = false;
-
         /// <summary>
         /// 窗口更新
         /// </summary>
         protected virtual void OnUpdate()
         {
             m_hasOverrideUpdate = false;
-        }
-
-        internal void CallDestroy()
-        {
-            OnDestroy();
         }
 
         /// <summary>
@@ -124,36 +130,42 @@ namespace GameLogic
         /// <summary>
         /// 当触发窗口的层级排序。
         /// </summary>
-        protected void _OnSortDepth()
+        protected void _OnSortingOrderChange()
         {
+            m_isSortingOrderDirty = false;
             if (ChildList != null)
             {
                 for (int i = 0; i < ChildList.Count; i++)
                 {
-                    ChildList[i].OnSortDepth();
+                    ChildList[i].OnSortingOrderChange();
                 }
             }
 
-            OnSortDepth();
+            OnSortingOrderChange();
         }
 
         /// <summary>
         /// 触发窗口的层级排序
         /// </summary>
-        protected virtual void OnSortDepth() { }
+        protected virtual void OnSortingOrderChange() { }
 
         /// <summary>
         /// 当因为全屏遮挡触发或者窗口可见性触发窗口的显隐
         /// </summary>
-        /// <param name="visible"></param>
-        protected virtual void OnSetVisible(bool visible) { }
+        protected virtual void OnVisible() { }
+
+        /// <summary>
+        /// 界面不可见的时候调用
+        /// 当被上层全屏界面覆盖后，也会触发一次隐藏
+        /// </summary>
+        protected virtual void OnHidden() { }
 
         internal void AddChild(UIWidget child)
         {
             if (ChildList != null)
             {
                 ChildList.Add(child);
-                SetUpdateDirty();
+                MarkUpdateDirty();
             }
         }
 
@@ -163,25 +175,25 @@ namespace GameLogic
             {
                 if (ChildList.Remove(child))
                 {
-                    SetUpdateDirty();
+                    MarkUpdateDirty();
                 }
             }
         }
 
-        internal void SetUpdateDirty()
+        private void MarkUpdateDirty()
         {
             m_updateListDirty = true;
-            Parent?.SetUpdateDirty();
+            Parent?.MarkUpdateDirty();
         }
 
         #region FindChildComponent
 
-        public Transform FindChild(string path)
+        protected Transform FindChild(string path)
         {
             return FindChildImp(rectTransform, path);
         }
 
-        public Transform FindChild(Transform trans, string path)
+        private Transform FindChild(Transform trans, string path)
         {
             return FindChildImp(trans, path);
         }
@@ -191,7 +203,7 @@ namespace GameLogic
             return FindChildComponentImp<T>(rectTransform, path);
         }
 
-        public T FindChildComponent<T>(Transform trans, string path) where T : Component
+        protected T FindChildComponent<T>(Transform trans, string path) where T : Component
         {
             return FindChildComponentImp<T>(trans, path);
         }
@@ -384,6 +396,7 @@ namespace GameLogic
                 for (int i = 0; i < needNCnt; i++)
                 {
                     T tempItem = prefab != null ? CreateWidgetByPrefab<T>(prefab, parentTrans) : CreateWidgetByType<T>(parentTrans);
+                    itemList.Add(tempItem);
                 }
             }
             else if(itemList.Count > count)
@@ -392,9 +405,12 @@ namespace GameLogic
             }
         }
 
-        public void AsyncAdjustItemNum<T>(List<T> itemList, int count, Transform parentTrans, GameObject prefab = null, string assetLocation = "", int maxNumPerFrame = 5, Action<T, int> updateAction = null) where T : UIWidget, new()
+        public void AsyncAdjustItemNum<T>(List<T> itemList, int count, Transform parentTrans, GameObject prefab = null,
+            string assetLocation = "", int maxNumPerFrame = 5, Action<T, int> updateAction = null)
+            where T : UIWidget, new()
         {
-            AsyncAdjustItemNumInternal(itemList, count, parentTrans, maxNumPerFrame, updateAction, prefab, assetLocation).Forget();
+            AsyncAdjustItemNumInternal(itemList, count, parentTrans, maxNumPerFrame, updateAction, prefab,
+                assetLocation).Forget();
         }
 
         private async UniTaskVoid AsyncAdjustItemNumInternal<T>(List<T> itemList, int count, Transform parentTrans,
@@ -443,7 +459,7 @@ namespace GameLogic
                 }
             }
 
-            if (itemList.Count() > count)
+            if (itemList.Count > count)
             {
                 RemoveUnUseItem(itemList, count);
             }
@@ -455,10 +471,9 @@ namespace GameLogic
 
             for (int i = 0; i < itemList.Count; i++)
             {
-                var item = itemList[i];
                 if (i >= count)
                 {
-                    removeList.Add(item);
+                    removeList.Add(itemList[i]);
                 }
             }
 
@@ -466,13 +481,7 @@ namespace GameLogic
             {
                 var item = removeList[i];
                 itemList.Remove(item);
-                item.OnDestroy();
-                item.OnDestroyWidget();
-                RemoveChild(item);
-                if (item.gameObject != null)
-                {
-                    UnityEngine.Object.Destroy(item.gameObject);
-                }
+                item.Destroy();
             }
         }
 

@@ -13,18 +13,17 @@ namespace GameLogic
     {
         #region 常量定义
 
-        public const int DEFAULT_LAYER_DEEP = 2000;
+        private const int DEFAULT_LAYER_DEEP = 2000;
         public const int EACH_WINDOW_DEEP = 100;
-        public const int WINDOW_HIDE_LAYER = 2; // Ignore Raycast
-        public const int WINDOW_SHOW_LAYER = 5; // UI
 
         #endregion
 
-        private static Transform m_uiCanvas;
         private bool m_enableErrorLog = true;
+        private static Transform s_uiCanvas;
         private Camera m_uiCamera;
-        private readonly List<UIWindow> m_uiStack = new List<UIWindow>(128);
-        private readonly Dictionary<string, UIWindow> m_uiMap = new Dictionary<string, UIWindow>(128);
+        private readonly List<UIWindow> m_uiStack = new List<UIWindow>(64);
+        private readonly Dictionary<string, UIWindow> m_uiFullNameMap = new Dictionary<string, UIWindow>(64);
+        // private readonly Dictionary<uint, UIWindow> m_uiMap = new Dictionary<uint, UIWindow>(64);
         private ErrorLogger m_errorLogger;
 
         /// <summary>
@@ -35,7 +34,7 @@ namespace GameLogic
         /// <summary>
         /// UI根节点
         /// </summary>
-        public static Transform UICanvas => m_uiCanvas;
+        public static Transform UICanvas => s_uiCanvas;
 
         /// <summary>
         /// UI摄像机
@@ -48,26 +47,47 @@ namespace GameLogic
 
             if (uiRoot != null)
             {
-                m_uiCanvas = uiRoot.GetComponentInChildren<Canvas>()?.transform;
+                s_uiCanvas = uiRoot.GetComponentInChildren<Canvas>()?.transform;
                 m_uiCamera = uiRoot.GetComponentInChildren<Camera>();
             }
             else
             {
-                DLogger.Fatal("不存在UIRoot");
+                DLogger.Fatal("不存在UIRoot，请检查场景资源");
                 return;
             }
 
             ResourceLoader = new UIResourceLoader();
             UnityEngine.Object.DontDestroyOnLoad(uiRoot);
 
-            if (m_uiCanvas != null)
+            if (s_uiCanvas != null)
             {
-                m_uiCanvas.gameObject.layer = LayerMask.NameToLayer("UI");
+                s_uiCanvas.gameObject.layer = LayerMask.NameToLayer("UI");
             }
 
-            if (m_enableErrorLog)
+            if (DebuggerDriver.Instance != null)
             {
-                m_errorLogger = new ErrorLogger(this);
+                switch (DebuggerDriver.Instance.ActiveWindowType)
+                {
+                    case DebuggerActiveWindowType.AlwaysOpen:
+                        m_enableErrorLog = true;
+                        break;
+
+                    case DebuggerActiveWindowType.OnlyOpenWhenDevelopment:
+                        m_enableErrorLog = Debug.isDebugBuild;
+                        break;
+
+                    case DebuggerActiveWindowType.OnlyOpenInEditor:
+                        m_enableErrorLog = Application.isEditor;
+                        break;
+
+                    default:
+                        m_enableErrorLog = false;
+                        break;
+                }
+                if (m_enableErrorLog)
+                {
+                    m_errorLogger = new ErrorLogger(this);
+                }
             }
         }
 
@@ -101,10 +121,10 @@ namespace GameLogic
                 m_errorLogger.Dispose();
                 m_errorLogger = null;
             }
-
-            if (m_uiCanvas != null && m_uiCanvas.parent != null)
+            CloseAllWindows();
+            if (s_uiCanvas != null && s_uiCanvas.parent != null)
             {
-                UnityEngine.Object.Destroy(m_uiCanvas.parent.gameObject);
+                UnityEngine.Object.Destroy(s_uiCanvas.parent.gameObject);
             }
         }
 
@@ -185,7 +205,7 @@ namespace GameLogic
             }
             // 队列最后一个一定是最顶部窗口
             UIWindow window = m_uiStack[^1];
-            return window.WindowName;
+            return window.WindowFullName;
         }
 
         public string GetTopWindow(int layer)
@@ -204,7 +224,7 @@ namespace GameLogic
             {
                 return string.Empty;
             }
-            return lastOne.WindowName;
+            return lastOne.WindowFullName;
         }
 
         #endregion
@@ -218,13 +238,18 @@ namespace GameLogic
 
         public bool ContainsWindow(Type type)
         {
-            return IsContains(type.Name);
+            return IsContains(type.FullName);
         }
 
-        private bool IsContains(string windowName)
+        private bool IsContains(string windowFullName)
         {
-            return m_uiMap.TryGetValue(windowName, out UIWindow window);
+            return m_uiFullNameMap.TryGetValue(windowFullName, out UIWindow window);
         }
+
+        // private bool IsContains(uint windowID)
+        // {
+        //     return m_uiMap.TryGetValue(windowID, out UIWindow window);
+        // }
 
         #endregion
 
@@ -253,11 +278,11 @@ namespace GameLogic
         private void ShowWindowImp<T>(bool isAsync, params System.Object[] userDatas) where T : UIWindow, new()
         {
             Type type = typeof(T);
-            string windowName = type.Name;
+            string windowName = type.FullName;
 
             if (!TryGetWindow(windowName, out UIWindow window, userDatas))
             {
-                window = CreateWindow<T>();
+                window = InternalCreateWindow<T>();
                 Push(window);
                 window.InternalLoad(window.AssetLocation, OnWindowPrepare, isAsync, userDatas).Forget();
             }
@@ -265,11 +290,11 @@ namespace GameLogic
 
         private void ShowWindowImp(Type type, bool isAsync, params System.Object[] userDatas)
         {
-            string windowName = type.Name;
+            string windowName = type.FullName;
 
             if (!TryGetWindow(windowName, out UIWindow window, userDatas))
             {
-                window = CreateWindow(type);
+                window = InternalCreateWindow(type);
                 Push(window);
                 window.InternalLoad(window.AssetLocation, OnWindowPrepare, isAsync, userDatas).Forget();
             }
@@ -283,7 +308,7 @@ namespace GameLogic
         private async UniTask<T> ShowWindowAwaitImp<T>(bool isAsync, params System.Object[] userDatas) where T : UIWindow, new()
         {
             Type type = typeof(T);
-            string windowName = type.Name;
+            string windowName = type.FullName;
 
             if (TryGetWindow(windowName, out var window, userDatas))
             {
@@ -291,7 +316,7 @@ namespace GameLogic
             }
             else
             {
-                window = CreateWindow<T>();
+                window = InternalCreateWindow<T>();
                 Push(window);
                 window.InternalLoad(window.AssetLocation, OnWindowPrepare, isAsync, userDatas).Forget();
                 float time = 0f;
@@ -314,48 +339,26 @@ namespace GameLogic
 
         #region CreateWindow
 
-        private UIWindow CreateWindow<T>() where T : UIWindow, new()
+        private UIWindow InternalCreateWindow<T>() where T : UIWindow, new()
         {
             Type type = typeof(T);
             UIWindow window = new T();
-            WindowAttribute windowAttribute = Attribute.GetCustomAttribute(type, typeof(WindowAttribute)) as WindowAttribute;
-
             if (window == null)
             {
                 throw new DGameException($"窗口 {type.Name} 窗口实例失败");
             }
-
-            if (windowAttribute != null)
-            {
-                string assetLocation = string.IsNullOrEmpty(windowAttribute.Location) ? type.Name : windowAttribute.Location;
-                window.Init(type.Name, windowAttribute.UILayer, windowAttribute.FullScreen, assetLocation, windowAttribute.IsResources, windowAttribute.NeedTweenPop, windowAttribute.HideTimeToClose);
-            }
-            else
-            {
-                window.Init(type.Name, (int)UILayer.UI, window.FullScreen, type.Name, false,  !window.FullScreen, 10);
-            }
+            window.Init(type.FullName, type.Name);
             return window;
         }
 
-        private UIWindow CreateWindow(Type type)
+        private UIWindow InternalCreateWindow(Type type)
         {
             UIWindow window = Activator.CreateInstance(type) as UIWindow;
-            WindowAttribute windowAttribute = Attribute.GetCustomAttribute(type, typeof(WindowAttribute)) as WindowAttribute;
-
             if (window == null)
             {
                 throw new DGameException($"窗口 {type.Name} 窗口实例失败");
             }
-
-            if (windowAttribute != null)
-            {
-                string assetLocation = string.IsNullOrEmpty(windowAttribute.Location) ? type.Name : windowAttribute.Location;
-                window.Init(type.Name, windowAttribute.UILayer, windowAttribute.FullScreen, assetLocation, windowAttribute.IsResources, windowAttribute.NeedTweenPop, windowAttribute.HideTimeToClose);
-            }
-            else
-            {
-                window.Init(type.Name, (int)UILayer.UI, window.FullScreen, type.Name, false, !window.FullScreen, 10);
-            }
+            window.Init(type.FullName, type.Name);
             return window;
         }
 
@@ -380,8 +383,13 @@ namespace GameLogic
 
         private UIWindow GetWindow(string windowName)
         {
-            return m_uiMap.TryGetValue(windowName, out UIWindow window) ? window : null;
+            return m_uiFullNameMap.GetValueOrDefault(windowName);
         }
+
+        // private UIWindow GetWindow(uint windowID)
+        // {
+        //     return m_uiMap.GetValueOrDefault(windowID);
+        // }
 
 #if UNITY_EDITOR && ENABLE_DGAME_LOG
 
@@ -397,7 +405,7 @@ namespace GameLogic
 
         public async UniTask<T> GetWindowAsyncAwait<T>(CancellationToken cancellationToken = default) where T : UIWindow
         {
-            string windowName = typeof(T).Name;
+            string windowName = typeof(T).FullName;
             var window = GetWindow(windowName);
 
             if (window == null)
@@ -433,7 +441,7 @@ namespace GameLogic
 
         public void GetWindowAsync<T>(Action<T> callback) where T : UIWindow
         {
-            string windowName = typeof(T).Name;
+            string windowName = typeof(T).FullName;
             var window = GetWindow(windowName);
             if (window == null)
             {
@@ -477,13 +485,8 @@ namespace GameLogic
 
         private void CloseWindow(Type type)
         {
-            string windowName = type.Name;
+            string windowName = type.FullName;
             UIWindow window = GetWindow(windowName);
-
-            if (window == null)
-            {
-                return;
-            }
             CloseWindow(window);
         }
 
@@ -494,14 +497,8 @@ namespace GameLogic
 
         private void HideWindow(Type type)
         {
-            string windowName = type.Name;
+            string windowName = type.FullName;
             UIWindow window = GetWindow(windowName);
-
-            if (window == null)
-            {
-                return;
-            }
-
             HideWindow(window);
         }
 
@@ -512,13 +509,13 @@ namespace GameLogic
                 return;
             }
 
-            if (window.HideTimeToClose < 0)
+            if (window.HideTimeToClose <= 0)
             {
                 CloseWindow(window);
                 return;
             }
             window.CancelHideToCloseTimer();
-            window.Visible = false;
+            window.Show(false);
             window.IsHide = true;
             window.HideTimer = GameModule.GameTimerModule.CreateOnceGameTimer(window.HideTimeToClose, _ =>
             {
@@ -537,21 +534,22 @@ namespace GameLogic
             {
                 return;
             }
-            window.InternalDestroy();
+            window.Destroy();
             Pop(window);
             OnSortWindowSortingOrder(window.WindowLayer);
             OnSetWindowVisible();
         }
 
-        public void CloseAllWindows(bool isDestroy = false)
+        public void CloseAllWindows()
         {
             for (int i = 0; i < m_uiStack.Count; i++)
             {
                 UIWindow window = m_uiStack[i];
-                window.InternalDestroy();
+                window.Destroy();
             }
             m_uiStack.Clear();
-            m_uiMap.Clear();
+            // m_uiMap.Clear();
+            m_uiFullNameMap.Clear();
         }
 
         public void CloseAllWindowsWithOut(List<UIWindow> withOutWindows)
@@ -562,9 +560,10 @@ namespace GameLogic
 
                 if (!withOutWindows.Contains(window))
                 {
-                    window.InternalDestroy();
+                    window.Destroy();
                     m_uiStack.RemoveAt(i);
-                    m_uiMap.Remove(window.WindowName);
+                    // m_uiMap.Remove(window.WindowID);
+                    m_uiFullNameMap.Remove(window.WindowFullName);
                 }
             }
         }
@@ -577,9 +576,10 @@ namespace GameLogic
 
                 if (window != withOutWindows)
                 {
-                    window.InternalDestroy();
+                    window.Destroy();
                     m_uiStack.RemoveAt(i);
-                    m_uiMap.Remove(window.WindowName);
+                    // m_uiMap.Remove(window.WindowID);
+                    m_uiFullNameMap.Remove(window.WindowFullName);
                 }
             }
         }
@@ -592,9 +592,10 @@ namespace GameLogic
 
                 if (window.GetType() != typeof(T))
                 {
-                    window.InternalDestroy();
+                    window.Destroy();
                     m_uiStack.RemoveAt(i);
-                    m_uiMap.Remove(window.WindowName);
+                    // m_uiMap.Remove(window.WindowID);
+                    m_uiFullNameMap.Remove(window.WindowFullName);
                 }
             }
         }
@@ -638,7 +639,7 @@ namespace GameLogic
                         continue;
                     }
 
-                    window.Visible = true;
+                    window.Show();
 
                     if (window.IsPrepared && window.FullScreen)
                     {
@@ -647,7 +648,7 @@ namespace GameLogic
                 }
                 else
                 {
-                    window.Visible = false;
+                    window.Show(false);
                 }
             }
         }
@@ -667,18 +668,18 @@ namespace GameLogic
             }
         }
 
-
         private void Pop(UIWindow window)
         {
             m_uiStack.Remove(window);
-            m_uiMap.Remove(window.WindowName);
+            m_uiFullNameMap.Remove(window.WindowFullName);
+            // m_uiMap.Remove(window.WindowID);
         }
 
         private void Push(UIWindow window)
         {
-            if (IsContains(window.WindowName))
+            if (IsContains(window.WindowFullName))
             {
-                throw new DGameException($"UI窗口 {window.WindowName} 已存在");
+                throw new DGameException($"UI窗口 {window.WindowFullName} 已存在");
             }
             int insertIndex = -1;
 
@@ -706,7 +707,8 @@ namespace GameLogic
                 insertIndex = 0;
             }
             m_uiStack.Insert(insertIndex, window);
-            m_uiMap[window.WindowName] = window;
+            m_uiFullNameMap[window.WindowFullName] = window;
+            // m_uiMap[window.WindowID] = window;
         }
     }
 }

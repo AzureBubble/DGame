@@ -9,7 +9,7 @@ namespace Launcher
 
         private Image m_imgBg;
         private Scrollbar m_scrollBarProgress;
-        private Text m_textLabelDesc;
+        private Text m_textUpdateDesc;
         private Text m_textVersion;
         private Text m_textLabelAppid;
 
@@ -17,24 +17,20 @@ namespace Launcher
         {
             m_imgBg = FindChildComponent<Image>("m_imgBg");
             m_scrollBarProgress = FindChildComponent<Scrollbar>("m_scrollBarProgress");
-            m_textLabelDesc = FindChildComponent<Text>("m_textLabelDesc/m_textLabelDesc");
+            m_textUpdateDesc = FindChildComponent<Text>("m_scrollBarProgress/m_textUpdateDesc");
             m_textVersion = FindChildComponent<Text>("m_textVersion");
             m_textLabelAppid = FindChildComponent<Text>("m_textLabelAppid");
         }
 
         #endregion
 
-        public override bool FullScreen => true;
-        public override bool NeedTween => false;
+        protected override bool FullScreen => true;
+        protected override bool NeedTween => false;
 
         public override void OnInit(object param)
         {
-            if (param == null)
-            {
-                return;
-            }
             base.OnInit(param);
-            m_textLabelDesc.text = param.ToString();
+            m_textUpdateDesc.text = param?.ToString();
             RefreshProgress(0f);
         }
 

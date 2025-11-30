@@ -8,9 +8,19 @@ namespace GameLogic
     {
         public override GameObject gameObject { get; protected set; }
 
-        public override RectTransform rectTransform { get; protected set; }
+        private RectTransform m_rectTransform;
+        /// <summary>
+        /// 矩阵位置组件
+        /// </summary>
+        public override RectTransform rectTransform => m_rectTransform != null
+            ? m_rectTransform : m_rectTransform = gameObject.transform as RectTransform;
 
-        public override Transform transform { get; protected set; }
+        private Transform m_transform;
+        /// <summary>
+        /// 位置组件
+        /// </summary>
+        public override Transform transform => m_transform != null
+            ? m_transform : m_transform = gameObject.transform;
 
         public override UIType Type => UIType.Widget;
 
@@ -22,11 +32,11 @@ namespace GameLogic
         /// <summary>
         /// 所属窗口
         /// </summary>
-        public UIWindow OwnerWindow
+        public UIWindow ParentWindow
         {
             get
             {
-                var parentUI = base.m_parent;
+                var parentUI = m_parent;
 
                 while (parentUI != null)
                 {
@@ -43,19 +53,32 @@ namespace GameLogic
         /// <summary>
         /// 组件可见性
         /// </summary>
-        public bool Visible
+        protected override bool Visible
         {
             get => gameObject.activeSelf;
             set
             {
+                if (gameObject.activeSelf == value)
+                {
+                    return;
+                }
+
                 gameObject?.SetActive(value);
-                OnSetVisible(value);
+
+                if (value)
+                {
+                    OnVisible();
+                }
+                else
+                {
+                    OnHidden();
+                }
             }
         }
 
         public bool InternalUpdate()
         {
-            if (!IsPrepared)
+            if (!IsPrepared || IsDestroyed)
             {
                 return false;
             }
@@ -66,7 +89,7 @@ namespace GameLogic
             {
                 listNextUpdateChild = m_updateChildList;
                 var updateListDirty = m_updateListDirty;
-                List<UIWidget> childList = new List<UIWidget>();
+                List<UIWidget> childList;
                 if (m_updateListDirty)
                 {
                     if (listNextUpdateChild == null)
@@ -112,14 +135,13 @@ namespace GameLogic
             if (listNextUpdateChild is not null && listNextUpdateChild.Count > 0)
             {
                 m_hasOverrideUpdate = true;
-                OnUpdate();
                 needUpdate = m_hasOverrideUpdate;
             }
             else
             {
-                OnUpdate();
                 needUpdate = true;
             }
+            OnUpdate();
             return needUpdate;
         }
 
@@ -173,7 +195,6 @@ namespace GameLogic
             RegisterEvent();
             OnCreate();
             IsPrepared = true;
-
             if (visible)
             {
                 Show(true);
@@ -194,8 +215,6 @@ namespace GameLogic
             }
 
             WidgetName = GetType().Name;
-            transform = go.GetComponent<Transform>();
-            rectTransform = transform as RectTransform;
             gameObject = go;
             DLogger.Assert(rectTransform != null, $"{go.name} UI元素必须具有 RectTransform");
             return true;
@@ -233,28 +252,31 @@ namespace GameLogic
 
         protected internal void OnDestroyWidget()
         {
-            Parent?.SetUpdateDirty();
-            
             RemoveAllUIEvents();
 
-            foreach (var child in ChildList)
+            for (int i = 0; i < ChildList.Count; i++)
             {
-                child.CallDestroy();
-                child.OnDestroyWidget();
+                ChildList[i]?.Destroy();
             }
 
             if (gameObject != null)
             {
                 Object.Destroy(gameObject);
+                gameObject = null;
             }
+            IsDestroyed = true;
         }
 
         public void Destroy()
         {
+            if (IsDestroyed)
+            {
+                return;
+            }
             if (Parent != null)
             {
                 Parent.RemoveChild(this);
-                CallDestroy();
+                OnDestroy();
                 OnDestroyWidget();
             }
         }

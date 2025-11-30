@@ -306,7 +306,7 @@ namespace DGame
             {
                 current = current.parent;
                 path.Insert(0, GAP);
-                path.Insert(0, child.name);
+                path.Insert(0, current.name);
             }
             return path.ToString();
         }

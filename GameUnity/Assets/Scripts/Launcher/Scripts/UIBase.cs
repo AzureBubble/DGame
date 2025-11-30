@@ -7,11 +7,12 @@ namespace Launcher
     {
         private const float NORMAL_TWEEN_POP_TIME = 0.3f;
         public GameObject gameObject;
-        public Transform transform => gameObject.transform;
+
+        public Transform transform { get { if (gameObject != null) { return gameObject.transform; } return null; } }
         public RectTransform rectTransform => transform as RectTransform;
 
-        public virtual bool NeedTween => true;
-        public virtual bool FullScreen => false;
+        protected virtual bool NeedTween => true;
+        protected virtual bool FullScreen => false;
         private bool m_isInTween = false;
 
         protected object m_param;
@@ -20,14 +21,17 @@ namespace Launcher
 
         public void TweenPop()
         {
-            if (FullScreen || !NeedTween || m_isInTween || !transform)
+            if (m_isInTween || !transform)
             {
                 return;
             }
 
-            m_isInTween = true;
-            transform.localScale = Vector3.one * 0.8f;
-            transform.DOScale(Vector3.one, NORMAL_TWEEN_POP_TIME).SetEase(Ease.OutBack).SetUpdate(true).SetAutoKill(true).onComplete += OnTweenPopComplete;
+            if (!FullScreen && NeedTween)
+            {
+                m_isInTween = true;
+                transform.localScale = Vector3.one * 0.8f;
+                transform.DOScale(Vector3.one, NORMAL_TWEEN_POP_TIME).SetEase(Ease.OutBack).SetUpdate(true).SetAutoKill(true).onComplete += OnTweenPopComplete;
+            }
         }
 
         private void OnTweenPopComplete()

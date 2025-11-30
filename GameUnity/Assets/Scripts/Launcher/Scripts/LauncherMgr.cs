@@ -27,13 +27,9 @@ namespace Launcher
             DLogger.Info("======== 初始化 LauncherMgr 完成 ========");
         }
 
-        public static void ShowUI<T>(object param = null) where T : UIBase
+        public static void ShowUI<T>(object param = null) where T : UIBase, new()
         {
-            ShowUI(typeof(T).Name, param);
-        }
-
-        public static void ShowUI(string uiName, object param = null)
-        {
+            string uiName = typeof(T).Name;
             if (string.IsNullOrEmpty(uiName))
             {
                 DLogger.Warning($"======== LauncherMgr.ShowUI UIName 为空 ========");
@@ -57,7 +53,7 @@ namespace Launcher
                         RectTransform rectTransform = uiWindow.GetComponent<RectTransform>();
                         rectTransform.sizeDelta = Vector2.zero;
 
-                        uiBase = new UIBase();
+                        uiBase = new T();
                         uiBase.gameObject = uiWindow;
                         m_uiMapDict[uiName] = uiBase;
                     }
@@ -74,7 +70,7 @@ namespace Launcher
 
         public static void CloseUI<T>() where T : UIBase
         {
-            ShowUI(typeof(T).Name);
+            CloseUI(typeof(T).Name);
         }
 
         public static void CloseUI(string uiName)

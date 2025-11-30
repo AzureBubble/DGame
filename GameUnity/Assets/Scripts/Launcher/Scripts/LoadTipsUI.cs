@@ -41,6 +41,7 @@ namespace Launcher
 
         public override void OnInit(object data)
         {
+            base.OnInit(data);
             m_textCancel.text = m_cancelText;
             m_textUpdate.text = m_updateText;
             m_textConfirm.text = m_confirmText;

@@ -11,7 +11,7 @@ namespace GameLogic
     /// <summary>
     /// UI基类
     /// </summary>
-    public class UIBase
+    public abstract class UIBase
     {
         protected UIBase m_parent = null;
 

@@ -228,6 +228,10 @@ namespace GameLogic
 
             WidgetName = GetType().Name;
             gameObject = go;
+            if (gameObject.GetComponent<Canvas>())
+            {
+                (Parent as UIWindow)?.MakeChildCanvasDirty();
+            }
             DLogger.Assert(rectTransform != null, $"{go.name} UI元素必须具有 RectTransform");
             return true;
         }
@@ -262,7 +266,7 @@ namespace GameLogic
 
         #region Destroy
 
-        protected internal void OnDestroyWidget()
+        private void InternalDestroyWidget()
         {
             RemoveAllUIEvents();
 
@@ -273,6 +277,10 @@ namespace GameLogic
 
             if (gameObject != null)
             {
+                if (gameObject.GetComponent<Canvas>())
+                {
+                    (Parent as UIWindow)?.MakeChildCanvasDirty();
+                }
                 Object.Destroy(gameObject);
                 gameObject = null;
             }
@@ -289,7 +297,7 @@ namespace GameLogic
             {
                 Parent.RemoveChild(this);
                 OnDestroy();
-                OnDestroyWidget();
+                InternalDestroyWidget();
             }
         }
 

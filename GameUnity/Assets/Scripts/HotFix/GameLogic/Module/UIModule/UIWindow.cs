@@ -23,7 +23,7 @@ namespace GameLogic
         private GraphicRaycaster m_graphicRaycaster;
         public GraphicRaycaster GraphicRaycaster => m_graphicRaycaster;
         private GraphicRaycaster[] m_childGraphicRaycasters;
-        private bool m_isChildCanvasDirty = false;
+        private bool m_isChildCanvasDirty;
         public override UIType Type => UIType.Window;
         private const float NORMAL_TWEEN_POP_TIME = 0.3f;
         private const float NORMAL_MODEL_ALPHA = 0.85f;
@@ -471,7 +471,7 @@ namespace GameLogic
             return needUpdate;
         }
 
-        public void Destroy()
+        protected internal void Destroy()
         {
             if (IsDestroyed)
             {

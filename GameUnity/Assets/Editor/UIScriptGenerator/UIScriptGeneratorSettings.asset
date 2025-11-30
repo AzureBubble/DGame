@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: UIScriptGeneratorSettings
   m_EditorClassIdentifier: 
   uiRoot: {fileID: 3662584845349564629, guid: 3983b8718d4c6cf4bae119ef45daef58, type: 3}
-  useBindComponent: 0
+  useBindComponent: 1
   genCodePath: Assets/Scripts/HotFix/GameLogic/UI/Gen
   impCodePath: Assets/Scripts/HotFix/GameLogic/UI
   nameSpace: GameLogic
@@ -26,6 +26,12 @@ MonoBehaviour:
     isGeneric: 0
   - uiTypeName: UIEventItem
     isGeneric: 1
+  - uiTypeName: BaseChildPage
+    isGeneric: 0
+  - uiTypeName: UILoopGridItemWidget
+    isGeneric: 0
+  - uiTypeName: UILoopItemWidget
+    isGeneric: 0
   scriptGenerateRulers:
   - uiElementRegex: m_go
     componentName: 0

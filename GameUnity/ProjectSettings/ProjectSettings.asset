@@ -710,22 +710,22 @@ PlayerSettings:
   webGLDecompressionFallback: 0
   webGLPowerPreference: 2
   scriptingDefineSymbols:
-    Android: DOTWEEN;ENABLE_DGAME_LOG;ENABLE_HYBRIDCLR;ODIN_INSPECTOR;ODIN_INSPECTOR_3;ODIN_INSPECTOR_3_1
-    EmbeddedLinux: DOTWEEN
+    Android: DOTWEEN;ENABLE_DGAME_LOG;ENABLE_HYBRIDCLR;ODIN_INSPECTOR;ODIN_INSPECTOR_3;ODIN_INSPECTOR_3_1;TextMeshPro
+    EmbeddedLinux: DOTWEEN;TextMeshPro
     GameCoreScarlett: DOTWEEN
-    GameCoreXboxOne: DOTWEEN
+    GameCoreXboxOne: DOTWEEN;TextMeshPro
     LinuxHeadlessSimulation: DOTWEEN
-    Lumin: DOTWEEN
-    Nintendo Switch: DOTWEEN
-    PS4: DOTWEEN
-    PS5: DOTWEEN
-    Stadia: DOTWEEN
-    Standalone: DOTWEEN;ODIN_INSPECTOR;ODIN_INSPECTOR_3;ODIN_INSPECTOR_3_1;ENABLE_DGAME_LOG;ENABLE_HYBRIDCLR
-    WebGL: DOTWEEN;ENABLE_DGAME_LOG;ENABLE_HYBRIDCLR
-    Windows Store Apps: DOTWEEN;ENABLE_DGAME_LOG;ENABLE_HYBRIDCLR
-    XboxOne: DOTWEEN
-    iPhone: DOTWEEN;ENABLE_DGAME_LOG;ENABLE_HYBRIDCLR
-    tvOS: DOTWEEN
+    Lumin: DOTWEEN;TextMeshPro
+    Nintendo Switch: DOTWEEN;TextMeshPro
+    PS4: DOTWEEN;TextMeshPro
+    PS5: DOTWEEN;TextMeshPro
+    Stadia: DOTWEEN;TextMeshPro
+    Standalone: DOTWEEN;ODIN_INSPECTOR;ODIN_INSPECTOR_3;ODIN_INSPECTOR_3_1;ENABLE_DGAME_LOG;ENABLE_HYBRIDCLR;TextMeshPro
+    WebGL: DOTWEEN;ENABLE_DGAME_LOG;ENABLE_HYBRIDCLR;TextMeshPro
+    Windows Store Apps: DOTWEEN;ENABLE_DGAME_LOG;ENABLE_HYBRIDCLR;TextMeshPro
+    XboxOne: DOTWEEN;TextMeshPro
+    iPhone: DOTWEEN;ENABLE_DGAME_LOG;ENABLE_HYBRIDCLR;TextMeshPro
+    tvOS: DOTWEEN;TextMeshPro
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend:

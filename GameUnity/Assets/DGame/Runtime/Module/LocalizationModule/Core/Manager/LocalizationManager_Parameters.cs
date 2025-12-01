@@ -88,7 +88,10 @@ namespace I2.Loc
 
                 // Check that some plural parameters can have the form: {[#name]}
                 var offset = translation[iParamStart + 1] == '#' ? 2 : 1;
-                var param = int.Parse(translation.Substring(iParamStart + offset, iParamEnd - iParamStart - offset));
+
+                int.TryParse(translation.Substring(iParamStart + offset, iParamEnd - iParamStart - offset),
+                    out var param);
+                // var param = int.Parse(translation.Substring(iParamStart + offset, iParamEnd - iParamStart - offset));
                 var result = (string)getParam(param);
                 if (result != null)
                 {
@@ -175,7 +178,10 @@ namespace I2.Loc
 			for (int i = 0, nMatches = matches.Count; i < nMatches; ++i)
 			{
 				var match = matches[i];
-				var param = int.Parse(match.Groups[^1].Value);
+
+                if (!int.TryParse(match.Groups[^1].Value, out var param))
+                    continue;
+				// var param = int.Parse(match.Groups[^1].Value);
 				var result = (string)getParam(param);
 				if (result == null)
 					continue;

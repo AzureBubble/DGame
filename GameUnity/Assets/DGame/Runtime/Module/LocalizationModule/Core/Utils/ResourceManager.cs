@@ -8,7 +8,7 @@ namespace I2.Loc
 {
 	public interface IResourceManager_Bundles
 	{
-		Object LoadFromBundle(string path, System.Type assetType );
+		T LoadFromBundle<T>(string path) where T : UnityEngine.Object;
 	}
 
 	public class ResourceManager : MonoBehaviour 
@@ -164,7 +164,7 @@ namespace I2.Loc
 			for (int i = 0, imax = mBundleManagers.Count; i < imax; ++i)
 				if (mBundleManagers[i]!=null)
 				{
-					var obj = mBundleManagers[i].LoadFromBundle(path, typeof(T)) as T;
+					var obj = mBundleManagers[i].LoadFromBundle<T>(path);
 					if (obj != null)
 						return obj;
 				}

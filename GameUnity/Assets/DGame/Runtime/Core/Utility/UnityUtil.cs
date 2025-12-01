@@ -450,6 +450,22 @@ namespace DGame
                 }
             }
 
+            public static void RmvMonoBehaviour<T>(Component go) where T : Component
+            {
+                if (go.TryGetComponent<T>(out var comp))
+                {
+#if UNITY_EDITOR
+                    string assetPath = UnityEditor.AssetDatabase.GetAssetPath(comp);
+                    if (!string.IsNullOrEmpty(assetPath))
+                    {
+                        Debug.LogError($"试图销毁 Asset: {assetPath}");
+                        return;
+                    }
+#endif
+                    UnityEngine.Object.DestroyImmediate(comp);
+                }
+            }
+
             #endregion
 
             #region Utils

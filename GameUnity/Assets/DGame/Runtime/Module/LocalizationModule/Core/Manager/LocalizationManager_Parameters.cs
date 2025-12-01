@@ -21,7 +21,7 @@ namespace I2.Loc
 
         #region Parameters
 
-        public delegate object _GetParam(string param);
+        public delegate object _GetParam(int param);
 
         public static void AutoLoadGlobalParamManagers()
         {
@@ -46,10 +46,10 @@ namespace I2.Loc
             ApplyLocalizationParams(ref translation, p => GetLocalizationParam(p, root), allowLocalizedParameters);
         }
 
-        public static void ApplyLocalizationParams(ref string translation, Dictionary<string, object> parameters, bool allowLocalizedParameters = true)
+        public static void ApplyLocalizationParams<T>(ref string translation, Dictionary<int, T> parameters, bool allowLocalizedParameters = true)
         {
             ApplyLocalizationParams(ref translation, p => {
-                    object o = null;
+                    T o = default;
                     if (parameters.TryGetValue(p, out o))
                         return o;
                     return null;
@@ -72,14 +72,14 @@ namespace I2.Loc
             int index = 0;
             while (index>=0 && index<translation.Length)
             {
-                int iParamStart = translation.IndexOf("{[", index, StringComparison.Ordinal);
+                int iParamStart = translation.IndexOf("{", index, StringComparison.Ordinal);
                 if (iParamStart < 0) break;
 
-                int iParamEnd = translation.IndexOf("]}", iParamStart, StringComparison.Ordinal);
+                int iParamEnd = translation.IndexOf("}", iParamStart, StringComparison.Ordinal);
                 if (iParamEnd < 0) break;
 
                 // there is a sub param, so, skip this one:   "this {[helo{[hi]} end"
-                int isubParam = translation.IndexOf("{[", iParamStart+1, StringComparison.Ordinal);
+                int isubParam = translation.IndexOf("{", iParamStart+1, StringComparison.Ordinal);
                 if (isubParam>0 && isubParam<iParamEnd)
                 {
                     index = isubParam;
@@ -87,8 +87,8 @@ namespace I2.Loc
                 }
 
                 // Check that some plural parameters can have the form: {[#name]}
-                var offset = translation[iParamStart + 2] == '#' ? 3 : 2;
-                var param = translation.Substring(iParamStart + offset, iParamEnd - iParamStart - offset);
+                var offset = translation[iParamStart + 1] == '#' ? 2 : 1;
+                var param = int.Parse(translation.Substring(iParamStart + offset, iParamEnd - iParamStart - offset));
                 var result = (string)getParam(param);
                 if (result != null)
                 {
@@ -107,7 +107,7 @@ namespace I2.Loc
                         }
                     }
 
-                    var paramTag = translation.Substring(iParamStart, iParamEnd - iParamStart + 2);
+                    var paramTag = translation.Substring(iParamStart, iParamEnd - iParamStart + 1);
                     translation = translation.Replace(paramTag, result);
 
                     int amount = 0;
@@ -138,7 +138,7 @@ namespace I2.Loc
             }
         }
 
-        internal static string GetLocalizationParam(string ParamName, GameObject root)
+        internal static string GetLocalizationParam(int ParamName, GameObject root)
         {
             string result = null;
             if (root)
@@ -175,7 +175,7 @@ namespace I2.Loc
 			for (int i = 0, nMatches = matches.Count; i < nMatches; ++i)
 			{
 				var match = matches[i];
-				var param = match.Groups[match.Groups.Count - 1].Value;
+				var param = int.Parse(match.Groups[^1].Value);
 				var result = (string)getParam(param);
 				if (result == null)
 					continue;

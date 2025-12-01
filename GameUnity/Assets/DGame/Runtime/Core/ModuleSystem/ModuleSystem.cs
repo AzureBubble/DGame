@@ -115,7 +115,7 @@ namespace DGame
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         /// <exception cref="DGameException"></exception>
-        private static T RegisterModule<T>(Module module) where T : class
+        public static T RegisterModule<T>(Module module) where T : class
         {
             Type type = typeof(T);
 

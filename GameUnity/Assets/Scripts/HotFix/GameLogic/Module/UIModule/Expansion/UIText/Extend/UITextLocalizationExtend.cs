@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using I2.Loc;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,86 +9,226 @@ namespace GameLogic
     [Serializable]
     public class UITextLocalizationExtend
     {
-        // [SerializeField] private bool m_isUseBestFit;
-        //
-        // [SerializeField] private int m_visibleLines;
-        //
-        // /// <summary>
-        // /// 当前可见的文字行数
-        // /// </summary>
-        // public int VisibleLines => m_visibleLines;
-        //
-        // private readonly UIVertex[] m_tmpVerts = new UIVertex[4];
-        //
-        // public void OnPopulateMesh(VertexHelper toFill, Text text)
-        // {
-        //     if (!m_isUseBestFit)
-        //     {
-        //         return;
-        //     }
-        // }
-        //
-        // private bool OverrideForBestFit(VertexHelper toFill, Text text)
-        // {
-        //     if (null == text.font) return false;
-        //     text.m_DisableFontTextureRebuiltCallback = true;
-        //     UseFitSettings();
-        //     IList<UIVertex> verts = text.cachedTextGenerator.verts;
-        //     float unitsPerPixel = 1 / text.pixelsPerUnit;
-        //     int vertCount = verts.Count;
-        //     // 没有要处理的对象时，直接return。
-        //     if (vertCount <= 0)
-        //     {
-        //         toFill.Clear();
-        //         return false;
-        //     }
-        //     Vector2 roundingOffset = new Vector2(verts[0].position.x, verts[0].position.y) * unitsPerPixel;
-        //     roundingOffset = text.PixelAdjustPoint(roundingOffset) - roundingOffset;
-        //     toFill.Clear();
-        //
-        //     for (int i = 0; i < vertCount; ++i)
-        //     {
-        //         int tempVertsIndex = i & 3;
-        //         m_tmpVerts[tempVertsIndex] = verts[i];
-        //         m_tmpVerts[tempVertsIndex].position *= unitsPerPixel;
-        //         if (roundingOffset != Vector2.zero)
-        //         {
-        //             m_tmpVerts[tempVertsIndex].position.x += roundingOffset.x;
-        //             m_tmpVerts[tempVertsIndex].position.y += roundingOffset.y;
-        //         }
-        //
-        //         if (tempVertsIndex == 3)
-        //         {
-        //             toFill.AddUIVertexQuad(m_tmpVerts);
-        //         }
-        //     }
-        //     m_DisableFontTextureRebuiltCallback = false;
-        //     VisibleLines = text.cachedTextGenerator.lineCount;
-        //     return true;
-        // }
-        //
-        // private void UseFitSettings()
-        // {
-        //     TextGenerationSettings settings = GetGenerationSettings(rectTransform.rect.size);
-        //     settings.resizeTextForBestFit = false;
-        //
-        //     if (!text.resizeTextForBestFit)
-        //     {
-        //         cachedTextGenerator.PopulateWithErrors(text, settings, gameObject);
-        //         return;
-        //     }
-        //
-        //     int minSize = resizeTextMinSize;
-        //     int txtLen = text.Length;
-        //
-        //     //从Best Fit中最大的值开始，逐次递减，每次减小后都尝试生成文本，
-        //     //如果生成的文本可见字符数等于文本内容的长度，则找到满足需求(可以使所有文本都可见的最大字号)的字号。
-        //     for (int i = resizeTextMaxSize; i >= minSize; --i)
-        //     {
-        //         settings.fontSize = i;
-        //         cachedTextGenerator.PopulateWithErrors(text, settings, gameObject);
-        //         if (cachedTextGenerator.characterCountVisible == txtLen) break;
-        //     }
-        // }
+        [SerializeField] private bool m_useI2Localization;
+
+        [SerializeField] private bool m_hasParams;
+
+        [SerializeField] private TextDefine m_textDefine;
+
+        private Localize m_localize;
+        private LocalizationParamsManager m_localizationParamsManager;
+        private Text m_text;
+
+        public TextDefine UITextDefine
+        {
+            get => m_textDefine;
+            set
+            {
+                if (m_textDefine != value)
+                {
+                    m_textDefine = value;
+                    SetTerm(m_textDefine);
+                }
+            }
+        }
+
+        public bool UseI2Localization
+        {
+            get => m_useI2Localization;
+            set
+            {
+                if (m_useI2Localization != value)
+                {
+                    m_useI2Localization = value;
+
+                    if (value)
+                    {
+                        if (m_localize == null)
+                        {
+                            m_localize = m_text.gameObject.AddComponent<Localize>();
+                        }
+                    }
+                    else
+                    {
+                        if (m_localize != null)
+                        {
+                            SafeDestroyComponent(ref m_localize);
+                        }
+                    }
+                }
+            }
+        }
+
+        public bool HasParams
+        {
+            get => m_hasParams;
+            set
+            {
+                if (m_hasParams != value)
+                {
+                    m_hasParams = value;
+                    if (value)
+                    {
+                        if (m_localizationParamsManager == null)
+                        {
+                            m_localizationParamsManager = m_text.gameObject.AddComponent<LocalizationParamsManager>();
+                        }
+                    }
+                    else
+                    {
+                        if (m_localizationParamsManager != null)
+                        {
+                            SafeDestroyComponent(ref m_localizationParamsManager);
+                        }
+                    }
+                }
+            }
+        }
+
+        public void Initialize(Text text)
+        {
+            m_text = text;
+        }
+
+#if UNITY_EDITOR
+        public void EditorInitialize(Text text)
+        {
+            m_text = text;
+        }
+
+        private void SafeRefreshText()
+        {
+            if (UnityEditor.EditorApplication.isPlaying)
+            {
+                RefreshText();
+            }
+            else
+            {
+                UnityEditor.EditorApplication.delayCall += () =>
+                {
+                    if (m_text != null)
+                        RefreshText();
+                };
+            }
+        }
+#endif
+
+        public void RefreshText()
+        {
+            if (!m_useI2Localization)
+            {
+                SafeDestroyComponent(ref m_localize);
+                SafeDestroyComponent(ref m_localizationParamsManager);
+                return;
+            }
+
+            if (m_localize == null)
+            {
+                m_localize = m_text.gameObject.AddComponent<Localize>();
+            }
+
+            if (m_hasParams && m_localizationParamsManager == null)
+            {
+                m_localizationParamsManager = m_text.gameObject.AddComponent<LocalizationParamsManager>();
+            }
+            else if (!m_hasParams)
+            {
+                SafeDestroyComponent(ref m_localizationParamsManager);
+            }
+        }
+
+        // 安全的组件销毁方法
+        private void SafeDestroyComponent<T>(ref T component) where T : MonoBehaviour
+        {
+            if (component != null && component.gameObject != null)
+            {
+                // 确保组件仍然附加在游戏对象上
+                if (component.transform != null && component.gameObject != null)
+                {
+#if UNITY_EDITOR
+                    if (!Application.isPlaying)
+                    {
+                        // 编辑器模式：使用 DestroyImmediate，但检查上下文
+                        if (UnityEditor.EditorUtility.IsPersistent(component))
+                        {
+                            Debug.LogWarning($"试图销毁资源组件: {component.name}");
+                            return;
+                        }
+
+                        // 记录 Undo 操作
+                        UnityEditor.Undo.DestroyObjectImmediate(component);
+                    }
+                    else
+#endif
+                    {
+                        UnityEngine.Object.Destroy(component);
+                    }
+                }
+                component = null;
+            }
+        }
+
+        public string GetParameterValue(int ParamName)
+            => m_localizationParamsManager.GetParameterValue(ParamName);
+
+        public string GetParameterValue(string ParamName)
+            => m_localizationParamsManager.GetParameterValue(ParamName);
+
+
+        public void SetParameterValue(int ParamName, string ParamValue, bool localize = true)
+        {
+            if (!UseI2Localization)
+            {
+                UseI2Localization = true;
+            }
+            if (!HasParams)
+            {
+                HasParams = true;
+            }
+
+            m_localizationParamsManager.SetParameterValue(ParamName, ParamValue, localize);
+            SetTerm(m_textDefine);
+        }
+
+        public void SetParameterValue(string ParamName, string ParamValue, bool localize = true)
+        {
+            if (!UseI2Localization)
+            {
+                UseI2Localization = true;
+            }
+            if (!HasParams)
+            {
+                HasParams = true;
+            }
+            m_localizationParamsManager.SetParameterValue(ParamName, ParamValue, localize);
+            SetTerm(m_textDefine);
+        }
+
+        public void SetParameterValue(List<int> ParamNames, List<string> ParamValues, bool localize = true)
+        {
+            if (!UseI2Localization)
+            {
+                UseI2Localization = true;
+            }
+            if (!HasParams)
+            {
+                HasParams = true;
+            }
+            for (int i = 0; i < ParamNames.Count && i < ParamValues.Count; i++)
+            {
+                m_localizationParamsManager.SetParameterValue(ParamNames[i], ParamValues[i], localize);
+            }
+            SetTerm(m_textDefine);
+        }
+
+        public void SetTerm(TextDefine textDefine)
+        {
+            if (!UseI2Localization)
+            {
+                UseI2Localization = true;
+            }
+            m_textDefine = textDefine;
+            m_localize?.SetTerm(m_textDefine.ToString());
+        }
     }
 }

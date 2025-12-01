@@ -101,7 +101,7 @@ namespace DGame
                     }
                     else
                     {
-                        strFile.AppendLine($"\t[Window(UILayer.UI, location : \"{root.name}\")]");
+                        // strFile.AppendLine($"\t[Window(UILayer.UI, location : \"{root.name}\")]");
                         strFile.AppendLine($"\tclass {root.name} : UIWindow");
                     }
                     strFile.AppendLine("\t{");

@@ -19,7 +19,7 @@ namespace I2.Loc
             LocalizationManager.ParamManagers.Remove(this);
         }
 
-		public virtual string GetParameterValue( string ParamName )
+		public virtual string GetParameterValue( int ParamName )
         {
             return null;
         }

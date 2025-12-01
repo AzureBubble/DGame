@@ -6,7 +6,7 @@ namespace I2.Loc
 {
     public interface ILocalizationParamsManager
     {
-        string GetParameterValue( string Param );
+        string GetParameterValue( int Param );
     }
 
     public class LocalizationParamsManager : MonoBehaviour, ILocalizationParamsManager
@@ -14,7 +14,8 @@ namespace I2.Loc
         [Serializable]
         public struct ParamValue
         {
-            public string Name, Value;
+            public string Name;
+            public string Value;
         
         }
 
@@ -23,6 +24,15 @@ namespace I2.Loc
 
         public bool _IsGlobalManager;
         
+        public string GetParameterValue( int ParamName )
+        {
+            if (_Params != null && ParamName >= 0 && ParamName < _Params.Count)
+            {
+                return _Params[ParamName].Value;
+            }
+            return null; // not found
+        }
+
         public string GetParameterValue( string ParamName )
         {
             if (_Params != null)
@@ -33,6 +43,24 @@ namespace I2.Loc
             }
             return null; // not found
         }
+
+        public void SetParameterValue( int ParamName, string ParamValue, bool localize = true )
+        {
+            bool setted = false;
+            if (ParamName >= 0 && ParamName < _Params.Count)
+            {
+                var temp = _Params[ParamName];
+                temp.Value = ParamValue;
+                _Params[ParamName] = temp;
+                setted = true;
+            }
+
+            if (!setted)
+                _Params.Add(new ParamValue { Name = ParamName.ToString(), Value = ParamValue });
+
+			if (localize)
+				OnLocalize();
+		}
 
         public void SetParameterValue( string ParamName, string ParamValue, bool localize = true )
         {
@@ -46,12 +74,13 @@ namespace I2.Loc
                     setted = true;
                     break;
                 }
+
             if (!setted)
                 _Params.Add(new ParamValue { Name = ParamName, Value = ParamValue });
-        
-			if (localize)
-				OnLocalize();
-		}
+
+            if (localize)
+                OnLocalize();
+        }
 		
 		public void OnLocalize()
 		{

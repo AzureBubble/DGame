@@ -156,7 +156,7 @@ namespace DGame
                         }
                         else
                         {
-                            strFile.AppendLine($"\t[Window(UILayer.UI, location : \"{fileName.Replace(".cs", "")}\")]");
+                            // strFile.AppendLine($"\t[Window(UILayer.UI, location : \"{fileName.Replace(".cs", "")}\")]");
                             strFile.AppendLine($"\tpublic partial class {fileName.Replace(".cs", "")} : {uiTypeName}");
                         }
                     }
@@ -374,7 +374,7 @@ namespace DGame
             {
                 if (!string.IsNullOrEmpty(uiTypeName) && string.Equals(uiTypeName, "UIWindow", StringComparison.Ordinal))
                 {
-                    strFile.AppendLine($"\t[Window(UILayer.UI, location : \"{fileName.Replace(".cs", "")}\")]");
+                    // strFile.AppendLine($"\t[Window(UILayer.UI, location : \"{fileName.Replace(".cs", "")}\")]");
                 }
                 strFile.AppendLine($"\tpublic partial class {fileName.Replace(".cs", "")}");
                 strFile.AppendLine("\t{");

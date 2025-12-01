@@ -21,6 +21,7 @@ namespace DGame
         private SerializedProperty m_runInBackground = null;
         private SerializedProperty m_neverSleep = null;
         private SerializedProperty m_memoryStrictCheckType = null;
+        private SerializedProperty m_editorLanguage = null;
 
         private string[] m_stringUtilHelperTypeNames = null;
         private int m_stringUtilHelperTypeNameIndex = 0;
@@ -53,6 +54,7 @@ namespace DGame
 
             EditorGUI.BeginDisabledGroup(EditorApplication.isPlayingOrWillChangePlaymode);
             {
+                DrawEditorLanguageSettings(rootModule);
                 DrawGlobalHelperSettings(rootModule);
                 DrawMemoryPoolSettings(rootModule);
                 DrawPerformanceSettings(rootModule);
@@ -62,6 +64,26 @@ namespace DGame
             EditorGUI.EndDisabledGroup();
 
             serializedObject.ApplyModifiedProperties();
+        }
+
+        private void DrawEditorLanguageSettings(RootModule rootModule)
+        {
+            EditorGUILayout.BeginVertical("HelpBox");
+            {
+                EditorGUILayout.LabelField("编辑器模式语言设置");
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.LabelField(new GUIContent("Editor Language"), GUILayout.Width(120));
+                EditorGUILayout.PropertyField(m_editorLanguage, GUIContent.none);
+
+                EditorGUILayout.EndHorizontal();
+
+                EditorGUILayout.Space(3);
+
+                string helperStatus = "编辑器模式下运行的语言类型: " + LocalizationUtil.GetLanguage(rootModule.EditorLanguage);
+                EditorGUILayout.HelpBox(helperStatus,
+                    rootModule.EditorLanguage != Language.Unspecified ? MessageType.Info : MessageType.Warning);
+            }
+            EditorGUILayout.EndVertical();
         }
 
         private void DrawMemoryPoolSettings(RootModule rootModule)
@@ -534,6 +556,7 @@ namespace DGame
             m_runInBackground = serializedObject?.FindProperty("runInBackground");
             m_neverSleep = serializedObject?.FindProperty("neverSleep");
             m_memoryStrictCheckType = serializedObject?.FindProperty("m_memoryStrictCheckType");
+            m_editorLanguage = serializedObject?.FindProperty("editorLanguage");
             RefreshTypeNames();
         }
 

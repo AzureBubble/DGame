@@ -51,7 +51,7 @@ namespace DGame
                         assetHandle.Dispose();
                     }
 
-                    assetHandle = null;
+                    m_assetHandle = null;
                 }
             }
         }

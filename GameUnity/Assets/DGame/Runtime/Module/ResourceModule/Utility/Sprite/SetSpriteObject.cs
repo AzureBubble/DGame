@@ -43,6 +43,7 @@ namespace DGame
         private UnityEngine.Sprite sprite;
 
         public string Location { get; private set; }
+        public Object TargetObject { get; set; }
 
         private bool m_setNativeSize = false;
         Action<Image> m_imageCallback;

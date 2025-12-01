@@ -10,6 +10,11 @@ namespace DGame
         string Location { get; }
 
         /// <summary>
+        /// Unity资源对象
+        /// </summary>
+        public UnityEngine.Object TargetObject { get; set; }
+
+        /// <summary>
         /// 社渚资源
         /// </summary>
         /// <param name="asset"></param>

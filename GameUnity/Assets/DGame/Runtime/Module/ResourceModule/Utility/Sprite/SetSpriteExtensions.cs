@@ -21,7 +21,7 @@ namespace DGame
         {
             ResourceExtComponent.Instance
                 .SetAssetByResources<Sprite>(SetSpriteObject.Create(image, location, setNativeSize, callback,
-                    cancellationToken)).Forget();
+                    cancellationToken), cancellationToken).Forget();
         }
 
         /// <summary>
@@ -36,7 +36,7 @@ namespace DGame
         {
             ResourceExtComponent.Instance
                 .SetAssetByResources<Sprite>(SetSpriteObject.Create(spriteRenderer, location, callback,
-                    cancellationToken)).Forget();
+                    cancellationToken), cancellationToken).Forget();
         }
 
         /// <summary>

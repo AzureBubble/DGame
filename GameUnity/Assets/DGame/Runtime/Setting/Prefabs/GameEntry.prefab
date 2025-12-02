@@ -131,6 +131,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3cee5b47d2104df7bb245f03c47a6c1f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  innerLocalizationCsvLocation: Localization
   innerLocalizationCsv: {fileID: 4900000, guid: d19df2b0432b338418a9ea81385be10b, type: 3}
   allLanguages: []
   m_useRuntimeModule: 1

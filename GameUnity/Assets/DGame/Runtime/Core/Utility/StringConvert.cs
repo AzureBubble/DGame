@@ -251,23 +251,6 @@ namespace DGame
                 // return (T)Enum.ToObject(typeof(T), index);
             }
 
-            /// <summary>
-            /// 转换为枚举
-            /// 枚举名称转换为枚举类型
-            /// </summary>
-            /// <typeparam name="T"></typeparam>
-            /// <param name="name">枚举名</param>
-            /// <returns></returns>
-            public static T NameToEnum<T>(string name)
-            {
-                if (Enum.IsDefined(typeof(T), name) == false)
-                {
-                    throw new ArgumentException($"Enum {typeof(T)} is not defined name {name}");
-                }
-
-                return (T)Enum.Parse(typeof(T), name);
-            }
-
             #endregion
 
             #region 秒转时间字符串

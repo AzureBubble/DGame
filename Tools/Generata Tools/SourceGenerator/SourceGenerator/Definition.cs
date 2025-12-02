@@ -35,4 +35,13 @@ public class Definition
     public static readonly string[] RequireComponentUsingNameSpace = ["UnityEngine"];
     public const string RequireComponentNameSpace = "AOT";//"DGame";
     public const string RequireComponentAttributeName = "RequireComponent";
+
+
+    /// <summary>
+    /// TextDefineEnum文件生成的命名空间
+    /// </summary>
+    public static readonly List<string> TextDefineTargetNameSpaces = ["GameLogic"]; //"DGame", "GameProto", "GameBattle"
+    // public static readonly string[] RequireComponentUsingNameSpace = ["UnityEngine"];
+    public const string TextDefineNameSpace = "GameLogic";//"DGame";
+    public const string TextDefineEnumName = "TextDefine";
 }

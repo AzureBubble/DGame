@@ -357,7 +357,7 @@ namespace GameLogic
                     uiTextLocalizationExtend.HasParams = hasParams.boolValue;
                     if(useI2Localization.boolValue)
                         uiTextLocalizationExtend.SetTerm((TextDefine)textDefine.enumValueIndex);
-                    // UnityEditor.EditorUtility.SetDirty(serializedObject?.targetObject);
+                    UnityEditor.EditorUtility.SetDirty(serializedObject?.targetObject);
                 }
                 serializedObject?.ApplyModifiedProperties();
             }, title, ref isPanelOpen, true);

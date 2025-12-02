@@ -31,6 +31,12 @@ namespace DGame
         UniTask LoadLanguageTotalAsset(string assetName);
 
         /// <summary>
+        /// 加载语言总表
+        /// </summary>
+        /// <returns></returns>
+        UniTask LoadLanguageTotalAsset();
+
+        /// <summary>
         /// 加载语言分表
         /// </summary>
         /// <param name="language">语言类型</param>

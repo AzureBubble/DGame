@@ -45,7 +45,10 @@ namespace GameLogic
                     {
                         if (m_localize == null)
                         {
-                            m_localize = m_text.gameObject.AddComponent<Localize>();
+                            if (!m_text.TryGetComponent(out m_localize))
+                            {
+                                m_localize = m_text.gameObject.AddComponent<Localize>();
+                            }
                         }
                     }
                     else
@@ -71,7 +74,10 @@ namespace GameLogic
                     {
                         if (m_localizationParamsManager == null)
                         {
-                            m_localizationParamsManager = m_text.gameObject.AddComponent<LocalizationParamsManager>();
+                            if (!m_text.TryGetComponent(out m_localizationParamsManager))
+                            {
+                                m_localizationParamsManager = m_text.gameObject.AddComponent<LocalizationParamsManager>();
+                            }
                         }
                     }
                     else
@@ -94,6 +100,7 @@ namespace GameLogic
         public void EditorInitialize(Text text)
         {
             m_text = text;
+            SafeRefreshText();
         }
 
         private void SafeRefreshText()
@@ -124,17 +131,25 @@ namespace GameLogic
 
             if (m_localize == null)
             {
-                m_localize = m_text.gameObject.AddComponent<Localize>();
+                if (!m_text.TryGetComponent(out m_localize))
+                {
+                    m_localize = m_text.gameObject.AddComponent<Localize>();
+                }
             }
 
             if (m_hasParams && m_localizationParamsManager == null)
             {
-                m_localizationParamsManager = m_text.gameObject.AddComponent<LocalizationParamsManager>();
+                if (!m_text.TryGetComponent(out m_localizationParamsManager))
+                {
+                    m_localizationParamsManager = m_text.gameObject.AddComponent<LocalizationParamsManager>();
+                }
             }
             else if (!m_hasParams)
             {
                 SafeDestroyComponent(ref m_localizationParamsManager);
             }
+
+            SetTerm(m_textDefine);
         }
 
         // 安全的组件销毁方法
@@ -190,6 +205,29 @@ namespace GameLogic
             SetTerm(m_textDefine);
         }
 
+        public void SetParameterValue(string paramName, TextDefine termDefine, bool localize = true)
+        {
+            string term = termDefine.ToString();
+            string translatedValue = GetTranslation(term);
+            SetParameterValue(paramName, translatedValue, localize);
+        }
+
+        public void SetParameterValue(int paramName, TextDefine termDefine, bool localize = true)
+        {
+            string term = termDefine.ToString();
+            string translatedValue = GetTranslation(term);
+            SetParameterValue(paramName, translatedValue, localize);
+        }
+
+        private string GetTranslation(string term)
+        {
+            if (I2.Loc.LocalizationManager.Sources.Count == 0)
+                return term;
+
+            string translation = I2.Loc.LocalizationManager.GetTranslation(term);
+            return string.IsNullOrEmpty(translation) ? term : translation;
+        }
+
         public void SetParameterValue(string ParamName, string ParamValue, bool localize = true)
         {
             if (!UseI2Localization)
@@ -228,7 +266,7 @@ namespace GameLogic
                 UseI2Localization = true;
             }
             m_textDefine = textDefine;
-            m_localize?.SetTerm(m_textDefine.ToString());
+            m_localize?.SetTerm(m_textDefine.Convert());
         }
     }
 }

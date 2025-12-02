@@ -28,6 +28,11 @@ namespace DGame
             await m_localizationManager.LoadLanguageTotalAsset(assetName);
         }
 
+        public async UniTask LoadLanguageTotalAsset()
+        {
+            await m_localizationManager.LoadLanguageTotalAsset();
+        }
+
         public async UniTask LoadLanguage(string language, bool setCurrent = false, bool fromInit = false)
         {
             await m_localizationManager.LoadLanguage(language, setCurrent, fromInit);

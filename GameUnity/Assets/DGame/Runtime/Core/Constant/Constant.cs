@@ -8,6 +8,7 @@ namespace DGame
     {
         public static class Settings
         {
+            public const string LANGUAGE = "Settings.Language";
             public const string MUSIC_MUTED = "Settings.MusicMuted";
             public const string MUSIC_VOLUME = "Settings.MusicVolume";
             public const string SOUND_MUTED = "Settings.SoundMuted";

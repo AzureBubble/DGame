@@ -203,6 +203,12 @@ namespace GameLogic
         public void SetParameterValue(int ParamName, string ParamValue, bool localize = true)
             => UITextLocalizationExtend?.SetParameterValue(ParamName, ParamValue, localize);
 
+        public void SetParameterValue(int ParamName, TextDefine ParamValue, bool localize = true)
+            => UITextLocalizationExtend?.SetParameterValue(ParamName, ParamValue, localize);
+
+        public void SetParameterValue(string ParamName, TextDefine ParamValue, bool localize = true)
+            => UITextLocalizationExtend?.SetParameterValue(ParamName, ParamValue, localize);
+
         public void SetParameterValue(string ParamName, string ParamValue, bool localize = true)
             => UITextLocalizationExtend?.SetParameterValue(ParamName, ParamValue, localize);
 

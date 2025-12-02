@@ -9,6 +9,7 @@ namespace I2.Loc
         string GetParameterValue( int Param );
     }
 
+    [DisallowMultipleComponent]
     public class LocalizationParamsManager : MonoBehaviour, ILocalizationParamsManager
 	{
         [Serializable]

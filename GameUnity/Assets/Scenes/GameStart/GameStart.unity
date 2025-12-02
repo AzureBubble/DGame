@@ -279,6 +279,10 @@ PrefabInstance:
       propertyPath: m_useRuntimeModule
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 3370507358827451886, guid: 3375c1da4c80d8e40bca1675c3990457, type: 3}
+      propertyPath: innerLocalizationCsv
+      value: 
+      objectReference: {fileID: 4900000, guid: d19df2b0432b338418a9ea81385be10b, type: 3}
     - target: {fileID: 8427157544136828061, guid: 3375c1da4c80d8e40bca1675c3990457, type: 3}
       propertyPath: m_RootOrder
       value: 1

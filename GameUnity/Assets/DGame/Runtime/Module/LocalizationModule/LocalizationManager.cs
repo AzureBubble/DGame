@@ -1,16 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Cysharp.Threading.Tasks;
 using I2.Loc;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace DGame
 {
     [DisallowMultipleComponent]
     public sealed class LocalizationManager : MonoBehaviour, IResourceManager_Bundles
     {
+        [SerializeField]private string innerLocalizationCsvLocation = "Localization";
         private string m_defaultLanguage = "Chinese";
 
         [SerializeField] private TextAsset innerLocalizationCsv;
@@ -96,6 +95,11 @@ namespace DGame
             await LoadLanguage(m_defaultLanguage, true, true);
 #endif
             return true;
+        }
+
+        public async UniTask LoadLanguageTotalAsset()
+        {
+            await LoadLanguageTotalAsset(innerLocalizationCsvLocation);
         }
 
         public async UniTask LoadLanguageTotalAsset(string assetName)

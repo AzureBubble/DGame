@@ -298,5 +298,14 @@ namespace GameLogic
         }
 
         #endregion
+
+        #region UIText多语言
+
+        public static string Convert(this TextDefine textDefine)
+        {
+            return TextDefineConverter.Convert(textDefine);
+        }
+
+        #endregion
     }
 }

@@ -13,6 +13,7 @@ using UnityEditor;
 
 namespace I2.Loc
 {
+	[DisallowMultipleComponent]
     [AddComponentMenu("I2/Localization/I2 Localize")]
     public class Localize : MonoBehaviour
     {

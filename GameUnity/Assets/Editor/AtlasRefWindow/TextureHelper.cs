@@ -1,3 +1,6 @@
+using System;
+using System.IO;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -5,6 +8,7 @@ namespace DGame
 {
     public class TextureHelper
     {
+        public const string ReplacePrefix = "Assets/ABAssets/UIRaw/";
         public const string UIRawPath = "Assets/ABAssets/UIRaw/Atlas";
         public const string MonsterPath = "Assets/ActorModel/Monster";
         public const string HomePath = "Assets/ActorModel/Home";
@@ -14,25 +18,28 @@ namespace DGame
 
         private static bool IsOnePicOneAtlasPath(string fullName)
         {
-            if (fullName.StartsWith(UIBkgPath, System.StringComparison.OrdinalIgnoreCase) ||
-                fullName.StartsWith(SceneBkgPath, System.StringComparison.OrdinalIgnoreCase) ||
-                fullName.StartsWith(UIChapterIconPath, System.StringComparison.OrdinalIgnoreCase))
+            if(AtlasConfig.Instance.singleAtlasDir
+               .Any(fullName.StartsWith))
             {
                 return true;
             }
+            // if (fullName.StartsWith(UIBkgPath, System.StringComparison.OrdinalIgnoreCase) ||
+            //     fullName.StartsWith(SceneBkgPath, System.StringComparison.OrdinalIgnoreCase) ||
+            //     fullName.StartsWith(UIChapterIconPath, System.StringComparison.OrdinalIgnoreCase))
+            // {
+            //     return true;
+            // }
 
             return false;
         }
 
-
-
         private static string GetDeepPath(string oriPath, string targetPath, int deepCnt)
         {
-            var idx = oriPath.LastIndexOf(targetPath) + targetPath.Length;
+            var idx = oriPath.LastIndexOf(targetPath, StringComparison.Ordinal) + targetPath.Length;
 
             for (int i = 0; i < deepCnt; i++)
             {
-                var newIdx = oriPath.IndexOf("/", idx + 1);
+                var newIdx = oriPath.IndexOf("/", idx + 1, StringComparison.Ordinal);
 
                 if (newIdx != -1)
                 {
@@ -44,7 +51,7 @@ namespace DGame
                 }
             }
 
-            var finStr = oriPath.Substring(0, idx).Replace("Assets/", "").Replace("/", "_");
+            var finStr = oriPath.Substring(0, idx).Replace("Assets/ABAssets/", "").Replace("/", "_");
             return finStr;
         }
 
@@ -56,35 +63,42 @@ namespace DGame
         public static string GetPackageTag(string fullName)
         {
             fullName = fullName.Replace("\\", "/");
-            int idx = fullName.LastIndexOf("Assets/");
-
-            if (idx == -1)
+            if (!fullName.StartsWith("Assets/"))
             {
                 return "";
             }
-
-            //这是Assets/之后的路径
-            string str = fullName.Substring(idx);
+            // var idx = fullName.IndexOf("Assets/", StringComparison.Ordinal);
+            // //这是Assets/之后的路径
+            // string str = fullName.Substring(idx);
+            string str = fullName;
 
             if (IsOnePicOneAtlasPath(fullName))
             {
-                str = str.Substring(0, str.LastIndexOf(".")).Replace("Assets/UIRaw/", "").Replace("/", "_");
+                str = str.Substring(0, str.LastIndexOf(".", StringComparison.Ordinal))
+                    .Replace(ReplacePrefix, "").Replace("/", "_");
             }
             else
             {
-                //怪物的不同动作，打到同一个图集
-                if (fullName.StartsWith(MonsterPath, System.StringComparison.OrdinalIgnoreCase))
+                if (AtlasConfig.Instance.sourceAtlasRootDir.Any(fullName.StartsWith))
                 {
                     //Debug.LogFormat("{0}", GetDeepPath(fullName, MonsterPath, 1));
-                    str = GetDeepPath(str, MonsterPath, 1);
+                    str = Path.GetDirectoryName(fullName)?.Replace("\\","/").Replace("Assets/ABAssets/UIRaw/", "").Replace("/", "_");
                 }
-                else if (fullName.StartsWith(HomePath, System.StringComparison.OrdinalIgnoreCase))
+                else if (AtlasConfig.Instance.rootChildAtlasDir.Any(fullName.StartsWith))
                 {
-                    str = GetDeepPath(str, HomePath, 1);
+                    var matchedPaths = AtlasConfig.Instance.rootChildAtlasDir
+                        .Where(dir => !string.IsNullOrEmpty(dir))
+                        .Select(dir => dir.Replace("\\", "/").TrimEnd('/'))
+                        .Where(dir => fullName.StartsWith(dir + "/", StringComparison.OrdinalIgnoreCase))
+                        .ToList();
+
+                    var matchPath = matchedPaths.OrderByDescending(p => p.Length).First();
+
+                    str = GetDeepPath(str, matchPath, 1);
                 }
                 else
                 {
-                    str = str.Substring(0, str.LastIndexOf("/")).Replace("Assets/", "").Replace("/", "_");
+                    str = str.Substring(0, str.LastIndexOf("/", StringComparison.Ordinal)).Replace("Assets/UIRaw", "").Replace("/", "_");
                 }
             }
 

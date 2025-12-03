@@ -176,6 +176,8 @@ namespace DGame
         private PrefabRefData m_goRef;
 
         private const string NormalAtlasDir = "Assets/AssetArt/Atlas";
+        private static string AtlasExtension => AtlasConfig.Instance.enableV2 ? ".spriteatlasv2" : ".spriteatlas";
+        private string UIPrefabPath =>  Application.dataPath + "/ABAssets/UI/";
 
         private static Texture2D m_selectBackground;
         private GUIStyle m_selectStyle;
@@ -207,14 +209,14 @@ namespace DGame
             m_listAtlasRef.Clear();
             m_dicAtlasRef.Clear();
 
-            string prefabPath = Application.dataPath + "/ABAssets/UI/";
+            string prefabPath = UIPrefabPath;
             DirectoryInfo dicInfo = new DirectoryInfo(prefabPath);
             FileInfo[] fileInfos = dicInfo.GetFiles("*.prefab", SearchOption.AllDirectories);
             int count = fileInfos.Length;
             for (var index = 0; index < count; index++)
             {
                 var file = fileInfos[index];
-                var cancel = EditorUtility.DisplayCancelableProgressBar("分析图集", string.Format("分析预制体：{0}/{1}", index, count), (float)index / count);
+                var cancel = EditorUtility.DisplayCancelableProgressBar("分析图集", $"分析预制体：{index}/{count}", (float)index / count);
                 if (cancel)
                 {
                     break;
@@ -292,7 +294,7 @@ namespace DGame
             for (var atlasIndex = 0; atlasIndex < atlasCount; atlasIndex++)
             {
                 var atlasRefData = m_listAtlasRef[atlasIndex];
-                var cancel = EditorUtility.DisplayCancelableProgressBar("分析图集", string.Format("分析图集：{0}/{1}", atlasIndex, atlasCount), (float)atlasIndex / atlasCount);
+                var cancel = EditorUtility.DisplayCancelableProgressBar("分析图集", $"分析图集：{atlasIndex}/{atlasCount}", (float)atlasIndex / atlasCount);
                 if (cancel)
                 {
                     break;
@@ -372,7 +374,7 @@ namespace DGame
         {
             var assetPath = AssetDatabase.GetAssetPath(sprite);
             string atlasName = TextureHelper.GetPackageTag(assetPath);
-            var path = string.Format("{0}/{1}.spriteatlasv2", NormalAtlasDir, atlasName);
+            var path = $"{NormalAtlasDir}/{atlasName}{AtlasExtension}";
             return AssetDatabase.LoadAssetAtPath<SpriteAtlas>(path);
         }
 

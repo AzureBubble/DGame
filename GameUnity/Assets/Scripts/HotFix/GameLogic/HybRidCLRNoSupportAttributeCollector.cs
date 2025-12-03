@@ -13,6 +13,7 @@ namespace GameLogic
 #if !UNITY_EDITOR && ENABLE_HYBRIDCLR
         private static readonly string s_runtimeInitializeOnLoadMethodCollectorClassName = "AOT.RuntimeInitializeOnLoadMethodCollector_Gen";
         private static readonly string s_executeMethodsName = "ExecuteMethods";
+        private static readonly string s_executeAllMethodsName = "ExecuteAllMethods";
         private static MethodInfo s_methodInfo;
         private static Type s_collectorType;
 #endif
@@ -55,7 +56,7 @@ namespace GameLogic
             var collectorType = Type.GetType(s_runtimeInitializeOnLoadMethodCollectorClassName);
             if (collectorType != null)
             {
-                var methodInfo = collectorType.GetMethod("ExecuteAllMethods",
+                var methodInfo = collectorType.GetMethod(s_executeAllMethodsName,
                     System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic);
                 methodInfo?.Invoke(null, null);
             }

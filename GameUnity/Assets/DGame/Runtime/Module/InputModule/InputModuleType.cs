@@ -1,23 +1,10 @@
 ﻿namespace DGame
 {
-    public enum KeyPressType
+    public enum InputType
     {
-        None,
-
-        /// <summary>
-        /// 按键按下
-        /// </summary>
         Down,
-
-        /// <summary>
-        /// 按键按住
-        /// </summary>
-        Stay,
-
-        /// <summary>
-        /// 按键抬起
-        /// </summary>
         Up,
+        Stay,
 
         /// <summary>
         /// 获取 Axis 值: -1 ~ 1
@@ -30,8 +17,10 @@
         AxisRaw,
     }
 
-    public enum HotKeyNameType
+    public enum HotKeyType
     {
-        Horizontal, Vertical
+        None,
+        Horizontal,
+        Vertical,
     }
 }

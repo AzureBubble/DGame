@@ -33,7 +33,21 @@ namespace DGame
         /// 对象池自动释放时间间隔
         /// </summary>
         [SerializeField]
-        private float autoReleaseInternal = 0.0f;
+        private float autoReleaseInternal = 60.0f;
+
+        /// <summary>
+        /// 每帧最大处理资源数量，用于分帧处理避免卡顿。
+        /// </summary>
+        [SerializeField]
+        private int m_maxProcessPerFrame = 50;
+
+        /// <summary>
+        /// 当前正在处理的节点，用于分帧处理。
+        /// </summary>
+#if ODIN_INSPECTOR && ENABLE_ODIN_INSPECTOR
+        [ShowInInspector]
+#endif
+        private LinkedListNode<LoadAssetObject> m_currentProcessNode;
 
         /// <summary>
         /// 保存加载的图片对象
@@ -84,14 +98,24 @@ namespace DGame
 #endif
         public void ReleaseUnused()
         {
-            if (m_loadAssetObjectsLinkedList == null)
+            if (m_loadAssetObjectsLinkedList == null || m_loadAssetObjectsLinkedList.Count == 0)
             {
+                m_currentProcessNode = null;
+                m_checkCanReleaseTime = 0f;
                 return;
             }
 
+            // 如果当前没有正在处理的节点，从头开始
+            if (m_currentProcessNode == null)
+            {
+                m_currentProcessNode = m_loadAssetObjectsLinkedList.First;
+            }
+
+            int processedCount = 0;
             LinkedListNode<LoadAssetObject> current = m_loadAssetObjectsLinkedList.First;
 
-            while (current != null)
+            // 分帧处理：每帧最多处理 maxProcessPerFrame 个资源
+            while (current != null && processedCount < m_maxProcessPerFrame)
             {
                 var next = current.Next;
                 if(current.Value.assetObject.IsCanRelease())
@@ -100,9 +124,15 @@ namespace DGame
                     MemoryPool.Recycle(current.Value.assetObject);
                     m_loadAssetObjectsLinkedList.Remove(current);
                 }
-                current = current.Next;
+                current = next;
+                processedCount++;
             }
-            m_checkCanReleaseTime = 0.0f;
+            m_currentProcessNode = current;
+
+            if (m_currentProcessNode == null)
+            {
+                m_checkCanReleaseTime = 0.0f;
+            }
             // Debugger.Info("======== ResourceExtComponent.释放无引用资源 ========");
         }
 

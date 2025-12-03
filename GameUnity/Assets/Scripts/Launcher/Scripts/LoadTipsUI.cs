@@ -17,19 +17,20 @@ namespace Launcher
 
         protected override void ScriptGenerator()
         {
-            m_textDesc = FindChildComponent<Text>("m_textDesc/m_textDesc");
-            m_btnConfirm = FindChildComponent<Button>("m_btnConfirm/m_btnConfirm/m_btnConfirm");
-            m_textConfirm = FindChildComponent<Text>("m_textConfirm/m_textConfirm/m_textConfirm/m_textConfirm");
-            m_btnUpdate = FindChildComponent<Button>("m_btnUpdate/m_btnUpdate/m_btnUpdate");
-            m_textUpdate = FindChildComponent<Text>("m_textUpdate/m_textUpdate/m_textUpdate/m_textUpdate");
-            m_btnCancel = FindChildComponent<Button>("m_btnCancel/m_btnCancel/m_btnCancel");
-            m_textCancel = FindChildComponent<Text>("m_textCancel/m_textCancel/m_textCancel/m_textCancel");
+            m_textDesc = FindChildComponent<Text>("BgImage/m_textDesc");
+            m_btnConfirm = FindChildComponent<Button>("BgImage/ButtonGroup/m_btnConfirm");
+            m_textConfirm = FindChildComponent<Text>("BgImage/ButtonGroup/m_btnConfirm/m_textConfirm");
+            m_btnUpdate = FindChildComponent<Button>("BgImage/ButtonGroup/m_btnUpdate");
+            m_textUpdate = FindChildComponent<Text>("BgImage/ButtonGroup/m_btnUpdate/m_textUpdate");
+            m_btnCancel = FindChildComponent<Button>("BgImage/ButtonGroup/m_btnCancel");
+            m_textCancel = FindChildComponent<Text>("BgImage/ButtonGroup/m_btnCancel/m_textCancel");
             m_btnConfirm.onClick.AddListener(OnClickConfirmBtn);
             m_btnUpdate.onClick.AddListener(OnClickUpdateBtn);
             m_btnCancel.onClick.AddListener(OnClickCancelBtn);
         }
 
         #endregion
+
 
         private const string m_cancelText = "Cancel";
         private const string m_confirmText = "Confirm";

@@ -4,10 +4,6 @@ using System.Linq;
 using System.Reflection;
 using GameLogic;
 using DGame;
-using UnityEngine;
-using AOT;
-using Cysharp.Threading.Tasks;
-using UnityEngine.UI;
 
 #if ENABLE_OBFUZ
 using Obfuz;
@@ -39,7 +35,7 @@ public partial class GameStart
 
     private static void StartGame()
     {
-        // UIModule.Instance.ShowWindow<TestWindow>();
+        UIModule.Instance.ShowWindow<MainWindow>();
     }
 
     private static void OnDestroy()

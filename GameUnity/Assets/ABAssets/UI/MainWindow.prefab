@@ -1087,7 +1087,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: "\u5F00\u59CB\u6E38\u620F"
+  m_Text: "\u6807\u9898{0}"
   m_uiTextSpacingExtend:
     m_isUseTextSpacing: 0
     m_textSpacing: 1
@@ -1130,7 +1130,7 @@ MonoBehaviour:
   m_uiTextLocalizationExtend:
     m_useI2Localization: 1
     m_hasParams: 0
-    m_textDefine: 1
+    m_textDefine: 2
   m_isUseBestFitFont: 0
 --- !u!114 &2786555522483725760
 MonoBehaviour:
@@ -1144,7 +1144,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 344445a89b4f74a0e9a0a766903df87e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mTerm: StartGame
+  mTerm: Title
   mTermSecondary: 
   PrimaryTermModifier: 0
   SecondaryTermModifier: 0
@@ -1294,7 +1294,7 @@ MonoBehaviour:
   m_uiTextLocalizationExtend:
     m_useI2Localization: 1
     m_hasParams: 0
-    m_textDefine: 2
+    m_textDefine: 0
   m_isUseBestFitFont: 0
 --- !u!114 &2517874977653366808
 MonoBehaviour:

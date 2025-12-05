@@ -1,5 +1,5 @@
 ﻿// 此文件由CSV Reader工具自动生成
-// 生成时间: 2025-12-02 12:25:11
+// 生成时间: 2025-12-06 00:40:01
 // 源CSV文件: Localization
 
 namespace GameLogic
@@ -10,13 +10,7 @@ namespace GameLogic
 	public enum TextDefine
 	{
 		QuitGame, // 退出游戏1
-		StartGame, // 开始游戏
+		StartGame, // 开始游戏1
 		Title, // 标题{0}
-		Title2, // 标题{0}
-		Title3, // 标题{0}
-		QuitGame1, // 退出游戏1
-		StartGame2, // 开始游戏
-		Title4, // 标题{0}
-		Title34, // 标题{0}
 	}
 }

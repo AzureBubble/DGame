@@ -291,15 +291,22 @@ namespace DGame
                 return;
             }
 
-            strVar.AppendLine($"\t\tprivate {componentName} {varName};");
+            if (rule.isUIWidget)
+            {
+                strVar.AppendLine($"\t\tprivate GameObject {varName};");
+            }
+            else
+            {
+                strVar.AppendLine($"\t\tprivate {componentName} {varName};");
+            }
 
             if (rule.componentName == UIComponentName.GameObject)
             {
                 strBind.AppendLine($"\t\t\t{varName} = m_bindComponent.GetComponent<RectTransform>({m_bindIndex}).gameObject;");
             }
-            else if (rule.componentName != UIComponentName.GameObject && rule.isUIWidget)
+            else if (rule.isUIWidget)
             {
-                strBind.AppendLine($"\t\t\t{varName} = CreateWidgetByPrefab<{componentName}>(m_bindComponent.GetComponent<RectTransform>({m_bindIndex}).gameObject);");
+                strBind.AppendLine($"\t\t\t{varName} = m_bindComponent.GetComponent<RectTransform>({m_bindIndex}).gameObject;");
             }
             else
             {
@@ -571,8 +578,7 @@ namespace DGame
                 return;
             }
 
-            if (rule.componentName == UIComponentName.GameObject
-                || (rule.componentName != UIComponentName.GameObject && rule.isUIWidget))
+            if (rule.componentName == UIComponentName.GameObject || rule.isUIWidget)
             {
                 var c = child.gameObject.GetComponent<RectTransform>();
                 uiBindComponent.AddComponent(c);

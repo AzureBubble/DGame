@@ -1,6 +1,8 @@
 {
   "dependencies": {
     "com.code-philosophy.hybridclr": "https://gitee.com/focus-creative-games/hybridclr_unity.git",
+    "com.code-philosophy.obfuz": "https://github.com/focus-creative-games/obfuz.git",
+    "com.code-philosophy.obfuz4hybridclr": "https://github.com/focus-creative-games/obfuz4hybridclr.git",
     "com.tuyoogame.yooasset": "2.3.17",
     "com.unity.2d.sprite": "1.0.0",
     "com.unity.collab-proxy": "2.0.7",

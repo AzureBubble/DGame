@@ -1,10 +1,22 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using HybridCLR.Editor;
-using HybridCLR.Editor.Commands;
 using UnityEditor;
 using UnityEngine;
+
+#if ENABLE_HYBRIDCLR
+
+using HybridCLR.Editor;
+using HybridCLR.Editor.Commands;
+
+#endif
+
+#if ENABLE_OBFUZ
+
+using Obfuz4HybridCLR;
+using Obfuz.Settings;
+
+#endif
 
 namespace DGame
 {
@@ -25,6 +37,31 @@ namespace DGame
         {
             CopyAotAssembliesToAssetPath(buildTarget);
             CopyHotUpdateAssembliesToAssetPath(buildTarget);
+
+#if ENABLE_HYBRIDCLR && ENABLE_OBFUZ
+        CompileDllCommand.CompileDll(buildTarget);
+
+        string obfuscatedHotUpdateDllPath = PrebuildCommandExt.GetObfuscatedHotUpdateAssemblyOutputPath(buildTarget);
+        ObfuscateUtil.ObfuscateHotUpdateAssemblies(buildTarget, obfuscatedHotUpdateDllPath);
+
+        Directory.CreateDirectory(Application.streamingAssetsPath);
+
+        string hotUpdateDllPath = $"{SettingsUtil.GetHotUpdateDllsOutputDirByTarget(buildTarget)}";
+        List<string> obfuscationRelativeAssemblyNames = ObfuzSettings.Instance.assemblySettings.GetObfuscationRelativeAssemblyNames();
+
+        foreach (string assName in SettingsUtil.HotUpdateAssemblyNamesIncludePreserved)
+        {
+            string srcDir = obfuscationRelativeAssemblyNames.Contains(assName) ? obfuscatedHotUpdateDllPath : hotUpdateDllPath;
+            string srcFile = $"{srcDir}/{assName}.dll";
+            string dstFile = Application.dataPath +"/"+ DGame.Settings.UpdateSettings.AssemblyTextAssetPath  + $"/{assName}.dll.bytes";
+            if (File.Exists(srcFile))
+            {
+                File.Copy(srcFile, dstFile, true);
+                Debug.Log($"[CompileAndObfuscate] Copy {srcFile} to {dstFile}");
+            }
+        }
+#endif
+
             AssetDatabase.Refresh();
         }
 

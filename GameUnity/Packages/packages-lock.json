@@ -5,7 +5,21 @@
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "59a3c3974a6e435e0ed57fb9af61fbbc6d17a8b7"
+      "hash": "fcef6dfe8ed715cc60a7618a1d2ad62bcace3a80"
+    },
+    "com.code-philosophy.obfuz": {
+      "version": "https://github.com/focus-creative-games/obfuz.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "1ff3b5c3249fa600af49a6328a4b7e531ea56243"
+    },
+    "com.code-philosophy.obfuz4hybridclr": {
+      "version": "https://github.com/focus-creative-games/obfuz4hybridclr.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "c9214b2cf9869cf93e060442ec12b9fa828d98d5"
     },
     "com.tuyoogame.yooasset": {
       "version": "2.3.17",

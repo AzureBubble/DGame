@@ -14,6 +14,11 @@ using HybridCLR;
 
 #endif
 
+#if ENABLE_OBFUZ
+using Obfuz;
+using Obfuz.EncryptionVM;
+#endif
+
 namespace Procedure
 {
     /// <summary>
@@ -273,7 +278,9 @@ namespace Procedure
 
         private void AllAssemblyLoadComplete()
         {
+            SetUpStaticSecretKey();
             SwitchState<StartGameProcedure>();
+
 #if UNITY_EDITOR
             m_mainLogicAssembly = GetMainLogicAssembly();
 #endif
@@ -298,6 +305,19 @@ namespace Procedure
             // await UniTask.Yield();
             object[] objects = new object[] { new object[] { m_hotfixAssemblyList } };
             entryMethod.Invoke(entryType, objects);
+        }
+
+        private void SetUpStaticSecretKey()
+        {
+#if ENABLE_OBFUZ
+            Debug.Log("Enable Obfuz");
+            Debug.Log("SetUpStaticSecret begin");
+            EncryptionService<DefaultStaticEncryptionScope>.Encryptor =
+                new GeneratedEncryptionVirtualMachine(Resources.Load<TextAsset>("Obfuz/defaultStaticSecretKey").bytes);
+            Debug.Log("SetUpStaticSecret end");
+#else
+            Debug.Log("Disable Obfuz");
+#endif
         }
 
         public override void OnFixedUpdate()

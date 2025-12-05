@@ -275,6 +275,18 @@ PrefabInstance:
       propertyPath: m_useRuntimeModule
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4103294288059457241, guid: 3375c1da4c80d8e40bca1675c3990457, type: 3}
+      propertyPath: m_showFullWindow
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4932445106473816620, guid: 3375c1da4c80d8e40bca1675c3990457, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6487986302111756051, guid: 3375c1da4c80d8e40bca1675c3990457, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8427157544136828061, guid: 3375c1da4c80d8e40bca1675c3990457, type: 3}
       propertyPath: m_RootOrder
       value: 1

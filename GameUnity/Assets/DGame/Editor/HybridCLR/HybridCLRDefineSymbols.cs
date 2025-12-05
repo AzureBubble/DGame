@@ -44,20 +44,20 @@ namespace DGame
             ScriptingDefineSymbolsTools.DisableScriptingDefineSymbol(ENABLE_HYBRIDCLR_SCRIPTING_DEFINE_SYMBOLS);
         }
 
-#if ENABLE_OBFUZ
+// #if ENABLE_OBFUZ
         [MenuItem("DGame Tools/HybridCLR/启用Obfuz")]
         public static void EnableObfuz()
         {
             ScriptingDefineSymbolsTools.EnableScriptingDefineSymbol(ENABLE_OBFUZ_SCRIPTING_DEFINE_SYMBOLS);
         }
-#endif
+// #endif
 
-#if ENABLE_OBFUZ
+// #if ENABLE_OBFUZ
         [MenuItem("DGame Tools/HybridCLR/禁用Obfuz")]
         public static void DisableObfuz()
         {
             ScriptingDefineSymbolsTools.DisableScriptingDefineSymbol(ENABLE_OBFUZ_SCRIPTING_DEFINE_SYMBOLS);
         }
-#endif
+// #endif
     }
 }

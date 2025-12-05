@@ -300,11 +300,7 @@ namespace DGame
                 strVar.AppendLine($"\t\tprivate {componentName} {varName};");
             }
 
-            if (rule.componentName == UIComponentName.GameObject)
-            {
-                strBind.AppendLine($"\t\t\t{varName} = m_bindComponent.GetComponent<RectTransform>({m_bindIndex}).gameObject;");
-            }
-            else if (rule.isUIWidget)
+            if (rule.componentName == UIComponentName.GameObject || rule.isUIWidget)
             {
                 strBind.AppendLine($"\t\t\t{varName} = m_bindComponent.GetComponent<RectTransform>({m_bindIndex}).gameObject;");
             }

@@ -358,7 +358,7 @@ namespace GameLogic
         }
 
 
-        public T CreateWidgetByPrefab<T>(GameObject goPrefab, Transform parentTrans, bool visible = true)
+        public T CreateWidgetByPrefab<T>(GameObject goPrefab, Transform parentTrans = null, bool visible = true)
             where T : UIWidget, new()
         {
             var widget = new T();

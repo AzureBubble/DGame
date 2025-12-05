@@ -297,6 +297,10 @@ namespace DGame
             {
                 strBind.AppendLine($"\t\t\t{varName} = m_bindComponent.GetComponent<RectTransform>({m_bindIndex}).gameObject;");
             }
+            else if (rule.componentName != UIComponentName.GameObject && rule.isUIWidget)
+            {
+                strBind.AppendLine($"\t\t\t{varName} = CreateWidgetByPrefab<{componentName}>(m_bindComponent.GetComponent<RectTransform>({m_bindIndex}).gameObject);");
+            }
             else
             {
                 strBind.AppendLine($"\t\t\t{varName} = m_bindComponent.GetComponent<{componentName}>({m_bindIndex});");
@@ -567,7 +571,8 @@ namespace DGame
                 return;
             }
 
-            if (rule.componentName == UIComponentName.GameObject)
+            if (rule.componentName == UIComponentName.GameObject
+                || (rule.componentName != UIComponentName.GameObject && rule.isUIWidget))
             {
                 var c = child.gameObject.GetComponent<RectTransform>();
                 uiBindComponent.AddComponent(c);

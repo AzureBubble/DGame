@@ -197,7 +197,7 @@ namespace DGame
                 default:
                     if (rule.isUIWidget)
                     {
-                        strBind.AppendLine($"\t\t\t{varName} = CreateWidgetByPrefab<{componentName}>(\"{varPath}\");");
+                        strBind.AppendLine($"\t\t\t{varName} = CreateWidget<{componentName}>(\"{varPath}\");");
                         return;
                     }
                     strBind.AppendLine($"\t\t\t{varName} = FindChildComponent<{componentName}>(\"{varPath}\");");

@@ -291,18 +291,15 @@ namespace DGame
                 return;
             }
 
-            if (rule.isUIWidget)
-            {
-                strVar.AppendLine($"\t\tprivate GameObject {varName};");
-            }
-            else
-            {
-                strVar.AppendLine($"\t\tprivate {componentName} {varName};");
-            }
+            strVar.AppendLine($"\t\tprivate {componentName} {varName};");
 
-            if (rule.componentName == UIComponentName.GameObject || rule.isUIWidget)
+            if (rule.componentName == UIComponentName.GameObject)
             {
                 strBind.AppendLine($"\t\t\t{varName} = m_bindComponent.GetComponent<RectTransform>({m_bindIndex}).gameObject;");
+            }
+            else if (rule.componentName != UIComponentName.GameObject && rule.isUIWidget)
+            {
+                strBind.AppendLine($"\t\t\t{varName} = CreateWidget<{componentName}>(m_bindComponent.GetComponent<RectTransform>({m_bindIndex}).gameObject);");
             }
             else
             {

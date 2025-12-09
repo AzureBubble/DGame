@@ -50,11 +50,7 @@ namespace DGame
         Action<SpriteRenderer> m_spriteRendererCallback;
         private CancellationToken m_cancellationToken;
 
-        public void OnSpawnFromMemoryPool()
-        {
-        }
-
-        public void OnRecycleToMemoryPool()
+        public void OnRelease()
         {
             spriteRenderer = null;
             image = null;

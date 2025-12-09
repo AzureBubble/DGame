@@ -34,9 +34,9 @@ namespace DGame
                 return assetObject;
             }
 
-            public override void OnRecycleToMemoryPool()
+            public override void OnRelease()
             {
-                base.OnRecycleToMemoryPool();
+                base.OnRelease();
                 m_assetHandle = null;
             }
 

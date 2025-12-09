@@ -12,14 +12,10 @@ namespace DGame
         {
             #region 内存池方法
 
-            public void OnSpawnFromMemoryPool()
-            {
-            }
-
             /// <summary>
             /// 回收到内存池 初始化信息
             /// </summary>
-            public void OnRecycleToMemoryPool()
+            public void OnRelease()
             {
                 m_object = null;
                 SpawnCount = 0;
@@ -88,7 +84,7 @@ namespace DGame
 
                 if (spawned)
                 {
-                    obj.OnSpawnFromObjectPool();
+                    obj.OnSpawn();
                 }
 
                 return internalObj;
@@ -111,7 +107,7 @@ namespace DGame
             {
                 SpawnCount++;
                 m_object.LastUseTime = DateTime.UtcNow;
-                m_object.OnSpawnFromObjectPool();
+                m_object.OnSpawn();
                 return m_object;
             }
 
@@ -121,7 +117,7 @@ namespace DGame
             /// <exception cref="DGameException"></exception>
             public void OnRecycleToObjectPool()
             {
-                m_object.OnRecycleToObjectPool();
+                m_object.OnRecycle();
                 m_object.LastUseTime = DateTime.UtcNow;
                 SpawnCount--;
 
@@ -138,7 +134,7 @@ namespace DGame
             public void ReleaseObj(bool isDestroy)
             {
                 m_object.ReleaseObj(isDestroy);
-                MemoryPool.Recycle(m_object);
+                MemoryPool.Release(m_object);
             }
         }
     }

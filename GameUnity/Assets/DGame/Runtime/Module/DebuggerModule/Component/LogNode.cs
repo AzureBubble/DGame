@@ -30,11 +30,7 @@ namespace DGame
                 return logNode;
             }
 
-            public void OnSpawnFromMemoryPool()
-            {
-            }
-
-            public void OnRecycleToMemoryPool()
+            public void OnRelease()
             {
                 m_logTime = default(DateTime);
                 m_logFrameCount = 0;

@@ -311,7 +311,7 @@ namespace DGame
                 m_poolObjects.Remove(poolObject.Name, poolObject);
                 m_poolObjectsMap.Remove(poolObject.Peek().Target);
                 poolObject.ReleaseObj(false);
-                MemoryPool.Recycle(poolObject);
+                MemoryPool.Release(poolObject);
                 return true;
             }
 
@@ -410,7 +410,7 @@ namespace DGame
                 foreach (var poolObj in m_poolObjectsMap.Values)
                 {
                     poolObj.ReleaseObj(true);
-                    MemoryPool.Recycle(poolObj);
+                    MemoryPool.Release(poolObj);
                 }
 
                 m_poolObjectsMap.Clear();

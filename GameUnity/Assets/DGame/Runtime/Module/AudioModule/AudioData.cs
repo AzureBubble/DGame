@@ -11,11 +11,7 @@ namespace DGame
 
         public bool InPool { get; private set; } = false;
 
-        public override void OnSpawnFromMemoryPool()
-        {
-        }
-
-        public override void OnRecycleToMemoryPool()
+        public override void OnRelease()
         {
             if (!InPool)
             {
@@ -33,11 +29,11 @@ namespace DGame
             return audioData;
         }
 
-        internal static void Recycle(AudioData audioData)
+        internal static void Release(AudioData audioData)
         {
             if (audioData != null)
             {
-                MemoryPool.Recycle(audioData);
+                MemoryPool.Release(audioData);
             }
         }
     }

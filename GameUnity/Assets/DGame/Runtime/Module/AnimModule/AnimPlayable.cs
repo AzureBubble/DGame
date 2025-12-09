@@ -29,11 +29,7 @@ namespace DGame
             m_isDestroyed = true;
         }
 
-        public void OnSpawnFromMemoryPool()
-        {
-        }
-
-        public void OnRecycleToMemoryPool()
+        public void OnRelease()
         {
             for (int i = 0; i < m_animClips.Count; i++)
             {
@@ -87,7 +83,7 @@ namespace DGame
 
         public void DestroyGraph()
         {
-            MemoryPool.Recycle(this);
+            MemoryPool.Release(this);
         }
 
         public void PlayGraph()

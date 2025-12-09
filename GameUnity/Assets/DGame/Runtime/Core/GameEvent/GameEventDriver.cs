@@ -31,11 +31,7 @@ namespace DGame
             m_eventRecords = new List<EventRecord>();
         }
 
-        public void OnSpawnFromMemoryPool()
-        {
-        }
-
-        public void OnRecycleToMemoryPool()
+        public void OnRelease()
         {
             if (!m_isInitialized)
             {

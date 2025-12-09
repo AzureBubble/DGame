@@ -658,14 +658,10 @@ namespace DGame
 
         internal override void Destroy()
         {
-            MemoryPool.Recycle(this);
+            MemoryPool.Release(this);
         }
 
-        public void OnSpawnFromMemoryPool()
-        {
-        }
-
-        public void OnRecycleToMemoryPool()
+        public void OnRelease()
         {
             if (m_currentState != null)
             {

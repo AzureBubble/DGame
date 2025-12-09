@@ -81,7 +81,7 @@ namespace DGame
                 m_logNodeQueue.Enqueue(LogNode.Create(type, logMessage, stacktrace));
                 while (m_logNodeQueue.Count > maxLine)
                 {
-                    MemoryPool.Recycle(m_logNodeQueue.Dequeue());
+                    MemoryPool.Release(m_logNodeQueue.Dequeue());
                 }
             }
 

@@ -7,8 +7,7 @@ namespace DGame
     /// </summary>
     public abstract class BasePoolObject : IMemory
     {
-
-        public BasePoolObject()
+        protected BasePoolObject()
         {
             Name = null;
             Target = null;
@@ -87,14 +86,10 @@ namespace DGame
 
         #region 内存池方法
 
-        public virtual void OnSpawnFromMemoryPool()
-        {
-        }
-
         /// <summary>
         /// 回收到内存池 初始化信息
         /// </summary>
-        public virtual void OnRecycleToMemoryPool()
+        public virtual void OnRelease()
         {
             Name = null;
             Target = null;
@@ -110,7 +105,7 @@ namespace DGame
         /// <summary>
         /// 从对象池中取出
         /// </summary>
-        protected internal virtual void OnSpawnFromObjectPool()
+        protected internal virtual void OnSpawn()
         {
 
         }
@@ -118,7 +113,7 @@ namespace DGame
         /// <summary>
         /// 回收到对象池
         /// </summary>
-        protected internal virtual void OnRecycleToObjectPool()
+        protected internal virtual void OnRecycle()
         {
 
         }

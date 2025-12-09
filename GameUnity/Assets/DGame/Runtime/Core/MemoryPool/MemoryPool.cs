@@ -35,7 +35,7 @@ namespace DGame
                 foreach (var memoryCollector in m_memoryCollectorPool.Values)
                 {
                     results[index++] = new MemoryCollectorInfo(memoryCollector.ClassType, memoryCollector.UnusedCount,
-                        memoryCollector.UsingCount, memoryCollector.SpawnCount, memoryCollector.RecycleCount, memoryCollector.AddCount,
+                        memoryCollector.UsingCount, memoryCollector.SpawnCount, memoryCollector.ReleaseCount, memoryCollector.AddCount,
                         memoryCollector.RemoveCount, memoryCollector.Capacity);
                 }
             }
@@ -91,7 +91,7 @@ namespace DGame
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <exception cref="DGameException"></exception>
-        public static void Recycle<T>(List<T> memories) where T : class, IMemory
+        public static void Release<T>(List<T> memories) where T : class, IMemory
         {
             var classType = typeof(T);
             if (classType == null)
@@ -105,7 +105,7 @@ namespace DGame
             {
                 for (int i = 0; i < memories.Count; i++)
                 {
-                    memoryCollector.Recycle(memories[i]);
+                    memoryCollector.Release(memories[i]);
                 }
             }
         }
@@ -115,7 +115,7 @@ namespace DGame
         /// </summary>
         /// <param name="memory"></param>
         /// <exception cref="DGameException"></exception>
-        public static void Recycle(IMemory memory)
+        public static void Release(IMemory memory)
         {
             if (memory == null)
             {
@@ -124,7 +124,7 @@ namespace DGame
 
             Type classType = memory.GetType();
             InternalCheckClassTypeIsValid(classType);
-            GetMemoryCollector(classType)?.Recycle(memory);
+            GetMemoryCollector(classType)?.Release(memory);
         }
 
         #endregion

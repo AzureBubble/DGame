@@ -278,7 +278,7 @@ namespace DGame
             {
                 if (m_audioData != null)
                 {
-                    AudioData.Recycle(m_audioData);
+                    AudioData.Release(m_audioData);
                     m_audioData = null;
                 }
 
@@ -373,7 +373,7 @@ namespace DGame
 
             if (m_audioData != null)
             {
-                AudioData.Recycle(m_audioData);
+                AudioData.Release(m_audioData);
             }
         }
     }

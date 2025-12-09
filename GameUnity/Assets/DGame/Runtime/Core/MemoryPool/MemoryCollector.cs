@@ -26,7 +26,7 @@ namespace DGame
 
         public int SpawnCount { get; private set; }
 
-        public int RecycleCount { get; private set; }
+        public int ReleaseCount { get; private set; }
 
         public int AddCount { get; private set; }
 
@@ -51,7 +51,7 @@ namespace DGame
             ClassType = classType;
             UsingCount = 0;
             SpawnCount = 0;
-            RecycleCount = 0;
+            ReleaseCount = 0;
             AddCount = 0;
             RemoveCount = 0;
         }
@@ -84,7 +84,6 @@ namespace DGame
             }
 
             AddCount++;
-            memory.OnSpawnFromMemoryPool();
             return memory;
         }
 
@@ -99,23 +98,20 @@ namespace DGame
                 {
                     return m_collector.Dequeue();
                 }
-                else
-                {
-                    memory = Activator.CreateInstance(ClassType) as IMemory;
-                }
+
+                memory = Activator.CreateInstance(ClassType) as IMemory;
             }
             AddCount++;
-            memory?.OnSpawnFromMemoryPool();
             return memory;
         }
 
         #endregion
 
-        #region Recycle
+        #region Release
 
-        public void Recycle(IMemory memory)
+        public void Release(IMemory memory)
         {
-            memory.OnRecycleToMemoryPool();
+            memory.OnRelease();
             lock (m_collector)
             {
                 if (MemoryPool.EnableStrictCheck && m_collector.Contains(memory))
@@ -126,7 +122,7 @@ namespace DGame
                 m_collector.Enqueue(memory);
             }
 
-            RecycleCount--;
+            ReleaseCount--;
             UsingCount--;
         }
 

@@ -267,7 +267,7 @@ namespace GameLogic
         {
             if (m_eventDriver != null)
             {
-                MemoryPool.Recycle(m_eventDriver);
+                MemoryPool.Release(m_eventDriver);
             }
         }
 

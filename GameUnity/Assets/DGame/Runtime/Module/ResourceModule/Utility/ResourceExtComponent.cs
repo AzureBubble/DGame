@@ -121,7 +121,7 @@ namespace DGame
                 if(current.Value.assetObject.IsCanRelease())
                 {
                     m_assetItemPool.Recycle(current.Value.assetTarget);
-                    MemoryPool.Recycle(current.Value.assetObject);
+                    MemoryPool.Release(current.Value.assetObject);
                     m_loadAssetObjectsLinkedList.Remove(current);
                 }
                 current = next;

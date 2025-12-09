@@ -12,11 +12,7 @@ namespace DGame
             public CancellationTokenSource Cts { get; set; }
             public string Location { get; set; }
 
-            public void OnSpawnFromMemoryPool()
-            {
-            }
-
-            public void OnRecycleToMemoryPool()
+            public void OnRelease()
             {
                 Cts?.Cancel();
                 Cts?.Dispose();
@@ -154,7 +150,7 @@ namespace DGame
         {
             if (m_loadingStates.TryGetValue(target, out var oldState))
             {
-                MemoryPool.Recycle(oldState);
+                MemoryPool.Release(oldState);
                 m_loadingStates.Remove(target);
             }
         }
@@ -167,7 +163,7 @@ namespace DGame
         {
             if (m_loadingStates.TryGetValue(target, out var state))
             {
-                MemoryPool.Recycle(state);
+                MemoryPool.Release(state);
                 m_loadingStates.Remove(target);
             }
         }
@@ -191,7 +187,7 @@ namespace DGame
         {
             foreach (var state in m_loadingStates.Values)
             {
-                MemoryPool.Recycle(state);
+                MemoryPool.Release(state);
             }
 
             m_loadingStates.Clear();

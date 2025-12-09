@@ -15,6 +15,7 @@
             {
                 return;
             }
+            ResourceExtComponent.ResourceModule?.UnloadAsset(Target);
         }
     }
 }

@@ -25,9 +25,7 @@ namespace DGame
         }
 
         private int ObjectPoolComparison(BaseObjectPool x, BaseObjectPool y)
-        {
-            return x.Priority.CompareTo(y.Priority);
-        }
+            => x.Priority.CompareTo(y.Priority);
 
         public override void OnCreate()
         {
@@ -36,12 +34,13 @@ namespace DGame
 
         public override void OnDestroy()
         {
-            foreach (BaseObjectPool pool in m_cachedAllObjectPools)
+            for (var i = 0; i < m_cachedAllObjectPools.Count; i++)
             {
-                pool.Destroy();
+                m_cachedAllObjectPools[i].Destroy();
             }
-            m_cachedAllObjectPools.Clear();
+
             m_objectPools.Clear();
+            m_cachedAllObjectPools.Clear();
         }
 
         public void Update(float elapseSeconds, float realElapseSeconds)
@@ -52,19 +51,13 @@ namespace DGame
             }
         }
 
-        #region CheckHasObjectPool
+        #region Contains
 
-        private bool InternalHasObjectPool(TypeNamePair pair)
-        {
-            return m_objectPools.ContainsKey(pair);
-        }
+        private bool InternalContains(TypeNamePair pair) => m_objectPools.ContainsKey(pair);
 
-        public bool CheckHasObjectPool<T>() where T : BasePoolObject
-        {
-            return InternalHasObjectPool(new TypeNamePair(typeof(T)));
-        }
+        public bool Contains<T>() where T : BasePoolObject => InternalContains(new TypeNamePair(typeof(T)));
 
-        public bool CheckHasObjectPool(Type objectType)
+        public bool Contains(Type objectType)
         {
             if (objectType == null)
             {
@@ -75,15 +68,13 @@ namespace DGame
             {
                 throw new DGameException(Utility.StringUtil.Format("对象类型{0}无效，必须是BasePoolObject子类", objectType.FullName));
             }
-            return InternalHasObjectPool(new TypeNamePair(objectType));
+            return InternalContains(new TypeNamePair(objectType));
         }
 
-        public bool CheckHasObjectPool<T>(string name) where T : BasePoolObject
-        {
-            return InternalHasObjectPool(new TypeNamePair(typeof(T), name));
-        }
+        public bool Contains<T>(string name) where T : BasePoolObject
+            => InternalContains(new TypeNamePair(typeof(T), name));
 
-        public bool CheckHasObjectPool(Type objectType, string name)
+        public bool Contains(Type objectType, string name)
         {
             if (objectType == null)
             {
@@ -94,10 +85,10 @@ namespace DGame
             {
                 throw new DGameException(Utility.StringUtil.Format("对象类型{0}无效，必须是BasePoolObject子类", objectType.FullName));
             }
-            return InternalHasObjectPool(new TypeNamePair(objectType, name));
+            return InternalContains(new TypeNamePair(objectType, name));
         }
 
-        public bool CheckHasObjectPool(Predicate<BaseObjectPool> condition)
+        public bool Contains(Predicate<BaseObjectPool> condition)
         {
             if (condition == null)
             {
@@ -119,18 +110,10 @@ namespace DGame
         #region GetObjectPool
 
         private BaseObjectPool InternalGetObjectPool(TypeNamePair pair)
-        {
-            if (m_objectPools.TryGetValue(pair, out BaseObjectPool pool))
-            {
-                return pool;
-            }
-            return null;
-        }
+            => m_objectPools.GetValueOrDefault(pair);
 
         public IObjectPool<T> GetObjectPool<T>() where T : BasePoolObject
-        {
-            return (IObjectPool<T>)InternalGetObjectPool(new TypeNamePair(typeof(T)));
-        }
+            => InternalGetObjectPool(new TypeNamePair(typeof(T))) as IObjectPool<T>;
 
         public BaseObjectPool GetObjectPool(Type objType)
         {
@@ -147,9 +130,7 @@ namespace DGame
         }
 
         public IObjectPool<T> GetObjectPool<T>(string name) where T : BasePoolObject
-        {
-            return (IObjectPool<T>)InternalGetObjectPool(new TypeNamePair(typeof(T), name));
-        }
+            => InternalGetObjectPool(new TypeNamePair(typeof(T), name)) as IObjectPool<T>;
 
         public BaseObjectPool GetObjectPool(Type objType, string name)
         {
@@ -184,31 +165,37 @@ namespace DGame
 
         public BaseObjectPool[] GetObjectPools(Predicate<BaseObjectPool> condition)
         {
+            List<BaseObjectPool> pools = new List<BaseObjectPool>();
+            GetObjectPools(condition, pools);
+            return pools.ToArray();
+        }
+
+        public void GetObjectPools(Predicate<BaseObjectPool> condition, List<BaseObjectPool> results)
+        {
             if (condition == null)
             {
                 throw new DGameException("条件无效");
             }
 
-            List<BaseObjectPool> pools = new List<BaseObjectPool>();
+            if (results == null)
+            {
+                throw new DGameException("Results is invalid.");
+            }
+            results.Clear();
             foreach (var pool in m_objectPools.Values)
             {
                 if (condition(pool))
                 {
-                    pools.Add(pool);
+                    results.Add(pool);
                 }
             }
-            return pools.ToArray();
         }
 
         public BaseObjectPool[] GetAllObjectPools()
-        {
-            return GetAllObjectPools(false);
-        }
+            => GetAllObjectPools(false);
 
         public void GetAllObjectPools(List<BaseObjectPool> pools)
-        {
-            GetAllObjectPools(false, pools);
-        }
+            => GetAllObjectPools(false, pools);
 
         public BaseObjectPool[] GetAllObjectPools(bool sort)
         {
@@ -262,7 +249,7 @@ namespace DGame
         {
             TypeNamePair pair = new TypeNamePair(typeof(T), name);
 
-            if (CheckHasObjectPool<T>(name))
+            if (Contains<T>(name))
             {
                 throw new DGameException(Utility.StringUtil.Format("对象池已经存在 '{0}'", pair));
             }
@@ -290,7 +277,7 @@ namespace DGame
             }
             TypeNamePair pair = new TypeNamePair(objType, name);
 
-            if (CheckHasObjectPool(objType, name))
+            if (Contains(objType, name))
             {
                 throw new DGameException(Utility.StringUtil.Format("对象池已经存在 '{0}'", pair));
             }
@@ -307,368 +294,266 @@ namespace DGame
         }
 
         public IObjectPool<T> CreateSingleSpawnObjectPool<T>() where T : BasePoolObject
-        {
-            return InternalCreateObjectPool<T>(string.Empty, false, DEFAULT_EXPIRE_TIME, DEFAULT_CAPACITY,
-                DEFAULT_EXPIRE_TIME, DEFAULT_PRIORITY);
-        }
+            => InternalCreateObjectPool<T>(string.Empty, false,
+                DEFAULT_EXPIRE_TIME, DEFAULT_CAPACITY, DEFAULT_EXPIRE_TIME, DEFAULT_PRIORITY);
 
         public BaseObjectPool CreateSingleSpawnObjectPool(Type objType)
-        {
-            return InternalCreateObjectPool(objType, string.Empty, false, DEFAULT_EXPIRE_TIME, DEFAULT_CAPACITY, DEFAULT_EXPIRE_TIME, DEFAULT_PRIORITY);
-        }
+            => InternalCreateObjectPool(objType, string.Empty, false,
+                DEFAULT_EXPIRE_TIME, DEFAULT_CAPACITY, DEFAULT_EXPIRE_TIME, DEFAULT_PRIORITY);
 
         public IObjectPool<T> CreateSingleSpawnObjectPool<T>(string name) where T : BasePoolObject
-        {
-            return InternalCreateObjectPool<T>(name, false, DEFAULT_EXPIRE_TIME, DEFAULT_CAPACITY,
-                DEFAULT_EXPIRE_TIME, DEFAULT_PRIORITY);
-        }
+            => InternalCreateObjectPool<T>(name, false, DEFAULT_EXPIRE_TIME,
+                DEFAULT_CAPACITY, DEFAULT_EXPIRE_TIME, DEFAULT_PRIORITY);
 
         public BaseObjectPool CreateSingleSpawnObjectPool(Type objType, string name)
-        {
-            return InternalCreateObjectPool(objType, name, false, DEFAULT_EXPIRE_TIME, DEFAULT_CAPACITY, DEFAULT_EXPIRE_TIME, DEFAULT_PRIORITY);
-        }
+            => InternalCreateObjectPool(objType, name, false,
+                DEFAULT_EXPIRE_TIME, DEFAULT_CAPACITY, DEFAULT_EXPIRE_TIME, DEFAULT_PRIORITY);
 
         public IObjectPool<T> CreateSingleSpawnObjectPool<T>(int capacity) where T : BasePoolObject
-        {
-            return InternalCreateObjectPool<T>(string.Empty, false, DEFAULT_EXPIRE_TIME, capacity,
-                DEFAULT_EXPIRE_TIME, DEFAULT_PRIORITY);
-        }
+            => InternalCreateObjectPool<T>(string.Empty, false,
+                DEFAULT_EXPIRE_TIME, capacity, DEFAULT_EXPIRE_TIME, DEFAULT_PRIORITY);
 
         public BaseObjectPool CreateSingleSpawnObjectPool(Type objType, int capacity)
-        {
-            return InternalCreateObjectPool(objType, string.Empty, false, DEFAULT_EXPIRE_TIME, capacity,
-                DEFAULT_EXPIRE_TIME, DEFAULT_PRIORITY);
-        }
+            => InternalCreateObjectPool(objType, string.Empty, false,
+                DEFAULT_EXPIRE_TIME, capacity, DEFAULT_EXPIRE_TIME, DEFAULT_PRIORITY);
 
         public IObjectPool<T> CreateSingleSpawnObjectPool<T>(float expireTime) where T : BasePoolObject
-        {
-            return InternalCreateObjectPool<T>(string.Empty, false, expireTime, DEFAULT_CAPACITY,
-                expireTime, DEFAULT_PRIORITY);
-        }
+            => InternalCreateObjectPool<T>(string.Empty, false,
+                expireTime, DEFAULT_CAPACITY, expireTime, DEFAULT_PRIORITY);
 
         public BaseObjectPool CreateSingleSpawnObjectPool(Type objType, float expireTime)
-        {
-            return InternalCreateObjectPool(objType, string.Empty, false, expireTime, DEFAULT_CAPACITY,
-                expireTime, DEFAULT_PRIORITY);
-        }
+            => InternalCreateObjectPool(objType, string.Empty, false,
+                expireTime, DEFAULT_CAPACITY, expireTime, DEFAULT_PRIORITY);
 
         public IObjectPool<T> CreateSingleSpawnObjectPool<T>(string name, int capacity) where T : BasePoolObject
-        {
-            return InternalCreateObjectPool<T>(name, false, DEFAULT_EXPIRE_TIME, capacity,
-                DEFAULT_EXPIRE_TIME, DEFAULT_PRIORITY);
-        }
+            => InternalCreateObjectPool<T>(name, false, DEFAULT_EXPIRE_TIME,
+                capacity, DEFAULT_EXPIRE_TIME, DEFAULT_PRIORITY);
 
         public BaseObjectPool CreateSingleSpawnObjectPool(Type objType, string name, int capacity)
-        {
-            return InternalCreateObjectPool(objType, name, false, DEFAULT_EXPIRE_TIME, capacity,
-                DEFAULT_EXPIRE_TIME, DEFAULT_PRIORITY);
-        }
+            => InternalCreateObjectPool(objType, name, false,
+                DEFAULT_EXPIRE_TIME, capacity, DEFAULT_EXPIRE_TIME, DEFAULT_PRIORITY);
 
         public IObjectPool<T> CreateSingleSpawnObjectPool<T>(string name, float expireTime) where T : BasePoolObject
-        {
-            return InternalCreateObjectPool<T>(name, false, expireTime, DEFAULT_CAPACITY,
-                expireTime, DEFAULT_PRIORITY);
-        }
+            => InternalCreateObjectPool<T>(name, false, expireTime,
+                DEFAULT_CAPACITY, expireTime, DEFAULT_PRIORITY);
 
         public BaseObjectPool CreateSingleSpawnObjectPool(Type objType, string name, float expireTime)
-        {
-            return InternalCreateObjectPool(objType, name, false, expireTime, DEFAULT_CAPACITY,
-                expireTime, DEFAULT_PRIORITY);
-        }
+            => InternalCreateObjectPool(objType, name, false,
+                expireTime, DEFAULT_CAPACITY, expireTime, DEFAULT_PRIORITY);
 
         public IObjectPool<T> CreateSingleSpawnObjectPool<T>(int capacity, float expireTime) where T : BasePoolObject
-        {
-            return InternalCreateObjectPool<T>(string.Empty, false, expireTime, capacity,
-                expireTime, DEFAULT_PRIORITY);
-        }
+            => InternalCreateObjectPool<T>(string.Empty, false,
+                expireTime, capacity, expireTime, DEFAULT_PRIORITY);
 
         public BaseObjectPool CreateSingleSpawnObjectPool(Type objType, int capacity, float expireTime)
-        {
-            return InternalCreateObjectPool(objType, string.Empty, false, expireTime, capacity,
-                expireTime, DEFAULT_PRIORITY);
-        }
+            => InternalCreateObjectPool(objType, string.Empty, false,
+                expireTime, capacity, expireTime, DEFAULT_PRIORITY);
 
         public IObjectPool<T> CreateSingleSpawnObjectPool<T>(int capacity, int priority) where T : BasePoolObject
-        {
-            return InternalCreateObjectPool<T>(string.Empty, false, DEFAULT_EXPIRE_TIME, capacity,
-                DEFAULT_EXPIRE_TIME, priority);
-        }
+            => InternalCreateObjectPool<T>(string.Empty, false,
+                DEFAULT_EXPIRE_TIME, capacity, DEFAULT_EXPIRE_TIME, priority);
 
         public BaseObjectPool CreateSingleSpawnObjectPool(Type objType, int capacity, int priority)
-        {
-            return InternalCreateObjectPool(objType, string.Empty, false, DEFAULT_EXPIRE_TIME, capacity,
-                DEFAULT_EXPIRE_TIME, priority);
-        }
+            => InternalCreateObjectPool(objType, string.Empty, false,
+                DEFAULT_EXPIRE_TIME, capacity, DEFAULT_EXPIRE_TIME, priority);
 
         public IObjectPool<T> CreateSingleSpawnObjectPool<T>(float expireTime, int priority) where T : BasePoolObject
-        {
-            return InternalCreateObjectPool<T>(string.Empty, false, expireTime, DEFAULT_CAPACITY,
-                expireTime, priority);
-        }
+            => InternalCreateObjectPool<T>(string.Empty, false,
+                expireTime, DEFAULT_CAPACITY, expireTime, priority);
 
         public BaseObjectPool CreateSingleSpawnObjectPool(Type objType, float expireTime, int priority)
-        {
-            return InternalCreateObjectPool(objType, string.Empty, false, expireTime, DEFAULT_CAPACITY,
-                expireTime, priority);
-        }
+            => InternalCreateObjectPool(objType, string.Empty, false,
+                expireTime, DEFAULT_CAPACITY, expireTime, priority);
 
-        public IObjectPool<T> CreateSingleSpawnObjectPool<T>(string name, int capacity, float expireTime) where T : BasePoolObject
-        {
-            return InternalCreateObjectPool<T>(name, false, expireTime, capacity,
-                expireTime, DEFAULT_PRIORITY);
-        }
+        public IObjectPool<T> CreateSingleSpawnObjectPool<T>(string name, int capacity, float expireTime)
+            where T : BasePoolObject
+            => InternalCreateObjectPool<T>(name, false,
+                expireTime, capacity, expireTime, DEFAULT_PRIORITY);
 
         public BaseObjectPool CreateSingleSpawnObjectPool(Type objType, string name, int capacity, float expireTime)
-        {
-            return InternalCreateObjectPool(objType, name, false, expireTime, capacity,
-                expireTime, DEFAULT_PRIORITY);
-        }
+            => InternalCreateObjectPool(objType, name, false,
+                expireTime, capacity, expireTime, DEFAULT_PRIORITY);
 
-        public IObjectPool<T> CreateSingleSpawnObjectPool<T>(string name, int capacity, int priority) where T : BasePoolObject
-        {
-            return InternalCreateObjectPool<T>(name, false, DEFAULT_EXPIRE_TIME, capacity,
-                DEFAULT_EXPIRE_TIME, priority);
-        }
+        public IObjectPool<T> CreateSingleSpawnObjectPool<T>(string name, int capacity, int priority)
+            where T : BasePoolObject
+            => InternalCreateObjectPool<T>(name, false,
+                DEFAULT_EXPIRE_TIME, capacity, DEFAULT_EXPIRE_TIME, priority);
 
         public BaseObjectPool CreateSingleSpawnObjectPool(Type objType, string name, int capacity, int priority)
-        {
-            return InternalCreateObjectPool(objType, name, false, DEFAULT_EXPIRE_TIME, capacity,
-                DEFAULT_EXPIRE_TIME, priority);
-        }
+            => InternalCreateObjectPool(objType, name, false,
+                DEFAULT_EXPIRE_TIME, capacity, DEFAULT_EXPIRE_TIME, priority);
 
-        public IObjectPool<T> CreateSingleSpawnObjectPool<T>(string name, float expireTime, int priority) where T : BasePoolObject
-        {
-            return InternalCreateObjectPool<T>(name, false, expireTime, DEFAULT_CAPACITY,
-                expireTime, priority);
-        }
+        public IObjectPool<T> CreateSingleSpawnObjectPool<T>(string name, float expireTime, int priority)
+            where T : BasePoolObject
+            => InternalCreateObjectPool<T>(name, false,
+                expireTime, DEFAULT_CAPACITY, expireTime, priority);
 
         public BaseObjectPool CreateSingleSpawnObjectPool(Type objType, string name, float expireTime, int priority)
-        {
-            return InternalCreateObjectPool(objType, name, false, expireTime, DEFAULT_CAPACITY,
-                expireTime, priority);
-        }
+            => InternalCreateObjectPool(objType, name, false,
+                expireTime, DEFAULT_CAPACITY, expireTime, priority);
 
-        public IObjectPool<T> CreateSingleSpawnObjectPool<T>(int capacity, float expireTime, int priority) where T : BasePoolObject
-        {
-            return InternalCreateObjectPool<T>(string.Empty, false, expireTime, capacity,
-                expireTime, priority);
-        }
+        public IObjectPool<T> CreateSingleSpawnObjectPool<T>(int capacity, float expireTime, int priority)
+            where T : BasePoolObject
+            => InternalCreateObjectPool<T>(string.Empty, false,
+                expireTime, capacity, expireTime, priority);
 
         public BaseObjectPool CreateSingleSpawnObjectPool(Type objType, int capacity, float expireTime, int priority)
-        {
-            return InternalCreateObjectPool(objType, string.Empty, false, expireTime, capacity,
-                expireTime, priority);
-        }
+            => InternalCreateObjectPool(objType, string.Empty, false,
+                expireTime, capacity, expireTime, priority);
 
-        public IObjectPool<T> CreateSingleSpawnObjectPool<T>(string name, int capacity, float expireTime, int priority) where T : BasePoolObject
-        {
-            return InternalCreateObjectPool<T>(name, false, expireTime, capacity,
-                expireTime, priority);
-        }
+        public IObjectPool<T> CreateSingleSpawnObjectPool<T>(string name, int capacity, float expireTime, int priority)
+            where T : BasePoolObject
+            => InternalCreateObjectPool<T>(name, false,
+                expireTime, capacity, expireTime, priority);
 
-        public BaseObjectPool CreateSingleSpawnObjectPool(Type objType, string name, int capacity, float expireTime, int priority)
-        {
-            return InternalCreateObjectPool(objType, name, false, expireTime, capacity,
-                expireTime, priority);
-        }
+        public BaseObjectPool CreateSingleSpawnObjectPool(Type objType, string name, int capacity, float expireTime,
+            int priority)
+            => InternalCreateObjectPool(objType, name, false,
+                expireTime, capacity, expireTime, priority);
 
-        public IObjectPool<T> CreateSingleSpawnObjectPool<T>(string name, float autoReleaseInterval, int capacity, float expireTime,
-            int priority) where T : BasePoolObject
-        {
-            return InternalCreateObjectPool<T>(name, false, autoReleaseInterval, capacity,
-                expireTime, priority);
-        }
+        public IObjectPool<T> CreateSingleSpawnObjectPool<T>(string name, float autoReleaseInterval, int capacity,
+            float expireTime, int priority) where T : BasePoolObject
+            => InternalCreateObjectPool<T>(name, false,
+                autoReleaseInterval, capacity, expireTime, priority);
 
-        public BaseObjectPool CreateSingleSpawnObjectPool(Type objType, string name, float autoReleaseInterval, int capacity,
-            float expireTime, int priority)
-        {
-            return InternalCreateObjectPool(objType, name, false, autoReleaseInterval, capacity,
-                expireTime, priority);
-        }
+        public BaseObjectPool CreateSingleSpawnObjectPool(Type objType, string name, float autoReleaseInterval,
+            int capacity, float expireTime, int priority)
+            => InternalCreateObjectPool(objType, name, false,
+                autoReleaseInterval, capacity, expireTime, priority);
 
         #endregion
 
         #region CreateMultiSpawnObjectPool
 
         public IObjectPool<T> CreateMultiSpawnObjectPool<T>() where T : BasePoolObject
-        {
-            return InternalCreateObjectPool<T>(string.Empty, true, DEFAULT_EXPIRE_TIME, DEFAULT_CAPACITY,
-                DEFAULT_EXPIRE_TIME, DEFAULT_PRIORITY);
-        }
+            => InternalCreateObjectPool<T>(string.Empty, true,
+                DEFAULT_EXPIRE_TIME, DEFAULT_CAPACITY, DEFAULT_EXPIRE_TIME, DEFAULT_PRIORITY);
 
         public BaseObjectPool CreateMultiSpawnObjectPool(Type objType)
-        {
-            return InternalCreateObjectPool(objType, string.Empty, true, DEFAULT_EXPIRE_TIME, DEFAULT_CAPACITY, DEFAULT_EXPIRE_TIME, DEFAULT_PRIORITY);
-        }
+            => InternalCreateObjectPool(objType, string.Empty, true,
+                DEFAULT_EXPIRE_TIME, DEFAULT_CAPACITY, DEFAULT_EXPIRE_TIME, DEFAULT_PRIORITY);
+
 
         public IObjectPool<T> CreateMultiSpawnObjectPool<T>(string name) where T : BasePoolObject
-        {
-            return InternalCreateObjectPool<T>(name, true, DEFAULT_EXPIRE_TIME, DEFAULT_CAPACITY,
-                DEFAULT_EXPIRE_TIME, DEFAULT_PRIORITY);
-        }
+            => InternalCreateObjectPool<T>(name, true,
+                DEFAULT_EXPIRE_TIME, DEFAULT_CAPACITY, DEFAULT_EXPIRE_TIME, DEFAULT_PRIORITY);
 
         public BaseObjectPool CreateMultiSpawnObjectPool(Type objType, string name)
-        {
-            return InternalCreateObjectPool(objType, name, true, DEFAULT_EXPIRE_TIME, DEFAULT_CAPACITY, DEFAULT_EXPIRE_TIME, DEFAULT_PRIORITY);
-        }
+            => InternalCreateObjectPool(objType, name, true,
+                DEFAULT_EXPIRE_TIME, DEFAULT_CAPACITY, DEFAULT_EXPIRE_TIME, DEFAULT_PRIORITY);
+
 
         public IObjectPool<T> CreateMultiSpawnObjectPool<T>(int capacity) where T : BasePoolObject
-        {
-            return InternalCreateObjectPool<T>(string.Empty, true, DEFAULT_EXPIRE_TIME, capacity,
-                DEFAULT_EXPIRE_TIME, DEFAULT_PRIORITY);
-        }
+            => InternalCreateObjectPool<T>(string.Empty, true,
+                DEFAULT_EXPIRE_TIME, capacity, DEFAULT_EXPIRE_TIME, DEFAULT_PRIORITY);
 
         public BaseObjectPool CreateMultiSpawnObjectPool(Type objType, int capacity)
-        {
-            return InternalCreateObjectPool(objType, string.Empty, true, DEFAULT_EXPIRE_TIME, capacity,
-                DEFAULT_EXPIRE_TIME, DEFAULT_PRIORITY);
-        }
+            => InternalCreateObjectPool(objType, string.Empty, true,
+                DEFAULT_EXPIRE_TIME, capacity, DEFAULT_EXPIRE_TIME, DEFAULT_PRIORITY);
 
         public IObjectPool<T> CreateMultiSpawnObjectPool<T>(float expireTime) where T : BasePoolObject
-        {
-            return InternalCreateObjectPool<T>(string.Empty, true, expireTime, DEFAULT_CAPACITY,
-                expireTime, DEFAULT_PRIORITY);
-        }
+            => InternalCreateObjectPool<T>(string.Empty, true,
+                expireTime, DEFAULT_CAPACITY, expireTime, DEFAULT_PRIORITY);
 
         public BaseObjectPool CreateMultiSpawnObjectPool(Type objType, float expireTime)
-        {
-            return InternalCreateObjectPool(objType, string.Empty, true, expireTime, DEFAULT_CAPACITY,
-                expireTime, DEFAULT_PRIORITY);
-        }
+            => InternalCreateObjectPool(objType, string.Empty, true,
+                expireTime, DEFAULT_CAPACITY, expireTime, DEFAULT_PRIORITY);
 
         public IObjectPool<T> CreateMultiSpawnObjectPool<T>(string name, int capacity) where T : BasePoolObject
-        {
-            return InternalCreateObjectPool<T>(name, true, DEFAULT_EXPIRE_TIME, capacity,
-                DEFAULT_EXPIRE_TIME, DEFAULT_PRIORITY);
-        }
+            => InternalCreateObjectPool<T>(name, true,
+                DEFAULT_EXPIRE_TIME, capacity, DEFAULT_EXPIRE_TIME, DEFAULT_PRIORITY);
 
         public BaseObjectPool CreateMultiSpawnObjectPool(Type objType, string name, int capacity)
-        {
-            return InternalCreateObjectPool(objType, name, true, DEFAULT_EXPIRE_TIME, capacity,
-                DEFAULT_EXPIRE_TIME, DEFAULT_PRIORITY);
-        }
+            => InternalCreateObjectPool(objType, name, true,
+                DEFAULT_EXPIRE_TIME, capacity, DEFAULT_EXPIRE_TIME, DEFAULT_PRIORITY);
 
         public IObjectPool<T> CreateMultiSpawnObjectPool<T>(string name, float expireTime) where T : BasePoolObject
-        {
-            return InternalCreateObjectPool<T>(name, true, expireTime, DEFAULT_CAPACITY,
-                expireTime, DEFAULT_PRIORITY);
-        }
+            => InternalCreateObjectPool<T>(name, true,
+                expireTime, DEFAULT_CAPACITY, expireTime, DEFAULT_PRIORITY);
 
         public BaseObjectPool CreateMultiSpawnObjectPool(Type objType, string name, float expireTime)
-        {
-            return InternalCreateObjectPool(objType, name, true, expireTime, DEFAULT_CAPACITY,
-                expireTime, DEFAULT_PRIORITY);
-        }
+            => InternalCreateObjectPool(objType, name, true,
+                expireTime, DEFAULT_CAPACITY, expireTime, DEFAULT_PRIORITY);
 
         public IObjectPool<T> CreateMultiSpawnObjectPool<T>(int capacity, float expireTime) where T : BasePoolObject
-        {
-            return InternalCreateObjectPool<T>(string.Empty, true, expireTime, capacity,
-                expireTime, DEFAULT_PRIORITY);
-        }
+            => InternalCreateObjectPool<T>(string.Empty, true,
+                expireTime, capacity, expireTime, DEFAULT_PRIORITY);
 
         public BaseObjectPool CreateMultiSpawnObjectPool(Type objType, int capacity, float expireTime)
-        {
-            return InternalCreateObjectPool(objType, string.Empty, true, expireTime, capacity,
-                expireTime, DEFAULT_PRIORITY);
-        }
+            => InternalCreateObjectPool(objType, string.Empty, true,
+                expireTime, capacity, expireTime, DEFAULT_PRIORITY);
 
         public IObjectPool<T> CreateMultiSpawnObjectPool<T>(int capacity, int priority) where T : BasePoolObject
-        {
-            return InternalCreateObjectPool<T>(string.Empty, true, DEFAULT_EXPIRE_TIME, capacity,
-                DEFAULT_EXPIRE_TIME, priority);
-        }
+            => InternalCreateObjectPool<T>(string.Empty, true,
+                DEFAULT_EXPIRE_TIME, capacity, DEFAULT_EXPIRE_TIME, priority);
 
         public BaseObjectPool CreateMultiSpawnObjectPool(Type objType, int capacity, int priority)
-        {
-            return InternalCreateObjectPool(objType, string.Empty, true, DEFAULT_EXPIRE_TIME, capacity,
-                DEFAULT_EXPIRE_TIME, priority);
-        }
+            => InternalCreateObjectPool(objType, string.Empty, true,
+                DEFAULT_EXPIRE_TIME, capacity, DEFAULT_EXPIRE_TIME, priority);
 
         public IObjectPool<T> CreateMultiSpawnObjectPool<T>(float expireTime, int priority) where T : BasePoolObject
-        {
-            return InternalCreateObjectPool<T>(string.Empty, true, expireTime, DEFAULT_CAPACITY,
-                expireTime, priority);
-        }
+            => InternalCreateObjectPool<T>(string.Empty, true,
+                expireTime, DEFAULT_CAPACITY, expireTime, priority);
 
         public BaseObjectPool CreateMultiSpawnObjectPool(Type objType, float expireTime, int priority)
-        {
-            return InternalCreateObjectPool(objType, string.Empty, true, expireTime, DEFAULT_CAPACITY,
-                expireTime, priority);
-        }
+            => InternalCreateObjectPool(objType, string.Empty, true,
+                expireTime, DEFAULT_CAPACITY, expireTime, priority);
 
-        public IObjectPool<T> CreateMultiSpawnObjectPool<T>(string name, int capacity, float expireTime) where T : BasePoolObject
-        {
-            return InternalCreateObjectPool<T>(name, true, expireTime, capacity,
-                expireTime, DEFAULT_PRIORITY);
-        }
+        public IObjectPool<T> CreateMultiSpawnObjectPool<T>(string name, int capacity, float expireTime)
+            where T : BasePoolObject
+            => InternalCreateObjectPool<T>(name, true,
+                expireTime, capacity, expireTime, DEFAULT_PRIORITY);
 
         public BaseObjectPool CreateMultiSpawnObjectPool(Type objType, string name, int capacity, float expireTime)
-        {
-            return InternalCreateObjectPool(objType, name, true, expireTime, capacity,
-                expireTime, DEFAULT_PRIORITY);
-        }
+            => InternalCreateObjectPool(objType, name, true,
+                expireTime, capacity, expireTime, DEFAULT_PRIORITY);
 
-        public IObjectPool<T> CreateMultiSpawnObjectPool<T>(string name, int capacity, int priority) where T : BasePoolObject
-        {
-            return InternalCreateObjectPool<T>(name, true, DEFAULT_EXPIRE_TIME, capacity,
-                DEFAULT_EXPIRE_TIME, priority);
-        }
+        public IObjectPool<T> CreateMultiSpawnObjectPool<T>(string name, int capacity, int priority)
+            where T : BasePoolObject
+            => InternalCreateObjectPool<T>(name, true,
+                DEFAULT_EXPIRE_TIME, capacity, DEFAULT_EXPIRE_TIME, priority);
 
         public BaseObjectPool CreateMultiSpawnObjectPool(Type objType, string name, int capacity, int priority)
-        {
-            return InternalCreateObjectPool(objType, name, true, DEFAULT_EXPIRE_TIME, capacity,
-                DEFAULT_EXPIRE_TIME, priority);
-        }
+            => InternalCreateObjectPool(objType, name, true,
+                DEFAULT_EXPIRE_TIME, capacity, DEFAULT_EXPIRE_TIME, priority);
 
-        public IObjectPool<T> CreateMultiSpawnObjectPool<T>(string name, float expireTime, int priority) where T : BasePoolObject
-        {
-            return InternalCreateObjectPool<T>(name, true, expireTime, DEFAULT_CAPACITY,
-                expireTime, priority);
-        }
+        public IObjectPool<T> CreateMultiSpawnObjectPool<T>(string name, float expireTime, int priority)
+            where T : BasePoolObject
+            => InternalCreateObjectPool<T>(name, true,
+                expireTime, DEFAULT_CAPACITY, expireTime, priority);
 
         public BaseObjectPool CreateMultiSpawnObjectPool(Type objType, string name, float expireTime, int priority)
-        {
-            return InternalCreateObjectPool(objType, name, true, expireTime, DEFAULT_CAPACITY,
-                expireTime, priority);
-        }
+            => InternalCreateObjectPool(objType, name, true,
+                expireTime, DEFAULT_CAPACITY, expireTime, priority);
 
-        public IObjectPool<T> CreateMultiSpawnObjectPool<T>(int capacity, float expireTime, int priority) where T : BasePoolObject
-        {
-            return InternalCreateObjectPool<T>(string.Empty, true, expireTime, capacity,
-                expireTime, priority);
-        }
+        public IObjectPool<T> CreateMultiSpawnObjectPool<T>(int capacity, float expireTime, int priority)
+            where T : BasePoolObject
+            => InternalCreateObjectPool<T>(string.Empty, true,
+                expireTime, capacity, expireTime, priority);
 
         public BaseObjectPool CreateMultiSpawnObjectPool(Type objType, int capacity, float expireTime, int priority)
-        {
-            return InternalCreateObjectPool(objType, string.Empty, true, expireTime, capacity,
-                expireTime, priority);
-        }
+            => InternalCreateObjectPool(objType, string.Empty, true,
+                expireTime, capacity, expireTime, priority);
 
-        public IObjectPool<T> CreateMultiSpawnObjectPool<T>(string name, int capacity, float expireTime, int priority) where T : BasePoolObject
-        {
-            return InternalCreateObjectPool<T>(name, true, expireTime, capacity,
-                expireTime, priority);
-        }
+        public IObjectPool<T> CreateMultiSpawnObjectPool<T>(string name, int capacity, float expireTime, int priority)
+            where T : BasePoolObject
+            => InternalCreateObjectPool<T>(name, true,
+                expireTime, capacity, expireTime, priority);
 
-        public BaseObjectPool CreateMultiSpawnObjectPool(Type objType, string name, int capacity, float expireTime, int priority)
-        {
-            return InternalCreateObjectPool(objType, name, true, expireTime, capacity,
-                expireTime, priority);
-        }
+        public BaseObjectPool CreateMultiSpawnObjectPool(Type objType, string name, int capacity, float expireTime,
+            int priority)
+            => InternalCreateObjectPool(objType, name, true,
+                expireTime, capacity, expireTime, priority);
 
-        public IObjectPool<T> CreateMultiSpawnObjectPool<T>(string name, float autoReleaseInterval, int capacity, float expireTime,
-            int priority) where T : BasePoolObject
-        {
-            return InternalCreateObjectPool<T>(name, true, autoReleaseInterval, capacity,
-                expireTime, priority);
-        }
+        public IObjectPool<T> CreateMultiSpawnObjectPool<T>(string name, float autoReleaseInterval, int capacity,
+            float expireTime, int priority) where T : BasePoolObject
+            => InternalCreateObjectPool<T>(name, true,
+                autoReleaseInterval, capacity, expireTime, priority);
 
-        public BaseObjectPool CreateMultiSpawnObjectPool(Type objType, string name, float autoReleaseInterval, int capacity,
-            float expireTime, int priority)
-        {
-            return InternalCreateObjectPool(objType, name, true, autoReleaseInterval, capacity,
-                expireTime, priority);
-        }
+        public BaseObjectPool CreateMultiSpawnObjectPool(Type objType, string name, float autoReleaseInterval,
+            int capacity, float expireTime, int priority)
+            => InternalCreateObjectPool(objType, name, true,
+                autoReleaseInterval, capacity, expireTime, priority);
 
         #endregion
 
@@ -685,9 +570,7 @@ namespace DGame
         }
 
         public bool DestroyObjectPool<T>() where T : BasePoolObject
-        {
-            return InternalDestroyObjectPool( new TypeNamePair(typeof(T)));
-        }
+            => InternalDestroyObjectPool(new TypeNamePair(typeof(T)));
 
         public bool DestroyObjectPool(Type objectType)
         {
@@ -698,15 +581,15 @@ namespace DGame
 
             if (!typeof(BasePoolObject).IsAssignableFrom(objectType))
             {
-                throw new DGameException(Utility.StringUtil.Format("对象类型{0}无效，必须是BasePoolObject子类", objectType.FullName));
+                throw new DGameException(
+                    Utility.StringUtil.Format("对象类型{0}无效，必须是BasePoolObject子类", objectType.FullName));
             }
-            return InternalDestroyObjectPool( new TypeNamePair(objectType));
+
+            return InternalDestroyObjectPool(new TypeNamePair(objectType));
         }
 
         public bool DestroyObjectPool<T>(string name) where T : BasePoolObject
-        {
-            return InternalDestroyObjectPool( new TypeNamePair(typeof(T), name));
-        }
+            => InternalDestroyObjectPool(new TypeNamePair(typeof(T), name));
 
         public bool DestroyObjectPool(Type objectType, string name)
         {
@@ -717,9 +600,11 @@ namespace DGame
 
             if (!typeof(BasePoolObject).IsAssignableFrom(objectType))
             {
-                throw new DGameException(Utility.StringUtil.Format("对象类型{0}无效，必须是BasePoolObject子类", objectType.FullName));
+                throw new DGameException(
+                    Utility.StringUtil.Format("对象类型{0}无效，必须是BasePoolObject子类", objectType.FullName));
             }
-            return InternalDestroyObjectPool( new TypeNamePair(objectType, name));
+
+            return InternalDestroyObjectPool(new TypeNamePair(objectType, name));
         }
 
         public bool DestroyObjectPool<T>(IObjectPool<T> objectPools) where T : BasePoolObject
@@ -744,7 +629,7 @@ namespace DGame
 
         #region ReleaseCanRecycleObject
 
-        public void ReleaseCanRecycleObject()
+        public void Release()
         {
             DLogger.Info("对象池释放中...");
             GetAllObjectPools(true, m_cachedAllObjectPools);
@@ -755,7 +640,7 @@ namespace DGame
             }
         }
 
-        public void ReleaseAllUnusedToMemoryPool()
+        public void ReleaseAllUnused()
         {
             DLogger.Info("对象池释放所有未使用的对象中...");
             GetAllObjectPools(true, m_cachedAllObjectPools);

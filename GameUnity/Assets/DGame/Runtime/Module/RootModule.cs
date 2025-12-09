@@ -151,7 +151,7 @@ namespace DGame
         {
             DLogger.Warning("======== 内存不足 自动清理缓存... ========");
             var objectPoolModule = ModuleSystem.GetModule<IObjectPoolModule>();
-            objectPoolModule?.ReleaseAllUnusedToMemoryPool();
+            objectPoolModule?.ReleaseAllUnused();
             var resourceModule = ModuleSystem.GetModule<IResourceModule>();
             resourceModule?.OnLowMemory();
         }

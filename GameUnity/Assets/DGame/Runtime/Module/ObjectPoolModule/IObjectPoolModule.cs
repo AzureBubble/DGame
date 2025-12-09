@@ -13,21 +13,21 @@ namespace DGame
         /// </summary>
         int Count { get; }
 
-        #region CheckHasObjectPool
+        #region Contains
 
         /// <summary>
         /// 检查是否存在对象池
         /// </summary>
         /// <typeparam name="T">对象类型</typeparam>
         /// <returns></returns>
-        bool CheckHasObjectPool<T>() where T : BasePoolObject;
+        bool Contains<T>() where T : BasePoolObject;
 
         /// <summary>
         /// 检查是否存在对象池
         /// </summary>
         /// <param name="type">对象类型</param>
         /// <returns></returns>
-        bool CheckHasObjectPool(Type type);
+        bool Contains(Type type);
 
         /// <summary>
         /// 检查是否存在对象池
@@ -35,7 +35,7 @@ namespace DGame
         /// <typeparam name="T">对象类型</typeparam>
         /// <param name="name">对象名称</param>
         /// <returns></returns>
-        bool CheckHasObjectPool<T>(string name) where T : BasePoolObject;
+        bool Contains<T>(string name) where T : BasePoolObject;
 
         /// <summary>
         /// 检查是否存在对象池
@@ -43,14 +43,14 @@ namespace DGame
         /// <param name="type">对象类型</param>
         /// <param name="name">对象名称</param>
         /// <returns></returns>
-        bool CheckHasObjectPool(Type type, string name);
+        bool Contains(Type type, string name);
 
         /// <summary>
         /// 检查是否存在对象池
         /// </summary>
         /// <param name="condition">检查条件</param>
         /// <returns></returns>
-        bool CheckHasObjectPool(Predicate<BaseObjectPool> condition);
+        bool Contains(Predicate<BaseObjectPool> condition);
 
         #endregion
 
@@ -767,9 +767,9 @@ namespace DGame
 
         #region Release
 
-        void ReleaseCanRecycleObject();
+        void Release();
 
-        void ReleaseAllUnusedToMemoryPool();
+        void ReleaseAllUnused();
 
         #endregion
     }

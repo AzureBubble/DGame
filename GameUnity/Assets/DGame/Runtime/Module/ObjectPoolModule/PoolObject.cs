@@ -5,9 +5,9 @@ namespace DGame
     internal sealed partial class ObjectPoolModule
     {
         /// <summary>
-        /// 对象池内部泛型对象
+        /// 对象池内部泛型对象 对象池使用
         /// </summary>
-        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="T">对象</typeparam>
         private sealed class PoolObject<T> : IMemory where T : BasePoolObject
         {
             #region 内存池方法
@@ -35,8 +35,7 @@ namespace DGame
             /// </summary>
             public bool Locked
             {
-                get => m_object.Locked;
-                internal set => m_object.Locked = value;
+                get => m_object.Locked; internal set => m_object.Locked = value;
             }
 
             /// <summary>
@@ -44,8 +43,7 @@ namespace DGame
             /// </summary>
             public int Priority
             {
-                get => m_object.Priority;
-                internal set => m_object.Priority = value;
+                get => m_object.Priority; internal set => m_object.Priority = value;
             }
 
             /// <summary>
@@ -58,12 +56,6 @@ namespace DGame
             public bool IsUsing => SpawnCount > 0;
 
             public int SpawnCount { get; private set; } = 0;
-
-            public PoolObject()
-            {
-                m_object = null;
-                SpawnCount = 0;
-            }
 
             /// <summary>
             /// 从内存池中创建对象

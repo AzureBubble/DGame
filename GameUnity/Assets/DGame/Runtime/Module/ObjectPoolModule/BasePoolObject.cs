@@ -7,39 +7,30 @@ namespace DGame
     /// </summary>
     public abstract class BasePoolObject : IMemory
     {
-        protected BasePoolObject()
-        {
-            Name = null;
-            Target = null;
-            Locked = false;
-            Priority = 0;
-            LastUseTime = default(DateTime);
-        }
-
         /// <summary>
         /// 对象名字
         /// </summary>
-        public string Name { get; private set; }
+        public string Name { get; private set; } = string.Empty;
 
         /// <summary>
         /// 对象
         /// </summary>
-        public object Target { get; private set; }
+        public object Target { get; private set; } = null;
 
         /// <summary>
         /// 对象是否加锁
         /// </summary>
-        public bool Locked { get; set; }
+        public bool Locked { get; set; } = false;
 
         /// <summary>
         /// 对象优先级
         /// </summary>
-        public int Priority { get; set; }
+        public int Priority { get; set; } = 0;
 
         /// <summary>
         /// 对象最后一次使用时间
         /// </summary>
-        public DateTime LastUseTime { get; internal set; }
+        public DateTime LastUseTime { get; internal set; } = default(DateTime);
 
         /// <summary>
         /// 自定义释放检查标记

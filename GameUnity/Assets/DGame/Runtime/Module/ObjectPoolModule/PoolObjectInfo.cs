@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 namespace DGame
 {
     [StructLayout(LayoutKind.Auto)]
-    public struct PoolObjectInfo
+    public readonly struct PoolObjectInfo
     {
         /// <summary>
         /// 初始化对象信息的新实例

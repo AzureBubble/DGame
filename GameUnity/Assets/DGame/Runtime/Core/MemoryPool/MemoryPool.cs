@@ -17,7 +17,7 @@ namespace DGame
         /// <summary>
         /// 获取内存收集对象数量
         /// </summary>
-        public static int Capacity => m_memoryCollectorPool.Count;
+        public static int Capacity => m_memoryCollectorPool != null ? m_memoryCollectorPool.Count : 0;
 
         /// <summary>
         /// 获取所有的内存收集器信息
@@ -34,7 +34,7 @@ namespace DGame
 
                 foreach (var memoryCollector in m_memoryCollectorPool.Values)
                 {
-                    results[index++] = new MemoryCollectorInfo(memoryCollector.ClassType, memoryCollector.UnusedCount,
+                    results[index++] = new MemoryCollectorInfo(memoryCollector.MemoryType, memoryCollector.UnusedCount,
                         memoryCollector.UsingCount, memoryCollector.SpawnCount, memoryCollector.ReleaseCount, memoryCollector.AddCount,
                         memoryCollector.RemoveCount, memoryCollector.Capacity);
                 }
@@ -65,21 +65,17 @@ namespace DGame
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         public static T Spawn<T>() where T : class, IMemory, new()
-        {
-            var classType = typeof(T);
-            InternalCheckClassTypeIsValid(classType);
-            return GetMemoryCollector(classType)?.Spawn<T>();
-        }
+            => GetMemoryCollector(typeof(T))?.Spawn<T>();
 
         /// <summary>
         /// 从内存池中获取内存对象
         /// </summary>
-        /// <param name="classType"></param>
+        /// <param name="memoryType"></param>
         /// <returns></returns>
-        public static IMemory Spawn(Type classType)
+        public static IMemory Spawn(Type memoryType)
         {
-            InternalCheckClassTypeIsValid(classType);
-            return GetMemoryCollector(classType)?.Spawn();
+            InternalCheckMemoryTypeIsValid(memoryType);
+            return GetMemoryCollector(memoryType)?.Spawn();
         }
 
         #endregion
@@ -93,14 +89,12 @@ namespace DGame
         /// <exception cref="DGameException"></exception>
         public static void Release<T>(List<T> memories) where T : class, IMemory
         {
-            var classType = typeof(T);
-            if (classType == null)
+            if (memories == null || memories.Count <= 0)
             {
-                throw new DGameException("内存对象类型无效");
+                return;
             }
-            InternalCheckClassTypeIsValid(classType);
-            var memoryCollector = GetMemoryCollector(classType);
-
+            var memoryType = typeof(T);
+            var memoryCollector = GetMemoryCollector(memoryType);
             if (memoryCollector != null)
             {
                 for (int i = 0; i < memories.Count; i++)
@@ -122,9 +116,9 @@ namespace DGame
                 throw new DGameException("内存对象类型无效");
             }
 
-            Type classType = memory.GetType();
-            InternalCheckClassTypeIsValid(classType);
-            GetMemoryCollector(classType)?.Release(memory);
+            Type memoryType = memory.GetType();
+            InternalCheckMemoryTypeIsValid(memoryType);
+            GetMemoryCollector(memoryType)?.Release(memory);
         }
 
         #endregion
@@ -134,12 +128,12 @@ namespace DGame
         /// <summary>
         /// 添加内存收集器的对象数量
         /// </summary>
-        /// <param name="classType"></param>
+        /// <param name="memoryType"></param>
         /// <param name="count"></param>
-        public static void AddMemoryCollectorCnt(Type classType, int count)
+        public static void Add(Type memoryType, int count)
         {
-            InternalCheckClassTypeIsValid(classType);
-            GetMemoryCollector(classType)?.Add(count);
+            InternalCheckMemoryTypeIsValid(memoryType);
+            GetMemoryCollector(memoryType)?.Add(count);
         }
 
         /// <summary>
@@ -147,12 +141,8 @@ namespace DGame
         /// </summary>
         /// <param name="count"></param>
         /// <typeparam name="T"></typeparam>
-        public static void AddMemoryCollectorCnt<T>(int count) where T : class, IMemory, new()
-        {
-            var classType = typeof(T);
-            InternalCheckClassTypeIsValid(classType);
-            GetMemoryCollector(classType)?.Add<T>(count);
-        }
+        public static void Add<T>(int count) where T : class, IMemory, new()
+            => GetMemoryCollector(typeof(T))?.Add<T>(count);
 
         #endregion
 
@@ -163,9 +153,9 @@ namespace DGame
         /// </summary>
         /// <param name="classType"></param>
         /// <param name="count"></param>
-        public static void RemoveMemoryCollectorCnt(Type classType, int count)
+        public static void Remove(Type classType, int count)
         {
-            InternalCheckClassTypeIsValid(classType);
+            InternalCheckMemoryTypeIsValid(classType);
             GetMemoryCollector(classType)?.Remove(count);
         }
 
@@ -174,10 +164,8 @@ namespace DGame
         /// </summary>
         /// <param name="count"></param>
         /// <typeparam name="T"></typeparam>
-        public static void RemoveMemoryCollectorCnt<T>(int count) where T : class, IMemory
-        {
-            RemoveMemoryCollectorCnt(typeof(T), count);
-        }
+        public static void Remove<T>(int count) where T : class, IMemory
+            => GetMemoryCollector(typeof(T))?.Remove(count);
 
         #endregion
 
@@ -186,11 +174,11 @@ namespace DGame
         /// <summary>
         /// 清空内存收集的内存对象
         /// </summary>
-        /// <param name="classType">对象类型</param>
-        public static void ClearMemoryCollector(Type classType)
+        /// <param name="memoryType">对象类型</param>
+        public static void ClearMemoryCollector(Type memoryType)
         {
-            InternalCheckClassTypeIsValid(classType);
-            GetMemoryCollector(classType)?.Clear();
+            InternalCheckMemoryTypeIsValid(memoryType);
+            GetMemoryCollector(memoryType)?.Clear();
         }
 
         /// <summary>
@@ -198,49 +186,47 @@ namespace DGame
         /// </summary>
         /// <typeparam name="T">对象类型</typeparam>
         public static void ClearMemoryCollector<T>() where T : class, IMemory
-        {
-            ClearMemoryCollector(typeof(T));
-        }
+            => GetMemoryCollector(typeof(T))?.Clear();
 
         #endregion
 
         /// <summary>
         /// 内部检查内存池对象类型是否有效
         /// </summary>
-        /// <param name="classType"></param>
+        /// <param name="memoryType"></param>
         /// <exception cref="DGameException"></exception>
-        public static void InternalCheckClassTypeIsValid(Type classType)
+        private static void InternalCheckMemoryTypeIsValid(Type memoryType)
         {
             if (!EnableStrictCheck)
             {
                 return;
             }
 
-            if (classType == null)
+            if (memoryType == null)
             {
                 throw new DGameException("内存池对象类型无效");
             }
 
-            if (!classType.IsClass || classType.IsAbstract)
+            if (!memoryType.IsClass || memoryType.IsAbstract)
             {
                 throw new DGameException("传入的内存池对象类型不能是抽象的或不是class类型");
             }
 
-            if (!typeof(IMemory).IsAssignableFrom(classType))
+            if (!typeof(IMemory).IsAssignableFrom(memoryType))
             {
-                throw new DGameException($"内存池对象类型{classType.FullName}无效");
+                throw new DGameException($"内存池对象类型{memoryType.FullName}无效");
             }
         }
 
         /// <summary>
         /// 从内存池中获取内存收集器
         /// </summary>
-        /// <param name="classType">内存对象类型</param>
+        /// <param name="memoryType">内存对象类型</param>
         /// <returns>内存收集器</returns>
         /// <exception cref="DGameException"></exception>
-        private static MemoryCollector GetMemoryCollector(Type classType)
+        private static MemoryCollector GetMemoryCollector(Type memoryType)
         {
-            if (classType == null)
+            if (memoryType == null)
             {
                 throw new DGameException("传入的内存池对象类型为空");
             }
@@ -249,10 +235,10 @@ namespace DGame
 
             lock (m_memoryCollectorPool)
             {
-                if (!m_memoryCollectorPool.TryGetValue(classType, out memoryCollector))
+                if (!m_memoryCollectorPool.TryGetValue(memoryType, out memoryCollector))
                 {
-                    memoryCollector = new MemoryCollector(classType);
-                    m_memoryCollectorPool.Add(classType, memoryCollector);
+                    memoryCollector = new MemoryCollector(memoryType);
+                    m_memoryCollectorPool.Add(memoryType, memoryCollector);
                 }
             }
 

@@ -24,7 +24,7 @@ namespace DGame
             }
 
             m_type = type;
-            m_name = string.IsNullOrEmpty(name) ? String.Empty : name;
+            m_name = string.IsNullOrEmpty(name) ? string.Empty : name;
         }
 
         public override string ToString()

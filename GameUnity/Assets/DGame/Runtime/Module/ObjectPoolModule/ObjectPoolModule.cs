@@ -751,7 +751,7 @@ namespace DGame
 
             foreach (var pool in m_cachedAllObjectPools)
             {
-                pool.ReleaseCanRecycleObject();
+                pool.Release();
             }
         }
 
@@ -762,7 +762,7 @@ namespace DGame
 
             foreach (var pool in m_cachedAllObjectPools)
             {
-                pool.ReleaseAllUnusedToMemoryPool();
+                pool.ReleaseAllUnused();
             }
         }
 

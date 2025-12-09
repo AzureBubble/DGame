@@ -11,7 +11,7 @@ namespace DGame
     internal sealed class MemoryCollector
     {
         private readonly Queue<IMemory> m_collector;
-        public Type ClassType { get; private set; }
+        public Type MemoryType { get; private set; }
         public int UsingCount { get; private set; }
 
         /// <summary>
@@ -34,21 +34,21 @@ namespace DGame
 
         #region Constructor
 
-        public MemoryCollector(Type classType)
+        public MemoryCollector(Type memoryType)
         {
             m_collector = new Queue<IMemory>();
-            InitCollector(classType);
+            InitCollector(memoryType);
         }
 
-        public MemoryCollector(Type classType, int count)
+        public MemoryCollector(Type memoryType, int count)
         {
             m_collector = new Queue<IMemory>(count);
-            InitCollector(classType);
+            InitCollector(memoryType);
         }
 
-        private void InitCollector(Type classType)
+        private void InitCollector(Type memoryType)
         {
-            ClassType = classType;
+            MemoryType = memoryType;
             UsingCount = 0;
             SpawnCount = 0;
             ReleaseCount = 0;
@@ -62,47 +62,39 @@ namespace DGame
 
         public T Spawn<T>() where T : class, IMemory, new()
         {
-            if (!typeof(IMemory).IsAssignableFrom(ClassType))
+            if (!typeof(IMemory).IsAssignableFrom(MemoryType))
             {
-                throw new DGameException($"内存池类型不匹配，无法取出对象：{ClassType.Name}");
+                throw new DGameException($"内存池类型不匹配，无法取出对象：{MemoryType.Name}");
             }
 
             UsingCount++;
             SpawnCount++;
 
-            T memory;
             lock (m_collector)
             {
                 if (m_collector.Count > 0)
                 {
-                    memory = (T)m_collector.Dequeue();
-                }
-                else
-                {
-                    memory = new T();
+                    return (T)m_collector.Dequeue();
                 }
             }
 
             AddCount++;
-            return memory;
+            return new T();
         }
 
         public IMemory Spawn()
         {
             UsingCount++;
             SpawnCount++;
-            IMemory memory;
             lock (m_collector)
             {
                 if (m_collector.Count > 0)
                 {
                     return m_collector.Dequeue();
                 }
-
-                memory = Activator.CreateInstance(ClassType) as IMemory;
             }
             AddCount++;
-            return memory;
+            return Activator.CreateInstance(MemoryType) as IMemory;
         }
 
         #endregion
@@ -132,9 +124,9 @@ namespace DGame
 
         public void Add<T>(int count) where T : class, IMemory, new()
         {
-            if (!typeof(IMemory).IsAssignableFrom(ClassType))
+            if (!typeof(IMemory).IsAssignableFrom(MemoryType))
             {
-                throw new DGameException($"类型不匹配：{typeof(T).Name} != {ClassType.Name}");
+                throw new DGameException($"类型不匹配：{typeof(T).Name} != {MemoryType.Name}");
             }
 
             lock (m_collector)
@@ -154,7 +146,7 @@ namespace DGame
                 AddCount += count;
                 while (count-- > 0)
                 {
-                    m_collector.Enqueue(Activator.CreateInstance(ClassType) as IMemory);
+                    m_collector.Enqueue(Activator.CreateInstance(MemoryType) as IMemory);
                 }
             }
         }
@@ -167,7 +159,7 @@ namespace DGame
         {
             lock (m_collector)
             {
-                count = Capacity < count ? Capacity : count;
+                count = m_collector.Count > count ? count : m_collector.Count;
                 RemoveCount += count;
                 while (count-- > 0)
                 {

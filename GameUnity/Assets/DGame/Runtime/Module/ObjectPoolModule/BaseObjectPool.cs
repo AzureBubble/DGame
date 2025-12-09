@@ -30,62 +30,41 @@ namespace DGame
         /// <summary>
         /// 可以释放的对象数量 （回收到内存池）
         /// </summary>
-        public abstract int CanRecycleToMemoryPoolCount { get; }
+        public abstract int CanReleaseCount { get; }
 
         /// <summary>
         /// 是否允许对象被多次获取。
+        /// <remarks>true=>可以同时获取多个对象 false=>同一时间只能有一个对象被获取</remarks>
         /// </summary>
-        public abstract bool AllowMultiSpawn
-        {
-            get;
-        }
+        public abstract bool AllowMultiSpawn { get; }
 
         /// <summary>
         /// 自动释放可释放对象的间隔（秒）
         /// </summary>
-        public abstract float AutoReleaseInterval
-        {
-            get;
-            set;
-        }
+        public abstract float AutoReleaseInterval { get; set; }
 
         /// <summary>
         /// 对象池容量
         /// </summary>
-        public abstract int Capacity
-        {
-            get;
-            set;
-        }
+        public abstract int Capacity { get; set; }
 
         /// <summary>
         /// 对象池对象过期回收时间（秒）
         /// </summary>
-        public abstract float ExpireTime
-        {
-            get;
-            set;
-        }
+        public abstract float ExpireTime { get; set; }
 
         /// <summary>
         /// 对象池优先级
         /// </summary>
-        public abstract int Priority
-        {
-            get;
-            set;
-        }
+        public abstract int Priority { get; set; }
 
-        public BaseObjectPool() : this(null)
-        {
-
-        }
+        protected BaseObjectPool() : this(null) { }
 
         /// <summary>
         /// 初始化对象池
         /// </summary>
         /// <param name="name">对象池名称</param>
-        public BaseObjectPool(string name)
+        protected BaseObjectPool(string name)
         {
             Name = string.IsNullOrEmpty(name) ? string.Empty : name;
         }
@@ -93,18 +72,18 @@ namespace DGame
         /// <summary>
         /// 释放对象池中可以回收到内存池的对象（从对象池中释放）
         /// </summary>
-        public abstract void ReleaseCanRecycleObject();
+        public abstract void Release();
 
         /// <summary>
         /// 释放对象池中可以回收到内存池的对象（从对象池中释放）
         /// </summary>
         /// <param name="releaseCnt">尝试释放的数量</param>
-        public abstract void ReleaseCanRecycleObject(int releaseCnt);
+        public abstract void Release(int releaseCnt);
 
         /// <summary>
         /// 释放对象池中未使用的对象到内存池（从对象池中释放）
         /// </summary>
-        public abstract void ReleaseAllUnusedToMemoryPool();
+        public abstract void ReleaseAllUnused();
 
         /// <summary>
         /// 对象池更新函数

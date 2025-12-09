@@ -23,13 +23,7 @@ namespace DGame
 
             #endregion
 
-            private T m_object;
-
-            public PoolObject()
-            {
-                m_object = null;
-                SpawnCount = 0;
-            }
+            private T m_object = null;
 
             /// <summary>
             /// 对象名称
@@ -63,7 +57,13 @@ namespace DGame
 
             public bool IsUsing => SpawnCount > 0;
 
-            public int SpawnCount { get; private set; }
+            public int SpawnCount { get; private set; } = 0;
+
+            public PoolObject()
+            {
+                m_object = null;
+                SpawnCount = 0;
+            }
 
             /// <summary>
             /// 从内存池中创建对象
@@ -71,7 +71,7 @@ namespace DGame
             /// <param name="obj"></param>
             /// <param name="spawned"></param>
             /// <returns></returns>
-            public static PoolObject<T> CreateFromMemoryPool(T obj, bool spawned)
+            public static PoolObject<T> Create(T obj, bool spawned)
             {
                 if (obj == null)
                 {
@@ -94,16 +94,13 @@ namespace DGame
             /// 查看对象
             /// </summary>
             /// <returns></returns>
-            public T Peek()
-            {
-                return m_object;
-            }
+            public T Peek() => m_object;
 
             /// <summary>
             /// 从对象池中获取对象
             /// </summary>
             /// <returns></returns>
-            public T OnSpawnFromObjectPool()
+            public T OnSpawn()
             {
                 SpawnCount++;
                 m_object.LastUseTime = DateTime.UtcNow;
@@ -115,7 +112,7 @@ namespace DGame
             /// 回收对象到对象池
             /// </summary>
             /// <exception cref="DGameException"></exception>
-            public void OnRecycleToObjectPool()
+            public void OnRecycle()
             {
                 m_object.OnRecycle();
                 m_object.LastUseTime = DateTime.UtcNow;

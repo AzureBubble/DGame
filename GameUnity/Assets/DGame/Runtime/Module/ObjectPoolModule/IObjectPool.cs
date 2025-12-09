@@ -13,7 +13,7 @@ namespace DGame
     /// <param name="toReleaseCount">需要释放的对象数量</param>
     /// <param name="expireTime">对象过期参考时间</param>
     /// <returns>经筛选需要释放的对象集合</returns>
-    public delegate List<T> ReleaseCanRecycleObjectFilterCallback<T>(List<T> candidateObjects, int toReleaseCount, DateTime expireTime) where T : BasePoolObject;
+    public delegate List<T> ReleaseObjectFilterCallback<T>(List<T> candidateObjects, int toReleaseCount, DateTime expireTime) where T : BasePoolObject;
 
     /// <summary>
     /// 对象池接口
@@ -43,8 +43,9 @@ namespace DGame
 
         /// <summary>
         /// 是否允许对象被多次获取
+        /// <remarks>true=>可以同时获取多个对象 false=>同一时间只能有一个对象被获取</remarks>
         /// </summary>
-        bool AllowMultipleSpawn { get; }
+        bool AllowMultiSpawn { get; }
 
         /// <summary>
         /// 自动释放可释放对象的间隔（秒）
@@ -70,7 +71,7 @@ namespace DGame
         /// 注册对象（对象外部创建，标记到对象池管理）
         /// </summary>
         /// <param name="obj">对象</param>
-        /// <param name="spawned">对象是否已正在被使用</param>
+        /// <param name="spawned">对象是否已Spawn</param>
         void Register(T obj, bool spawned);
 
         /// <summary>
@@ -143,41 +144,41 @@ namespace DGame
         /// 回收对象到内存池（从对象池中释放）
         /// </summary>
         /// <param name="obj">需要释放的对象</param>
-        bool RecycleToMemoryPool(T obj);
+        bool ReleaseObject(T obj);
 
         /// <summary>
         /// 回收对象到内存池 （从对象池中释放）
         /// </summary>
         /// <param name="obj">需要释放的对象</param>
-        bool RecycleToMemoryPool(object obj);
+        bool ReleaseObject(object obj);
 
         /// <summary>
         /// 释放对象池中可以回收到内存池的对象（从对象池中释放）
         /// </summary>
-        void ReleaseCanRecycleObject();
+        void Release();
 
         /// <summary>
         /// 释放对象池中可以回收到内存池的对象（从对象池中释放）
         /// </summary>
         /// <param name="releaseCnt">尝试释放的数量</param>
-        void ReleaseCanRecycleObject(int releaseCnt);
+        void Release(int releaseCnt);
 
         /// <summary>
         /// 释放对象池中可以回收到内存池的对象（从对象池中释放）
         /// </summary>
-        /// <param name="releaseFilterCallback">释放对象筛选函数</param>
-        void ReleaseCanRecycleObject(ReleaseCanRecycleObjectFilterCallback<T> releaseFilterCallback);
+        /// <param name="releaseObjectFilterCallback">释放对象筛选函数</param>
+        void Release(ReleaseObjectFilterCallback<T> releaseObjectFilterCallback);
 
         /// <summary>
         /// 释放对象池中可以回收到内存池的对象（从对象池中释放）
         /// </summary>
         /// <param name="releaseCnt">尝试释放对象数量</param>
-        /// <param name="releaseFilterCallback">释放对象筛选函数</param>
-        void ReleaseCanRecycleObject(int releaseCnt, ReleaseCanRecycleObjectFilterCallback<T> releaseFilterCallback);
+        /// <param name="releaseObjectFilterCallback">释放对象筛选函数</param>
+        void Release(int releaseCnt, ReleaseObjectFilterCallback<T> releaseObjectFilterCallback);
 
         /// <summary>
         /// 释放对象池中未使用的对象到内存池（从对象池中释放）
         /// </summary>
-        void ReleaseAllUnusedToMemoryPool();
+        void ReleaseAllUnused();
     }
 }

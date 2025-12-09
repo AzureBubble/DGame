@@ -21,7 +21,7 @@ namespace DGame
             /// </summary>
             private readonly Dictionary<object, PoolObject<T>> m_poolObjectsMap;
 
-            private readonly ReleaseCanRecycleObjectFilterCallback<T> m_defaultReleaseCanRecycleObjectFilterCallback;
+            private readonly ReleaseObjectFilterCallback<T> m_defaultReleaseObjectFilterCallback;
             private readonly List<T> m_cachedCanRecycleObjects;
             private readonly List<T> m_cachedToRecycleObjects;
             private readonly bool m_allowMultiSpawn;
@@ -39,9 +39,7 @@ namespace DGame
             /// </summary>
             public override int Count => m_poolObjectsMap.Count;
 
-            public bool AllowMultipleSpawn { get; }
-
-            public override int CanRecycleToMemoryPoolCount
+            public override int CanReleaseCount
             {
                 get
                 {
@@ -69,7 +67,7 @@ namespace DGame
                     }
 
                     m_capacity = value;
-                    ReleaseCanRecycleObject();
+                    Release();
                 }
             }
 
@@ -89,7 +87,7 @@ namespace DGame
                     }
 
                     m_expireTime = value;
-                    ReleaseCanRecycleObject();
+                    Release();
                 }
             }
 
@@ -100,7 +98,7 @@ namespace DGame
             {
                 m_poolObjects = new DGameMultiDictionary<string, PoolObject<T>>();
                 m_poolObjectsMap = new Dictionary<object, PoolObject<T>>();
-                m_defaultReleaseCanRecycleObjectFilterCallback = DefaultReleaseCanRecycleObjectFilterCallback;
+                m_defaultReleaseObjectFilterCallback = DefaultReleaseCanRecycleObjectFilterCallback;
                 m_cachedCanRecycleObjects = new List<T>();
                 m_cachedToRecycleObjects = new List<T>();
                 m_allowMultiSpawn = allowMultipleSpawn;
@@ -118,13 +116,13 @@ namespace DGame
                     throw new DGameException("注册的对象无效");
                 }
 
-                PoolObject<T> poolObject = PoolObject<T>.CreateFromMemoryPool(obj, spawned);
+                PoolObject<T> poolObject = PoolObject<T>.Create(obj, spawned);
                 m_poolObjects.Add(obj.Name, poolObject);
                 m_poolObjectsMap.Add(obj.Target, poolObject);
 
                 if (Count > m_capacity)
                 {
-                    ReleaseCanRecycleObject();
+                    Release();
                 }
             }
 
@@ -174,7 +172,7 @@ namespace DGame
                         // 对象如果正在被使用则需要判断是否可以被多次获取
                         if (m_allowMultiSpawn || !poolObject.IsUsing)
                         {
-                            return poolObject.OnSpawnFromObjectPool();
+                            return poolObject.OnSpawn();
                         }
                     }
                 }
@@ -204,11 +202,11 @@ namespace DGame
 
                 if (poolObject != null)
                 {
-                    poolObject.OnRecycleToObjectPool();
+                    poolObject.OnRecycle();
 
                     if (Count > m_capacity && poolObject.SpawnCount <= 0)
                     {
-                        ReleaseCanRecycleObject();
+                        Release();
                     }
                 }
                 else
@@ -278,17 +276,17 @@ namespace DGame
                 }
             }
 
-            public bool RecycleToMemoryPool(T obj)
+            public bool ReleaseObject(T obj)
             {
                 if (obj == null)
                 {
                     throw new DGameException("对象无效");
                 }
 
-                return RecycleToMemoryPool(obj.Target);
+                return ReleaseObject(obj.Target);
             }
 
-            public bool RecycleToMemoryPool(object obj)
+            public bool ReleaseObject(object obj)
             {
                 if (obj == null)
                 {
@@ -315,25 +313,25 @@ namespace DGame
                 return true;
             }
 
-            public override void ReleaseCanRecycleObject()
+            public override void Release()
             {
-                ReleaseCanRecycleObject(Count - m_capacity, m_defaultReleaseCanRecycleObjectFilterCallback);
+                Release(Count - m_capacity, m_defaultReleaseObjectFilterCallback);
             }
 
-            public override void ReleaseCanRecycleObject(int releaseCnt)
+            public override void Release(int releaseCnt)
             {
-                ReleaseCanRecycleObject(releaseCnt, m_defaultReleaseCanRecycleObjectFilterCallback);
+                Release(releaseCnt, m_defaultReleaseObjectFilterCallback);
             }
 
-            public void ReleaseCanRecycleObject(ReleaseCanRecycleObjectFilterCallback<T> releaseFilterCallback)
+            public void Release(ReleaseObjectFilterCallback<T> releaseObjectFilterCallback)
             {
-                ReleaseCanRecycleObject(Count - m_capacity, releaseFilterCallback);
+                Release(Count - m_capacity, releaseObjectFilterCallback);
             }
 
-            public void ReleaseCanRecycleObject(int releaseCnt,
-                ReleaseCanRecycleObjectFilterCallback<T> releaseFilterCallback)
+            public void Release(int releaseCnt,
+                ReleaseObjectFilterCallback<T> releaseObjectFilterCallback)
             {
-                if (releaseFilterCallback == null)
+                if (releaseObjectFilterCallback == null)
                 {
                     throw new DGameException("释放对象池对象的过滤回调函数无效");
                 }
@@ -352,7 +350,7 @@ namespace DGame
 
                 m_autoReleaseTime = 0.0f;
                 GetCanRecycleObject(m_cachedCanRecycleObjects);
-                List<T> toReleaseObjs = releaseFilterCallback(m_cachedCanRecycleObjects, releaseCnt, expireTime);
+                List<T> toReleaseObjs = releaseObjectFilterCallback(m_cachedCanRecycleObjects, releaseCnt, expireTime);
 
                 if (toReleaseObjs == null || toReleaseObjs.Count <= 0)
                 {
@@ -361,18 +359,18 @@ namespace DGame
 
                 foreach (var releaseObj in toReleaseObjs)
                 {
-                    RecycleToMemoryPool(releaseObj);
+                    ReleaseObject(releaseObj);
                 }
             }
 
-            public override void ReleaseAllUnusedToMemoryPool()
+            public override void ReleaseAllUnused()
             {
                 m_autoReleaseTime = 0.0f;
                 GetCanRecycleObject(m_cachedCanRecycleObjects);
 
                 foreach (var recycleObject in m_cachedCanRecycleObjects)
                 {
-                    RecycleToMemoryPool(recycleObject);
+                    ReleaseObject(recycleObject);
                 }
             }
 
@@ -385,7 +383,7 @@ namespace DGame
                     return;
                 }
 
-                ReleaseCanRecycleObject();
+                Release();
             }
 
             public override PoolObjectInfo[] GetAllPoolObjectInfos()

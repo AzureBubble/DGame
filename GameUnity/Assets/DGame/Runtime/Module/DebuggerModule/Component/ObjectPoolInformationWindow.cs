@@ -43,7 +43,7 @@ namespace DGame
                     DrawItem("Auto Release Interval", objectPool.AutoReleaseInterval.ToString(CultureInfo.InvariantCulture), "自动释放可释放对象的间隔（秒）");
                     DrawItem("Capacity", objectPool.Capacity.ToString(), "对象池容量");
                     DrawItem("Used Count", objectPool.Count.ToString(), "对象的数量");
-                    DrawItem("Can Release Count", objectPool.CanRecycleToMemoryPoolCount.ToString(), "可以释放的对象数量 （回收到内存池）");
+                    DrawItem("Can Release Count", objectPool.CanReleaseCount.ToString(), "可以释放的对象数量 （回收到内存池）");
                     DrawItem("Expire Time", objectPool.ExpireTime.ToString(CultureInfo.InvariantCulture), "对象池对象过期回收时间（秒）");
                     DrawItem("Priority", objectPool.Priority.ToString(), "对象池优先级");
                     PoolObjectInfo[] objectInfos = objectPool.GetAllPoolObjectInfos();

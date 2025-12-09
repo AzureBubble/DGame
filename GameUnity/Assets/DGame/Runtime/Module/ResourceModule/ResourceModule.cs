@@ -284,7 +284,7 @@ namespace DGame
 
         public void UnloadUnusedAssets()
         {
-            m_assetObjectPool.ReleaseAllUnusedToMemoryPool();
+            m_assetObjectPool.ReleaseAllUnused();
 
             foreach (var package in m_packagesMap.Values)
             {

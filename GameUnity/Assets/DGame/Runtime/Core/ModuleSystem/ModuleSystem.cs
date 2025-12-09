@@ -13,7 +13,7 @@ namespace DGame
         /// <summary>
         /// 默认模块数量
         /// </summary>
-        internal const int DEFAULT_MODULE_COUNT = 16;
+        private const int DEFAULT_MODULE_COUNT = 16;
         private static readonly Dictionary<Type, Module> m_moduleMaps = new Dictionary<Type, Module>(DEFAULT_MODULE_COUNT);
         private static readonly LinkedList<Module> m_modules = new LinkedList<Module>();
         private static readonly LinkedList<Module> m_updateModules = new LinkedList<Module>();

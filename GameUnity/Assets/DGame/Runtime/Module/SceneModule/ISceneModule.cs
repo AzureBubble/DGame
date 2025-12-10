@@ -1,8 +1,5 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
-using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace DGame
@@ -23,7 +20,8 @@ namespace DGame
         /// <param name="priority">优先级</param>
         /// <param name="gcCollect">加载主场景是否回收垃圾</param>
         /// <param name="progressCallBack">加载进度回调</param>
-        UniTask<Scene> LoadSceneAsync(string location, LoadSceneMode sceneMode = LoadSceneMode.Single, bool suspendLoad = false, uint priority = 100, bool gcCollect = true,
+        UniTask<Scene> LoadSceneAsync(string location, LoadSceneMode sceneMode = LoadSceneMode.Single,
+            bool suspendLoad = false, uint priority = 100, bool gcCollect = true,
             Action<float> progressCallBack = null);
 
         /// <summary>
@@ -36,13 +34,9 @@ namespace DGame
         /// <param name="callBack">加载回调</param>
         /// <param name="gcCollect">加载主场景是否回收垃圾</param>
         /// <param name="progressCallBack">加载进度回调</param>
-        void LoadScene(string location,
-            LoadSceneMode sceneMode = LoadSceneMode.Single,
-            bool suspendLoad = false,
-            uint priority = 100,
-            Action<Scene> callBack = null,
-            bool gcCollect = true,
-            Action<float> progressCallBack = null);
+        void LoadScene(string location, LoadSceneMode sceneMode = LoadSceneMode.Single,
+            bool suspendLoad = false, uint priority = 100, Action<Scene> callBack = null,
+            bool gcCollect = true, Action<float> progressCallBack = null);
 
         /// <summary>
         /// 激活场景（当同时存在多个场景时用于切换激活场景）
@@ -85,6 +79,6 @@ namespace DGame
         /// </summary>
         /// <param name="location">场景资源定位地址。</param>
         /// <returns>是否包含场景。</returns>
-        bool IsContainScene(string location);
+        bool ContainsScene(string location);
     }
 }

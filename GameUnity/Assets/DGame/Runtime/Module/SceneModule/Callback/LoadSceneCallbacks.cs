@@ -1,10 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
 namespace DGame
 {
-   /// <summary>
+    /// <summary>
     /// 加载场景回调函数集。
     /// </summary>
     public sealed class LoadSceneCallbacks
@@ -14,33 +10,47 @@ namespace DGame
         private readonly LoadSceneUpdateCallback m_loadSceneUpdateCallback;
 
         /// <summary>
+        /// 获取加载场景成功回调函数。
+        /// </summary>
+        public LoadSceneSuccessCallback LoadSceneSuccessCallback => m_loadSceneSuccessCallback;
+
+        /// <summary>
+        /// 获取加载场景失败回调函数。
+        /// </summary>
+        public LoadSceneFailureCallback LoadSceneFailureCallback => m_loadSceneFailureCallback;
+
+        /// <summary>
+        /// 获取加载场景更新回调函数。
+        /// </summary>
+        public LoadSceneUpdateCallback LoadSceneUpdateCallback => m_loadSceneUpdateCallback;
+
+        /// <summary>
         /// 初始化加载场景回调函数集的新实例。
         /// </summary>
         /// <param name="loadSceneSuccessCallback">加载场景成功回调函数。</param>
         public LoadSceneCallbacks(LoadSceneSuccessCallback loadSceneSuccessCallback)
             : this(loadSceneSuccessCallback, null, null)
-        {
-        }
+        { }
 
         /// <summary>
         /// 初始化加载场景回调函数集的新实例。
         /// </summary>
         /// <param name="loadSceneSuccessCallback">加载场景成功回调函数。</param>
         /// <param name="loadSceneFailureCallback">加载场景失败回调函数。</param>
-        public LoadSceneCallbacks(LoadSceneSuccessCallback loadSceneSuccessCallback, LoadSceneFailureCallback loadSceneFailureCallback)
+        public LoadSceneCallbacks(LoadSceneSuccessCallback loadSceneSuccessCallback,
+            LoadSceneFailureCallback loadSceneFailureCallback)
             : this(loadSceneSuccessCallback, loadSceneFailureCallback, null)
-        {
-        }
+        { }
 
         /// <summary>
         /// 初始化加载场景回调函数集的新实例。
         /// </summary>
         /// <param name="loadSceneSuccessCallback">加载场景成功回调函数。</param>
         /// <param name="loadSceneUpdateCallback">加载场景更新回调函数。</param>
-        public LoadSceneCallbacks(LoadSceneSuccessCallback loadSceneSuccessCallback, LoadSceneUpdateCallback loadSceneUpdateCallback)
+        public LoadSceneCallbacks(LoadSceneSuccessCallback loadSceneSuccessCallback,
+            LoadSceneUpdateCallback loadSceneUpdateCallback)
             : this(loadSceneSuccessCallback, null, loadSceneUpdateCallback)
-        {
-        }
+        { }
 
         /// <summary>
         /// 初始化加载场景回调函数集的新实例。
@@ -48,7 +58,8 @@ namespace DGame
         /// <param name="loadSceneSuccessCallback">加载场景成功回调函数。</param>
         /// <param name="loadSceneFailureCallback">加载场景失败回调函数。</param>
         /// <param name="loadSceneUpdateCallback">加载场景更新回调函数。</param>
-        public LoadSceneCallbacks(LoadSceneSuccessCallback loadSceneSuccessCallback, LoadSceneFailureCallback loadSceneFailureCallback, LoadSceneUpdateCallback loadSceneUpdateCallback)
+        public LoadSceneCallbacks(LoadSceneSuccessCallback loadSceneSuccessCallback,
+            LoadSceneFailureCallback loadSceneFailureCallback, LoadSceneUpdateCallback loadSceneUpdateCallback)
         {
             if (loadSceneSuccessCallback == null)
             {
@@ -58,39 +69,6 @@ namespace DGame
             m_loadSceneSuccessCallback = loadSceneSuccessCallback;
             m_loadSceneFailureCallback = loadSceneFailureCallback;
             m_loadSceneUpdateCallback = loadSceneUpdateCallback;
-        }
-
-        /// <summary>
-        /// 获取加载场景成功回调函数。
-        /// </summary>
-        public LoadSceneSuccessCallback LoadSceneSuccessCallback
-        {
-            get
-            {
-                return m_loadSceneSuccessCallback;
-            }
-        }
-
-        /// <summary>
-        /// 获取加载场景失败回调函数。
-        /// </summary>
-        public LoadSceneFailureCallback LoadSceneFailureCallback
-        {
-            get
-            {
-                return m_loadSceneFailureCallback;
-            }
-        }
-
-        /// <summary>
-        /// 获取加载场景更新回调函数。
-        /// </summary>
-        public LoadSceneUpdateCallback LoadSceneUpdateCallback
-        {
-            get
-            {
-                return m_loadSceneUpdateCallback;
-            }
         }
     }
 
@@ -109,7 +87,8 @@ namespace DGame
     /// <param name="status">加载场景状态。</param>
     /// <param name="errorMessage">错误信息。</param>
     /// <param name="userData">用户自定义数据。</param>
-    public delegate void LoadSceneFailureCallback(string sceneAssetName, LoadResourceStatus status, string errorMessage, object userData);
+    public delegate void LoadSceneFailureCallback(string sceneAssetName, LoadResourceStatus status,
+        string errorMessage, object userData);
 
     /// <summary>
     /// 加载场景成功回调函数。
@@ -118,5 +97,6 @@ namespace DGame
     /// <param name="scene">场景对象。</param>
     /// <param name="duration">加载持续时间。</param>
     /// <param name="userData">用户自定义数据。</param>
-    public delegate void LoadSceneSuccessCallback(string sceneAssetName,UnityEngine.SceneManagement.Scene scene, float duration, object userData);
+    public delegate void LoadSceneSuccessCallback(string sceneAssetName, UnityEngine.SceneManagement.Scene scene,
+        float duration, object userData);
 }

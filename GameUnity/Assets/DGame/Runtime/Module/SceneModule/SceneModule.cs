@@ -10,9 +10,9 @@ namespace DGame
     {
         private SceneHandle m_currentMainScene;
 
-        private readonly Dictionary<string, SceneHandle> m_subScenes = new Dictionary<string, SceneHandle>();
+        private readonly Dictionary<string, SceneHandle> m_subScenes = new Dictionary<string, SceneHandle>(8);
 
-        private readonly HashSet<string> m_handlingScene = new HashSet<string>();
+        private readonly HashSet<string> m_handlingScene = new HashSet<string>(4);
 
         /// <summary>
         /// 当前主场景名称。
@@ -27,24 +27,19 @@ namespace DGame
 
         public override void OnDestroy()
         {
-            var iter = m_subScenes.Values.GetEnumerator();
-            while (iter.MoveNext())
+            foreach (var sceneHandle in m_subScenes.Values)
             {
-                SceneHandle subScene = iter.Current;
-                if (subScene != null)
-                {
-                    subScene.UnloadAsync();
-                }
+                sceneHandle?.UnloadAsync();
             }
 
-            iter.Dispose();
             m_subScenes.Clear();
             m_handlingScene.Clear();
             CurrentMainSceneName = string.Empty;
-
         }
-        public async UniTask<Scene> LoadSceneAsync(string location, LoadSceneMode sceneMode = LoadSceneMode.Single, bool suspendLoad = false,
-            uint priority = 100, bool gcCollect = true, Action<float> progressCallBack = null)
+
+        public async UniTask<Scene> LoadSceneAsync(string location, LoadSceneMode sceneMode = LoadSceneMode.Single,
+            bool suspendLoad = false, uint priority = 100, bool gcCollect = true,
+            Action<float> progressCallBack = null)
         {
             if (!m_handlingScene.Add(location))
             {
@@ -52,68 +47,82 @@ namespace DGame
                 return default;
             }
 
-            if (sceneMode == LoadSceneMode.Additive)
+            try
             {
-                if (m_subScenes.TryGetValue(location, out SceneHandle subScene))
+                if (sceneMode == LoadSceneMode.Additive)
                 {
-                    throw new Exception($"子场景已经加载过了 Scene: {location}");
-                }
-
-                subScene = YooAssets.LoadSceneAsync(location, sceneMode, LocalPhysicsMode.None, suspendLoad, priority);
-
-                if (progressCallBack != null)
-                {
-                    while (!subScene.IsDone && subScene.IsValid)
+                    if (m_subScenes.TryGetValue(location, out var subScene))
                     {
-                        progressCallBack.Invoke(subScene.Progress);
-                        await UniTask.Yield();
+                        throw new DGameException($"子场景已经加载过了 Scene: {location}");
                     }
+
+                    subScene = YooAssets.LoadSceneAsync(location, sceneMode, LocalPhysicsMode.None, suspendLoad,
+                        priority);
+
+                    m_subScenes.Add(location, subScene);
+
+                    try
+                    {
+                        if (progressCallBack != null)
+                        {
+                            while (!subScene.IsDone && subScene.IsValid)
+                            {
+                                progressCallBack.Invoke(subScene.Progress);
+                                await UniTask.Yield();
+                            }
+                        }
+                        else
+                        {
+                            await subScene.ToUniTask();
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        m_subScenes.Remove(location);
+                        throw new DGameException($"子场景加载异常: {e}");
+                    }
+
+                    return subScene.SceneObject;
                 }
                 else
                 {
-                    await subScene.ToUniTask();
+                    if (m_currentMainScene != null && !m_currentMainScene.IsDone)
+                    {
+                        throw new DGameException($"当前场景正在加载中... CurrentMainScene: {CurrentMainSceneName}.");
+                    }
+
+                    CurrentMainSceneName = location;
+
+                    m_currentMainScene = YooAssets.LoadSceneAsync(location, sceneMode, LocalPhysicsMode.None,
+                        suspendLoad, priority);
+
+                    if (progressCallBack != null)
+                    {
+                        while (!m_currentMainScene.IsDone && m_currentMainScene.IsValid)
+                        {
+                            progressCallBack.Invoke(m_currentMainScene.Progress);
+                            await UniTask.Yield();
+                        }
+                    }
+                    else
+                    {
+                        await m_currentMainScene.ToUniTask();
+                    }
+
+                    ModuleSystem.GetModule<IResourceModule>().ForceUnloadUnusedAssets(gcCollect);
+
+                    return m_currentMainScene.SceneObject;
                 }
-
-                m_subScenes.Add(location, subScene);
-
-                m_handlingScene.Remove(location);
-
-                return subScene.SceneObject;
             }
-            else
+            finally
             {
-                if (m_currentMainScene != null && !m_currentMainScene.IsDone)
-                {
-                    throw new Exception($"当前场景正在加载中... CurrentMainScene: {CurrentMainSceneName}.");
-                }
-
-                CurrentMainSceneName = location;
-
-                m_currentMainScene = YooAssets.LoadSceneAsync(location, sceneMode, LocalPhysicsMode.None, suspendLoad, priority);
-
-                if (progressCallBack != null)
-                {
-                    while (!m_currentMainScene.IsDone && m_currentMainScene.IsValid)
-                    {
-                        progressCallBack.Invoke(m_currentMainScene.Progress);
-                        await UniTask.Yield();
-                    }
-                }
-                else
-                {
-                    await m_currentMainScene.ToUniTask();
-                }
-
-                ModuleSystem.GetModule<IResourceModule>().ForceUnloadUnusedAssets(gcCollect);
-
                 m_handlingScene.Remove(location);
-
-                return m_currentMainScene.SceneObject;
             }
         }
 
-        public void LoadScene(string location, LoadSceneMode sceneMode = LoadSceneMode.Single, bool suspendLoad = false,
-            uint priority = 100, Action<Scene> callBack = null, bool gcCollect = true, Action<float> progressCallBack = null)
+        public void LoadScene(string location, LoadSceneMode sceneMode = LoadSceneMode.Single,
+            bool suspendLoad = false, uint priority = 100, Action<Scene> callBack = null,
+            bool gcCollect = true, Action<float> progressCallBack = null)
         {
             if (!m_handlingScene.Add(location))
             {
@@ -181,7 +190,6 @@ namespace DGame
             while (!sceneHandle.IsDone && sceneHandle.IsValid)
             {
                 await UniTask.Yield();
-
                 progress?.Invoke(sceneHandle.Progress);
             }
         }
@@ -198,13 +206,13 @@ namespace DGame
                 return false;
             }
 
-            m_subScenes.TryGetValue(location, out SceneHandle subScene);
+            m_subScenes.TryGetValue(location, out var subScene);
             if (subScene != null)
             {
                 return subScene.ActivateScene();
             }
 
-            DLogger.Warning($"主场景无效资源路径:{location}");
+            DLogger.Warning($"场景无效资源路径:{location}");
             return false;
         }
 
@@ -220,7 +228,7 @@ namespace DGame
                 return false;
             }
 
-            m_subScenes.TryGetValue(location, out SceneHandle subScene);
+            m_subScenes.TryGetValue(location, out var subScene);
             if (subScene != null)
             {
                 return subScene.UnSuspend();
@@ -280,7 +288,6 @@ namespace DGame
                 }
 
                 m_subScenes.Remove(location);
-
                 m_handlingScene.Remove(location);
 
                 return true;
@@ -306,7 +313,7 @@ namespace DGame
                 }
 
                 subScene.UnloadAsync();
-                subScene.UnloadAsync().Completed += @base =>
+                subScene.UnloadAsync().Completed += _ =>
                 {
                     m_subScenes.Remove(location);
                     m_handlingScene.Remove(location);
@@ -324,14 +331,14 @@ namespace DGame
             DLogger.Warning($"无效的资源地址，卸载场景失败:{location}");
         }
 
-        public bool IsContainScene(string location)
+        public bool ContainsScene(string location)
         {
             if (CurrentMainSceneName.Equals(location))
             {
                 return true;
             }
 
-            return m_subScenes.TryGetValue(location, out var _);
+            return m_subScenes.TryGetValue(location, out _);
         }
     }
 }

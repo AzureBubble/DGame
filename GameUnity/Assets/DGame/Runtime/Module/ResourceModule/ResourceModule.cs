@@ -396,7 +396,7 @@ namespace DGame
             }
             else
             {
-                string key = $"{packageName}/{location}";
+                string key = GetCacheKey(location, packageName);
 
                 if (m_assetInfosMap.TryGetValue(key, out AssetInfo assetInfo))
                 {

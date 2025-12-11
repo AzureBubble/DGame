@@ -1,4 +1,4 @@
-﻿#if ODIN_INSPECTOR && ENABLE_ODIN_INSPECTOR
+﻿#if ODIN_INSPECTOR && ENABLE_ODIN_INSPECTOR && UNITY_EDITOR
 
 using Sirenix.OdinInspector;
 
@@ -8,11 +8,11 @@ using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace DGame
 {
-    internal partial class ResourceExtComponent : MonoBehaviour
+    [DisallowMultipleComponent]
+    internal sealed partial class ResourceExtComponent : MonoBehaviour
     {
         public static ResourceExtComponent Instance { get; private set; }
         private readonly TimeoutController m_timeoutController = new TimeoutController();
@@ -47,7 +47,7 @@ namespace DGame
 #if ODIN_INSPECTOR && ENABLE_ODIN_INSPECTOR
         [ShowInInspector]
 #endif
-        private LinkedListNode<LoadAssetObject> m_currentProcessNode;
+        private LinkedListNode<LoadedAssetObject> m_currentProcessNode;
 
         /// <summary>
         /// 保存加载的图片对象
@@ -55,7 +55,7 @@ namespace DGame
 #if ODIN_INSPECTOR && ENABLE_ODIN_INSPECTOR && UNITY_EDITOR
         [ShowInInspector, LabelText("保存加载的图片对象"), DisableInPlayMode]
 #endif
-        private LinkedList<LoadAssetObject> m_loadAssetObjectsLinkedList;
+        private LinkedList<LoadedAssetObject> m_loadedAssetObjectsLinkedList;
 
         /// <summary>
         /// 散图集合对象池
@@ -64,10 +64,10 @@ namespace DGame
 
 
 #if UNITY_EDITOR
-        public LinkedList<LoadAssetObject> LoadAssetObjectsLinkedList
+        public LinkedList<LoadedAssetObject> LoadAssetObjectsLinkedList
         {
-            get => m_loadAssetObjectsLinkedList;
-            set => m_loadAssetObjectsLinkedList = value;
+            get => m_loadedAssetObjectsLinkedList;
+            set => m_loadedAssetObjectsLinkedList = value;
         }
 #endif
 
@@ -78,7 +78,7 @@ namespace DGame
             IObjectPoolModule poolModule = ModuleSystem.GetModule<IObjectPoolModule>();
             m_assetItemPool = poolModule.CreateMultiSpawnObjectPool<AssetItemObject>("SetAssetPool",
                 autoReleaseInternal, 16, 60, 0);
-            m_loadAssetObjectsLinkedList = new LinkedList<LoadAssetObject>();
+            m_loadedAssetObjectsLinkedList = new LinkedList<LoadedAssetObject>();
             InitializedResources();
         }
 
@@ -98,7 +98,7 @@ namespace DGame
 #endif
         public void ReleaseUnused()
         {
-            if (m_loadAssetObjectsLinkedList == null || m_loadAssetObjectsLinkedList.Count == 0)
+            if (m_loadedAssetObjectsLinkedList == null || m_loadedAssetObjectsLinkedList.Count == 0)
             {
                 m_currentProcessNode = null;
                 m_checkCanReleaseTime = 0f;
@@ -108,11 +108,11 @@ namespace DGame
             // 如果当前没有正在处理的节点，从头开始
             if (m_currentProcessNode == null)
             {
-                m_currentProcessNode = m_loadAssetObjectsLinkedList.First;
+                m_currentProcessNode = m_loadedAssetObjectsLinkedList.First;
             }
 
             int processedCount = 0;
-            LinkedListNode<LoadAssetObject> current = m_loadAssetObjectsLinkedList.First;
+            LinkedListNode<LoadedAssetObject> current = m_currentProcessNode;
 
             // 分帧处理：每帧最多处理 maxProcessPerFrame 个资源
             while (current != null && processedCount < m_maxProcessPerFrame)
@@ -122,7 +122,7 @@ namespace DGame
                 {
                     m_assetItemPool.Recycle(current.Value.assetTarget);
                     MemoryPool.Release(current.Value.assetObject);
-                    m_loadAssetObjectsLinkedList.Remove(current);
+                    m_loadedAssetObjectsLinkedList.Remove(current);
                 }
                 current = next;
                 processedCount++;
@@ -136,9 +136,9 @@ namespace DGame
             // Debugger.Info("======== ResourceExtComponent.释放无引用资源 ========");
         }
 
-        private void SetAsset(ISetAssetObject setAssetObject, Object assetObject)
+        private void SetAsset(ISetAssetObject setAssetObject, UnityEngine.Object assetObject)
         {
-            m_loadAssetObjectsLinkedList.AddLast(new LoadAssetObject(setAssetObject, assetObject));
+            m_loadedAssetObjectsLinkedList.AddLast(new LoadedAssetObject(setAssetObject, assetObject));
             setAssetObject.SetAsset(assetObject);
         }
 

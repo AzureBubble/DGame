@@ -6,6 +6,7 @@ namespace DGame
     {
         /// <summary>
         /// 资源对象
+        /// <remarks>对象池对象</remarks>
         /// </summary>
         private sealed class AssetObject : BasePoolObject
         {
@@ -15,7 +16,8 @@ namespace DGame
             private AssetHandle m_assetHandle = null;
             private ResourceModule m_resourceModule;
 
-            public static AssetObject Spawn(string name, object target, object assetHandle, ResourceModule resourceModule)
+            public static AssetObject Create(string name, object target,
+                object assetHandle, ResourceModule resourceModule)
             {
                 if (assetHandle == null)
                 {
@@ -29,28 +31,26 @@ namespace DGame
 
                 AssetObject assetObject = MemoryPool.Spawn<AssetObject>();
                 assetObject.Initialize(name, target);
-                assetObject.m_assetHandle = (AssetHandle)assetHandle;
+                assetObject.m_assetHandle = assetHandle as AssetHandle;
                 assetObject.m_resourceModule = resourceModule;
                 return assetObject;
             }
 
             public override void OnRelease()
             {
-                base.OnRelease();
                 m_assetHandle = null;
+                base.OnRelease();
             }
 
             protected internal override void ReleaseObj(bool isDestroy)
             {
                 if (!isDestroy)
                 {
-                    AssetHandle assetHandle = m_assetHandle;
-
-                    if (assetHandle != null && assetHandle.IsValid)
+                    // 释放资源句柄
+                    if (m_assetHandle != null && m_assetHandle.IsValid)
                     {
-                        assetHandle.Dispose();
+                        m_assetHandle.Dispose();
                     }
-
                     m_assetHandle = null;
                 }
             }

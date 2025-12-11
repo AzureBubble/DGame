@@ -243,7 +243,7 @@ namespace DGame
         /// <returns>返回资源实例</returns>
         public T LoadFromBundle<T>(string path)where T : Object
         {
-            var assetObj = m_resourceModule.LoadAssetSync<T>(path);
+            var assetObj = m_resourceModule.LoadAsset<T>(path);
 
             if (assetObj != null)
             {

@@ -354,7 +354,7 @@ namespace DGame
                     {
                         if (EditorApplication.isPlaying)
                         {
-                            t.UpdatableWhilePlaying = updatableWhilePlaying;
+                            t.updatableWhilePlaying = updatableWhilePlaying;
                         }
                         else
                         {

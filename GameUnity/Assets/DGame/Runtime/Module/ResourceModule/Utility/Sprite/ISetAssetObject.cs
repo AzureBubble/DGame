@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-namespace DGame
+﻿namespace DGame
 {
     public interface ISetAssetObject : IMemory
     {
@@ -15,10 +13,10 @@ namespace DGame
         public UnityEngine.Object TargetObject { get; set; }
 
         /// <summary>
-        /// 社渚资源
+        /// 设置资源
         /// </summary>
         /// <param name="asset"></param>
-        void SetAsset(Object asset);
+        void SetAsset(UnityEngine.Object asset);
 
         /// <summary>
         /// 是否可以回收释放资源

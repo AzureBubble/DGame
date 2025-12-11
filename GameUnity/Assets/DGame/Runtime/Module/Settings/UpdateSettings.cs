@@ -64,10 +64,19 @@ namespace DGame
         public List<string> HotUpdateAssemblies = new List<string>() { "GameProto.dll", "GameLogic.dll" };
         public List<string> AOTMetaAssemblies = new List<string>() { "mscorlib.dll", "System.dll", "System.Core.dll", "DGame.Runtime.dll" ,"UniTask.dll", "YooAsset.dll" };
 
+        /// <summary>
+        /// 主热更DLL
+        /// </summary>
         public string LogicMainDllName = "GameLogic.dll";
 
+        /// <summary>
+        /// 程序集文本资产打包Asset后缀名
+        /// </summary>
         public string AssemblyTextAssetExtension = ".bytes";
 
+        /// <summary>
+        /// 程序集文本AB资产资源目录
+        /// </summary>
         public string AssemblyTextAssetPath = "ABAssets/DLL";
 
         [Header("更新设置")]
@@ -84,51 +93,78 @@ namespace DGame
         [SerializeField]
         private LoadResWayWebGL m_loadResWayWebGL = LoadResWayWebGL.Remote;
 
+        /// <summary>
+        /// WebGL平台加载本地资源/加载远程资源
+        /// </summary>
         public LoadResWayWebGL GetLoadResWayWebGL() => m_loadResWayWebGL;
 
         [SerializeField]
         private bool m_isAutoAssetCopyToBuildAddress = false;
 
+        /// <summary>
+        /// 是否自动将打包资源复制到打包后的StreamingAssets地址和buildAddress地址
+        /// </summary>
         public bool IsAutoAssetCopyToBuildAddress() => m_isAutoAssetCopyToBuildAddress;
 
         [SerializeField]
         private string m_buildAddress = "../../Builds/Unity_Data/StreamingAssets";
-        /// <summary>
-        /// 是否使用可寻址资源代替资源路径
-        /// 说明：开启此项可以节省运行时清单占用的内存！
-        /// </summary>
+
         [SerializeField]
         private bool m_replaceAssetPathWithAddress = false;
 
         [SerializeField]
         private bool m_forceGenerateAtlas = false;
 
+        /// <summary>
+        /// 打包程序资源缓存地址
+        /// </summary>
         public string GetBuildAddress() => m_buildAddress;
 
+        /// <summary>
+        /// 是否使用可寻址资源代替资源路径
+        /// <remarks>说明：开启此项可以节省运行时清单占用的内存！</remarks>
+        /// </summary>
         public bool GetReplaceAssetPathWithAddress()
                 => m_replaceAssetPathWithAddress;
 
+        /// <summary>
+        /// 是否打包的时候强制重新生成图集
+        /// </summary>
         public bool ForceGenerateAtlas => m_forceGenerateAtlas;
 
-        public string GetResDownloadPath() => Path.Combine(m_resDownloadPath, projectName, GetPlatformName()).Replace("\\", "/");
+        /// <summary>
+        /// 获取资源服务器地址。https://127.0.0.1:8081/Demo/Android
+        /// </summary>
+        public string GetResDownloadPath() =>
+                Path.Combine(m_resDownloadPath, projectName, GetPlatformName()).Replace("\\", "/");
 
-        public string GetFallbackResDownloadPath() => Path.Combine(m_fallbackResDownloadPath, projectName, GetPlatformName()).Replace("\\", "/");
+        /// <summary>
+        /// 获取资源服务备用地址 https://127.0.0.1:8081/Demo/Android
+        /// </summary>
+        [SerializeField]
+        public string GetFallbackResDownloadPath()
+                => Path.Combine(m_fallbackResDownloadPath, projectName, GetPlatformName()).Replace("\\", "/");
 
         [SerializeField]
         public string packageName = "DefaultPackage";
 
+        /// <summary>
+        /// 资源包名
+        /// </summary>
         public string PackageName { get => packageName; set => packageName = value; }
+
+        public string updateUIDefineConfigPath = "Config/UpdateUIDefine";
 
         /// <summary>
         /// 热更新流程文本配置路径
         /// </summary>
-        public string updateUIDefineConfigPath = "Config/UpdateUIDefine";
         public string UpdateUIDefineConfigPath => updateUIDefineConfigPath;
+
+        [SerializeField] private bool m_enableAddressable = true;
 
         /// <summary>
         /// AB资源是否支持可寻址
         /// </summary>
-        [SerializeField] private bool m_enableAddressable = true;
         public bool EnableAddressable => m_enableAddressable;
 
         /// <summary>

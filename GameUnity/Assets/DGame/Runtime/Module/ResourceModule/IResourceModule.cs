@@ -1,17 +1,8 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using YooAsset;
-
-#if ODIN_INSPECTOR && UNITY_EDITOR
-
-using Sirenix.OdinInspector;
-
-#endif
 
 namespace DGame
 {
@@ -53,19 +44,20 @@ namespace DGame
         /// <summary>
         /// 失败重试的最大次数
         /// </summary>
-        int FailedTryAgainCnt { get; set; }
+        int FailedTryAgainNum { get; set; }
 
         /// <summary>
-        /// 初始化
+        /// 初始化YooAssets系统
         /// </summary>
         void Initialize();
 
         /// <summary>
-        /// 异步初始化操作
+        /// 异步初始化YooAssets资源包操作
         /// </summary>
-        /// <param name="customPackageName">资源包名</param>
+        /// <param name="packageName">资源包名</param>
+        /// <param name="needInitMainFest">是否需要直接初始化资源清单 （单机OtherPackage使用）</param>
         /// <returns></returns>
-        UniTask<InitializationOperation> InitPackage(string customPackageName);
+        UniTask<InitializationOperation> InitPackage(string packageName, bool needInitMainFest = false);
 
         /// <summary>
         /// 默认资源包名
@@ -83,24 +75,24 @@ namespace DGame
         bool AutoUnloadBundleWhenUnused { get; set; }
 
         /// <summary>
-        /// 热更服务器链接URL
+        /// 热更服务器地址URL
         /// </summary>
-        string HostServerURl { get; set; }
+        string HostServerURL { get; set; }
 
         /// <summary>
-        /// 备用热更服务器链接URL
+        /// 备用热更服务器地址URL
         /// </summary>
         string FallbackHostServerURL { get; set; }
 
         /// <summary>
         /// WebGL平台加载资源的方式
         /// </summary>
-        LoadResWayWebGL LoadResWayWebGL{ get; set; }
+        LoadResWayWebGL LoadResWayWebGL { get; set; }
 
         /// <summary>
         /// 资源对象池自动释放可释放对象的时间间隔（秒）
         /// </summary>
-        float AssetAutoReleaseInterval { get; set; }
+        float AssetPoolAutoReleaseInterval { get; set; }
 
         /// <summary>
         /// 资源对象池容量
@@ -145,7 +137,7 @@ namespace DGame
         /// <param name="location">资源地址</param>
         /// <param name="packageName">资源包名，为空使用默认资源包</param>
         /// <returns></returns>
-        CheckAssetStatus CheckAssetIsExist(string location, string packageName = "");
+        CheckAssetStatus ContainsAsset(string location, string packageName = "");
 
         /// <summary>
         /// 检查资源地址是否有效
@@ -158,7 +150,7 @@ namespace DGame
         #region GetAssetInfo
 
         /// <summary>
-        /// 获取资源信息列表
+        /// 通过tag获取资源信息列表
         /// </summary>
         /// <param name="resTag">资源标签</param>
         /// <param name="packageName">资源包名，为空使用默认资源包</param>
@@ -166,7 +158,7 @@ namespace DGame
         AssetInfo[] GetAssetInfos(string resTag, string packageName = "");
 
         /// <summary>
-        /// 获取资源信息列表
+        /// 通过tags获取资源信息列表
         /// </summary>
         /// <param name="tags">资源标签列表</param>
         /// <param name="packageName">资源包名，为空使用默认资源包</param>
@@ -174,7 +166,7 @@ namespace DGame
         AssetInfo[] GetAssetInfos(string[] tags, string packageName = "");
 
         /// <summary>
-        /// 获取资源信息
+        /// 通过资源地址获取资源信息
         /// </summary>
         /// <param name="location">资源地址</param>
         /// <param name="packageName">资源包名，为空使用默认资源包</param>
@@ -193,8 +185,8 @@ namespace DGame
         /// <param name="loadAssetCallbacks">加载资源回调函数集</param>
         /// <param name="userData">用户自定义数据</param>
         /// <param name="packageName">指定资源包的名称。不传使用默认资源包</param>
-        void LoadAssetAsync(string location, int priority, LoadAssetCallbacks loadAssetCallbacks, object userData,
-            string packageName = "");
+        void LoadAssetAsync(string location, int priority, LoadAssetCallbacks loadAssetCallbacks,
+            object userData, string packageName = "");
 
         /// <summary>
         /// 异步加载资源
@@ -231,15 +223,15 @@ namespace DGame
             string packageName = "") where T : UnityEngine.Object;
 
         /// <summary>
-        /// 异步加载游戏物体并实例化
+        /// 异步加载资源
         /// </summary>
         /// <param name="location">资源的定位地址</param>
-        /// <param name="parent">资源实例父节点</param>
+        /// <param name="assetType">要加载的资源类型</param>
         /// <param name="cancellationToken">取消操作Token</param>
         /// <param name="packageName">指定资源包的名称。不传使用默认资源包</param>
         /// <returns></returns>
-        UniTask<GameObject> LoadGameObjectAsync(string location, Transform parent = null,
-            CancellationToken cancellationToken = default, string packageName = "");
+        UniTask<UnityEngine.Object> LoadAssetAsync(string location, Type assetType, CancellationToken cancellationToken = default,
+            string packageName = "");
 
         #endregion
 
@@ -252,7 +244,16 @@ namespace DGame
         /// <param name="packageName">资源包的名称 传使用默认资源包</param>
         /// <typeparam name="T">要加载资源的类型</typeparam>
         /// <returns>资源实例对象</returns>
-        T LoadAssetSync<T>(string location, string packageName = "") where T : UnityEngine.Object;
+        T LoadAsset<T>(string location, string packageName = "") where T : UnityEngine.Object;
+
+        /// <summary>
+        /// 同步加载资源
+        /// </summary>
+        /// <param name="location">资源的定位地址</param>
+        /// <param name="packageName">资源包的名称 传使用默认资源包</param>
+        /// <param name="assetType">要加载资源的类型</param>
+        /// <returns>资源实例对象</returns>
+        UnityEngine.Object LoadAsset(string location, Type assetType, string packageName = "");
         
         #endregion
 
@@ -268,6 +269,18 @@ namespace DGame
         /// <remarks>会实例化资源到场景 无需主动UnloadAsset Destroy时自动UnloadAsset</remarks>
         GameObject LoadGameObject(string location, Transform parent = null, string packageName = "");
 
+        /// <summary>
+        /// 异步加载游戏物体并实例化
+        /// </summary>
+        /// <param name="location">资源的定位地址</param>
+        /// <param name="parent">资源实例父节点</param>
+        /// <param name="cancellationToken">取消操作Token</param>
+        /// <param name="packageName">指定资源包的名称。不传使用默认资源包</param>
+        /// <returns>资源实例</returns>
+        /// <remarks>会实例化资源到场景 无需主动UnloadAsset Destroy时自动UnloadAsset</remarks>
+        UniTask<GameObject> LoadGameObjectAsync(string location, Transform parent = null,
+            CancellationToken cancellationToken = default, string packageName = "");
+
         #endregion
 
         #region LoadAssetHandle
@@ -278,8 +291,17 @@ namespace DGame
         /// <param name="location">资源定位地址</param>
         /// <param name="packageName">资源包名称</param>
         /// <typeparam name="T">资源类型</typeparam>
-        /// <returns></returns>
+        /// <returns>资源操作句柄</returns>
         AssetHandle LoadAssetSyncHandle<T>(string location, string packageName = "") where T : UnityEngine.Object;
+
+        /// <summary>
+        /// 获取同步加载的资源操作句柄
+        /// </summary>
+        /// <param name="location">资源定位地址</param>
+        /// <param name="packageName">资源包名称</param>
+        /// <param name="assetType">资源类型</param>
+        /// <returns>资源操作句柄</returns>
+        AssetHandle LoadAssetSyncHandle(string location, Type assetType, string packageName = "");
 
         /// <summary>
         /// 获取异步加载的资源操作句柄
@@ -287,8 +309,17 @@ namespace DGame
         /// <param name="location">资源定位地址</param>
         /// <param name="packageName">资源包名称</param>
         /// <typeparam name="T">资源类型</typeparam>
-        /// <returns></returns>
+        /// <returns>资源操作句柄</returns>
         AssetHandle LoadAssetAsyncHandle<T>(string location, string packageName = "") where T : UnityEngine.Object;
+
+        /// <summary>
+        /// 获取异步加载的资源操作句柄
+        /// </summary>
+        /// <param name="location">资源定位地址</param>
+        /// <param name="packageName">资源包名称</param>
+        /// <param name="assetType">资源类型</param>
+        /// <returns>资源操作句柄</returns>
+        AssetHandle LoadAssetAsyncHandle(string location, Type assetType, string packageName = "");
 
         #endregion
 
@@ -297,7 +328,6 @@ namespace DGame
         /// </summary>
         /// <param name="clearMode">文件清理方式</param>
         /// <param name="customPackageName">指定资源包的名称。不传使用默认资源包</param>
-        /// <returns></returns>
         ClearCacheFilesOperation ClearCacheFilesAsync(EFileClearMode clearMode = EFileClearMode.ClearUnusedBundleFiles,
             string customPackageName = "");
 
@@ -331,21 +361,23 @@ namespace DGame
         string GetPacketVersion(string customPackageName = "");
 
         /// <summary>
-        /// 异步更新最新资源包的版本
+        /// 异步请求资源清单的版本信息
         /// </summary>
         /// <param name="appendTimeTicks">请求URL是否需要带时间戳</param>
         /// <param name="timeout">超时时间</param>
         /// <param name="customPackageName">指定资源包的名称。不传使用默认资源包</param>
         /// <returns></returns>
-        RequestPackageVersionOperation RequestPackageVersionAsync(bool appendTimeTicks = false, int timeout = 60, string customPackageName = "");
+        RequestPackageVersionOperation RequestPackageVersionAsync(bool appendTimeTicks = false, int timeout = 60,
+            string customPackageName = "");
 
         /// <summary>
-        /// 请求并更新清单
+        /// 异步请求更新资源清单文件
         /// </summary>
         /// <param name="packageVersion">更新的包裹版本</param>
         /// <param name="timeout">超时时间（默认值：60秒）</param>
         /// <param name="customPackageName">指定资源包的名称。不传使用默认资源包</param>
-        UpdatePackageManifestOperation UpdatePackageManifestAsync(string packageVersion, int timeout = 60, string customPackageName = "");
+        UpdatePackageManifestOperation UpdatePackageManifestAsync(string packageVersion, int timeout = 60,
+            string customPackageName = "");
 
         /// <summary>
         /// 设置服务器URL
@@ -360,9 +392,9 @@ namespace DGame
         void OnLowMemory();
 
         /// <summary>
-        /// 低内存回调保护
+        /// 低内存回调保护 设置低内存时强制卸载未使用的资源回调
         /// </summary>
-        /// <param name="action">低内存行为</param>
+        /// <param name="action">低内存行为，true进行GC</param>
         void SetForceUnloadUnusedAssetsAction(Action<bool> action);
     }
 
@@ -375,18 +407,12 @@ namespace DGame
         /// <summary>
         /// 访问远程资源
         /// </summary>
-#if ODIN_INSPECTOR && UNITY_EDITOR && ENABLE_ODIN_INSPECTOR
-        [LabelText("访问远程资源")]
-#endif
         [InspectorName("访问远程资源")]
         Remote = 0,
 
         /// <summary>
         /// 跳过远程下载资源直接访问StreamingAssets
         /// </summary>
-#if ODIN_INSPECTOR && UNITY_EDITOR && ENABLE_ODIN_INSPECTOR
-        [LabelText("访问StreamingAssets")]
-#endif
         [InspectorName("访问StreamingAssets")]
         StreamingAssets = 1,
     }

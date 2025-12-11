@@ -1,15 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace DGame
 {
     [SerializeField]
     public struct AssetRefInfo
     {
-        public int instanceID;
-        public Object refAsset;
+        public readonly int instanceID;
+        public readonly Object refAsset;
 
         public AssetRefInfo(Object asset)
         {
@@ -21,25 +19,22 @@ namespace DGame
     [DisallowMultipleComponent]
     public class AssetReference : MonoBehaviour
     {
-        [SerializeField]
-        private GameObject sourceGameObject;
-        [SerializeField]
-        private List<AssetRefInfo> refInfos = new List<AssetRefInfo>();
-        private static IResourceModule m_resourceModule;
-        private static Dictionary<GameObject, AssetReference> m_originalRefs = new Dictionary<GameObject, AssetReference>();
+        private static IResourceModule s_resourceModule;
+        private static Dictionary<GameObject, AssetReference> s_originalRefs = new Dictionary<GameObject, AssetReference>();
+
+        [SerializeField] private GameObject sourceGameObject;
+        [SerializeField] private List<AssetRefInfo> refInfos = new List<AssetRefInfo>();
 
         private void CheckInit()
         {
-            if (m_resourceModule != null)
+            if (s_resourceModule != null)
             {
                 return;
             }
-            else
-            {
-                m_resourceModule = ModuleSystem.GetModule<IResourceModule>();
-            }
 
-            if (m_resourceModule == null)
+            s_resourceModule = ModuleSystem.GetModule<IResourceModule>();
+
+            if (s_resourceModule == null)
             {
                 throw new DGameException("资源管理器无效");
             }
@@ -49,7 +44,7 @@ namespace DGame
         {
             if (sourceGameObject != null)
             {
-                m_resourceModule?.UnloadAsset(sourceGameObject);
+                s_resourceModule?.UnloadAsset(sourceGameObject);
             }
             else
             {
@@ -59,15 +54,22 @@ namespace DGame
 
         private void Awake()
         {
+            // 如果不是原始实例（即克隆体）
             if (!IsOriginalInstance())
             {
+                // 清理克隆体的引用
                 ClearCloneReferences();
             }
         }
 
+        /// <summary>
+        /// 判断当前实例是否为原始实例
+        /// </summary>
+        /// <returns></returns>
         private bool IsOriginalInstance()
         {
-            return m_originalRefs.TryGetValue(gameObject, out AssetReference reference) && reference == this;
+            // 检查字典中是否包含当前GameObject，且映射的AssetReference就是当前组件
+            return s_originalRefs.TryGetValue(gameObject, out AssetReference reference) && reference == this;
         }
 
         private void ClearCloneReferences()
@@ -94,7 +96,7 @@ namespace DGame
             {
                 for (int i = 0; i < refInfos.Count; i++)
                 {
-                    m_resourceModule?.UnloadAsset(refInfos[i].refAsset);
+                    s_resourceModule?.UnloadAsset(refInfos[i].refAsset);
                 }
                 refInfos.Clear();
             }
@@ -112,16 +114,23 @@ namespace DGame
                 throw new DGameException("游戏对象已经存在此场景中");
             }
 
-            m_resourceModule = resourceModule;
+            s_resourceModule = resourceModule;
             sourceGameObject = source;
 
-            if (!m_originalRefs.ContainsKey(gameObject))
+            if (!s_originalRefs.ContainsKey(gameObject))
             {
-                m_originalRefs.Add(gameObject, this);
+                s_originalRefs.Add(gameObject, this);
             }
             return this;
         }
 
+        /// <summary>
+        /// 引用一个泛型资源（如Texture、AudioClip等）
+        /// </summary>
+        /// <param name="source">资源</param>
+        /// <param name="resourceModule"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public AssetReference Ref<T>(T source, IResourceModule resourceModule = null) where T : Object
         {
             if (source == null)
@@ -129,7 +138,7 @@ namespace DGame
                 throw new DGameException("资源是无效的");
             }
 
-            m_resourceModule = resourceModule;
+            s_resourceModule = resourceModule;
 
             if (refInfos == null)
             {
@@ -140,7 +149,8 @@ namespace DGame
             return this;
         }
 
-        internal static AssetReference Instantiate(GameObject source, Transform parent = null, IResourceModule resourceModule = null)
+        internal static AssetReference Instantiate(GameObject source, Transform parent = null,
+            IResourceModule resourceModule = null)
         {
             if (source == null)
             {
@@ -152,10 +162,16 @@ namespace DGame
                 throw new DGameException("游戏对象已经存在此场景中");
             }
 
-            var instance = Object.Instantiate(source, parent);
-            return instance.AddComponent<AssetReference>().Ref(source, resourceModule);
+            return Object.Instantiate(source, parent)?.AddComponent<AssetReference>()?.Ref(source, resourceModule);
         }
 
+        /// <summary>
+        /// 为已存在的GameObject引用一个源GameObject
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="instance"></param>
+        /// <param name="resourceModule"></param>
+        /// <returns></returns>
         public static AssetReference Ref(GameObject source, GameObject instance, IResourceModule resourceModule = null)
         {
             if (source == null)
@@ -168,20 +184,36 @@ namespace DGame
                 throw new DGameException("游戏对象已经存在此场景中");
             }
 
-            var com = instance.GetComponent<AssetReference>();
-            return com != null ? com.Ref(source, resourceModule) : instance.AddComponent<AssetReference>().Ref(source, resourceModule);
+            if (!instance.TryGetComponent<AssetReference>(out var assetRef))
+            {
+                assetRef = instance.AddComponent<AssetReference>();
+            }
+
+            return assetRef?.Ref(source, resourceModule);
         }
 
-
-        public static AssetReference Ref<T>(T source, GameObject instance, IResourceModule resourceModule = null) where T : Object
+        /// <summary>
+        /// 为已存在的GameObject引用一个泛型资源
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="instance"></param>
+        /// <param name="resourceModule"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static AssetReference Ref<T>(T source, GameObject instance,
+            IResourceModule resourceModule = null) where T : Object
         {
             if (source == null)
             {
                 throw new DGameException("资源对象是无效的");
             }
 
-            var com = instance.GetComponent<AssetReference>();
-            return com != null ? com.Ref(source, resourceModule) : instance.AddComponent<AssetReference>().Ref(source, resourceModule);
+            if (!instance.TryGetComponent<AssetReference>(out var assetRef))
+            {
+                assetRef = instance.AddComponent<AssetReference>();
+            }
+
+            return assetRef?.Ref(source, resourceModule);
         }
     }
 }

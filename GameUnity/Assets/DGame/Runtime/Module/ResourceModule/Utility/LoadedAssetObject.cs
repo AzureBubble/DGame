@@ -1,15 +1,13 @@
-﻿#if ODIN_INSPECTOR && ENABLE_ODIN_INSPECTOR
+﻿#if ODIN_INSPECTOR && ENABLE_ODIN_INSPECTOR && UNITY_EDITOR
 
 using Sirenix.OdinInspector;
 
 #endif
 
-using UnityEngine;
-
 namespace DGame
 {
-    [SerializeField]
-    public class LoadAssetObject
+    [UnityEngine.SerializeField]
+    public class LoadedAssetObject
     {
 
 #if ODIN_INSPECTOR && ENABLE_ODIN_INSPECTOR
@@ -20,14 +18,13 @@ namespace DGame
 #if ODIN_INSPECTOR && ENABLE_ODIN_INSPECTOR
         [ShowInInspector]
 #endif
-        public Object assetTarget { get; }
+        public UnityEngine.Object assetTarget { get; }
 
 #if UNITY_EDITOR
         public bool isSelect { get; }
 #endif
 
-
-        public LoadAssetObject(ISetAssetObject assetObject, Object assetTarget)
+        public LoadedAssetObject(ISetAssetObject assetObject, UnityEngine.Object assetTarget)
         {
             this.assetObject = assetObject;
             this.assetTarget = assetTarget;

@@ -430,12 +430,7 @@ namespace DGame
                     throw new DGameException("目标对象无效");
                 }
 
-                if (m_poolObjectsMap.TryGetValue(target, out var poolObject))
-                {
-                    return poolObject;
-                }
-
-                return null;
+                return m_poolObjectsMap.GetValueOrDefault(target);
             }
 
             private void GetCanReleaseObjects(List<T> result)

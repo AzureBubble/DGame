@@ -9,10 +9,11 @@ namespace DGame
 
         private static void CheckResourceModule()
         {
-            if (m_resourceModule == null)
+            if (m_resourceModule != null)
             {
-                m_resourceModule = ModuleSystem.GetModule<IResourceModule>();
+                return;
             }
+            m_resourceModule = ModuleSystem.GetModule<IResourceModule>();
         }
 
         #region SetMaterial
@@ -32,8 +33,7 @@ namespace DGame
                 {
                     if (image == null || image.gameObject == null)
                     {
-                        m_resourceModule.UnloadAsset(location);
-                        material = null;
+                        m_resourceModule.UnloadAsset(material);
                         return;
                     }
                     image.material = material;
@@ -42,13 +42,14 @@ namespace DGame
             }
             else
             {
-                Material material = m_resourceModule.LoadAssetSync<Material>(location, packageName);
+                Material material = m_resourceModule.LoadAsset<Material>(location, packageName);
                 image.material = material;
                 AssetReference.Ref(material, image.gameObject);
             }
         }
 
-        public static void SetMaterial(this SpriteRenderer spriteRenderer, string location, bool isAsync = false, string packageName = "")
+        public static void SetMaterial(this SpriteRenderer spriteRenderer, string location,
+            bool isAsync = false, string packageName = "")
         {
             if (spriteRenderer == null)
             {
@@ -63,8 +64,7 @@ namespace DGame
                 {
                     if (spriteRenderer == null || spriteRenderer.gameObject == null)
                     {
-                        m_resourceModule.UnloadAsset(location);
-                        material = null;
+                        m_resourceModule.UnloadAsset(material);
                         return;
                     }
                     spriteRenderer.material = material;
@@ -73,13 +73,14 @@ namespace DGame
             }
             else
             {
-                Material material = m_resourceModule.LoadAssetSync<Material>(location, packageName);
+                Material material = m_resourceModule.LoadAsset<Material>(location, packageName);
                 spriteRenderer.material = material;
                 AssetReference.Ref(material, spriteRenderer.gameObject);
             }
         }
 
-        public static void SetShareMaterial(this MeshRenderer meshRenderer, string location, bool isAsync = false, string packageName = "")
+        public static void SetSharedMaterial(this MeshRenderer meshRenderer, string location,
+            bool isAsync = false, string packageName = "")
         {
             if (meshRenderer == null)
             {
@@ -94,8 +95,7 @@ namespace DGame
                 {
                     if (meshRenderer == null || meshRenderer.gameObject == null)
                     {
-                        m_resourceModule.UnloadAsset(location);
-                        material = null;
+                        m_resourceModule.UnloadAsset(material);
                         return;
                     }
                     meshRenderer.sharedMaterial = material;
@@ -104,14 +104,15 @@ namespace DGame
             }
             else
             {
-                Material material = m_resourceModule.LoadAssetSync<Material>(location, packageName);
+                Material material = m_resourceModule.LoadAsset<Material>(location, packageName);
                 meshRenderer.sharedMaterial = material;
                 AssetReference.Ref(material, meshRenderer.gameObject);
             }
         }
 
 
-        public static void SetMaterial(this MeshRenderer meshRenderer, string location, bool needInstance = true, bool isAsync = false, string packageName = "")
+        public static void SetMaterial(this MeshRenderer meshRenderer, string location,
+            bool needInstance = true, bool isAsync = false, string packageName = "")
         {
             if (meshRenderer == null)
             {
@@ -126,8 +127,7 @@ namespace DGame
                 {
                     if (meshRenderer == null || meshRenderer.gameObject == null)
                     {
-                        m_resourceModule.UnloadAsset(location);
-                        material = null;
+                        m_resourceModule.UnloadAsset(material);
                         return;
                     }
                     meshRenderer.material = needInstance ? Object.Instantiate(material) : material;
@@ -136,7 +136,7 @@ namespace DGame
             }
             else
             {
-                Material material = m_resourceModule.LoadAssetSync<Material>(location, packageName);
+                Material material = m_resourceModule.LoadAsset<Material>(location, packageName);
                 meshRenderer.material = needInstance ? Object.Instantiate(material) : material;
                 AssetReference.Ref(material, meshRenderer.gameObject);
             }

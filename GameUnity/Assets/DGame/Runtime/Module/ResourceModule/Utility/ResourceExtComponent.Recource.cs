@@ -37,8 +37,8 @@ namespace DGame
         private void OnLoadAssetFailure(string assetName, LoadResourceStatus status, string errormessage, object userdata)
         {
             m_loadingAssetList.Remove(assetName);
-            ISetAssetObject setAssetObject = (ISetAssetObject)userdata;
-            if (setAssetObject != null)
+
+            if (userdata is ISetAssetObject setAssetObject)
             {
                 ClearLoadingState(setAssetObject.TargetObject);
             }
@@ -48,22 +48,23 @@ namespace DGame
         private void OnLoadAssetSuccess(string assetName, object asset, float duration, object userdata)
         {
             m_loadingAssetList.Remove(assetName);
-            ISetAssetObject setAssetObject = (ISetAssetObject)userdata;
-            UnityEngine.Object assetObject = asset as UnityEngine.Object;
-            if (assetObject != null)
+            if (asset is UnityEngine.Object assetObject)
             {
-                // 检查资源是否仍然是当前需要的。
-                if (IsCurrentLocation(setAssetObject.TargetObject, setAssetObject.Location))
+                if (userdata is ISetAssetObject setAssetObject)
                 {
-                    ClearLoadingState(setAssetObject.TargetObject);
+                    // 检查资源是否仍然是当前需要的
+                    if (IsCurrentLocation(setAssetObject.TargetObject, setAssetObject.Location))
+                    {
+                        ClearLoadingState(setAssetObject.TargetObject);
 
-                    m_assetItemPool.Register(AssetItemObject.Create(setAssetObject.Location, assetObject), true);
-                    SetAsset(setAssetObject, assetObject);
-                }
-                else
-                {
-                    // 资源已经过期，卸载。
-                    m_resourceModule.UnloadAsset(assetObject);
+                        m_assetItemPool.Register(AssetItemObject.Create(setAssetObject.Location, assetObject), true);
+                        SetAsset(setAssetObject, assetObject);
+                    }
+                    else
+                    {
+                        // 资源已经过期，卸载
+                        m_resourceModule.UnloadAsset(assetObject);
+                    }
                 }
             }
             else
@@ -77,7 +78,8 @@ namespace DGame
         /// </summary>
         /// <param name="setAssetObject">需要设置的对象</param>
         /// <param name="cancellationToken">CancellationToken</param>
-        public async UniTaskVoid SetAssetByResources<T>(ISetAssetObject setAssetObject, CancellationToken cancellationToken) where T : UnityEngine.Object
+        public async UniTaskVoid SetAssetByResources<T>(ISetAssetObject setAssetObject,
+            CancellationToken cancellationToken) where T : UnityEngine.Object
         {
             var target = setAssetObject.TargetObject;
             var location = setAssetObject.Location;
@@ -130,7 +132,7 @@ namespace DGame
                     T resource = await m_resourceModule.LoadAssetAsync<T>(location, linkedTokenSource.Token);
                     if (resource != null)
                     {
-                        m_loadAssetCallbacks?.LoadAssetSuccessCallback.Invoke(location,resource, 0f, setAssetObject);
+                        m_loadAssetCallbacks?.LoadAssetSuccessCallback?.Invoke(location,resource, 0f, setAssetObject);
                     }
                     m_loadingAssetList.Remove(location);
                 }

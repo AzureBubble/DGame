@@ -1,6 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using YooAsset;
 
@@ -28,16 +26,26 @@ namespace DGame
         private bool useSystemUnloadUnusedAssets = true;
         public bool UseSystemUnloadUnusedAssets { get => useSystemUnloadUnusedAssets; set => useSystemUnloadUnusedAssets = value; }
 
+        /// <summary>
+        /// 当前最新的包裹版本
+        /// </summary>
         public string PackageVersion { get; set; }
 
         [SerializeField]
         private string packageName = "DefaultPackage";
 
+        /// <summary>
+        /// 资源包名称。
+        /// </summary>
         public string PackageName { get => packageName; set => packageName = value; }
 
         [SerializeField]
         private EPlayMode playMode = EPlayMode.EditorSimulateMode;
 
+        /// <summary>
+        /// 资源系统运行模式
+        /// <remarks>编辑器内优先使用</remarks>
+        /// </summary>
         public EPlayMode PlayMode
         {
             get
@@ -66,11 +74,19 @@ namespace DGame
 
         [SerializeField]
         private EncryptionType encryptionType = EncryptionType.None;
+
+        /// <summary>
+        /// 资源模块的加密类型
+        /// </summary>
         public EncryptionType EncryptionType => encryptionType;
 
         [SerializeField]
-        private bool updatableWhilePlaying;
-        public bool UpdatableWhilePlaying { get => m_resourceModule.UpdatableWhilePlaying; set => m_resourceModule.UpdatableWhilePlaying = updatableWhilePlaying = value; }
+        public bool updatableWhilePlaying;
+
+        /// <summary>
+        /// 是否支持边玩边下载
+        /// </summary>
+        public bool UpdatableWhilePlaying => updatableWhilePlaying;
 
         /// <summary>
         /// 设置异步系统参数，每帧执行消耗的最大时间切片（单位：毫秒）
@@ -86,34 +102,74 @@ namespace DGame
 
         [SerializeField]
         private int downloadingMaxNum = 10;
+
+        /// <summary>
+        /// 同时最大下载数目
+        /// </summary>
         public int DownloadingMaxNum { get => downloadingMaxNum; set => downloadingMaxNum = value; }
 
         [SerializeField]
         private int failedTryAgain = 3;
+
+        /// <summary>
+        /// 重试次数
+        /// </summary>
         public int FailedTryAgain { get => failedTryAgain; set => failedTryAgain = value; }
 
         /// <summary>
-        /// 获取当前资源适用的游戏版本号。
+        /// 获取当前资源适用的游戏版本号
         /// </summary>
         public string ApplicableGameVersion => m_resourceModule?.ApplicableGameVersion;
 
         /// <summary>
-        /// 获取当前内部资源版本号。
+        /// 获取当前内部资源版本号
         /// </summary>
         public int InternalResourceVersion => m_resourceModule.InternalResourceVersion;
 
         [SerializeField]
         private float assetAutoReleaseInterval = 60f;
-        public float AssetAutoReleaseInterval { get => m_resourceModule.AssetAutoReleaseInterval; set => m_resourceModule.AssetAutoReleaseInterval = assetAutoReleaseInterval = value; }
+
+        /// <summary>
+        /// 资源对象池自动释放可释放对象的间隔秒数
+        /// </summary>
+        public float AssetAutoReleaseInterval
+        {
+            get => m_resourceModule.AssetPoolAutoReleaseInterval;
+            set => m_resourceModule.AssetPoolAutoReleaseInterval = assetAutoReleaseInterval = value;
+        }
         [SerializeField]
         private int assetPoolCapacity = 64;
-        public int AssetCapacity { get => m_resourceModule.AssetPoolCapacity; set => m_resourceModule.AssetPoolCapacity = assetPoolCapacity = value; }
+
+        /// <summary>
+        /// 资源对象池的容量
+        /// </summary>
+        public int AssetCapacity
+        {
+            get => m_resourceModule.AssetPoolCapacity;
+            set => m_resourceModule.AssetPoolCapacity = assetPoolCapacity = value;
+        }
         [SerializeField]
         private float assetExpireTime = 60f;
-        public float AssetExpireTime { get => m_resourceModule.AssetExpireTime; set => m_resourceModule.AssetExpireTime = assetExpireTime = value; }
+
+        /// <summary>
+        /// 资源对象池对象过期秒数
+        /// </summary>
+        public float AssetExpireTime
+        {
+            get => m_resourceModule.AssetExpireTime;
+            set => m_resourceModule.AssetExpireTime = assetExpireTime = value;
+        }
         [SerializeField]
         private int assetPoolPriority;
-        public int AssetPriority { get => m_resourceModule.AssetPoolPriority; set => m_resourceModule.AssetPoolPriority = assetPoolPriority = value; }
+
+        /// <summary>
+        /// 资源对象池的优先级
+        /// </summary>
+        public int AssetPriority
+        {
+            get => m_resourceModule.AssetPoolPriority;
+            set => m_resourceModule.AssetPoolPriority = assetPoolPriority = value;
+        }
 
         private void Start()
         {
@@ -137,15 +193,17 @@ namespace DGame
             m_resourceModule.EncryptionType = EncryptionType;
             m_resourceModule.Milliseconds = milliseconds;
             m_resourceModule.AutoUnloadBundleWhenUnused = autoUnloadBundleWhenUnused;
-            // TODO：设置资源热更地址
-            // m_resourceModule.HostServerURl =
-            // m_resourceModule.FallbackHostServerURL =
-            // m_resourceModule.LoadResWayWebGL =
+            m_resourceModule.SetRemoteServerURL(
+                Settings.UpdateSettings.GetResDownloadPath(),
+                Settings.UpdateSettings.GetFallbackResDownloadPath());
+            // m_resourceModule.HostServerURL = Settings.UpdateSettings.GetResDownloadPath();
+            // m_resourceModule.FallbackHostServerURL = Settings.UpdateSettings.GetFallbackResDownloadPath();
+            m_resourceModule.LoadResWayWebGL = Settings.UpdateSettings.GetLoadResWayWebGL();
             m_resourceModule.DownloadingMaxNum = DownloadingMaxNum;
-            m_resourceModule.FailedTryAgainCnt = FailedTryAgain;
+            m_resourceModule.FailedTryAgainNum = FailedTryAgain;
             m_resourceModule.UpdatableWhilePlaying = UpdatableWhilePlaying;
             m_resourceModule.Initialize();
-            m_resourceModule.AssetAutoReleaseInterval = assetAutoReleaseInterval;
+            m_resourceModule.AssetPoolAutoReleaseInterval = assetAutoReleaseInterval;
             m_resourceModule.AssetPoolCapacity = assetPoolCapacity;
             m_resourceModule.AssetExpireTime = assetExpireTime;
             m_resourceModule.AssetPoolPriority = assetPoolPriority;
@@ -164,7 +222,7 @@ namespace DGame
             m_forceUnloadUnusedAssets = true;
             if (performGCCollect)
             {
-                m_performGCCollect = performGCCollect;
+                m_performGCCollect = true;
             }
         }
 

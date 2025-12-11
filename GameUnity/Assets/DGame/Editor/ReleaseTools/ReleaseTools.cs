@@ -148,7 +148,7 @@ namespace DGame
             }
 
             // 配置构建参数
-            buildParameters.BuildOutputRoot = AssetBundleBuilderHelper.GetDefaultBuildOutputRoot(); // 构建输出目录
+            buildParameters.BuildOutputRoot = outputRoot; //AssetBundleBuilderHelper.GetDefaultBuildOutputRoot(); // 构建输出目录
             buildParameters.BuildinFileRoot = AssetBundleBuilderHelper.GetStreamingAssetsRoot(); // 内置文件根目录
             buildParameters.BuildPipeline = buildPipeline.ToString(); // 构建管线名称
             buildParameters.BuildTarget = buildTarget; // 目标平台

@@ -10,12 +10,12 @@ namespace DGame
     public class LoadedAssetObject
     {
 
-#if ODIN_INSPECTOR && ENABLE_ODIN_INSPECTOR
+#if ODIN_INSPECTOR && ENABLE_ODIN_INSPECTOR && UNITY_EDITOR
         [ShowInInspector]
 #endif
         public ISetAssetObject assetObject { get; }
 
-#if ODIN_INSPECTOR && ENABLE_ODIN_INSPECTOR
+#if ODIN_INSPECTOR && ENABLE_ODIN_INSPECTOR && UNITY_EDITOR
         [ShowInInspector]
 #endif
         public UnityEngine.Object assetTarget { get; }

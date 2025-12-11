@@ -44,7 +44,7 @@ namespace DGame
         /// <summary>
         /// 当前正在处理的节点，用于分帧处理。
         /// </summary>
-#if ODIN_INSPECTOR && ENABLE_ODIN_INSPECTOR
+#if ODIN_INSPECTOR && ENABLE_ODIN_INSPECTOR && UNITY_EDITOR
         [ShowInInspector]
 #endif
         private LinkedListNode<LoadedAssetObject> m_currentProcessNode;

@@ -162,8 +162,7 @@ namespace DGame
             }
         }
 
-        private string GetLanguageAssetName(string language)
-            => $"{LocalizationUtil.I2ResAssetNamePrefix}{language}";
+        private string GetLanguageAssetName(string language) => $"{LocalizationUtil.I2ResAssetNamePrefix}{language}";
 
         private void UpdateAllLanguages()
         {
@@ -179,14 +178,10 @@ namespace DGame
         }
 
         public bool CheckContainsLanguage(string language)
-        {
-            return allLanguages.Contains(language);
-        }
+            => allLanguages.Contains(language);
 
         public bool SetLanguage(Language language, bool load = false)
-        {
-            return SetLanguage(LocalizationUtil.GetLanguage(language), load);
-        }
+            => SetLanguage(LocalizationUtil.GetLanguage(language), load);
 
         public bool SetLanguage(string language, bool load = false)
         {

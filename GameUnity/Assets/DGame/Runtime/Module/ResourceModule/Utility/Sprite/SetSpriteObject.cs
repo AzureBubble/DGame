@@ -21,22 +21,22 @@ namespace DGame
             SpriteRender,
         }
 
-#if ODIN_INSPECTOR && ENABLE_ODIN_INSPECTOR
+#if ODIN_INSPECTOR && ENABLE_ODIN_INSPECTOR && UNITY_EDITOR
         [ShowInInspector]
 #endif
         private SetType m_setType;
 
-#if ODIN_INSPECTOR && ENABLE_ODIN_INSPECTOR
+#if ODIN_INSPECTOR && ENABLE_ODIN_INSPECTOR && UNITY_EDITOR
         [ShowInInspector]
 #endif
         private Image m_image;
 
-#if ODIN_INSPECTOR && ENABLE_ODIN_INSPECTOR
+#if ODIN_INSPECTOR && ENABLE_ODIN_INSPECTOR && UNITY_EDITOR
         [ShowInInspector]
 #endif
         private SpriteRenderer m_spriteRenderer;
 
-#if ODIN_INSPECTOR && ENABLE_ODIN_INSPECTOR
+#if ODIN_INSPECTOR && ENABLE_ODIN_INSPECTOR && UNITY_EDITOR
         [ShowInInspector]
 #endif
         private UnityEngine.Sprite m_sprite;

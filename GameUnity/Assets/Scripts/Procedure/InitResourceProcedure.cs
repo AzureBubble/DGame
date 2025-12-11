@@ -73,7 +73,7 @@ namespace Procedure
                     DLogger.Error(message);
                     // 获取远程版本失败！点击确认重试\n <color=#FF0000>{message}</color>
                     LauncherMgr.ShowMessageBox(Utility.StringUtil.Format(UpdateUIDefine.Instance.Init_Resource_Error_Try_Again_Tips, message),
-                        InitResources().Forget, Application.Quit);
+                        () => { InitResources().Forget(); }, Application.Quit);
                 }
                 else
                 {
@@ -86,7 +86,7 @@ namespace Procedure
             DLogger.Error(message);
             // 初始化资源失败！点击确认重试\n <color=#FF0000>原因: {0}</color>
             LauncherMgr.ShowMessageBox(Utility.StringUtil.Format(UpdateUIDefine.Instance.Init_Resource_Error_Try_Again_WebGL_Tips, message),
-                InitResources().Forget, Application.Quit);
+                () => { InitResources().Forget(); }, Application.Quit);
         }
 
         private bool IsNeedUpdate()
@@ -103,7 +103,7 @@ namespace Procedure
                     LauncherMgr.ShowUI<LoadUpdateUI>(UpdateUIDefine.Instance.Init_Resource_Network_Error_Try_Again_WebGL_Tips);
                     // 没有找到本地版本记录，需要更新资源！
                     LauncherMgr.ShowMessageBox(UpdateUIDefine.Instance.Init_Resource_No_Find_Local_Record_Tips,
-                        InitResources().Forget, Application.Quit);
+                        () => { InitResources().Forget(); }, Application.Quit);
                     return false;
                 }
 
@@ -115,7 +115,7 @@ namespace Procedure
                     LauncherMgr.ShowUI<LoadUpdateUI>(UpdateUIDefine.Instance.Init_Resource_Have_Notice_No_Force_Update_Tips);
                     // 更新失败，检测到可选资源更新，推荐完成更新提升游戏体验！ \n \n 确定再试一次，取消进入游戏
                     LauncherMgr.ShowMessageBox(UpdateUIDefine.Instance.Init_Resource_Have_Notice_No_Force_Update_Suggestion_Tips,
-                        InitResources().Forget, SwitchState<PreloadProcedure>);
+                        () => { InitResources().Forget(); }, SwitchState<PreloadProcedure>);
                 }
                 else
                 {

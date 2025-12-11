@@ -118,7 +118,7 @@ namespace Launcher
         {
             ShowUI<LoadTipsUI>(desc);
             var ui = GetActiveUI<LoadTipsUI>();
-            ui?.SetAllCallback(onConfirm, onCancel, onUpdate);
+            ui?.SetAllCallback(onConfirm, onUpdate, onCancel);
         }
 
         public static void RefreshProgress(float progress)

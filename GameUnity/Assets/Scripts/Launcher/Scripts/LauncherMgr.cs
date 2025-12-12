@@ -55,6 +55,7 @@ namespace Launcher
 
                         uiBase = new T();
                         uiBase.gameObject = uiWindow;
+                        uiBase.CallScriptGenerator();
                         m_uiMapDict[uiName] = uiBase;
                     }
                 }

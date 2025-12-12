@@ -46,6 +46,12 @@ namespace DGame
             // 目标路径 可以是任何目录路径
             string targetPath = Settings.UpdateSettings.GetBuildAddress();
 
+            if (!System.IO.Path.IsPathRooted(targetPath))
+            {
+                // 如果是相对路径，结合 StreamingAssets 的路径进行合并
+                targetPath = System.IO.Path.Combine(streamingAssetsPath, targetPath).Replace("\\","/");
+            }
+
             if (!Directory.Exists(targetPath))
             {
                 Debug.LogError($"[CopyStreamingAssetsFiles] 打包目录不存在，检查UpdateSettings.m_buildAddress: {targetPath}");

@@ -31,7 +31,6 @@ namespace Launcher
 
         #endregion
 
-
         private const string m_cancelText = "Cancel";
         private const string m_confirmText = "Confirm";
         private const string m_updateText = "Update";

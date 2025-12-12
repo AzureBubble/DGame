@@ -19,6 +19,11 @@ namespace Launcher
 
         protected virtual void ScriptGenerator(){}
 
+        public void CallScriptGenerator()
+        {
+            ScriptGenerator();
+        }
+
         public void TweenPop()
         {
             if (m_isInTween || !transform)
@@ -41,7 +46,6 @@ namespace Launcher
 
         public virtual void OnInit(object param)
         {
-            ScriptGenerator();
             m_param = param;
         }
 

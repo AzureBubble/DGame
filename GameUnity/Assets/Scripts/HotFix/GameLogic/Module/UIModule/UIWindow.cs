@@ -16,6 +16,7 @@ namespace GameLogic
 
         private static uint s_nextWindowId = 0;
         private readonly string m_modelSpritePath = "ModelSprite";
+        private SetUISafeFitHelper m_setUISafeFitHelper;
         private System.Action<UIWindow> m_prepareCallback;
         private Canvas m_canvas;
         public Canvas Canvas => m_canvas;
@@ -241,6 +242,59 @@ namespace GameLogic
             WindowFullName = windowName;
             AssetLocation = assetLocation;
         }
+
+        #region 刘海屏适配
+
+        /// <summary>
+        /// 移动设备屏幕适配
+        /// </summary>
+        /// <param name="fitRect">适配的RectTransform对象</param>
+        /// <param name="liuHaiFit">是否开启刘海屏顶部适配</param>
+        /// <param name="topSpacing">刘海屏顶部适配偏移高度</param>
+        /// <param name="bottomFit">是否开启刘海屏底部适配</param>
+        /// <param name="bottomSpacing">刘海屏底部适配偏移高度</param>
+        public void SetUIFit(RectTransform fitRect, bool liuHaiFit = true, float topSpacing = 0, bool bottomFit = true, float bottomSpacing = 0)
+        {
+            if (m_setUISafeFitHelper == null)
+            {
+                m_setUISafeFitHelper = new SetUISafeFitHelper(fitRect, liuHaiFit, topSpacing, bottomFit, bottomSpacing);
+            }
+            m_setUISafeFitHelper?.SetUIFit();
+        }
+
+        /// <summary>
+        /// rectTransform不受m_curRect适配影响
+        /// </summary>
+        /// <param name="rect"></param>
+        public void SetUINotFit(RectTransform rect)
+        {
+            if (rect == null)
+            {
+                return;
+            }
+
+            m_setUISafeFitHelper?.SetUINotFit(rect);
+        }
+
+        /// <summary>
+        /// 设置某一个节点不受指定RectTransform的影响
+        /// </summary>
+        /// <param name="rect">设置的RectTransform</param>
+        /// <param name="refRect">依赖的RectTransform</param>
+        public void SetUINotFit(RectTransform rect, RectTransform refRect)
+        {
+            if (rect == null || refRect == null)
+            {
+                return;
+            }
+            if (m_setUISafeFitHelper == null)
+            {
+                m_setUISafeFitHelper = new SetUISafeFitHelper();
+            }
+            m_setUISafeFitHelper?.SetUINotFit(rect, refRect);
+        }
+
+        #endregion
 
         public void AllocWindowId()
         {

@@ -40,34 +40,56 @@ namespace DGame
         public static void ForceGenerateAll(bool isClearAll)
         {
             m_isInScanExistingSprites = true;
-            if (isClearAll)
+            try
             {
-                m_atlasPathMap.Clear();
-                ClearCache();
-                ClearAllAtlas();
-            }
-            m_atlasMap.Clear();
-            ScanExistingSprites();
-            if (m_isBuildChange)
-            {
-                foreach (var item in m_atlasMap)
+                EditorUtility.DisplayProgressBar("生成图集", "正在初始化...", 0f);
+
+                if (isClearAll)
                 {
-                    if (GetLatestAtlasTime(item.Key) >= GetLatestSpriteTime(item.Key))
+                    EditorUtility.DisplayProgressBar("生成图集", "清理缓存...", 0.1f);
+                    m_atlasPathMap.Clear();
+                    ClearCache();
+                    ClearAllAtlas();
+                }
+
+                m_atlasMap.Clear();
+                EditorUtility.DisplayProgressBar("生成图集", "扫描现有精灵...", 0.2f);
+                ScanExistingSprites();
+
+                EditorUtility.DisplayProgressBar("生成图集", "分析变更...", 0.4f);
+                if (m_isBuildChange)
+                {
+                    int current = 0;
+                    int total = m_atlasMap.Count;
+                    foreach (var item in m_atlasMap)
                     {
-                        continue;
-                    }
-                    else
-                    {
+                        current++;
+                        if (total > 0)
+                        {
+                            EditorUtility.DisplayProgressBar("生成图集", $"检查图集时间戳 ({current}/{total})...", 0.4f + 0.2f * current / total);
+                        }
+
+                        if (GetLatestAtlasTime(item.Key) >= GetLatestSpriteTime(item.Key))
+                        {
+                            continue;
+                        }
+
                         m_dirtyAtlasNamesNeedCreateNew.Add(item.Key);
                     }
                 }
+                else
+                {
+                    m_dirtyAtlasNamesNeedCreateNew.UnionWith(m_atlasMap.Keys);
+                }
+
+                EditorUtility.DisplayProgressBar("生成图集", "生成图集文件...", 0.6f);
+                ProcessDirtyAtlases(true);
             }
-            else
+            finally
             {
-                m_dirtyAtlasNamesNeedCreateNew.UnionWith(m_atlasMap.Keys);
+                EditorUtility.ClearProgressBar();
+                m_isInScanExistingSprites = false;
             }
-            ProcessDirtyAtlases(true);
-            m_isInScanExistingSprites = false;
         }
 
         private static void ClearAllAtlas()
@@ -93,6 +115,9 @@ namespace DGame
 
         private static void ProcessDirtyAtlases(bool force = false)
         {
+            int totalCount = m_dirtyAtlasNames.Count + m_dirtyAtlasNamesNeedCreateNew.Count;
+            int processedCount = 0;
+            bool showProgress = totalCount > 3 && m_isInScanExistingSprites;
             try
             {
                 AssetDatabase.StartAssetEditing();
@@ -100,6 +125,11 @@ namespace DGame
                 while (m_dirtyAtlasNames.Count > 0)
                 {
                     var atlasName = m_dirtyAtlasNames.First();
+                    if (showProgress)
+                    {
+                        processedCount++;
+                        EditorUtility.DisplayProgressBar("生成图集", $"更新图集: {atlasName} ({processedCount}/{totalCount})", 0.6f + 0.4f * processedCount / totalCount);
+                    }
                     if (force || ShouldUpdateAtlas(atlasName))
                     {
                         GenerateAtlas(atlasName, false);
@@ -110,6 +140,11 @@ namespace DGame
                 while (m_dirtyAtlasNamesNeedCreateNew.Count > 0)
                 {
                     var atlasName = m_dirtyAtlasNamesNeedCreateNew.First();
+                    if (showProgress)
+                    {
+                        processedCount++;
+                        EditorUtility.DisplayProgressBar("生成图集", $"创建图集: {atlasName} ({processedCount}/{totalCount})", 0.6f + 0.4f * processedCount / totalCount);
+                    }
                     if (force || ShouldUpdateAtlas(atlasName))
                     {
                         GenerateAtlas(atlasName, true);
@@ -190,18 +225,22 @@ namespace DGame
             {
                 spriteAtlasAsset?.Add(sprites.ToArray());
                 SpriteAtlasAsset.Save(spriteAtlasAsset, outputPath);
-                AssetDatabase.Refresh();
+                AssetDatabase.ImportAsset(outputPath, ImportAssetOptions.ForceUpdate);
                 EditorApplication.delayCall += () =>
                 {
 #if UNITY_2022_1_OR_NEW
                     SpriteAtlasImporter sai = (SpriteAtlasImporter)AssetImporter.GetAtPath(outputPath);
-                    ConfigureAtlasV2Settings(sai);
+                    if (sai != null)
+                    {
+                        ConfigureAtlasV2Settings(sai);
+                        AssetDatabase.WriteImportSettingsIfDirty(outputPath);
+                        AssetDatabase.Refresh(ImportAssetOptions.ForceUpdate);
+                    }
 #else
                     ConfigureAtlasV2Settings(spriteAtlasAsset);
                     SpriteAtlasAsset.Save(spriteAtlasAsset, outputPath);
+                    AssetDatabase.Refresh(ImportAssetOptions.ForceUpdate);
 #endif
-                    AssetDatabase.WriteImportSettingsIfDirty(outputPath);
-                    AssetDatabase.Refresh();
                 };
             }
             else
@@ -228,9 +267,12 @@ namespace DGame
                     AssetDatabase.CreateAsset(atlas, outputPath);
                 }
             }
-            EditorUtility.SetDirty(atlas);
+            if (atlas != null)
+            {
+                EditorUtility.SetDirty(atlas);
+            }
             AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
+            AssetDatabase.Refresh(ImportAssetOptions.ForceUpdate);
             if (File.Exists(outputPath))
             {
                 m_atlasPathMap[atlasName] = outputPath;
@@ -655,19 +697,25 @@ namespace DGame
         {
             if (m_atlasMap.TryGetValue(atlasName, out List<string> list))
             {
-                return list
-                    .Select(p => new FileInfo(p).LastWriteTime)
-                    .DefaultIfEmpty()
-                    .Max();
+                DateTime maxTime = DateTime.MinValue;
+                foreach (var path in list)
+                {
+                    if (File.Exists(path))
+                    {
+                        var time = File.GetLastWriteTime(path);
+                        if (time > maxTime) maxTime = time;
+                    }
+                }
+                return maxTime;
             }
             return DateTime.MinValue;
         }
 
         private static DateTime GetLatestAtlasTime(string atlasName)
         {
-            if (m_atlasPathMap.TryGetValue(atlasName, out var atlasPath))
+            if (m_atlasPathMap.TryGetValue(atlasName, out var atlasPath) && File.Exists(atlasPath))
             {
-                return new FileInfo(atlasPath).LastWriteTime;
+                return File.GetLastWriteTime(atlasPath);
             }
             return DateTime.MinValue;
         }
@@ -682,7 +730,6 @@ namespace DGame
                 {
                     Debug.Log($"<b>[DeleteAtlas]</b> {atlasPath} path: {Path.GetFileName(atlasPath)}");
                 }
-                AssetDatabase.Refresh();
             }
         }
 
@@ -691,7 +738,6 @@ namespace DGame
             if (!Directory.Exists(Config.outputAtlasDir))
             {
                 Directory.CreateDirectory(Config.outputAtlasDir);
-                AssetDatabase.Refresh();
             }
         }
 

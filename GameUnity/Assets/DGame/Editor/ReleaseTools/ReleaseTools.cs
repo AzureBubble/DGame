@@ -243,7 +243,7 @@ namespace DGame
 
         #endregion
 
-        #region Android
+        #region Build
 
         [MenuItem("DGame Tools/Build/AutoBuildWindow", priority = 152)]
         public static void AutoBuildWindow()

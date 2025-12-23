@@ -188,7 +188,7 @@ namespace DGame
         static void OpenWindow()
         {
             m_selectBackground = MakeTex(0, 255, 0, 128);
-            AtlasRefWindow window = EditorWindow.CreateWindow<AtlasRefWindow>();
+            AtlasRefWindow window = GetWindow<AtlasRefWindow>();
             window.Init();
             window.minSize = new Vector2(1200, 600);
         }

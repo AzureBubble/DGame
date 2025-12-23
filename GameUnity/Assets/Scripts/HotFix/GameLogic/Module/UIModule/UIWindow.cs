@@ -168,12 +168,17 @@ namespace GameLogic
 
         protected override bool Visible
         {
-            get => m_canvas != null && m_canvasGroup?.alpha >= 1;
+            get => m_canvas != null && CanvasGroup?.alpha >= 1;
             set
             {
-                if (m_canvas == null || m_canvasGroup == null || !IsPrepared || IsDestroyed)
+                if (m_canvas == null || !IsPrepared || IsDestroyed)
                 {
                     return;
+                }
+
+                if (m_canvasGroup == null)
+                {
+                    m_canvasGroup = DGame.Utility.UnityUtil.AddMonoBehaviour<CanvasGroup>(gameObject);
                 }
 
                 int alpha = value ? 1 : 0;
@@ -241,6 +246,7 @@ namespace GameLogic
         {
             WindowFullName = windowName;
             AssetLocation = assetLocation;
+            AllocWindowId();
         }
 
         #region 刘海屏适配
@@ -345,7 +351,7 @@ namespace GameLogic
             {
                 if (isAsync)
                 {
-                    var uiInstance = await UIModule.ResourceLoader.LoadGameObjectAsync(location, UIModule.UICanvas, gameObject.GetCancellationTokenOnDestroy());
+                    var uiInstance = await UIModule.ResourceLoader.LoadGameObjectAsync(location, UIModule.UICanvas);
                     Handle_Completed(uiInstance);
                 }
                 else

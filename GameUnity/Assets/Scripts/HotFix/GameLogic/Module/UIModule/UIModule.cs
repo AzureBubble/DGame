@@ -26,7 +26,7 @@ namespace GameLogic
         private readonly Dictionary<uint, UIWindow> m_uiMap = new Dictionary<uint, UIWindow>(32);
         private readonly Queue<UIWindow> m_popWindowQueue = new Queue<UIWindow>(16);
         private readonly HashSet<UIWindow> m_poppedWindowSet = new HashSet<UIWindow>(16);
-        private bool m_startPopQueueWndStatus = false;
+        private bool m_isPoppingWindowQueue = false;
         private Action m_escCloseLastOneWindowCallback;
         private ErrorLogger m_errorLogger;
 
@@ -211,19 +211,19 @@ namespace GameLogic
             m_popWindowQueue.Enqueue(window);
         }
 
-        public void StartPopFirstWindowQueue()
+        public void StartPopWindowQueue()
         {
-            if (m_startPopQueueWndStatus)
+            if (m_isPoppingWindowQueue)
             {
                 return;
             }
-            m_startPopQueueWndStatus = true;
+            m_isPoppingWindowQueue = true;
             PopWindowQueue().Forget();
         }
 
-        private void PopNextQueueWindow(UIWindow window)
+        private void PopQueueNextWindow(UIWindow window)
         {
-            if (window != null && m_startPopQueueWndStatus && m_poppedWindowSet.Contains(window))
+            if (window != null && m_isPoppingWindowQueue && m_poppedWindowSet.Contains(window))
             {
                 PopWindowQueue().Forget();
             }
@@ -240,7 +240,7 @@ namespace GameLogic
             else
             {
                 m_poppedWindowSet.Clear();
-                m_startPopQueueWndStatus = false;
+                m_isPoppingWindowQueue = false;
             }
         }
 
@@ -667,7 +667,7 @@ namespace GameLogic
                 return;
             }
 
-            PopNextQueueWindow(window);
+            PopQueueNextWindow(window);
             if (window.HideTimeToClose <= 0)
             {
                 CloseWindow(window);
@@ -695,7 +695,7 @@ namespace GameLogic
             }
             if (!window.IsHide)
             {
-                PopNextQueueWindow(window);
+                PopQueueNextWindow(window);
             }
             window.Destroy();
             Pop(window);

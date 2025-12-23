@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if !UNITY_6000_3_OR_NEWER
+
 using UnityEditor;
 using UnityEngine;
 using YooAsset;
@@ -125,3 +126,5 @@ namespace DGame
         }
     }
 }
+
+#endif

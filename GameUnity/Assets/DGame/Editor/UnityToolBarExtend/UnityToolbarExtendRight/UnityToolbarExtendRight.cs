@@ -1,4 +1,6 @@
-﻿using UnityEditor;
+﻿#if !UNITY_6000_3_OR_NEWER
+
+using UnityEditor;
 
 namespace DGame
 {
@@ -15,3 +17,5 @@ namespace DGame
         }
     }
 }
+
+#endif

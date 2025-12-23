@@ -6,7 +6,7 @@ using Sirenix.OdinInspector;
 
 namespace DGame
 {
-    [UnityEngine.SerializeField]
+    [System.Serializable]
     public class LoadedAssetObject
     {
 

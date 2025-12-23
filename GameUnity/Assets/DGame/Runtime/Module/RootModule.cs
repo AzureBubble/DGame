@@ -13,7 +13,11 @@ namespace DGame
     {
         private static RootModule m_instance = null;
 
+#if UNITY_6000_3_OR_NEWER
+        public static RootModule Instance => m_instance == null ? UnityEngine.Object.FindFirstObjectByType<RootModule>() : m_instance;
+#else
         public static RootModule Instance => m_instance == null ? UnityEngine.Object.FindObjectOfType<RootModule>() : m_instance;
+#endif
 
         private const int DEFAULT_DPI = 96;
 

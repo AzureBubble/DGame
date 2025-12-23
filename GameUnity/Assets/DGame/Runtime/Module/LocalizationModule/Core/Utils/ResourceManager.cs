@@ -19,8 +19,14 @@ namespace I2.Loc
 			get {
 				bool changed = mInstance==null;
 
-				if (mInstance==null)
+				if (mInstance == null)
+				{
+#if UNITY_6000_3_OR_NEWER
+					mInstance = (ResourceManager)FindFirstObjectByType(typeof(ResourceManager));
+#else
 					mInstance = (ResourceManager)FindObjectOfType(typeof(ResourceManager));
+#endif
+				}
 
 				if (mInstance==null)
 				{

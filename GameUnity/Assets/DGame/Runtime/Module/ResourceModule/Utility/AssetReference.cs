@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace DGame
 {
-    [SerializeField]
+    [System.Serializable]
     public struct AssetRefInfo
     {
         public readonly int instanceID;

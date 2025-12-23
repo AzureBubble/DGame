@@ -11,7 +11,7 @@ using UnityEngine.UI;
 
 namespace DGame
 {
-    [SerializeField]
+    [System.Serializable]
     public class SetSpriteObject : ISetAssetObject
     {
         enum SetType

@@ -27,6 +27,7 @@ namespace DGame
         /// </summary>
         [SerializeField]
         private float checkCanReleaseInternal = 30f;
+
         private float m_checkCanReleaseTime = 0.0f;
 
         /// <summary>

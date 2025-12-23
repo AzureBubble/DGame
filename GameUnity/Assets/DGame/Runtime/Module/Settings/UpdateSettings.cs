@@ -141,7 +141,6 @@ namespace DGame
         /// <summary>
         /// 获取资源服务备用地址 https://127.0.0.1:8081/Demo/Android
         /// </summary>
-        [SerializeField]
         public string GetFallbackResDownloadPath()
                 => Path.Combine(m_fallbackResDownloadPath, projectName, GetPlatformName()).Replace("\\", "/");
 

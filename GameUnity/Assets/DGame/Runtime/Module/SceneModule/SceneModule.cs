@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEngine.SceneManagement;
 using YooAsset;
+using SceneHandle = YooAsset.SceneHandle;
 
 namespace DGame
 {

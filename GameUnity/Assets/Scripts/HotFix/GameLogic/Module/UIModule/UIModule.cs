@@ -27,6 +27,7 @@ namespace GameLogic
         private readonly Queue<UIWindow> m_popWindowQueue = new Queue<UIWindow>(16);
         private readonly HashSet<UIWindow> m_poppedWindowSet = new HashSet<UIWindow>(16);
         private bool m_startPopQueueWndStatus = false;
+        private Action m_escCloseLastOneWindowCallback;
         private ErrorLogger m_errorLogger;
 
         /// <summary>
@@ -136,6 +137,7 @@ namespace GameLogic
             }
 
             ClearWindowQueue();
+            m_escCloseLastOneWindowCallback = null;
         }
 
         #region 设置安全区域
@@ -302,7 +304,13 @@ namespace GameLogic
                 }
             }
 
-            if (lastOne == null || !foundMultiple)
+            if (!foundMultiple)
+            {
+                m_escCloseLastOneWindowCallback?.Invoke();
+                return false;
+            }
+
+            if (lastOne == null)
             {
                 return false;
             }
@@ -326,13 +334,22 @@ namespace GameLogic
                 }
             }
 
-            if (lastOne == null || !foundMultiple)
+            if (!foundMultiple)
+            {
+                m_escCloseLastOneWindowCallback?.Invoke();
+                return false;
+            }
+
+            if (lastOne == null)
             {
                 return false;
             }
             CloseWindow(lastOne);
             return true;
         }
+
+        public void SetEscCloseLastOneWindowCallback(Action callback)
+            => m_escCloseLastOneWindowCallback = callback;
 
         #endregion
 

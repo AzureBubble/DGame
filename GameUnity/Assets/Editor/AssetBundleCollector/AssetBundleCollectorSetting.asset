@@ -30,7 +30,7 @@ MonoBehaviour:
       AssetTags: 
       ActiveRuleName: EnableGroup
       Collectors:
-      - CollectPath: Assets/ABAssets/Actor
+      - CollectPath: Assets/BundleAssets/Actor
         CollectorGUID: e8bd7513dd6972e40a4b6ba4be51b415
         CollectorType: 0
         AddressRuleName: AddressByFileName
@@ -43,7 +43,7 @@ MonoBehaviour:
       AssetTags: 
       ActiveRuleName: EnableGroup
       Collectors:
-      - CollectPath: Assets/ABAssets/Audios
+      - CollectPath: Assets/BundleAssets/Audios
         CollectorGUID: ca5d852074b926c4b893e4e39ef867f1
         CollectorType: 0
         AddressRuleName: AddressByFileName
@@ -56,7 +56,7 @@ MonoBehaviour:
       AssetTags: 
       ActiveRuleName: EnableGroup
       Collectors:
-      - CollectPath: Assets/ABAssets/Configs
+      - CollectPath: Assets/BundleAssets/Configs
         CollectorGUID: 3966f4765d851c44da48a14ff2db6389
         CollectorType: 0
         AddressRuleName: AddressByFileName
@@ -69,7 +69,7 @@ MonoBehaviour:
       AssetTags: 
       ActiveRuleName: EnableGroup
       Collectors:
-      - CollectPath: Assets/ABAssets/DLL
+      - CollectPath: Assets/BundleAssets/DLL
         CollectorGUID: 0e6503722ae073344a9a3234c32c9d81
         CollectorType: 0
         AddressRuleName: AddressByFileName
@@ -82,7 +82,7 @@ MonoBehaviour:
       AssetTags: 
       ActiveRuleName: EnableGroup
       Collectors:
-      - CollectPath: Assets/ABAssets/Effects
+      - CollectPath: Assets/BundleAssets/Effects
         CollectorGUID: 773de4af0dd986048bbc2f4b9cddd871
         CollectorType: 0
         AddressRuleName: AddressByFileName
@@ -95,7 +95,7 @@ MonoBehaviour:
       AssetTags: 
       ActiveRuleName: EnableGroup
       Collectors:
-      - CollectPath: Assets/ABAssets/Fonts
+      - CollectPath: Assets/BundleAssets/Fonts
         CollectorGUID: dc96c5869835f7e47917e3598cb909a7
         CollectorType: 0
         AddressRuleName: AddressByFileName
@@ -108,7 +108,7 @@ MonoBehaviour:
       AssetTags: 
       ActiveRuleName: EnableGroup
       Collectors:
-      - CollectPath: Assets/ABAssets/Materials
+      - CollectPath: Assets/BundleAssets/Materials
         CollectorGUID: a5152ab169960e84ebf3fcf141e0df9f
         CollectorType: 0
         AddressRuleName: AddressByFileName
@@ -121,7 +121,7 @@ MonoBehaviour:
       AssetTags: 
       ActiveRuleName: EnableGroup
       Collectors:
-      - CollectPath: Assets/ABAssets/Scenes
+      - CollectPath: Assets/BundleAssets/Scenes
         CollectorGUID: 788cb9623079cfe459a209c3dbd586e8
         CollectorType: 0
         AddressRuleName: AddressByFileName
@@ -134,7 +134,7 @@ MonoBehaviour:
       AssetTags: 
       ActiveRuleName: EnableGroup
       Collectors:
-      - CollectPath: Assets/ABAssets/UI
+      - CollectPath: Assets/BundleAssets/UI
         CollectorGUID: 94600582b7623e9479f92f2928ecb9dd
         CollectorType: 0
         AddressRuleName: AddressByFileName
@@ -147,7 +147,7 @@ MonoBehaviour:
       AssetTags: 
       ActiveRuleName: EnableGroup
       Collectors:
-      - CollectPath: Assets/ABAssets/UIRaw/Atlas
+      - CollectPath: Assets/BundleAssets/UIRaw/Atlas
         CollectorGUID: 309b8a90cadc92e469cc90fcd173e566
         CollectorType: 0
         AddressRuleName: AddressByFileName
@@ -155,7 +155,7 @@ MonoBehaviour:
         FilterRuleName: CollectAll
         AssetTags: 
         UserData: 
-      - CollectPath: Assets/ABAssets/UIRaw/Raw
+      - CollectPath: Assets/BundleAssets/UIRaw/Raw
         CollectorGUID: d539b64bf5607884984872938210889e
         CollectorType: 0
         AddressRuleName: AddressByFileName

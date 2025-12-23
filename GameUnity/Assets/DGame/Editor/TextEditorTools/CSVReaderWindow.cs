@@ -8,7 +8,7 @@ using System.Text;
 
 public class TextDefineCSVReaderWindow : EditorWindow
 {
-    private string DEFAULT_CSV_PATH => Application.dataPath + "/ABAssets/Configs/Localization.csv";
+    private string DEFAULT_CSV_PATH => Application.dataPath + "/BundleAssets/Configs/Localization.csv";
     // private const int m_enumStartIndex = 20000000;
     private const string m_csFileName = "TextDefine";
     private const string m_filterStr = "Text";

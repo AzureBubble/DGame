@@ -13,13 +13,13 @@ namespace DGame
         [Header("目录设置")] [Tooltip("生成的图集输出目录")]
         public string outputAtlasDir = "Assets/AssetArt/Atlas";
         [Tooltip("需要生成图集的UI根目录")]
-        public string[] sourceAtlasRootDir = new string[] { "Assets/ABAssets/UIRaw/Atlas" };
+        public string[] sourceAtlasRootDir = new string[] { "Assets/BundleAssets/UIRaw/Atlas" };
         [Tooltip("以当前目录的子级生成子级图集")]
-        public string[] rootChildAtlasDir = new string[] { "Assets/ABAssets/FrameSprite" };
+        public string[] rootChildAtlasDir = new string[] { "Assets/BundleAssets/FrameSprite" };
         [Tooltip("每张图都单独生成图集")]
-        public string[] singleAtlasDir = new string[] { "Assets/ABAssets/UIRaw/Atlas/Background" };
+        public string[] singleAtlasDir = new string[] { "Assets/BundleAssets/UIRaw/Atlas/Background" };
         [Tooltip("不需要生成图集的UI目录")]
-        public string[] excludeFolder = new string[] { "Assets/ABAssets/UIRaw/Raw" };
+        public string[] excludeFolder = new string[] { "Assets/BundleAssets/UIRaw/Raw" };
 
         [Header("平台格式设置")]
         public TextureImporterFormat androidFormat = TextureImporterFormat.ASTC_6x6;

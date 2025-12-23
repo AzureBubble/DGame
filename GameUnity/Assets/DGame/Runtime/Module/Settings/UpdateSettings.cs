@@ -77,7 +77,7 @@ namespace DGame
         /// <summary>
         /// 程序集文本AB资产资源目录
         /// </summary>
-        public string AssemblyTextAssetPath = "ABAssets/DLL";
+        public string AssemblyTextAssetPath = "BundleAssets/DLL";
 
         [Header("更新设置")]
         public UpdateStyle UpdateStyle = UpdateStyle.Force;

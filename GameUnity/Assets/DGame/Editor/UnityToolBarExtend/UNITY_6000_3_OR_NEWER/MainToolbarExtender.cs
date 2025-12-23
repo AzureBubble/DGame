@@ -173,7 +173,7 @@ namespace DGame
             private static List<(string sceneName, string scenePath)> m_otherScenes;
 
             private static string initScenePath = "Assets/Scenes";
-            private static string abScenePath = "Assets/ABAssets/Scenes";
+            private static string abScenePath = "Assets/BundleAssets/Scenes";
 
             [MainToolbarElement(kElementPath, defaultDockPosition = MainToolbarDockPosition.Middle, defaultDockIndex = 50)]
             public static MainToolbarElement OpenSceneSelectorDropdownButton()

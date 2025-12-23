@@ -8,11 +8,11 @@ namespace DGame
 {
     public class TextureHelper
     {
-        public const string ReplacePrefix = "Assets/ABAssets/UIRaw/";
-        public const string UIRawPath = "Assets/ABAssets/UIRaw/Atlas";
+        public const string ReplacePrefix = "Assets/BundleAssets/UIRaw/";
+        public const string UIRawPath = "Assets/BundleAssets/UIRaw/Atlas";
         public const string MonsterPath = "Assets/ActorModel/Monster";
         public const string HomePath = "Assets/ActorModel/Home";
-        public const string UIBkgPath = "Assets/ABAssets/UIRaw/Atlas/Background";
+        public const string UIBkgPath = "Assets/BundleAssets/UIRaw/Atlas/Background";
         public const string SceneBkgPath = "Assets/SceneRaw/Battleground/AllBkg";
         public const string UIChapterIconPath = "Assets/Resources/UIRaw/MapIcon";
 
@@ -51,7 +51,7 @@ namespace DGame
                 }
             }
 
-            var finStr = oriPath.Substring(0, idx).Replace("Assets/ABAssets/", "").Replace("/", "_");
+            var finStr = oriPath.Substring(0, idx).Replace("Assets/BundleAssets/", "").Replace("/", "_");
             return finStr;
         }
 
@@ -82,7 +82,7 @@ namespace DGame
                 if (AtlasConfig.Instance.sourceAtlasRootDir.Any(fullName.StartsWith))
                 {
                     //Debug.LogFormat("{0}", GetDeepPath(fullName, MonsterPath, 1));
-                    str = Path.GetDirectoryName(fullName)?.Replace("\\","/").Replace("Assets/ABAssets/UIRaw/", "").Replace("/", "_");
+                    str = Path.GetDirectoryName(fullName)?.Replace("\\","/").Replace("Assets/BundleAssets/UIRaw/", "").Replace("/", "_");
                 }
                 else if (AtlasConfig.Instance.rootChildAtlasDir.Any(fullName.StartsWith))
                 {

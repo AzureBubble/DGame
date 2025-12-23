@@ -177,7 +177,7 @@ namespace DGame
 
         private const string NormalAtlasDir = "Assets/AssetArt/Atlas";
         private static string AtlasExtension => AtlasConfig.Instance.enableV2 ? ".spriteatlasv2" : ".spriteatlas";
-        private string UIPrefabPath =>  Application.dataPath + "/ABAssets/UI/";
+        private string UIPrefabPath =>  Application.dataPath + "/BundleAssets/UI/";
 
         private static Texture2D m_selectBackground;
         private GUIStyle m_selectStyle;

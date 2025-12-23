@@ -26,15 +26,15 @@ MonoBehaviour:
   - UnityEngine.CoreModule.dll
   LogicMainDllName: GameLogic.dll
   AssemblyTextAssetExtension: .bytes
-  AssemblyTextAssetPath: ABAssets/DLL
-  UpdateStyle: 1
+  AssemblyTextAssetPath: BundleAssets/DLL
+  UpdateStyle: 0
   UpdateNotice: 0
   m_resDownloadPath: https://127.0.0.1:8081
   m_fallbackResDownloadPath: https://127.0.0.1:8082
   m_loadResWayWebGL: 1
-  m_isAutoAssetCopyToBuildAddress: 0
+  m_isAutoAssetCopyToBuildAddress: 1
   m_buildAddress: ../../Builds/Unity_Data/StreamingAssets
-  m_replaceAssetPathWithAddress: 0
+  m_replaceAssetPathWithAddress: 1
   m_forceGenerateAtlas: 0
   packageName: DefaultPackage
   updateUIDefineConfigPath: Config/UpdateUIDefine

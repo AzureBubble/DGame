@@ -19,7 +19,10 @@ using static VFolders.VFolders;
 using static VFolders.VFoldersData;
 using static VFolders.VFoldersCache;
 
-#if UNITY_6000_2_OR_NEWER
+#if UNITY_6000_3_OR_NEWER
+using TreeViewItem = UnityEditor.IMGUI.Controls.TreeViewItem<UnityEngine.EntityId>;
+using TreeViewState = UnityEditor.IMGUI.Controls.TreeViewState<UnityEngine.EntityId>;
+#elif UNITY_6000_2_OR_NEWER
 using TreeViewItem = UnityEditor.IMGUI.Controls.TreeViewItem<int>;
 using TreeViewState = UnityEditor.IMGUI.Controls.TreeViewState<int>;
 #endif
@@ -226,7 +229,7 @@ namespace VFolders
 
             currentScrollPos = treeViewControllerState?.scrollPos.y ?? 0;
 
-            expandedIds = treeViewControllerState?.expandedIDs ?? new List<int>();
+            expandedIds = treeViewControllerState?.expandedIDs?.ToInts() ?? new();
 
 
 
@@ -237,7 +240,11 @@ namespace VFolders
 
             treeViewAnimatesExpansion = treeViewAnimator?.GetMemberValue<bool>("isAnimating") ?? false;
             animatingItemTragetExpanded_fromTreeViewExpandAnimator = treeViewAnimatorSetup?.GetMemberValue<bool>("expanding") ?? false;
+#if UNITY_6000_3_OR_NEWER
+            animatingItemId_fromTreeViewExpandAnimator = treeViewAnimatorSetup?.GetMemberValue("item").GetMemberValue<EntityId>("id") ?? 0;
+#else
             animatingItemId_fromTreeViewExpandAnimator = treeViewAnimatorSetup?.GetMemberValue("item").GetMemberValue<int>("id") ?? 0;
+#endif
 
         }
 

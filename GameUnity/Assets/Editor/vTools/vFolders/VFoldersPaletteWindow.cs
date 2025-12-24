@@ -332,6 +332,8 @@ namespace VFolders
 
                 palette.SelectInInspector(frameInProject: false);
 
+                EditorWindow.GetWindow(typeof(Editor).Assembly.GetType("UnityEditor.InspectorWindow"))?.Show();
+
                 this.Close();
 
             }

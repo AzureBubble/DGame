@@ -1382,7 +1382,7 @@ namespace VFolders.Libs
         public struct GlobalID : System.IEquatable<GlobalID>
         {
             public Object GetObject() => GlobalObjectId.GlobalObjectIdentifierToObjectSlow(globalObjectId);
-            public int GetObjectInstanceId() => GlobalObjectId.GlobalObjectIdentifierToInstanceIDSlow(globalObjectId);
+            public int GetObjectInstanceId() => _GlobalObjectId_GlobalObjectIdentifierToInstanceIDSlow(globalObjectId);
 
 
             public string guid => globalObjectId.assetGUID.ToString();
@@ -1420,7 +1420,7 @@ namespace VFolders.Libs
         {
             var unityGlobalIds = new GlobalObjectId[instanceIds.Count()];
 
-            GlobalObjectId.GetGlobalObjectIdsSlow(instanceIds.ToArray(), unityGlobalIds);
+            _GlobalObjectId_GetGlobalObjectIdsSlow(instanceIds.ToArray(), unityGlobalIds);
 
             var globalIds = unityGlobalIds.Select(r => new GlobalID(r.ToString()));
 
@@ -1445,7 +1445,7 @@ namespace VFolders.Libs
 
             var iids = new int[goids.Length];
 
-            GlobalObjectId.GlobalObjectIdentifiersToInstanceIDsSlow(goids, iids);
+            _GlobalObjectId_GlobalObjectIdentifiersToInstanceIDsSlow(goids, iids);
 
             return iids;
 
@@ -1949,6 +1949,87 @@ namespace VFolders.Libs
 
 
 #endif
+
+        #endregion
+
+        #region Instance/Entity ID mess
+
+
+        static int _GlobalObjectId_GlobalObjectIdentifierToInstanceIDSlow(GlobalObjectId id)
+        {
+#if UNITY_6000_3_OR_NEWER
+            return GlobalObjectId.GlobalObjectIdentifierToEntityIdSlow(id);
+#else
+            return GlobalObjectId.GlobalObjectIdentifierToInstanceIDSlow(id);
+#endif
+
+        }
+
+        static void _GlobalObjectId_GlobalObjectIdentifiersToInstanceIDsSlow(GlobalObjectId[] identifiers, int[] outputInstanceIDs)
+        {
+#if UNITY_6000_3_OR_NEWER
+
+            var outputEntityIds = new EntityId[outputInstanceIDs.Length];
+
+            GlobalObjectId.GlobalObjectIdentifiersToEntityIdsSlow(identifiers, outputEntityIds);
+
+            for (int i = 0; i < outputEntityIds.Length; i++)
+                outputInstanceIDs[i] = (int)outputEntityIds[i];
+
+#else
+
+            GlobalObjectId.GlobalObjectIdentifiersToInstanceIDsSlow(identifiers, outputInstanceIDs);
+
+#endif
+
+        }
+
+        static void _GlobalObjectId_GetGlobalObjectIdsSlow(int[] ids, GlobalObjectId[] outputIdentifiers)
+        {
+#if UNITY_6000_3_OR_NEWER
+            GlobalObjectId.GetGlobalObjectIdsSlow(ids.Select(r => (EntityId)r).ToArray(), outputIdentifiers);
+#else
+            GlobalObjectId.GetGlobalObjectIdsSlow(ids, outputIdentifiers);
+#endif
+
+        }
+
+
+
+        public static Object _EditorUtility_InstanceIDToObject(int iid)
+        {
+#if UNITY_6000_3_OR_NEWER
+            return EditorUtility.EntityIdToObject(iid);
+#else
+            return EditorUtility.InstanceIDToObject(iid);
+#endif
+        }
+
+        public static string _AssetDatabase_GetAssetPath(int instanceID)
+        {
+#if UNITY_6000_3_OR_NEWER
+            return AssetDatabase.GetAssetPath((EntityId)instanceID);
+#else
+            return AssetDatabase.GetAssetPath(instanceID);
+#endif
+        }
+
+        public static int[] _Selection_instanceIDs
+        {
+            get
+            {
+#if UNITY_6000_3_OR_NEWER
+                return Selection.entityIds.Select(r => (int)r).ToArray();
+#else
+                return Selection.instanceIDs;
+#endif
+            }
+        }
+
+
+
+
+
 
         #endregion
 
@@ -2660,6 +2741,513 @@ namespace VFolders.Libs
 
 
         #endregion
+
+
+
+        public class ReorderableRow<Item> where Item : class
+        {
+
+            public void OnGUI(Rect rect)
+            {
+                void normalItem(int i)
+                {
+                    if (items[i] == droppedItem && animatingDroppedItem) return;
+
+                    var centerX = GetItemCenterX_withGaps(i);
+                    var centerY = itemsRect.height / 2;
+
+
+                    var minX = centerX - GetItemWidth(items[i]) / 2;
+
+                    if (minX < itemsRect.x) return;
+
+                    lastItemX = minX;
+
+
+                    var item = items[i];
+                    var itemRect = Rect.zero.SetSize(GetItemWidth(item), itemsRect.height).SetMidPos(centerX, centerY);
+
+                    ItemGUI(itemRect, items[i]);
+
+                }
+                void normalItems()
+                {
+                    for (int i = 0; i < items.Count; i++)
+                        normalItem(i);
+
+                }
+                void draggedItem_()
+                {
+                    if (!draggingItem) return;
+
+
+                    var centerX = curEvent.mousePosition.x + draggedItemHoldOffset.x;
+                    var centerY = itemsRect.IsHovered() ? itemsRect.height / 2 : curEvent.mousePosition.y;
+
+                    var itemRect = Rect.zero.SetSize(GetItemWidth(draggedItem), itemsRect.height).SetMidPos(centerX, centerY);
+
+
+                    ItemGUI(itemRect, draggedItem);
+
+                }
+                void droppedItem_()
+                {
+                    if (!animatingDroppedItem) return;
+
+
+                    var centerX = droppedItemX;
+                    var centerY = itemsRect.height / 2;
+
+                    var itemRect = Rect.zero.SetSize(GetItemWidth(droppedItem), itemsRect.height).SetMidPos(centerX, centerY);
+
+
+                    ItemGUI(itemRect, droppedItem);
+
+                }
+
+
+
+                this.itemsRect = rect;
+
+                MouseState();
+                Dragging();
+                Animations();
+
+                normalItems();
+                draggedItem_();
+                droppedItem_();
+
+            }
+
+            Rect itemsRect;
+
+            public bool repaintNeededAfterUndoRedo;
+
+            public float lastItemX;
+
+
+
+
+
+
+
+
+
+
+            void MouseState()
+            {
+                void down()
+                {
+                    if (!curEvent.isMouseDown) return;
+                    if (!itemsRect.IsHovered()) return;
+
+                    mousePressed = true;
+
+                    mouseDownPosiion = curEvent.mousePosition;
+
+                    var pressedItemIndex = GetItemIndex(mouseDownPosiion.x);
+
+                    if (pressedItemIndex.IsInRangeOf(items))
+                        pressedItem = items[pressedItemIndex];
+
+                    doubleclickUnhandled = curEvent.clickCount == 2;
+
+                    curEvent.Use();
+
+                }
+                void up()
+                {
+                    if (!curEvent.isMouseUp) return;
+
+                    mousePressed = false;
+                    pressedItem = null;
+
+                }
+                void hover()
+                {
+                    var hoveredItemIndex = GetItemIndex(curEvent.mousePosition.x);
+
+                    mouseHoversItem = itemsRect.IsHovered() && hoveredItemIndex.IsInRangeOf(items);
+
+                    if (mouseHoversItem)
+                        lastHoveredItem = items[hoveredItemIndex];
+
+
+                }
+
+                down();
+                up();
+                hover();
+
+            }
+
+            public bool mouseHoversItem;
+            public bool mousePressed;
+            public bool doubleclickUnhandled;
+
+            public Vector2 mouseDownPosiion;
+
+            public Item pressedItem;
+            public Item lastHoveredItem;
+
+
+
+
+
+            void Dragging()
+            {
+                void initFromOutside()
+                {
+                    if (draggingItem) return;
+                    if (!itemsRect.IsHovered()) return;
+                    if (!curEvent.isDragUpdate) return;
+                    if (DragAndDrop.objectReferences.FirstOrDefault() is not Object draggedObject) return;
+
+                    if (CanCreateItemFrom == null) return;
+                    if (!CanCreateItemFrom(draggedObject)) return;
+
+
+                    draggedItem = CreateItem(draggedObject);
+
+                    draggedItemHoldOffset = Vector2.zero;
+
+                    draggingItem = true;
+                    draggingItemFromInside = false;
+
+                    animatingDroppedItem = false;
+
+
+                }
+                void initFromInside()
+                {
+                    if (draggingItem) return;
+                    if (!mousePressed) return;
+                    if ((curEvent.mousePosition - mouseDownPosiion).magnitude <= 2) return;
+                    if (pressedItem == null) return;
+
+                    var i = GetItemIndex(mouseDownPosiion.x);
+
+                    if (i >= items.Count) return;
+                    if (i < 0) return;
+
+
+                    animatingDroppedItem = false;
+
+                    draggingItem = true;
+                    draggingItemFromInside = true;
+
+                    draggedItem = items[i];
+                    draggedItemHoldOffset = new Vector2(GetItemCenterX_withGaps(i) - mouseDownPosiion.x, itemsRect.center.y - mouseDownPosiion.y);
+
+                    gaps[i] = GetItemWidth(draggedItem);
+
+
+                    itemsHolderObject.RecordUndo();
+
+                    items.Remove(draggedItem);
+
+                }
+
+                void acceptFromOutside()
+                {
+                    if (!draggingItem) return;
+                    if (!curEvent.isDragPerform) return;
+                    if (!itemsRect.IsHovered()) return;
+
+                    DragAndDrop.AcceptDrag();
+                    curEvent.Use();
+
+                    itemsHolderObject.RecordUndo();
+
+                    accept();
+
+                    itemsHolderObject.Dirty();
+
+                }
+                void acceptFromInside()
+                {
+                    if (!draggingItem) return;
+                    if (!curEvent.isMouseUp) return;
+                    if (!itemsRect.IsHovered()) return;
+
+                    curEvent.Use();
+                    EditorGUIUtility.hotControl = 0;
+
+                    DragAndDrop.PrepareStartDrag(); // fixes phantom dragged component indicator after reordering items
+
+                    itemsHolderObject.RecordUndo();
+                    itemsHolderObject.Dirty();
+
+                    accept();
+
+                }
+                void accept()
+                {
+                    draggingItem = false;
+                    draggingItemFromInside = false;
+                    mousePressed = false;
+
+                    items.AddAt(draggedItem, insertDraggedItemAtIndex);
+
+                    gaps[insertDraggedItemAtIndex] -= GetItemWidth(draggedItem);
+                    gaps.AddAt(0, insertDraggedItemAtIndex);
+
+                    droppedItem = draggedItem;
+
+                    droppedItemX = curEvent.mousePosition.x + draggedItemHoldOffset.x;
+                    droppedItemXDerivative = 0;
+                    animatingDroppedItem = true;
+
+                    draggedItem = null;
+
+                    EditorGUIUtility.hotControl = 0;
+
+                    repaintNeededAfterUndoRedo = true;
+
+                }
+
+                void cancelFromOutside()
+                {
+                    if (!draggingItem) return;
+                    if (draggingItemFromInside) return;
+                    if (itemsRect.IsHovered()) return;
+
+                    draggingItem = false;
+                    mousePressed = false;
+
+                }
+                void cancelFromInsideAndDelete()
+                {
+                    if (!draggingItem) return;
+                    if (!curEvent.isMouseUp) return;
+                    if (itemsRect.IsHovered()) return;
+
+                    draggingItem = false;
+
+                    DragAndDrop.PrepareStartDrag(); // fixes phantom dragged component indicator after reordering items
+
+                    itemsHolderObject.Dirty();
+
+                    repaintNeededAfterUndoRedo = true;
+
+                }
+
+                void update()
+                {
+                    if (!draggingItem) return;
+
+                    DragAndDrop.visualMode = DragAndDropVisualMode.Generic;
+
+                    if (draggingItemFromInside) // otherwise it breaks vTabs dragndrop
+                        EditorGUIUtility.hotControl = EditorGUIUtility.GetControlID(FocusType.Passive);
+
+
+
+                    insertDraggedItemAtIndex = GetItemIndex(curEvent.mousePosition.x + draggedItemHoldOffset.x);
+
+                }
+
+                // void dropIntoItem()
+                // {
+                //     if (draggingItem) return;
+                //     if (!itemsRect.IsHovered()) return;
+                //     if (!DragAndDrop.objectReferences.Any()) return;
+                //     if (!DragAndDrop.objectReferences.Any(r => r is not DefaultAsset)) return;
+                //     if (!DragAndDrop.objectReferences.All(r => AssetDatabase.Contains(r))) return;
+
+                //     if (!mouseHoversItem) return;
+                //     if (lastHoveredItem.isDeleted) return;
+
+
+                //     if (curEvent.isDragUpdate)
+                //         DragAndDrop.visualMode = DragAndDropVisualMode.Move;
+
+
+                //     if (!curEvent.isDragPerform) return;
+
+                //     DragAndDrop.AcceptDrag();
+
+                //     curEvent.Use();
+
+
+                //     var oldPaths = DragAndDrop.objectReferences.Select(r => r.GetPath()).ToList();
+
+                //     var newPaths = oldPaths.Select(r => lastHoveredItem.guid.ToPath().CombinePath(r.GetFilename(withExtension: true)))
+                //                            .Select(r => AssetDatabase.GenerateUniqueAssetPath(r)).ToList();
+
+
+                //     typeof(Undo).GetMethod("RegisterAssetsMoveUndo", maxBindingFlags).Invoke(null, new object[] { oldPaths.ToArray() });
+
+                //     for (int i = 0; i < newPaths.Count; i++)
+                //         AssetDatabase.MoveAsset(oldPaths[i], newPaths[i]);
+
+                // }
+
+
+                initFromOutside();
+                initFromInside();
+
+                acceptFromOutside();
+                acceptFromInside();
+
+                cancelFromOutside();
+                cancelFromInsideAndDelete();
+
+                update();
+
+                // dropIntoItem();
+
+            }
+
+            public bool draggingItem;
+            public bool draggingItemFromInside;
+
+            int insertDraggedItemAtIndex;
+
+            Vector2 draggedItemHoldOffset;
+
+            public Item draggedItem;
+            public Item droppedItem;
+
+
+
+
+
+            void Animations()
+            {
+                if (!curEvent.isLayout) return;
+
+                void gaps_()
+                {
+                    var makeSpaceForDraggedItem = draggingItem && itemsRect.IsHovered();
+
+                    var lerpSpeed = 12;
+
+                    for (int i = 0; i < gaps.Count; i++)
+                        if (makeSpaceForDraggedItem && i == insertDraggedItemAtIndex)
+                            gaps[i] = MathUtil.Lerp(gaps[i], GetItemWidth(draggedItem), lerpSpeed, editorDeltaTime);
+                        else
+                            gaps[i] = MathUtil.Lerp(gaps[i], 0, lerpSpeed, editorDeltaTime);
+
+
+
+                    for (int i = 0; i < gaps.Count; i++)
+                        if (gaps[i].Approx(0))
+                            gaps[i] = 0;
+
+
+
+                    animatingGaps = gaps.Any(r => r > .1f);
+
+
+                }
+                void droppedItem_()
+                {
+                    if (!animatingDroppedItem) return;
+
+                    var lerpSpeed = 8;
+
+                    var targX = GetItemCenterX_withoutGaps(items.IndexOf(droppedItem));
+
+                    MathUtil.SmoothDamp(ref droppedItemX, targX, lerpSpeed, ref droppedItemXDerivative, editorDeltaTime);
+
+                    if ((droppedItemX - targX).Abs() < .5f)
+                        animatingDroppedItem = false;
+
+                }
+                void tooltip()
+                {
+                    if (!curEvent.isLayout) return;
+
+                    if (!mouseHoversItem || lastHoveredItem != lastClickedItem)
+                        hideTooltip = false;
+
+
+                    var lerpSpeed = UnityEditorInternal.InternalEditorUtility.isApplicationActive ? 15 : 12321;
+
+                    if (mouseHoversItem && !draggingItem && !hideTooltip)
+                        MathUtil.SmoothDamp(ref tooltipOpacity, 1, lerpSpeed, ref tooltipOpacityDerivative, editorDeltaTime);
+                    else
+                        MathUtil.SmoothDamp(ref tooltipOpacity, 0, lerpSpeed, ref tooltipOpacityDerivative, editorDeltaTime);
+
+
+                    if (tooltipOpacity > .99f)
+                        tooltipOpacity = 1;
+
+                    if (tooltipOpacity < .01f)
+                        tooltipOpacity = 0;
+
+
+                    animatingTooltip = tooltipOpacity != 0 && tooltipOpacity != 1;
+
+
+
+                    // this animation needs to happen after MouseState() (because it relies on MouseHoversItem) but before gui
+
+                }
+
+                gaps_();
+                droppedItem_();
+                tooltip();
+
+            }
+
+            float droppedItemX;
+            float droppedItemXDerivative;
+
+            public bool animatingDroppedItem;
+            public bool animatingGaps;
+            public bool animatingItemMovement => draggingItem || animatingDroppedItem || animatingGaps;
+
+            public bool animatingTooltip;
+            public bool hideTooltip;
+            public float tooltipOpacity;
+            public float tooltipOpacityDerivative;
+            public Item lastClickedItem;
+
+            public List<float> gaps
+            {
+                get
+                {
+                    while (_gaps.Count < items.Count + 1) _gaps.Add(0);
+                    while (_gaps.Count > items.Count + 1) _gaps.RemoveLast();
+
+                    return _gaps;
+
+                }
+            }
+            public List<float> _gaps = new();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            public List<Item> items;
+
+            public ScriptableObject itemsHolderObject; // to dirty and record undo
+
+
+            public System.Action<Rect, Item> ItemGUI;
+
+            public System.Func<Object, Item> CreateItem;
+            public System.Func<Object, bool> CanCreateItemFrom;
+
+            public System.Func<float, int> GetItemIndex;
+            public System.Func<Item, float> GetItemWidth;
+            public System.Func<int, float> GetItemCenterX_withGaps;
+            public System.Func<int, float> GetItemCenterX_withoutGaps;
+
+        }
+
 
     }
 

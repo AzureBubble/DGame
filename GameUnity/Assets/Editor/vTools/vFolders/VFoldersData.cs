@@ -45,7 +45,23 @@ namespace VFolders
         public class Bookmark
         {
 
-            public string name => isDeleted ? "Deleted" : guid.ToPath().GetFilename();
+            public string name
+            {
+                get
+                {
+                    if (isDeleted)
+                        return "Deleted";
+
+                    var filename = guid.ToPath().GetFilename(withExtension: true);
+
+                    if (filename.StartsWith("com."))
+                        if (UnityEditor.PackageManager.PackageInfo.FindForAssetPath(guid.ToPath()) is UnityEditor.PackageManager.PackageInfo packageInfo)
+                            return packageInfo.displayName;
+
+                    return filename;
+
+                }
+            }
 
 
             public bool isDeleted => !AssetDatabase.IsValidFolder(guid.ToPath());

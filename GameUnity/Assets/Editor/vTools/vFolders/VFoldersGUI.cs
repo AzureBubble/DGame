@@ -19,7 +19,10 @@ using static VFolders.VFolders;
 using static VFolders.VFoldersData;
 using static VFolders.VFoldersCache;
 
-#if UNITY_6000_2_OR_NEWER
+#if UNITY_6000_3_OR_NEWER
+using TreeViewItem = UnityEditor.IMGUI.Controls.TreeViewItem<UnityEngine.EntityId>;
+using TreeViewState = UnityEditor.IMGUI.Controls.TreeViewState<UnityEngine.EntityId>;
+#elif UNITY_6000_2_OR_NEWER
 using TreeViewItem = UnityEditor.IMGUI.Controls.TreeViewItem<int>;
 using TreeViewState = UnityEditor.IMGUI.Controls.TreeViewState<int>;
 #endif
@@ -40,6 +43,7 @@ namespace VFolders
 
             var isFolder = AssetDatabase.IsValidFolder(guid.ToPath());
             var isAsset = !isFolder && !guid.IsNullOrEmpty();
+            var isSubasset = isAsset && typeof(AssetDatabase).InvokeMethod<bool>("IsSubAsset", instanceId);
             var isFavorite = !isFolder && !isAsset && rowRect.x != 16;
 
             var isFavoritesRoot = rowRect.x == 16 && !isFolder && rowRect.y == 0;
@@ -83,8 +87,8 @@ namespace VFolders
                     var rowIndex = ((rowRect.y + offest) / 16).ToInt();
 
 
-                    if (rowIndex < 0 || rowIndex >= rows.Count) return;
                     if (rows == null) return;
+                    if (rowIndex < 0 || rowIndex >= rows.Count) return;
 
                     treeItem = rows[rowIndex];
 
@@ -94,7 +98,7 @@ namespace VFolders
                     if (treeItem != null) return;
                     if (isFavorite || isFavoritesRoot) return;
 
-                    treeItem = treeViewController?.InvokeMethod<TreeViewItem>("FindItem", instanceId);
+                    treeItem = treeViewController?.InvokeMethod<TreeViewItem>("FindItem", instanceId.ToIdType());
 
                 }
 
@@ -169,7 +173,7 @@ namespace VFolders
 
                 var rowHasCustomIcon = !isFolder ? false
                                                  : useBackgroundColors ? folderInfo.hasIcon
-                                                                  : folderInfo.hasIcon || folderInfo.hasColor;
+                                                                       : folderInfo.hasIcon || folderInfo.hasColor;
                 var rowHasIcon = !useMinimalMode ? true
                                                  : rowHasCustomIcon || isAsset || isFavorite || isRowBeingRenamed;
 
@@ -260,7 +264,7 @@ namespace VFolders
                     var colorRect = rowRect.AddWidthFromRight(30).AddWidth(16);
 
                     if (folderInfo.hasColorByRecursion)
-                        colorRect = colorRect.AddWidthFromRight(folderInfo.maxColorRecursionDepth * 14);
+                        colorRect = colorRect.AddWidthFromRight((folderInfo.maxColorRecursionDepth + (isSubasset ? 1 : 0)) * 14);
 
                     if (!isRowSelected && !folderInfo.hasColorByRecursion)
                         colorRect = colorRect.AddHeightFromMid(EditorGUIUtility.pixelsPerPoint >= 2 ? -.5f : -1);
@@ -371,7 +375,7 @@ namespace VFolders
                         iconRect = iconRect.MoveX(8);
 
 
-                    var icon = isAsset ? AssetDatabase.GetCachedIcon(guid.ToPath())
+                    var icon = isAsset ? treeItem?.GetMemberValue<Texture2D>("icon") ?? AssetDatabase.GetCachedIcon(guid.ToPath())
                                        : makeIconBrighter ? EditorIcons.GetIcon(folderInfo.folderState.isEmpty ? "FolderEmpty On Icon" : "Folder On Icon")
                                                           : EditorIcons.GetIcon(folderInfo.folderState.isEmpty ? "FolderEmpty Icon" : "Folder Icon");
 
@@ -670,15 +674,22 @@ namespace VFolders
                     if (!curEvent.isMouseUp) return;
 
                     var selectedGuids = isListArea
-                                               ?
-                                               Selection.objects.Where(r => r is DefaultAsset).Select(r => r.GetPath().ToGuid())
-                                               :
+                                        ?
+                                        Selection.objects.Where(r => r is DefaultAsset).Select(r => r.GetPath().ToGuid())
+                                        :
 #if UNITY_2021_1_OR_NEWER
-                                               treeViewController.GetFieldValue("m_CachedSelection").GetFieldValue<List<int>>("m_List")
+                                        treeViewController.GetFieldValue("m_CachedSelection").GetIdList("m_List")
 #else
-                                               treeViewController?.GetMemberValue("state").GetMemberValue<List<int>>("selectedIDs")
+                                        treeViewController?.GetMemberValue("state").GetMemberValue<List<int>>("selectedIDs")
 #endif
+
+
+#if UNITY_6000_3_OR_NEWER
+                                 .Select(id => treeViewController.InvokeMethod("FindItem", (EntityId)id))
+#else
                                  .Select(id => treeViewController.InvokeMethod("FindItem", id))
+#endif
+
                                  .Where(r => r?.GetType().Name == "FolderTreeItem")
                                  .Select(r => r.GetPropertyValue<string>("Guid"))
                                  .Where(r => r != null);
@@ -796,7 +807,8 @@ namespace VFolders
                     if (!VFoldersMenu.twoLineNamesEnabled) return;
 
 
-                    var isSelected = listArea_dragSelectionList.Any() ? listArea_dragSelectionList.Contains(instanceId) : Selection.instanceIDs.Contains(instanceId);
+                    var isSelected = listArea_dragSelectionList.Any() ? listArea_dragSelectionList.Contains(instanceId)
+                                                                      : _Selection_instanceIDs.Contains(instanceId);
 
                     var isCellBeingRenamed = isSelected && renamingCell;
 
@@ -1176,7 +1188,7 @@ namespace VFolders
 
             var treeViewState = treeViewController?.GetPropertyValue<TreeViewState>("state");
 
-            expandedIds = treeViewState?.expandedIDs ?? new List<int>();
+            expandedIds = treeViewState?.expandedIDs?.ToInts() ?? new();
 
 
 
@@ -1205,9 +1217,9 @@ namespace VFolders
 
 
 
-            listArea_dragSelectionList = listArea?.GetMemberValue("m_LocalAssets")?.GetMemberValue<List<int>>("m_DragSelection") ?? new();
-            treeView_dragSelectionList = treeViewController?.GetFieldValue("m_DragSelection")?.GetFieldValue<List<int>>("m_List") ?? new();
-            treeView_normalSelectionList = isTwoColumns ? treeViewController?.GetFieldValue("m_CachedSelection")?.GetFieldValue<List<int>>("m_List") ?? new() : null;
+            listArea_dragSelectionList = listArea?.GetMemberValue("m_LocalAssets")?.GetIdList("m_DragSelection") ?? new();
+            treeView_dragSelectionList = treeViewController?.GetFieldValue("m_DragSelection")?.GetIdList("m_List") ?? new();
+            treeView_normalSelectionList = isTwoColumns ? treeViewController?.GetFieldValue("m_CachedSelection")?.GetIdList("m_List") ?? new() : null;
 
 
 

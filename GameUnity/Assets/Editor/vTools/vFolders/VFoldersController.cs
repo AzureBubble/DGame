@@ -19,7 +19,10 @@ using static VFolders.VFolders;
 using static VFolders.VFoldersData;
 using static VFolders.VFoldersCache;
 
-#if UNITY_6000_2_OR_NEWER
+#if UNITY_6000_3_OR_NEWER
+using TreeViewItem = UnityEditor.IMGUI.Controls.TreeViewItem<UnityEngine.EntityId>;
+using TreeViewState = UnityEditor.IMGUI.Controls.TreeViewState<UnityEngine.EntityId>;
+#elif UNITY_6000_2_OR_NEWER
 using TreeViewItem = UnityEditor.IMGUI.Controls.TreeViewItem<int>;
 using TreeViewState = UnityEditor.IMGUI.Controls.TreeViewState<int>;
 #endif
@@ -158,7 +161,7 @@ namespace VFolders
 
             currentScrollPos = treeViewState?.scrollPos.y ?? 0;
 
-            expandedIds = treeViewState?.expandedIDs ?? new List<int>();
+            expandedIds = treeViewState?.expandedIDs?.ToInts() ?? new();
 
 
 
@@ -185,7 +188,7 @@ namespace VFolders
 
         public int GetRowIndex(int instanceId)
         {
-            return treeViewControllerData.InvokeMethod<int>("GetRow", instanceId);
+            return treeViewControllerData.InvokeMethod<int>("GetRow", instanceId.ToIdType());
         }
 
 
@@ -214,12 +217,12 @@ namespace VFolders
         public void CollapseAll()
         {
 
-            var idsToCollapse_roots = expandedIds.Where(id => EditorUtility.InstanceIDToObject(id).GetPath() is string path &&
+            var idsToCollapse_roots = expandedIds.Where(id => _EditorUtility_InstanceIDToObject(id).GetPath() is string path &&
                                                                    path.HasParentPath() &&
                                                                   (path.GetParentPath() == "Assets" || path.GetParentPath() == "Packages"));
 
 
-            var idsToCollapse_children = expandedIds.Where(id => EditorUtility.InstanceIDToObject(id).GetPath() is string path &&
+            var idsToCollapse_children = expandedIds.Where(id => _EditorUtility_InstanceIDToObject(id).GetPath() is string path &&
                                                                      !path.IsNullOrEmpty() &&
                                                                       path != "Assets" &&
                                                                       path != "Packages" &&
@@ -298,7 +301,7 @@ namespace VFolders
 
             bool hasParentToCollapse(int id)
             {
-                var o = Resources.InstanceIDToObject(id);
+                var o = _EditorUtility_InstanceIDToObject(id);
 
                 if (!o) return false;
 
@@ -322,7 +325,7 @@ namespace VFolders
             }
             bool areAllParentsExpanded(int id)
             {
-                var o = Resources.InstanceIDToObject(id);
+                var o = _EditorUtility_InstanceIDToObject(id);
 
                 if (!o) return true;
 
@@ -372,15 +375,15 @@ namespace VFolders
 
         public void SetExpandedIds(List<int> targetExpandedIds)
         {
-            treeViewControllerData.InvokeMethod("SetExpandedIDs", targetExpandedIds.ToArray());
+            treeViewControllerData.InvokeMethod("SetExpandedIDs", targetExpandedIds.ToArray()); // won't work on 6.3 but it's unused anyway
         }
         public void SetExpanded_withAnimation(int instanceId, bool expanded)
         {
-            treeViewController.InvokeMethod("ChangeFoldingForSingleItem", instanceId, expanded);
+            treeViewController.InvokeMethod("ChangeFoldingForSingleItem", instanceId.ToIdType(), expanded);
         }
         public void SetExpanded_withoutAnimation(int instanceId, bool expanded)
         {
-            treeViewControllerData.InvokeMethod("SetExpanded", instanceId, expanded);
+            treeViewControllerData.InvokeMethod("SetExpanded", instanceId.ToIdType(), expanded);
         }
 
 
@@ -406,7 +409,8 @@ namespace VFolders
         public void RevealFolder(string path, bool expand, bool highlight, bool snapToTopMargin)
         {
 
-            int getId(string path) => AssetDatabase.LoadAssetAtPath<DefaultAsset>(path).GetInstanceID();
+            // int getId(string path) => AssetDatabase.LoadAssetAtPath<DefaultAsset>(path).GetInstanceID();
+            int getId(string path) => typeof(AssetDatabase).InvokeMethod<int>("GetMainAssetOrInProgressProxyInstanceID", path);
 
 
             var idsToExpand = new List<int>();
@@ -435,7 +439,7 @@ namespace VFolders
             var rowCount = treeViewControllerData.GetMemberValue<ICollection>("m_Rows").Count;
             var maxScrollPos = rowCount * 16 - window.position.height + (isOneColumn ? 49.9f : 45.9f);
 
-            var rowIndex = treeViewControllerData.InvokeMethod<int>("GetRow", getId(path));
+            var rowIndex = treeViewControllerData.InvokeMethod<int>("GetRow", getId(path).ToIdType());
             var rowPos = rowIndex * 16f + (isOneColumn ? 11 : 23);
 
             var scrollAreaHeight = window.GetMemberValue<Rect>("m_TreeViewRect").height;
@@ -483,7 +487,7 @@ namespace VFolders
 
 
             // update folder tree
-            window.GetMemberValue("m_FolderTree").InvokeMethod("SetSelection", new[] { AssetDatabase.LoadAssetAtPath<DefaultAsset>(path).GetInstanceID() }, false);
+            window.GetMemberValue("m_FolderTree").InvokeMethod("SetSelection", new[] { AssetDatabase.LoadAssetAtPath<DefaultAsset>(path).GetInstanceID().ToIdType() }, false);
 
 
             // update list area

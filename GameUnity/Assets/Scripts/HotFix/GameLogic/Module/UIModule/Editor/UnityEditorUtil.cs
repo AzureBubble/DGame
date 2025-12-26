@@ -1,8 +1,7 @@
 #if UNITY_EDITOR
 
-using System.Collections;
-using System.Collections.Generic;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -16,6 +15,58 @@ namespace GameLogic
         /// <param name="rectTransform"></param>
         public static void ResetInCanvasFor(RectTransform rectTransform)
         {
+            // 检查是否在预制体编辑模式
+            var prefabStage = PrefabStageUtility.GetCurrentPrefabStage();
+
+            if (prefabStage != null)
+            {
+                // 预制体模式
+                PlaceUIElementInPrefabStage(rectTransform, prefabStage);
+            }
+            else
+            {
+                // 正常场景模式
+                PlaceUIElementInScene(rectTransform);
+            }
+
+            rectTransform.localScale = Vector3.one;
+            rectTransform.localPosition = new Vector3(rectTransform.localPosition.x, rectTransform.localPosition.y, 0);
+            Selection.activeGameObject = rectTransform.gameObject;
+        }
+
+        /// <summary>
+        /// 在预制体编辑模式下放置 UI 元素
+        /// </summary>
+        private static void PlaceUIElementInPrefabStage(RectTransform rectTransform, PrefabStage prefabStage)
+        {
+            rectTransform.SetParent(Selection.activeTransform);
+
+            if (!ParentHasCanvas(rectTransform))
+            {
+                // 在预制体中查找 Canvas
+                GameObject prefabRoot = prefabStage.prefabContentsRoot;
+                Canvas canvas = prefabRoot.GetComponentInChildren<Canvas>();
+
+                if (canvas != null)
+                {
+                    rectTransform.SetParent(canvas.transform);
+                }
+                else
+                {
+                    // 在预制体根物体下创建 Canvas
+                    Canvas canvasObject = new GameObject("Canvas", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster)).GetComponent<Canvas>();
+                    canvasObject.transform.SetParent(prefabRoot.transform, false);
+                    canvasObject.renderMode = RenderMode.ScreenSpaceOverlay;
+                    rectTransform.SetParent(canvasObject.transform);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 在场景模式下放置 UI 元素
+        /// </summary>
+        private static void PlaceUIElementInScene(RectTransform rectTransform)
+        {
             rectTransform.SetParent(Selection.activeTransform);
 
             if (!ParentHasCanvas(rectTransform))
@@ -25,17 +76,17 @@ namespace GameLogic
                 rectTransform.SetParent(canvas);
             }
 
+#if UNITY_6000_3_OR_NEWER
+            if (!Object.FindFirstObjectByType<UnityEngine.EventSystems.EventSystem>())
+#else
             if (!Object.FindObjectOfType<UnityEngine.EventSystems.EventSystem>())
+#endif
             {
                 // 创建 EventSystem 组件
                 GameObject eventSystem = new GameObject("EventSystem",
                     typeof(UnityEngine.EventSystems.EventSystem),
                     typeof(UnityEngine.EventSystems.StandaloneInputModule));
             }
-
-            rectTransform.localScale = Vector3.one;
-            rectTransform.localPosition = new Vector3(rectTransform.localPosition.x, rectTransform.localPosition.y, 0);
-            Selection.activeGameObject = rectTransform.gameObject;
         }
 
         /// <summary>
@@ -44,7 +95,11 @@ namespace GameLogic
         /// <returns></returns>
         public static Transform GetOrCreateCanvas()
         {
+#if UNITY_6000_3_OR_NEWER
+            Canvas canvas = Object.FindFirstObjectByType<Canvas>();
+#else
             Canvas canvas = Object.FindObjectOfType<Canvas>();
+#endif
 
             if (canvas != null)
             {

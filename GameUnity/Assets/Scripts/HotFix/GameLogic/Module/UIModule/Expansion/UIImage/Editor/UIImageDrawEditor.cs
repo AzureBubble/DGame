@@ -8,7 +8,7 @@ namespace GameLogic
     public class UIImageDrawEditor
     {
         [MenuItem("GameObject/UI/UIImage", priority = 32)]
-        private static void CreateUIImage()
+        public static void CreateUIImage()
         {
             UIImage uiImage = new GameObject("UIImage", typeof(RectTransform), typeof(UIImage)).GetComponent<UIImage>();
             UnityEditorUtil.ResetInCanvasFor(uiImage.rectTransform);

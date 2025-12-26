@@ -12,7 +12,7 @@ namespace GameLogic
         public static void CreateUIButton()
         {
             // 创建 UIButton 物体
-            UIButton uiBtn = new GameObject("UIButton", typeof(RectTransform), typeof(Image), typeof(UIButton)).GetComponent<UIButton>();
+            UIButton uiBtn = new GameObject("UIButton", typeof(RectTransform), typeof(UIImage), typeof(UIButton)).GetComponent<UIButton>();
             UnityEditorUtil.ResetInCanvasFor(uiBtn.rectTransform);
             uiBtn.transition = Selectable.Transition.None;
             // Navigation btnNavigation = uiBtn.navigation;

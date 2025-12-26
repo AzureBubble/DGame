@@ -1,8 +1,8 @@
 #if UNITY_EDITOR
 
-using System.Collections;
-using System.Collections.Generic;
+#if TextMeshPro
 using TMPro;
+#endif
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
@@ -15,194 +15,100 @@ namespace GameLogic
         private static int UIWINDOW_WIDTH = 1920;
         private static int UIWINDOW_HEIGHT = 1080;
 
+        private static int m_lastProcessedInstanceId;
+
         [InitializeOnLoadMethod]
         private static void OnHierarchyCreateUIComponent()
         {
             // 监听Hierarchy窗口中的对象创建事件
-            EditorApplication.hierarchyChanged -= OnComponentCreated;
-            EditorApplication.hierarchyChanged -= LoadUIWindowCamera;
-            EditorApplication.hierarchyChanged += OnComponentCreated;
-            EditorApplication.hierarchyChanged += LoadUIWindowCamera;
+            EditorApplication.hierarchyChanged -= OnHierarchyChanged;
+            EditorApplication.hierarchyChanged += OnHierarchyChanged;
+        }
+
+        private static void OnHierarchyChanged()
+        {
+            OnComponentCreated();
+            LoadUIWindowCamera();
         }
 
         private static void OnComponentCreated()
         {
-            GameObject obj = Selection.activeGameObject;
+            GameObject selectedObj = Selection.activeGameObject;
 
-            if (obj == null)
+            if (selectedObj == null)
+            {
+                return;
+            }
+
+            // 避免重复处理同一个对象
+            int instanceId = selectedObj.GetInstanceID();
+
+            if (instanceId == m_lastProcessedInstanceId)
             {
                 return;
             }
 
             #region 替换组件
 
-            if (obj.name.Contains("Button"))
+#if TextMeshPro
+            var tmpTextArr = selectedObj.GetComponentsInChildren<TextMeshProUGUI>(true);
+            if (tmpTextArr?.Length > 0)
             {
-                if (obj.TryGetComponent<Button>(out var button))
+                for (int i = 0; i < tmpTextArr.Length; i++)
                 {
-                    obj.name = "m_btn";
-                    DestroyImmediate(button);
-                    var uiButton = obj.AddComponent<UIButton>();
-                    uiButton.transition = Selectable.Transition.None;
-
-                    if (obj.TryGetComponent<Image>(out var image))
-                    {
-                        if (!(image is UIImage))
-                        {
-                            DestroyImmediate(image);
-                            obj.AddComponent<UIImage>();
-                        }
-                    }
-
-                    Text[] texts = obj.GetComponentsInChildren<Text>(true);
-                    if (texts != null && texts.Length > 0)
-                    {
-                        foreach (var btnText in texts)
-                        {
-                            if (!(btnText is UIText))
-                            {
-                                var textContent = btnText.text;
-                                var font = btnText.font;
-                                var fontStyle = btnText.fontStyle;
-                                var fontSize = btnText.fontSize;
-                                var textColor = btnText.color;
-                                var textRich = btnText.supportRichText;
-                                var textHorizontalOverflow = btnText.horizontalOverflow;
-                                var textVerticalOverflow = btnText.verticalOverflow;
-                                var textObj = btnText.gameObject;
-
-                                DestroyImmediate(btnText);
-                                var uiText = textObj.AddComponent<UIText>();
-                                uiText.raycastTarget = false;
-                                uiText.text = textContent;
-                                uiText.font = font;
-                                uiText.color = textColor;
-                                uiText.fontSize = fontSize;
-                                uiText.fontStyle = fontStyle;
-                                uiText.supportRichText = textRich;
-                                uiText.horizontalOverflow = textHorizontalOverflow;
-                                uiText.verticalOverflow = textVerticalOverflow;
-                                uiText.raycastTarget = false;
-                            }
-                            else
-                            {
-                                btnText.raycastTarget = false;
-                            }
-                        }
-                    }
-
-                    TextMeshProUGUI[] textPros = obj.GetComponentsInChildren<TextMeshProUGUI>(true);
-                    if (textPros != null && textPros.Length > 0)
-                    {
-                        foreach (var btnText in textPros)
-                        {
-                            btnText.raycastTarget = false;
-                        }
-                    }
+                    tmpTextArr[i].raycastTarget = false;
                 }
-
-                return;
             }
-            else if (obj.name.Contains("Image"))
-            {
-                if (obj.TryGetComponent<Image>(out var image))
-                {
-                    obj.name = "m_img";
-                    if (!(image is UIImage))
-                    {
-                        var sprite = image.sprite;
-                        var color = image.color;
-                        var material = image.material;
-                        var raycastTarget = image.raycastTarget;
-                        var maskable = image.maskable;
-                        var raycastPadding = image.raycastPadding;
-                        var imageType = image.type;
-                        var imgUseSpriteMesh = image.useSpriteMesh;
-                        var imgPreserveAspect = image.preserveAspect;
-                        var fillCenter = image.fillCenter;
-                        var pixelsPerUnitMultiplier = image.pixelsPerUnitMultiplier;
-                        var fillMethod = image.fillMethod;
-                        var fillOrigin = image.fillOrigin;
-                        var fillClockwise = image.fillClockwise;
-                        var fillAmount = image.fillAmount;
-                        GameObject.DestroyImmediate(image);
-                        var img = obj.AddComponent<UIImage>();
-                        img.sprite = sprite;
-                        img.color = color;
-                        img.material = material;
-                        img.raycastTarget = raycastTarget;
-                        img.maskable = maskable;
-                        img.raycastPadding = raycastPadding;
-                        img.type = imageType;
-                        img.useSpriteMesh = imgUseSpriteMesh;
-                        img.pixelsPerUnitMultiplier = pixelsPerUnitMultiplier;
-                        img.fillMethod = fillMethod;
-                        img.fillOrigin = fillOrigin;
-                        img.fillClockwise = fillClockwise;
-                        img.fillAmount = fillAmount;
-                        img.preserveAspect = imgPreserveAspect;
-                        img.fillCenter = fillCenter;
-                    }
-                }
+#endif
 
-                return;
+            if (selectedObj.name == "Button (Legacy)"
+                && selectedObj.TryGetComponent<Button>(out Button btn)
+                && !selectedObj.TryGetComponent<UIButton>(out _))
+            {
+                m_lastProcessedInstanceId = instanceId;
+                DestroyImmediate(btn.gameObject);
+                UIButtonDrawEditor.CreateUIButton();
             }
-            else if (obj.name.Contains("Text"))
+            else if (selectedObj.name == "Image"
+                     && selectedObj.TryGetComponent<Image>(out Image ig)
+                     && !selectedObj.TryGetComponent<UIImage>(out _))
             {
-                if (obj.TryGetComponent<Text>(out var text))
-                {
-                    // obj.name = "m_text";
-                    if (!(text is UIText))
-                    {
-                        var textContent = text.text;
-                        var font = text.font;
-                        var fontStyle = text.fontStyle;
-                        var fontSize = text.fontSize;
-                        var textColor = text.color;
-                        var textRich = text.supportRichText;
-                        var textHorizontalOverflow = text.horizontalOverflow;
-                        var textVerticalOverflow = text.verticalOverflow;
-                        var textObj = text.gameObject;
-
-                        DestroyImmediate(text);
-                        var uiText = textObj.AddComponent<UIText>();
-                        uiText.raycastTarget = false;
-                        uiText.text = textContent;
-                        uiText.font = font;
-                        uiText.color = textColor;
-                        uiText.fontSize = fontSize;
-                        uiText.fontStyle = fontStyle;
-                        uiText.supportRichText = textRich;
-                        uiText.horizontalOverflow = textHorizontalOverflow;
-                        uiText.verticalOverflow = textVerticalOverflow;
-                        uiText.raycastTarget = false;
-                    }
-                    else
-                    {
-                        text.raycastTarget = false;
-                    }
-                }
-
-                return;
+                m_lastProcessedInstanceId = instanceId;
+                DestroyImmediate(ig.gameObject);
+                UIImageDrawEditor.CreateUIImage();
             }
-            else if (obj.name.Contains("Scroll View"))
+            else if ((selectedObj.name == "Text (Legacy)") // || selectedObj.name == "Text"
+                     && selectedObj.TryGetComponent<Text>(out Text txt)
+                     && !selectedObj.TryGetComponent<UIText>(out _))
             {
-                if (obj.TryGetComponent<ScrollRect>(out var scrollRect))
+                m_lastProcessedInstanceId = instanceId;
+                DestroyImmediate(txt.gameObject);
+                UITextDrawEditor.CreateUIText();
+            }
+            else if (selectedObj.name.Contains("Scroll View"))
+            {
+                m_lastProcessedInstanceId = instanceId;
+
+                if (selectedObj.TryGetComponent<ScrollRect>(out var scrollRect))
                 {
-                    obj.name = "m_scroll";
+                    selectedObj.name = "m_scroll";
                 }
-                GameObject viewPort = obj.transform.Find("Viewport").gameObject;
+
+                GameObject viewPort = selectedObj.transform.Find("Viewport").gameObject;
+
                 if (viewPort.TryGetComponent<Mask>(out Mask mask))
                 {
                     DestroyImmediate(mask);
                     viewPort.AddComponent<RectMask2D>();
                 }
+
                 if (viewPort.TryGetComponent<Image>(out Image viewPortImage))
                 {
                     DestroyImmediate(viewPortImage);
                 }
 
-                Image[] images = obj.GetComponentsInChildren<Image>(true);
+                Image[] images = selectedObj.GetComponentsInChildren<Image>(true);
+
                 if (images != null && images.Length > 0)
                 {
                     foreach (var img in images)
@@ -222,7 +128,8 @@ namespace GameLogic
                     }
                 }
 
-                Scrollbar[] scrollbars = obj.GetComponentsInChildren<Scrollbar>(true);
+                Scrollbar[] scrollbars = selectedObj.GetComponentsInChildren<Scrollbar>(true);
+
                 if (scrollbars != null && scrollbars.Length > 0)
                 {
                     foreach (var tmpScrollbar in scrollbars)
@@ -233,14 +140,18 @@ namespace GameLogic
 
                 return;
             }
-            else if (obj.name.Contains("Slider"))
+            else if (selectedObj.name.Contains("Slider"))
             {
-                if (obj.TryGetComponent<Slider>(out var slider))
+                m_lastProcessedInstanceId = instanceId;
+
+                if (selectedObj.TryGetComponent<Slider>(out var slider))
                 {
-                    obj.name = "m_slider";
+                    selectedObj.name = "m_slider";
                     slider.transition = Selectable.Transition.None;
                 }
-                Image[] images = obj.GetComponentsInChildren<Image>(true);
+
+                Image[] images = selectedObj.GetComponentsInChildren<Image>(true);
+
                 if (images != null && images.Length > 0)
                 {
                     foreach (var img in images)
@@ -262,14 +173,18 @@ namespace GameLogic
 
                 return;
             }
-            else if (obj.name.Contains("Scrollbar"))
+            else if (selectedObj.name.Contains("Scrollbar"))
             {
-                if (obj.TryGetComponent<Scrollbar>(out var scrollbar))
+                m_lastProcessedInstanceId = instanceId;
+
+                if (selectedObj.TryGetComponent<Scrollbar>(out var scrollbar))
                 {
-                    obj.name = "m_scrollbar";
+                    selectedObj.name = "m_scrollbar";
                     scrollbar.transition = Selectable.Transition.None;
                 }
-                Image[] images = obj.GetComponentsInChildren<Image>(true);
+
+                Image[] images = selectedObj.GetComponentsInChildren<Image>(true);
+
                 if (images != null && images.Length > 0)
                 {
                     foreach (var img in images)
@@ -291,14 +206,18 @@ namespace GameLogic
 
                 return;
             }
-            else if (obj.name.Contains("InputField"))
+            else if (selectedObj.name.Contains("InputField"))
             {
-                if (obj.TryGetComponent<InputField>(out var inputField))
+                m_lastProcessedInstanceId = instanceId;
+
+                if (selectedObj.TryGetComponent<InputField>(out var inputField))
                 {
-                    obj.name = "m_input";
+                    selectedObj.name = "m_input";
                     inputField.transition = Selectable.Transition.None;
                 }
-                Image[] images = obj.GetComponentsInChildren<Image>(true);
+
+                Image[] images = selectedObj.GetComponentsInChildren<Image>(true);
+
                 if (images != null && images.Length > 0)
                 {
                     foreach (var img in images)
@@ -318,7 +237,8 @@ namespace GameLogic
                     }
                 }
 
-                Text[] texts = obj.GetComponentsInChildren<Text>(true);
+                Text[] texts = selectedObj.GetComponentsInChildren<Text>(true);
+
                 if (texts != null && texts.Length > 0)
                 {
                     foreach (var text in texts)
@@ -355,7 +275,8 @@ namespace GameLogic
                     }
                 }
 
-                var tmpTxt = obj.GetComponentsInChildren<UIText>();
+                var tmpTxt = selectedObj.GetComponentsInChildren<UIText>();
+
                 if (tmpTxt != null && tmpTxt.Length > 0)
                 {
                     inputField.placeholder = tmpTxt[0];
@@ -364,15 +285,17 @@ namespace GameLogic
 
                 return;
             }
-            else if (obj.name.Contains("Dropdown"))
+            else if (selectedObj.name.Contains("Dropdown"))
             {
-                if (obj.TryGetComponent<Dropdown>(out var dropdown))
+                m_lastProcessedInstanceId = instanceId;
+
+                if (selectedObj.TryGetComponent<Dropdown>(out var dropdown))
                 {
-                    obj.name = "m_dropDown";
+                    selectedObj.name = "m_dropDown";
                     dropdown.transition = Selectable.Transition.None;
                 }
 
-                var maskArr = obj.GetComponentsInChildren<Mask>(true);
+                var maskArr = selectedObj.GetComponentsInChildren<Mask>(true);
 
                 if (maskArr != null && maskArr.Length > 0)
                 {
@@ -380,12 +303,14 @@ namespace GameLogic
                     {
                         var tmpMask = maskArr[i];
                         var viewPort = tmpMask.gameObject;
+
                         // GameObject viewPort = obj.transform.Find("Viewport").gameObject;
                         if (viewPort.TryGetComponent<Mask>(out Mask mask))
                         {
                             DestroyImmediate(mask);
                             viewPort.AddComponent<RectMask2D>();
                         }
+
                         if (viewPort.TryGetComponent<Image>(out Image viewPortImage))
                         {
                             DestroyImmediate(viewPortImage);
@@ -393,7 +318,8 @@ namespace GameLogic
                     }
                 }
 
-                Image[] images = obj.GetComponentsInChildren<Image>(true);
+                Image[] images = selectedObj.GetComponentsInChildren<Image>(true);
+
                 if (images != null && images.Length > 0)
                 {
                     foreach (var img in images)
@@ -413,7 +339,8 @@ namespace GameLogic
                     }
                 }
 
-                Text[] texts = obj.GetComponentsInChildren<Text>(true);
+                Text[] texts = selectedObj.GetComponentsInChildren<Text>(true);
+
                 if (texts != null && texts.Length > 0)
                 {
                     foreach (var text in texts)
@@ -450,7 +377,8 @@ namespace GameLogic
                     }
                 }
 
-                var scrollbars = obj.GetComponentsInChildren<Scrollbar>(true);
+                var scrollbars = selectedObj.GetComponentsInChildren<Scrollbar>(true);
+
                 if (scrollbars != null && scrollbars.Length > 0)
                 {
                     for (int i = 0; i < scrollbars.Length; i++)
@@ -460,7 +388,8 @@ namespace GameLogic
                     }
                 }
 
-                var toggles = obj.GetComponentsInChildren<Toggle>(true);
+                var toggles = selectedObj.GetComponentsInChildren<Toggle>(true);
+
                 if (toggles != null && toggles.Length > 0)
                 {
                     for (int i = 0; i < toggles.Length; i++)
@@ -471,19 +400,23 @@ namespace GameLogic
                     }
                 }
 
-                Text[] tmpTexts = obj.GetComponentsInChildren<Text>();
+                Text[] tmpTexts = selectedObj.GetComponentsInChildren<Text>();
                 dropdown.captionText = tmpTexts[0];
 
                 return;
             }
-            else if (obj.name.Contains("Toggle"))
+            else if (selectedObj.name.Contains("Toggle"))
             {
-                if (obj.TryGetComponent<Toggle>(out var toggle))
+                m_lastProcessedInstanceId = instanceId;
+
+                if (selectedObj.TryGetComponent<Toggle>(out var toggle))
                 {
-                    obj.name = "m_toggle";
+                    selectedObj.name = "m_toggle";
                     toggle.transition = Selectable.Transition.None;
                 }
-                Image[] images = obj.GetComponentsInChildren<Image>(true);
+
+                Image[] images = selectedObj.GetComponentsInChildren<Image>(true);
+
                 if (images != null && images.Length > 0)
                 {
                     foreach (var img in images)
@@ -503,7 +436,8 @@ namespace GameLogic
                     }
                 }
 
-                Text[] texts = obj.GetComponentsInChildren<Text>(true);
+                Text[] texts = selectedObj.GetComponentsInChildren<Text>(true);
+
                 if (texts != null && texts.Length > 0)
                 {
                     foreach (var text in texts)
@@ -540,51 +474,9 @@ namespace GameLogic
                     }
                 }
 
-                Image[] tmpImages = obj.GetComponentsInChildren<Image>(true);
+                Image[] tmpImages = selectedObj.GetComponentsInChildren<Image>(true);
                 toggle.graphic = tmpImages[^1];
-
-                return;
             }
-
-            #endregion
-
-            #region 替换手动添加的UI组件
-
-
-            // if (obj.TryGetComponent(out Button btn))
-            // {
-            //     if (!(btn is UIButton))
-            //     {
-            //         DestroyImmediate(btn);
-            //         var uiBtn = obj.AddComponent<UIButton>();
-            //         uiBtn.transition = Selectable.Transition.None;
-            //     }
-            //     else
-            //     {
-            //         btn.transition = Selectable.Transition.None;
-            //     }
-            // }
-            // if (obj.TryGetComponent(out Text tmpT))
-            // {
-            //     if (!(tmpT is UIText))
-            //     {
-            //         DestroyImmediate(tmpT);
-            //         var uiText = obj.AddComponent<UIText>();
-            //         uiText.raycastTarget = false;
-            //     }
-            //     else
-            //     {
-            //         tmpT.raycastTarget = false;
-            //     }
-            // }
-            // if (obj.TryGetComponent(out Image tmpImg))
-            // {
-            //     if (!(tmpImg is UIImage))
-            //     {
-            //         DestroyImmediate(tmpImg);
-            //         obj.AddComponent<UIImage>();
-            //     }
-            // }
 
             #endregion
         }
@@ -592,14 +484,17 @@ namespace GameLogic
         private static void LoadUIWindowCamera()
         {
             var window = Selection.activeGameObject;
+
             if (window != null)
             {
                 bool isUIWindow = window.name.ToUpper().Contains("UI")
-                    || window.name.Contains("Window");
+                                  || window.name.Contains("Window");
+
                 if (isUIWindow && window.TryGetComponent<Canvas>(out Canvas canvas))
                 {
                     canvas.renderMode = RenderMode.ScreenSpaceCamera;
                     GameObject uiCameraObj = GameObject.Find("UIRoot/UICamera");
+
                     if (uiCameraObj != null)
                     {
                         canvas.worldCamera = uiCameraObj.GetComponent<Camera>();

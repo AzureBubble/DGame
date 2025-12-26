@@ -67,5 +67,6 @@ namespace DGame
         TextMeshProUGUI,
         Canvas,
         Dropdown,
+        TMP_InputField,
     }
 }

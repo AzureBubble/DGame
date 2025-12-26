@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
+using Object = UnityEngine.Object;
 
 namespace GameLogic
 {
@@ -143,7 +144,11 @@ namespace GameLogic
                 m_camera = Camera.main;
                 if (m_camera == null)
                 {
-                    m_camera = Transform.FindObjectOfType<Camera>();
+#if UNITY_6000_3_OR_NEWER
+                    m_camera = Object.FindFirstObjectByType<Camera>();
+#else
+                    m_camera = Object.FindObjectOfType<Camera>();
+#endif
                 }
             }
 

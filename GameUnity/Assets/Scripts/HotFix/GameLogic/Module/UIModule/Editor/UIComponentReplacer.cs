@@ -12,7 +12,47 @@ namespace GameLogic
         [MenuItem("GameObject/UI/替换UI拓展组件成Unity原生组件", false, 0)]
         public static void ReplaceExtendComponentToUnityComponent()
         {
-            ReplaceSelectedExtendComponentToUnityComponent();
+            GameObject root = Selection.activeGameObject;
+            if (root == null) return;
+
+            Undo.RegisterFullObjectHierarchyUndo(root, "Replace Extend Components To Unity Components");
+
+            int imageCount = 0, textCount = 0, buttonCount = 0;
+
+            // 获取所有Transform（包括自身和所有子对象）
+            Transform[] allTransforms = root.GetComponentsInChildren<Transform>(true);
+
+            foreach (Transform t in allTransforms)
+            {
+                GameObject go = t.gameObject;
+
+                // 替换 UIButton -> Button
+                UIButton uiButton = go.GetComponent<UIButton>();
+                if (uiButton != null)
+                {
+                    ReplaceComponent<UIButton, Button>(go);
+                    buttonCount++;
+                }
+
+                // 替换 UIImage -> Image
+                UIImage uiImage = go.GetComponent<UIImage>();
+                if (uiImage != null)
+                {
+                    ReplaceComponent<UIImage, Image>(go);
+                    imageCount++;
+                }
+
+                // 替换 UIText -> Text
+                UIText uiText = go.GetComponent<UIText>();
+                if (uiText != null)
+                {
+                    uiText.SetUITextLocalizationActive(false);
+                    ReplaceComponent<UIText, Text>(go);
+                    textCount++;
+                }
+            }
+
+            Debug.Log($"[UIComponentReplacer] 替换完成: UIImage -> Image: {imageCount}, UIText -> Text: {textCount}, UIButton -> Button: {buttonCount}");
         }
 
         [MenuItem("GameObject/UI/替换UI拓展组件成Unity原生组件", true)]
@@ -24,7 +64,46 @@ namespace GameLogic
         [MenuItem("GameObject/UI/替换Unity原生组件成UI拓展组件", false, 1)]
         public static void ReplaceUnityComponentToExtendComponent()
         {
-            ReplaceSelectedExtendComponentToUnityComponent();
+            GameObject root = Selection.activeGameObject;
+            if (root == null) return;
+
+            Undo.RegisterFullObjectHierarchyUndo(root, "Replace Unity Components To Extend Components");
+
+            int imageCount = 0, textCount = 0, buttonCount = 0;
+
+            // 获取所有Transform（包括自身和所有子对象）
+            Transform[] allTransforms = root.GetComponentsInChildren<Transform>(true);
+
+            foreach (Transform t in allTransforms)
+            {
+                GameObject go = t.gameObject;
+
+                // 替换 Button -> UIButton（排除已经是UIButton的）
+                Button button = go.GetComponent<Button>();
+                if (button != null && !(button is UIButton))
+                {
+                    ReplaceComponent<Button, UIButton>(go);
+                    buttonCount++;
+                }
+
+                // 替换 Image -> UIImage（排除已经是UIImage的）
+                Image image = go.GetComponent<Image>();
+                if (image != null && !(image is UIImage))
+                {
+                    ReplaceComponent<Image, UIImage>(go);
+                    imageCount++;
+                }
+
+                // 替换 Text -> UIText（排除已经是UIText的）
+                Text text = go.GetComponent<Text>();
+                if (text != null && !(text is UIText))
+                {
+                    ReplaceComponent<Text, UIText>(go);
+                    textCount++;
+                }
+            }
+
+            Debug.Log($"[UIComponentReplacer] 替换完成: Image -> UIImage: {imageCount}, Text -> UIText: {textCount}, Button -> UIButton: {buttonCount}");
         }
 
         [MenuItem("GameObject/UI/替换Unity原生组件成UI拓展组件", true)]
@@ -34,81 +113,26 @@ namespace GameLogic
         }
 
         /// <summary>
-        /// 将选中的GameObject及其所有子物体中的UIImage组件替换为Unity的Image组件
+        /// 替换组件，保留基类属性
         /// </summary>
-        private static void ReplaceSelectedExtendComponentToUnityComponent()
+        private static void ReplaceComponent<TSource, TTarget>(GameObject go)
+            where TSource : Component
+            where TTarget : Component
         {
-            if (Selection.activeGameObject == null)
-            {
-                Debug.LogWarning("请先选择一个GameObject");
-                return;
-            }
+            TSource source = go.GetComponent<TSource>();
+            if (source == null) return;
 
-            GameObject selectedObject = Selection.activeGameObject;
-            List<Component> replaceComponents = new List<Component>();
+            // 序列化源组件数据
+            string json = EditorJsonUtility.ToJson(source);
 
-            // 查找所有UIImage组件（包括选中物体和所有子物体）
-            Component[] allComponents = selectedObject.GetComponentsInChildren<Component>(true);
+            // 删除源组件
+            Undo.DestroyObjectImmediate(source);
 
-            foreach (Component component in allComponents)
-            {
-                // 使用类型名称匹配，因为UIImage可能是自定义组件
-                if (component != null && component.GetType().Name == "UIImage")
-                {
-                    replaceComponents.Add(component);
-                }
-            }
+            // 添加目标组件
+            TTarget target = Undo.AddComponent<TTarget>(go);
 
-            if (replaceComponents.Count == 0)
-            {
-                return;
-            }
-
-            int replacementCount = 0;
-
-            foreach (Component replaceComponent in replaceComponents)
-            {
-                GameObject targetGameObject = replaceComponent.gameObject;
-
-                if (targetGameObject.TryGetComponent<UIImage>(out var uiImage))
-                {
-                    var sprite = uiImage.sprite;
-                    var color = uiImage.color;
-                    var material = uiImage.material;
-                    var raycastTarget = uiImage.raycastTarget;
-                    var maskable = uiImage.maskable;
-                    var raycastPadding = uiImage.raycastPadding;
-                    var imageType = uiImage.type;
-                    var imgUseSpriteMesh = uiImage.useSpriteMesh;
-                    var imgPreserveAspect = uiImage.preserveAspect;
-                    var fillCenter = uiImage.fillCenter;
-                    var pixelsPerUnitMultiplier = uiImage.pixelsPerUnitMultiplier;
-                    var fillMethod = uiImage.fillMethod;
-                    var fillOrigin = uiImage.fillOrigin;
-                    var fillClockwise = uiImage.fillClockwise;
-                    var fillAmount = uiImage.fillAmount;
-                    GameObject.DestroyImmediate(uiImage);
-                    var img = targetGameObject.AddComponent<Image>();
-                    img.sprite = sprite;
-                    img.color = color;
-                    img.material = material;
-                    img.raycastTarget = raycastTarget;
-                    img.maskable = maskable;
-                    img.raycastPadding = raycastPadding;
-                    img.type = imageType;
-                    img.useSpriteMesh = imgUseSpriteMesh;
-                    img.pixelsPerUnitMultiplier = pixelsPerUnitMultiplier;
-                    img.fillMethod = fillMethod;
-                    img.fillOrigin = fillOrigin;
-                    img.fillClockwise = fillClockwise;
-                    img.fillAmount = fillAmount;
-                    img.preserveAspect = imgPreserveAspect;
-                    img.fillCenter = fillCenter;
-                    replacementCount++;
-                }
-            }
-
-            Debug.Log($"成功将 {replacementCount} 个UIImage组件替换为Image组件");
+            // 反序列化到目标组件（只会复制共有的字段）
+            EditorJsonUtility.FromJsonOverwrite(json, target);
         }
     }
 }

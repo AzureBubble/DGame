@@ -199,6 +199,10 @@ namespace GameLogic
         public string GetParameterValue(string ParamName)
             => UITextLocalizationExtend?.GetParameterValue(ParamName);
 
+        public void SetUITextLocalizationActive(bool active)
+        {
+            UITextLocalizationExtend.UseI2Localization = active;
+        }
 
         public void SetParameterValue(int ParamName, string ParamValue, bool localize = true)
             => UITextLocalizationExtend?.SetParameterValue(ParamName, ParamValue, localize);

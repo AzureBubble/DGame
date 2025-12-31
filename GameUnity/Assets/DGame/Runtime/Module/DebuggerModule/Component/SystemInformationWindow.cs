@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 namespace DGame
 {
@@ -8,8 +8,8 @@ namespace DGame
         {
             protected override void OnDrawScrollableWindow()
             {
-                GUILayout.Label("<b>System Information</b>");
-                GUILayout.BeginVertical("box");
+                DrawSectionTitle("System Information");
+                BeginPanel();
                 {
                     // 设备唯一标识符
                     DrawItem("Device Unique ID", SystemInfo.deviceUniqueIdentifier, "设备唯一标识符");
@@ -19,6 +19,13 @@ namespace DGame
                     DrawItem("Device Type", SystemInfo.deviceType.ToString(), "设备类型");
                     // 设备型号
                     DrawItem("Device Model", SystemInfo.deviceModel, "设备型号");
+                }
+                EndPanel();
+
+                DrawSectionTitle("Processor");
+                BeginPanel();
+                {
+                    ResetRowIndex();
                     // CPU型号
                     DrawItem("Processor Type", SystemInfo.processorType, "CPU型号");
                     // CPU核心数量
@@ -27,18 +34,39 @@ namespace DGame
                     DrawItem("Processor Frequency", Utility.StringUtil.Format("{0} MHz", SystemInfo.processorFrequency), "CPU频率(MHz)");
                     // 系统内存大小
                     DrawItem("System Memory Size", Utility.StringUtil.Format("{0} MB", SystemInfo.systemMemorySize), "系统内存大小(MB)");
+                }
+                EndPanel();
+
+                DrawSectionTitle("Operating System");
+                BeginPanel();
+                {
+                    ResetRowIndex();
 #if UNITY_5_5_OR_NEWER
                     // 操作系统
                     DrawItem("Operating System Family", SystemInfo.operatingSystemFamily.ToString(), "操作系统");
 #endif
                     // 操作系统版本号
                     DrawItem("Operating System", SystemInfo.operatingSystem, "操作系统版本号");
+                }
+                EndPanel();
+
+                DrawSectionTitle("Battery");
+                BeginPanel();
+                {
+                    ResetRowIndex();
 #if UNITY_5_6_OR_NEWER
                     // 电池状态
                     DrawItem("Battery Status", SystemInfo.batteryStatus.ToString(), "电池状态");
                     // 电池电量(百分比)
                     DrawItem("Battery Level", GetBatteryLevelString(SystemInfo.batteryLevel), "电池电量(百分比)");
 #endif
+                }
+                EndPanel();
+
+                DrawSectionTitle("Features");
+                BeginPanel();
+                {
+                    ResetRowIndex();
 #if UNITY_5_4_OR_NEWER
                     // 是否支持音频
                     DrawItem("Supports Audio", SystemInfo.supportsAudio.ToString(), "是否支持音频");
@@ -51,12 +79,19 @@ namespace DGame
                     DrawItem("Supports Gyroscope", SystemInfo.supportsGyroscope.ToString(), "是否支持陀螺仪");
                     // 是否支持震动功能
                     DrawItem("Supports Vibration", SystemInfo.supportsVibration.ToString(), "是否支持震动功能");
+                }
+                EndPanel();
+
+                DrawSectionTitle("Application");
+                BeginPanel();
+                {
+                    ResetRowIndex();
                     // 应用是否为正版/未被篡改
                     DrawItem("Genuine", Application.genuine.ToString(), "应用是否为正版");
                     // 是否可进行正版验证
                     DrawItem("Genuine Check Available", Application.genuineCheckAvailable.ToString(), "是否可进行正版验证");
                 }
-                GUILayout.EndVertical();
+                EndPanel();
             }
 
             private string GetBatteryLevelString(float batteryLevel)

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 namespace DGame
 {
@@ -10,29 +10,37 @@ namespace DGame
 
             protected override void OnDrawScrollableWindow()
             {
-                GUILayout.Label("<b>Quality Level</b>");
-                GUILayout.BeginVertical("box");
+                DrawSectionTitle("Quality Level");
+                BeginPanel();
                 {
                     // 切换图形质量
                     int currentQualityLevel = QualitySettings.GetQualityLevel();
 
                     DrawItem("Current Quality Level", QualitySettings.names[currentQualityLevel], "当前图形质量等级");
+
+                    GUILayout.Space(8);
+
                     // 图形质量切换是否立即生效
                     m_applyExpensiveChanges = GUILayout.Toggle(m_applyExpensiveChanges,
-                        "Apply expensive changes on quality level change.");
+                        "  Apply expensive changes on quality level change.", DebuggerStyles.ToggleStyle);
 
-                    int newQualityLevel =
-                        GUILayout.SelectionGrid(currentQualityLevel, QualitySettings.names, 3, "toggle");
+                    GUILayout.Space(8);
+
+                    // 质量等级选择网格
+                    int newQualityLevel = GUILayout.SelectionGrid(currentQualityLevel, QualitySettings.names, 3,
+                        DebuggerStyles.ToolbarButtonStyle, GUILayout.Height(DebuggerStyles.TabHeight * Mathf.CeilToInt(QualitySettings.names.Length / 3f)));
+
                     if (newQualityLevel != currentQualityLevel)
                     {
                         QualitySettings.SetQualityLevel(newQualityLevel, m_applyExpensiveChanges);
                     }
                 }
-                GUILayout.EndVertical();
+                EndPanel();
 
-                GUILayout.Label("<b>Rendering Information</b>");
-                GUILayout.BeginVertical("box");
+                DrawSectionTitle("Rendering Information");
+                BeginPanel();
                 {
+                    ResetRowIndex();
                     DrawItem("Active Color Space", QualitySettings.activeColorSpace.ToString(), "当前的颜色空间（Gamma/Linear）");
                     DrawItem("Desired Color Space", QualitySettings.desiredColorSpace.ToString(), "期望的颜色空间（Gamma/Linear）");
                     DrawItem("Max Queued Frames", QualitySettings.maxQueuedFrames.ToString(), "最大排队帧数");
@@ -49,31 +57,29 @@ namespace DGame
 #endif
                     DrawItem("Soft Vegetation", QualitySettings.softVegetation.ToString(), "软植被");
                     DrawItem("Realtime Reflection Probes", QualitySettings.realtimeReflectionProbes.ToString(), "实时反射探针");
-                    DrawItem("Billboards Face Camera Position",
-                        QualitySettings.billboardsFaceCameraPosition.ToString(), "广告牌是否面向相机位置");
-#if UNITY_2017_1_OR_NEWER
-                    DrawItem("Resolution Scaling Fixed DPI Factor",
-                        QualitySettings.resolutionScalingFixedDPIFactor.ToString(), "分辨率缩放固定DPI因子");
-#endif
-#if UNITY_2018_2_OR_NEWER
-                    DrawItem("Texture Streaming Enabled", QualitySettings.streamingMipmapsActive.ToString(), "纹理流式加载是否启用");
-                    DrawItem("Texture Streaming Add All Cameras",
-                        QualitySettings.streamingMipmapsAddAllCameras.ToString(), "是否为所有相机启用纹理流式加载");
-                    DrawItem("Texture Streaming Memory Budget",
-                        QualitySettings.streamingMipmapsMemoryBudget.ToString(), "纹理流式加载内存预算（MB）");
-                    DrawItem("Texture Streaming Renderers Per Frame",
-                        QualitySettings.streamingMipmapsRenderersPerFrame.ToString(), "每帧处理的渲染器数量");
-                    DrawItem("Texture Streaming Max Level Reduction",
-                        QualitySettings.streamingMipmapsMaxLevelReduction.ToString(), "最大mip级别减少量");
-                    DrawItem("Texture Streaming Max File IO Requests",
-                        QualitySettings.streamingMipmapsMaxFileIORequests.ToString(), "最大文件IO请求数量");
-#endif
+                    DrawItem("Billboards Face Camera Position", QualitySettings.billboardsFaceCameraPosition.ToString(), "广告牌是否面向相机位置");
                 }
-                GUILayout.EndVertical();
+                EndPanel();
 
-                GUILayout.Label("<b>Shadows Information</b>");
-                GUILayout.BeginVertical("box");
+#if UNITY_2018_2_OR_NEWER
+                DrawSectionTitle("Texture Streaming");
+                BeginPanel();
                 {
+                    ResetRowIndex();
+                    DrawItem("Texture Streaming Enabled", QualitySettings.streamingMipmapsActive.ToString(), "纹理流式加载是否启用");
+                    DrawItem("Texture Streaming Add All Cameras", QualitySettings.streamingMipmapsAddAllCameras.ToString(), "是否为所有相机启用纹理流式加载");
+                    DrawItem("Texture Streaming Memory Budget", QualitySettings.streamingMipmapsMemoryBudget.ToString(), "纹理流式加载内存预算（MB）");
+                    DrawItem("Texture Streaming Renderers Per Frame", QualitySettings.streamingMipmapsRenderersPerFrame.ToString(), "每帧处理的渲染器数量");
+                    DrawItem("Texture Streaming Max Level Reduction", QualitySettings.streamingMipmapsMaxLevelReduction.ToString(), "最大mip级别减少量");
+                    DrawItem("Texture Streaming Max File IO Requests", QualitySettings.streamingMipmapsMaxFileIORequests.ToString(), "最大文件IO请求数量");
+                }
+                EndPanel();
+#endif
+
+                DrawSectionTitle("Shadows Information");
+                BeginPanel();
+                {
+                    ResetRowIndex();
 #if UNITY_2017_1_OR_NEWER
                     DrawItem("Shadowmask Mode", QualitySettings.shadowmaskMode.ToString(), "阴影遮罩模式");
 #endif
@@ -85,16 +91,17 @@ namespace DGame
 #endif
                     DrawItem("Shadow Projection", QualitySettings.shadowProjection.ToString(), "阴影投影方式");
                     DrawItem("Shadow Distance", QualitySettings.shadowDistance.ToString(), "阴影渲染距离");
-                    DrawItem("Shadow Near Plane Offset", QualitySettings.shadowNearPlaneOffset.ToString());
+                    DrawItem("Shadow Near Plane Offset", QualitySettings.shadowNearPlaneOffset.ToString(), "阴影近平面偏移");
                     DrawItem("Shadow Cascades", QualitySettings.shadowCascades.ToString(), "阴影级联数量");
                     DrawItem("Shadow Cascade 2 Split", QualitySettings.shadowCascade2Split.ToString(), "2级级联分割比例");
                     DrawItem("Shadow Cascade 4 Split", QualitySettings.shadowCascade4Split.ToString(), "4级级联分割比例");
                 }
-                GUILayout.EndVertical();
+                EndPanel();
 
-                GUILayout.Label("<b>Other Information</b>");
-                GUILayout.BeginVertical("box");
+                DrawSectionTitle("Other Information");
+                BeginPanel();
                 {
+                    ResetRowIndex();
 #if UNITY_2019_1_OR_NEWER
                     DrawItem("Skin Weights", QualitySettings.skinWeights.ToString(), "蒙皮权重数量");
 #endif
@@ -102,15 +109,13 @@ namespace DGame
                     DrawItem("LOD Bias", QualitySettings.lodBias.ToString(), "LOD偏差");
                     DrawItem("Maximum LOD Level", QualitySettings.maximumLODLevel.ToString(), "最大LOD级别");
                     DrawItem("Particle Raycast Budget", QualitySettings.particleRaycastBudget.ToString(), "粒子射线检测预算");
-                    DrawItem("Async Upload Time Slice",
-                        Utility.StringUtil.Format("{0} ms", QualitySettings.asyncUploadTimeSlice), "异步上传时间和缓冲区设置");
-                    DrawItem("Async Upload Buffer Size",
-                        Utility.StringUtil.Format("{0} MB", QualitySettings.asyncUploadBufferSize), "异步上传缓冲区大小（MB）");
+                    DrawItem("Async Upload Time Slice", Utility.StringUtil.Format("{0} ms", QualitySettings.asyncUploadTimeSlice), "异步上传时间片");
+                    DrawItem("Async Upload Buffer Size", Utility.StringUtil.Format("{0} MB", QualitySettings.asyncUploadBufferSize), "异步上传缓冲区大小（MB）");
 #if UNITY_2018_3_OR_NEWER
                     DrawItem("Async Upload Persistent Buffer", QualitySettings.asyncUploadPersistentBuffer.ToString(), "异步上传持久化缓冲区");
 #endif
                 }
-                GUILayout.EndVertical();
+                EndPanel();
             }
         }
     }

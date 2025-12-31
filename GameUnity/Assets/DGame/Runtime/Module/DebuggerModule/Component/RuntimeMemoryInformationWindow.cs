@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 #if UNITY_5_5_OR_NEWER
@@ -22,77 +22,124 @@ namespace DGame
             protected override void OnDrawScrollableWindow()
             {
                 string typeName = typeof(T).Name;
-                GUILayout.Label(Utility.StringUtil.Format("<b>{0} Runtime Memory Information</b>", typeName));
-                GUILayout.BeginVertical("box");
+
+                DrawSectionTitle(Utility.StringUtil.Format("{0} Runtime Memory", typeName));
+                BeginPanel();
                 {
+                    // 采样按钮
                     if (GUILayout.Button(Utility.StringUtil.Format("Take Sample for {0}", typeName),
-                            GUILayout.Height(30f)))
+                            DebuggerStyles.ButtonStyle, GUILayout.Height(DebuggerStyles.LargeButtonHeight)))
                     {
                         TakeSample();
                     }
 
+                    GUILayout.Space(8);
+
                     if (m_sampleTime <= DateTime.MinValue)
                     {
-                        GUILayout.Label(Utility.StringUtil.Format("<b>Please take sample for {0} first.</b>",
-                            typeName));
+                        DrawInfoMessage(Utility.StringUtil.Format("Click 'Take Sample' to analyze {0} memory...", typeName));
                     }
                     else
                     {
+                        // 摘要信息
+                        string summary;
                         if (m_duplicateSimpleCount > 0)
                         {
-                            GUILayout.Label(Utility.StringUtil.Format(
-                                "<b>{0} {1}s ({2}) obtained at {3:yyyy-MM-dd HH:mm:ss}, while {4} {1}s ({5}) might be duplicated.</b>",
+                            summary = Utility.StringUtil.Format(
+                                "{0} {1}s ({2}) sampled at {3:yyyy-MM-dd HH:mm:ss}\n{4} items ({5}) might be duplicated",
                                 m_samples.Count, typeName, GetByteLengthString(m_sampleSize),
                                 m_sampleTime.ToLocalTime(), m_duplicateSimpleCount,
-                                GetByteLengthString(m_duplicateSampleSize)));
+                                GetByteLengthString(m_duplicateSampleSize));
+
+                            GUILayout.Label(DebuggerStyles.ColorBoldText(summary, DebuggerStyles.WarningColor),
+                                DebuggerStyles.RichLabelStyle);
                         }
                         else
                         {
-                            GUILayout.Label(Utility.StringUtil.Format(
-                                "<b>{0} {1}s ({2}) obtained at {3:yyyy-MM-dd HH:mm:ss}.</b>", m_samples.Count, typeName,
-                                GetByteLengthString(m_sampleSize), m_sampleTime.ToLocalTime()));
+                            summary = Utility.StringUtil.Format(
+                                "{0} {1}s ({2}) sampled at {3:yyyy-MM-dd HH:mm:ss}",
+                                m_samples.Count, typeName, GetByteLengthString(m_sampleSize),
+                                m_sampleTime.ToLocalTime());
+
+                            GUILayout.Label(DebuggerStyles.ColorBoldText(summary, DebuggerStyles.PrimaryColor),
+                                DebuggerStyles.RichLabelStyle);
                         }
+
+                        GUILayout.Space(8);
 
                         if (m_samples.Count > 0)
                         {
-                            GUILayout.BeginHorizontal();
+                            // 表格头
+                            DrawTableHeader(
+                                (Utility.StringUtil.Format("{0} Name", typeName), 0),
+                                ("Type", 180f),
+                                ("Size", 100f)
+                            );
+
+                            // 数据行
+                            int count = 0;
+                            for (int i = 0; i < m_samples.Count; i++)
                             {
-                                GUILayout.Label(Utility.StringUtil.Format("<b>{0} Name</b>", typeName));
-                                GUILayout.Label("<b>Type</b>", GUILayout.Width(240f));
-                                GUILayout.Label("<b>Size</b>", GUILayout.Width(80f));
+                                if (m_samples[i].Highlight)
+                                {
+                                    // 高亮重复项
+                                    DrawTableRowHighlight(
+                                        (m_samples[i].Name, 0),
+                                        (m_samples[i].Type, 180f),
+                                        (GetByteLengthString(m_samples[i].Size), 100f)
+                                    );
+                                }
+                                else
+                                {
+                                    DrawTableRow(i % 2 == 1,
+                                        (m_samples[i].Name, 0),
+                                        (m_samples[i].Type, 180f),
+                                        (GetByteLengthString(m_samples[i].Size), 100f)
+                                    );
+                                }
+
+                                count++;
+                                if (count >= Constant.SHOW_SAMPLE_COUNT)
+                                {
+                                    break;
+                                }
                             }
-                            GUILayout.EndHorizontal();
-                        }
 
-                        int count = 0;
-
-                        for (int i = 0; i < m_samples.Count; i++)
-                        {
-                            GUILayout.BeginHorizontal();
+                            if (m_samples.Count > Constant.SHOW_SAMPLE_COUNT)
                             {
-                                GUILayout.Label(m_samples[i].Highlight
-                                    ? Utility.StringUtil.Format("<color=yellow>{0}</color>", m_samples[i].Name)
-                                    : m_samples[i].Name);
-                                GUILayout.Label(m_samples[i].Highlight
-                                        ? Utility.StringUtil.Format("<color=yellow>{0}</color>", m_samples[i].Type)
-                                        : m_samples[i].Type, GUILayout.Width(240f));
-                                GUILayout.Label(m_samples[i].Highlight
-                                        ? Utility.StringUtil.Format("<color=yellow>{0}</color>",
-                                            GetByteLengthString(m_samples[i].Size))
-                                        : GetByteLengthString(m_samples[i].Size), GUILayout.Width(80f));
-                            }
-                            GUILayout.EndHorizontal();
-
-                            count++;
-
-                            if (count >= Constant.SHOW_SAMPLE_COUNT)
-                            {
-                                break;
+                                GUILayout.Space(4);
+                                GUILayout.Label(
+                                    DebuggerStyles.ColorText(
+                                        Utility.StringUtil.Format("... and {0} more items",
+                                            m_samples.Count - Constant.SHOW_SAMPLE_COUNT),
+                                        DebuggerStyles.SecondaryTextColor),
+                                    DebuggerStyles.RichLabelStyle);
                             }
                         }
                     }
                 }
-                GUILayout.EndVertical();
+                EndPanel();
+            }
+
+            private void DrawTableRowHighlight(params (string value, float width)[] columns)
+            {
+                GUILayout.BeginHorizontal(DebuggerStyles.WarningBoxStyle);
+                {
+                    foreach (var (value, width) in columns)
+                    {
+                        if (width > 0)
+                        {
+                            GUILayout.Label(DebuggerStyles.ColorText(value, DebuggerStyles.WarningColor),
+                                DebuggerStyles.RichLabelStyle, GUILayout.Width(width));
+                        }
+                        else
+                        {
+                            GUILayout.Label(DebuggerStyles.ColorText(value, DebuggerStyles.WarningColor),
+                                DebuggerStyles.RichLabelStyle);
+                        }
+                    }
+                }
+                GUILayout.EndHorizontal();
             }
 
             private void TakeSample()

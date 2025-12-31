@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Profiling;
@@ -17,45 +17,51 @@ namespace DGame
 
             protected override void OnDrawScrollableWindow()
             {
-                GUILayout.Label("<b>Runtime Memory Summary</b>");
-                GUILayout.BeginVertical("box");
+                DrawSectionTitle("Runtime Memory Summary");
+                BeginPanel();
                 {
-                    if (GUILayout.Button("Take Sample", GUILayout.Height(30f)))
+                    // 采样按钮
+                    if (GUILayout.Button("Take Sample", DebuggerStyles.ButtonStyle, GUILayout.Height(DebuggerStyles.LargeButtonHeight)))
                     {
                         TakeSample();
                     }
 
+                    GUILayout.Space(8);
+
                     if (m_sampleTime <= DateTime.MinValue)
                     {
-                        GUILayout.Label("<b>Please take sample first.</b>");
+                        DrawInfoMessage("Click 'Take Sample' to analyze runtime memory...");
                     }
                     else
                     {
-                        GUILayout.Label(Utility.StringUtil.Format(
-                            "<b>{0} Objects ({1}) obtained at {2:yyyy-MM-dd HH:mm:ss}</b>", m_sampleCount,
-                            GetByteLengthString(m_sampleSize), m_sampleTime.ToLocalTime()));
+                        // 摘要信息
+                        string summary = Utility.StringUtil.Format("{0} Objects ({1}) sampled at {2:yyyy-MM-dd HH:mm:ss}",
+                            m_sampleCount, GetByteLengthString(m_sampleSize), m_sampleTime.ToLocalTime());
 
-                        GUILayout.BeginHorizontal();
-                        {
-                            GUILayout.Label("<b>Type</b>");
-                            GUILayout.Label("<b>Count</b>", GUILayout.Width(120f));
-                            GUILayout.Label("<b>Size</b>", GUILayout.Width(120f));
-                        }
-                        GUILayout.EndHorizontal();
+                        GUILayout.Label(DebuggerStyles.ColorBoldText(summary, DebuggerStyles.PrimaryColor),
+                            DebuggerStyles.RichLabelStyle);
 
+                        GUILayout.Space(8);
+
+                        // 表格头
+                        DrawTableHeader(
+                            ("Type", 0),
+                            ("Count", 100f),
+                            ("Size", 120f)
+                        );
+
+                        // 数据行
                         for (int i = 0; i < m_records.Count; i++)
                         {
-                            GUILayout.BeginHorizontal();
-                            {
-                                GUILayout.Label(m_records[i].Name);
-                                GUILayout.Label(m_records[i].Count.ToString(), GUILayout.Width(120f));
-                                GUILayout.Label(GetByteLengthString(m_records[i].Size), GUILayout.Width(120f));
-                            }
-                            GUILayout.EndHorizontal();
+                            DrawTableRow(i % 2 == 1,
+                                (m_records[i].Name, 0),
+                                (m_records[i].Count.ToString(), 100f),
+                                (GetByteLengthString(m_records[i].Size), 120f)
+                            );
                         }
                     }
                 }
-                GUILayout.EndVertical();
+                EndPanel();
             }
 
             private void TakeSample()

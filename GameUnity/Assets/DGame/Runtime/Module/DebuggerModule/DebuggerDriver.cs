@@ -13,7 +13,7 @@ namespace DGame
         /// <summary>
         /// 默认调试器漂浮框大小
         /// </summary>
-        internal static readonly Rect DefaultIconRect = new Rect(10f, 10f, 60f, 60f);
+        internal static readonly Rect DefaultIconRect = new Rect(10f, 10f, 120f, 56f);
 
         /// <summary>
         /// 默认调试器窗口大小
@@ -27,7 +27,8 @@ namespace DGame
 
         private static TextEditor m_textEditor;
         private IDebuggerModule m_debuggerModule;
-        private readonly Rect m_dragRect = new Rect(0f, 0f, float.MaxValue, 25f);
+        private readonly Rect m_dragRect = new Rect(0f, 0f, float.MaxValue, float.MaxValue);
+        private const float DragMargin = 15f; // 四边可拖动边距
         private Rect m_iconRect = DefaultIconRect;
         private Rect m_windowRect = DefaultWindowRect;
         private float m_windowScale = DefaultWindowScale;
@@ -182,17 +183,21 @@ namespace DGame
             {
                 return;
             }
+
+            DebuggerStyles.Initialize();
+
             GUISkin cachedGuiSkin = GUI.skin;
             Matrix4x4 cachedMatrix = GUI.matrix;
             GUI.skin = imageSettings.reporterScrollerSkin;
             GUI.matrix = Matrix4x4.Scale(new Vector3(m_windowScale, m_windowScale, 1f));
+
             if (m_showFullWindow)
             {
-                m_windowRect = GUILayout.Window(0, m_windowRect, DrawWindow, "<b>DEBUGGER</b>");
+                m_windowRect = GUILayout.Window(0, m_windowRect, DrawWindow, "", DebuggerStyles.PanelStyle);
             }
             else
             {
-                m_iconRect = GUILayout.Window(0, m_iconRect, DrawDebuggerWindowIcon, "<b>DEBUGGER</b>");
+                m_iconRect = GUILayout.Window(0, m_iconRect, DrawDebuggerWindowIcon, "", DebuggerStyles.PanelStyle);
             }
 
             GUI.matrix = cachedMatrix;
@@ -201,32 +206,41 @@ namespace DGame
 
         private void DrawDebuggerWindowIcon(int windowID)
         {
-            GUI.DragWindow(m_dragRect);
-            GUILayout.Space(5);
-            Color32 color = Color.white;
             m_consoleWindow.RefreshCount();
+
+            // 获取FPS颜色
+            Color32 fpsColor = DebuggerStyles.GetFpsColor(m_fpsCounter.CurrentFps);
+
+            // 获取日志状态颜色
+            Color32 statusColor = Color.white;
+            string statusIcon = "";
             if (m_consoleWindow.FatalCount > 0)
             {
-                color = m_consoleWindow.GetLogStringColor(LogType.Exception);
+                statusColor = m_consoleWindow.GetLogStringColor(LogType.Exception);
+                statusIcon = " [!]";
             }
             else if (m_consoleWindow.ErrorCount > 0)
             {
-                color = m_consoleWindow.GetLogStringColor(LogType.Error);
+                statusColor = m_consoleWindow.GetLogStringColor(LogType.Error);
+                statusIcon = " [E]";
             }
             else if (m_consoleWindow.WarningCount > 0)
             {
-                color = m_consoleWindow.GetLogStringColor(LogType.Warning);
-            }
-            else
-            {
-                color = m_consoleWindow.GetLogStringColor(LogType.Log);
+                statusColor = m_consoleWindow.GetLogStringColor(LogType.Warning);
+                statusIcon = " [W]";
             }
 
-            string title = Utility.StringUtil.Format(Constant.DEFAULT_DEBUGGER_WINDOW_FPS_STRING, color.r, color.g, color.b, color.a, m_fpsCounter.CurrentFps);
-            if (GUILayout.Button(title, GUILayout.Width(100f), GUILayout.Height(40f)))
+            // 构建显示文本
+            string fpsText = DebuggerStyles.ColorBoldText($"FPS: {m_fpsCounter.CurrentFps:F1}", fpsColor);
+            string statusText = statusIcon.Length > 0 ? DebuggerStyles.ColorText(statusIcon, statusColor) : "";
+
+            if (GUILayout.Button(fpsText + statusText, DebuggerStyles.FpsButtonStyle, GUILayout.ExpandWidth(true), GUILayout.Height(40f)))
             {
                 ShowFullWindow = true;
             }
+
+            // 拖动放在最后，让按钮优先处理点击事件
+            GUI.DragWindow(m_dragRect);
         }
 
         public void GetRecentLogs(List<LogNode> results)
@@ -245,6 +259,7 @@ namespace DGame
             {
                 return;
             }
+
             List<string> names = new List<string>();
             string[] debuggerWindowNames = debuggerWindowGroup.GetDebuggerWindowNames();
 
@@ -253,58 +268,101 @@ namespace DGame
                 names.Add(Utility.StringUtil.Format("<b>{0}</b>", debuggerWindowNames[i]));
             }
 
-            if (debuggerWindowGroup == m_debuggerModule.DebuggerWindowRoot)
+            bool isRoot = debuggerWindowGroup == m_debuggerModule.DebuggerWindowRoot;
+            if (isRoot)
             {
                 names.Add("<b>Close</b>");
             }
 
-            int toolbarIndex = 0;
-            if (names.Count > 8)
+            // 绘制选项卡
+            GUILayout.BeginVertical();
             {
-                int itemsPerRow = 6;
-                int colCnt = Mathf.CeilToInt((float)names.Count / itemsPerRow);
-                float buttonHeight = 30f; // 每个按钮高度
-                 toolbarIndex = GUILayout.SelectionGrid(
+                int toolbarIndex = 0;
+                int itemsPerRow = names.Count > 6 ? 5 : names.Count;
+                int rowCount = Mathf.CeilToInt((float)names.Count / itemsPerRow);
+
+                toolbarIndex = GUILayout.SelectionGrid(
                     debuggerWindowGroup.SelectedIndex,
                     names.ToArray(),
                     itemsPerRow,
-                    GUILayout.MaxWidth(Screen.width), // 总宽度
-                    GUILayout.Height(buttonHeight * colCnt) // 每个按钮高度
+                    DebuggerStyles.ToolbarButtonStyle,
+                    GUILayout.Height(DebuggerStyles.TabHeight * rowCount)
                 );
-            }
-            else
-            {
-                toolbarIndex = GUILayout.Toolbar(debuggerWindowGroup.SelectedIndex, names.ToArray(), GUILayout.Height(30f), GUILayout.MaxWidth(Screen.width));
-            }
-            if (toolbarIndex >= debuggerWindowGroup.DebuggerWindowCount)
-            {
-                ShowFullWindow = false;
-                return;
-            }
 
-            if (debuggerWindowGroup.SelectedWindow == null)
-            {
-                return;
-            }
+                if (toolbarIndex >= debuggerWindowGroup.DebuggerWindowCount)
+                {
+                    ShowFullWindow = false;
+                    GUILayout.EndVertical();
+                    return;
+                }
 
-            if (debuggerWindowGroup.SelectedIndex != toolbarIndex)
-            {
-                debuggerWindowGroup.SelectedWindow?.OnExit();
-                debuggerWindowGroup.SelectedIndex = toolbarIndex;
-                debuggerWindowGroup.SelectedWindow?.OnEnter();
-            }
+                if (debuggerWindowGroup.SelectedWindow == null)
+                {
+                    GUILayout.EndVertical();
+                    return;
+                }
 
-            if (debuggerWindowGroup.SelectedWindow is IDebuggerWindowGroup subDebuggerWindowGroup)
-            {
-                DrawDebuggerWindowGroup(subDebuggerWindowGroup);
+                if (debuggerWindowGroup.SelectedIndex != toolbarIndex)
+                {
+                    debuggerWindowGroup.SelectedWindow?.OnExit();
+                    debuggerWindowGroup.SelectedIndex = toolbarIndex;
+                    debuggerWindowGroup.SelectedWindow?.OnEnter();
+                }
+
+                // 绘制分隔线
+                GUILayout.Space(4);
+
+                // 绘制子窗口组或窗口内容
+                if (debuggerWindowGroup.SelectedWindow is IDebuggerWindowGroup subDebuggerWindowGroup)
+                {
+                    DrawDebuggerWindowGroup(subDebuggerWindowGroup);
+                }
+
+                debuggerWindowGroup.SelectedWindow?.OnDraw();
             }
-            debuggerWindowGroup.SelectedWindow?.OnDraw();
+            GUILayout.EndVertical();
         }
 
         private void DrawWindow(int windowID)
         {
+            // 外层边距（用于拖动）
+            GUILayout.BeginHorizontal();
+            {
+                GUILayout.Space(DragMargin); // 左边距
+
+                GUILayout.BeginVertical();
+                {
+                    GUILayout.Space(DragMargin); // 上边距
+
+                    // 窗口标题栏
+                    GUILayout.BeginHorizontal(DebuggerStyles.HeaderBoxStyle);
+                    {
+                        GUILayout.Label("<b>DEBUGGER</b>", DebuggerStyles.TitleStyle);
+                        GUILayout.FlexibleSpace();
+
+                        // 显示FPS
+                        Color32 fpsColor = DebuggerStyles.GetFpsColor(m_fpsCounter.CurrentFps);
+                        string fpsText = DebuggerStyles.ColorBoldText($"FPS: {m_fpsCounter.CurrentFps:F1}", fpsColor);
+                        GUILayout.Label(fpsText, DebuggerStyles.RichLabelStyle, GUILayout.Width(100f));
+                    }
+                    GUILayout.EndHorizontal();
+
+                    GUILayout.Space(4);
+                    DrawDebuggerWindowGroup(m_debuggerModule.DebuggerWindowRoot);
+
+                    GUILayout.Space(DragMargin); // 下边距
+                }
+                GUILayout.EndVertical();
+
+                GUILayout.Space(DragMargin); // 右边距
+            }
+            GUILayout.EndHorizontal();
+
+            // 绘制悬停提示
+            DebuggerStyles.DrawTooltip();
+
+            // 拖动放在最后，让按钮等控件优先处理点击事件
             GUI.DragWindow(m_dragRect);
-            DrawDebuggerWindowGroup(m_debuggerModule.DebuggerWindowRoot);
         }
 
         private void OnDestroy()

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 namespace DGame
 {
@@ -8,8 +8,8 @@ namespace DGame
         {
             protected override void OnDrawScrollableWindow()
             {
-                GUILayout.Label("<b>Screen Information</b>");
-                GUILayout.BeginVertical("box");
+                DrawSectionTitle("Display");
+                BeginPanel();
                 {
                     DrawItem("Current Resolution", GetResolutionString(Screen.currentResolution), "当前屏幕分辨率");
                     DrawItem("Screen Width",
@@ -22,6 +22,13 @@ namespace DGame
                             Utility.Converter.GetCentimetersFromPixels(Screen.height)), "屏幕高度（像素 + 英寸 + 厘米转换）");
                     DrawItem("Screen DPI", Screen.dpi.ToString("F2"), "屏幕每英寸像素密度");
                     DrawItem("Screen Orientation", Screen.orientation.ToString(), "屏幕方向（横屏、竖屏等）");
+                }
+                EndPanel();
+
+                DrawSectionTitle("Full Screen");
+                BeginPanel();
+                {
+                    ResetRowIndex();
                     DrawItem("Is Full Screen", Screen.fullScreen.ToString(), "是否全屏模式");
 #if UNITY_2018_1_OR_NEWER
                     DrawItem("Full Screen Mode", Screen.fullScreenMode.ToString(), "全屏模式类型");
@@ -30,21 +37,49 @@ namespace DGame
 #if UNITY_2019_2_OR_NEWER
                     DrawItem("Brightness", Screen.brightness.ToString("F2"), "屏幕亮度（0.0-1.0）");
 #endif
+                }
+                EndPanel();
+
+                DrawSectionTitle("Cursor");
+                BeginPanel();
+                {
+                    ResetRowIndex();
                     DrawItem("Cursor Visible", Cursor.visible.ToString(), "光标是否可见");
                     DrawItem("Cursor Lock State", Cursor.lockState.ToString(), "光标锁定状态");
+                }
+                EndPanel();
+
+                DrawSectionTitle("Auto Rotation");
+                BeginPanel();
+                {
+                    ResetRowIndex();
                     DrawItem("Auto Landscape Left", Screen.autorotateToLandscapeLeft.ToString(), "是否自动旋转到左横屏");
                     DrawItem("Auto Landscape Right", Screen.autorotateToLandscapeRight.ToString(), "是否自动旋转到右横屏");
                     DrawItem("Auto Portrait", Screen.autorotateToPortrait.ToString(), "是否自动旋转到竖屏");
                     DrawItem("Auto Portrait Upside Down", Screen.autorotateToPortraitUpsideDown.ToString(), "是否自动旋转到倒竖屏");
+                }
+                EndPanel();
+
+                DrawSectionTitle("Safe Area & Cutouts");
+                BeginPanel();
+                {
+                    ResetRowIndex();
 #if UNITY_2017_2_OR_NEWER && !UNITY_2017_2_0
                     DrawItem("Safe Area", Screen.safeArea.ToString(), "安全显示区域（避开刘海、圆角）");
 #endif
 #if UNITY_2019_2_OR_NEWER
                     DrawItem("Cutouts", GetCutoutsString(Screen.cutouts), "屏幕缺口信息（刘海屏、挖孔屏）");
 #endif
+                }
+                EndPanel();
+
+                DrawSectionTitle("Supported Resolutions");
+                BeginPanel();
+                {
+                    ResetRowIndex();
                     DrawItem("Support Resolutions", GetResolutionsString(Screen.resolutions), "设备支持的所有分辨率列表");
                 }
-                GUILayout.EndVertical();
+                EndPanel();
             }
 
             private string GetSleepTimeoutDescription(int sleepTimeout)
@@ -73,6 +108,11 @@ namespace DGame
 
             private string GetCutoutsString(Rect[] cutouts)
             {
+                if (cutouts == null || cutouts.Length == 0)
+                {
+                    return "None";
+                }
+
                 string[] cutoutStrings = new string[cutouts.Length];
                 for (int i = 0; i < cutouts.Length; i++)
                 {
@@ -83,6 +123,11 @@ namespace DGame
 
             private string GetResolutionsString(Resolution[] resolutions)
             {
+                if (resolutions == null || resolutions.Length == 0)
+                {
+                    return "None";
+                }
+
                 string[] resolutionStrings = new string[resolutions.Length];
                 for (int i = 0; i < resolutions.Length; i++)
                 {

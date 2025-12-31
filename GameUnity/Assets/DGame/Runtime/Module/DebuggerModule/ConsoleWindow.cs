@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
@@ -55,14 +55,19 @@ namespace DGame
             public Color ErrorColor { get => errorColor; set => errorColor = value; }
             public Color FatalColor { get => fatalColor; set => fatalColor = value; }
 
+            // 样式缓存
+            private GUIStyle _logToggleStyle;
+            private GUIStyle _filterToggleStyle;
+            private GUIStyle _detailsStyle;
+
             public void Initialize(params object[] args)
             {
                 Application.logMessageReceived += OnLogMessageReceive;
                 lockScroll = m_lastLockScroll = Utility.PlayerPrefsUtil.GetBool(Constant.CONSOLE_WINDOW_LOCK_SCROLL);
-                infoFilter = m_lastInfoFilter =  Utility.PlayerPrefsUtil.GetBool(Constant.CONSOLE_WINDOW_INFO_FILTER);
+                infoFilter = m_lastInfoFilter = Utility.PlayerPrefsUtil.GetBool(Constant.CONSOLE_WINDOW_INFO_FILTER);
                 warningFilter = m_lastWarningFilter = Utility.PlayerPrefsUtil.GetBool(Constant.CONSOLE_WINDOW_WARNING_FILTER);
-                fatalFilter = m_lastFatalFilter =  Utility.PlayerPrefsUtil.GetBool(Constant.CONSOLE_WINDOW_FATAL_FILTER);
-                errorFilter = m_lastFatalFilter =  Utility.PlayerPrefsUtil.GetBool(Constant.CONSOLE_WINDOW_ERROR_FILTER);
+                fatalFilter = m_lastFatalFilter = Utility.PlayerPrefsUtil.GetBool(Constant.CONSOLE_WINDOW_FATAL_FILTER);
+                errorFilter = m_lastFatalFilter = Utility.PlayerPrefsUtil.GetBool(Constant.CONSOLE_WINDOW_ERROR_FILTER);
             }
 
             private void OnLogMessageReceive(string logMessage, string stacktrace, LogType type)
@@ -124,71 +129,141 @@ namespace DGame
 
             public void OnDraw()
             {
+                DebuggerStyles.Initialize();
+                InitializeStyles();
                 RefreshCount();
 
-                GUILayout.BeginHorizontal();
+                // 工具栏区域
+                DrawToolbar();
+
+                GUILayout.Space(4);
+
+                // 日志列表区域
+                DrawLogList();
+
+                GUILayout.Space(4);
+
+                // 日志详情区域
+                DrawLogDetails();
+            }
+
+            private void InitializeStyles()
+            {
+                if (_logToggleStyle == null)
                 {
-                    if (GUILayout.Button("Clear All", GUILayout.Width(100f)))
+                    _logToggleStyle = new GUIStyle(GUI.skin.toggle)
+                    {
+                        fontSize = 11,
+                        alignment = TextAnchor.MiddleLeft,
+                        padding = new RectOffset(20, 4, 4, 4),
+                        margin = new RectOffset(0, 0, 1, 1),
+                        richText = true,
+                        wordWrap = false,
+                        fixedHeight = 22f
+                    };
+                    _logToggleStyle.normal.textColor = DebuggerStyles.TextColor;
+                    _logToggleStyle.onNormal.textColor = DebuggerStyles.TextColor;
+                }
+
+                if (_filterToggleStyle == null)
+                {
+                    _filterToggleStyle = new GUIStyle(GUI.skin.toggle)
+                    {
+                        fontSize = 11,
+                        fontStyle = FontStyle.Bold,
+                        alignment = TextAnchor.MiddleLeft,
+                        padding = new RectOffset(18, 6, 4, 4),
+                        margin = new RectOffset(4, 4, 2, 2),
+                        richText = true
+                    };
+                }
+
+                if (_detailsStyle == null)
+                {
+                    _detailsStyle = new GUIStyle(GUI.skin.label)
+                    {
+                        fontSize = 11,
+                        alignment = TextAnchor.UpperLeft,
+                        padding = new RectOffset(8, 8, 8, 8),
+                        richText = true,
+                        wordWrap = true
+                    };
+                    _detailsStyle.normal.textColor = DebuggerStyles.TextColor;
+                }
+            }
+
+            private void DrawToolbar()
+            {
+                GUILayout.BeginHorizontal(DebuggerStyles.HeaderBoxStyle);
+                {
+                    // 清除按钮
+                    if (GUILayout.Button("Clear", DebuggerStyles.ButtonStyle, GUILayout.Width(70f), GUILayout.Height(DebuggerStyles.SmallButtonHeight)))
                     {
                         Clear();
                     }
 
-                    if (needPrintLog && GUILayout.Button("Save Logs", GUILayout.Width(100f)))
+                    // 保存日志按钮
+                    if (needPrintLog)
                     {
-                        SaveLogsToDevice();
+                        if (GUILayout.Button("Save", DebuggerStyles.ButtonStyle, GUILayout.Width(60f), GUILayout.Height(DebuggerStyles.SmallButtonHeight)))
+                        {
+                            SaveLogsToDevice();
+                        }
                     }
 
-                    lockScroll = GUILayout.Toggle(lockScroll, "Lock Scroll", GUILayout.Width(90f));
+                    GUILayout.Space(8);
+
+                    // 锁定滚动开关
+                    lockScroll = GUILayout.Toggle(lockScroll, "Lock", _filterToggleStyle, GUILayout.Width(60f));
+
                     GUILayout.FlexibleSpace();
-                    infoFilter = GUILayout.Toggle(infoFilter, Utility.StringUtil.Format("Info ({0})", m_infoCount), GUILayout.Width(90f));
-                    warningFilter = GUILayout.Toggle(warningFilter, Utility.StringUtil.Format("Warning ({0})", m_warningCount), GUILayout.Width(90f));
-                    errorFilter = GUILayout.Toggle(errorFilter, Utility.StringUtil.Format("Error ({0})", m_errorCount), GUILayout.Width(90f));
-                    fatalFilter = GUILayout.Toggle(fatalFilter, Utility.StringUtil.Format("Fatal ({0})", m_fatalCount), GUILayout.Width(90f));
+
+                    // 过滤器
+                    DrawFilterToggle(ref infoFilter, "Info", m_infoCount, infoColor);
+                    DrawFilterToggle(ref warningFilter, "Warn", m_warningCount, warningColor);
+                    DrawFilterToggle(ref errorFilter, "Error", m_errorCount, errorColor);
+                    DrawFilterToggle(ref fatalFilter, "Fatal", m_fatalCount, fatalColor);
                 }
                 GUILayout.EndHorizontal();
-                GUILayout.BeginVertical("box");
+            }
+
+            private void DrawFilterToggle(ref bool filter, string label, int count, Color color)
+            {
+                Color oldColor = GUI.contentColor;
+                GUI.contentColor = color;
+                filter = GUILayout.Toggle(filter, $"{label}({count})", _filterToggleStyle, GUILayout.Width(80f));
+                GUI.contentColor = oldColor;
+            }
+
+            private void DrawLogList()
+            {
+                GUILayout.BeginVertical(DebuggerStyles.BoxStyle, GUILayout.ExpandHeight(true));
                 {
                     if (lockScroll)
                     {
                         m_logScrollPosition.y = float.MaxValue;
                     }
+
                     m_logScrollPosition = GUILayout.BeginScrollView(m_logScrollPosition);
                     {
                         bool selected = false;
+                        int index = 0;
 
                         foreach (var logNode in m_logNodeQueue)
                         {
-                            switch (logNode.LogType)
+                            // 过滤检查
+                            if (!ShouldShowLog(logNode.LogType))
                             {
-                                case LogType.Error:
-                                    if (!errorFilter)
-                                    {
-                                        continue;
-                                    }
-                                    break;
-
-                                case LogType.Warning:
-                                    if (!warningFilter)
-                                    {
-                                        continue;
-                                    }
-                                    break;
-
-                                case LogType.Log:
-                                    if (!infoFilter)
-                                    {
-                                        continue;
-                                    }
-                                    break;
-
-                                case LogType.Exception:
-                                    if (!fatalFilter)
-                                    {
-                                        continue;
-                                    }
-                                    break;
+                                continue;
                             }
-                            if (GUILayout.Toggle(m_selectedLogNode == logNode, GetLogString(logNode)))
+
+                            // 设置交替背景色
+                            bool isAlt = index % 2 == 1;
+                            bool isSelected = m_selectedLogNode == logNode;
+
+                            GUIStyle rowStyle = GetLogRowStyle(logNode.LogType, isAlt, isSelected);
+
+                            if (GUILayout.Toggle(isSelected, GetLogString(logNode), rowStyle))
                             {
                                 selected = true;
                                 if (m_selectedLogNode != logNode)
@@ -197,6 +272,8 @@ namespace DGame
                                     m_stackTraceScrollPosition = Vector2.zero;
                                 }
                             }
+
+                            index++;
                         }
 
                         if (!selected)
@@ -207,23 +284,100 @@ namespace DGame
                     GUILayout.EndScrollView();
                 }
                 GUILayout.EndVertical();
+            }
 
-                GUILayout.BeginVertical("box");
+            private bool ShouldShowLog(LogType logType)
+            {
+                switch (logType)
                 {
-                    m_stackTraceScrollPosition = GUILayout.BeginScrollView(m_stackTraceScrollPosition, GUILayout.Height(100f));
+                    case LogType.Error:
+                        return errorFilter;
+                    case LogType.Warning:
+                        return warningFilter;
+                    case LogType.Log:
+                        return infoFilter;
+                    case LogType.Exception:
+                        return fatalFilter;
+                    default:
+                        return true;
+                }
+            }
 
-                    if (m_selectedLogNode != null)
+            private GUIStyle GetLogRowStyle(LogType logType, bool isAlt, bool isSelected)
+            {
+                GUIStyle style = new GUIStyle(_logToggleStyle);
+
+                Color bgColor;
+                if (isSelected)
+                {
+                    bgColor = new Color(0.2f, 0.4f, 0.6f, 0.8f);
+                }
+                else if (isAlt)
+                {
+                    bgColor = new Color(0.22f, 0.22f, 0.26f, 0.6f);
+                }
+                else
+                {
+                    bgColor = new Color(0.18f, 0.18f, 0.22f, 0.6f);
+                }
+
+                Texture2D bgTexture = CreateTexture(2, 2, bgColor);
+                style.normal.background = bgTexture;
+                style.onNormal.background = CreateTexture(2, 2, new Color(0.2f, 0.4f, 0.6f, 0.8f));
+
+                return style;
+            }
+
+            private static Texture2D CreateTexture(int width, int height, Color color)
+            {
+                Texture2D texture = new Texture2D(width, height);
+                Color[] pixels = new Color[width * height];
+                for (int i = 0; i < pixels.Length; i++)
+                {
+                    pixels[i] = color;
+                }
+                texture.SetPixels(pixels);
+                texture.Apply();
+                return texture;
+            }
+
+            private void DrawLogDetails()
+            {
+                GUILayout.BeginVertical(DebuggerStyles.BoxStyle, GUILayout.Height(120f));
+                {
+                    // 详情标题
+                    GUILayout.BeginHorizontal(DebuggerStyles.HeaderBoxStyle);
                     {
-                        Color32 color = GetLogStringColor(m_selectedLogNode.LogType);
-
-                        if (GUILayout.Button(
-                                Utility.StringUtil.Format(
-                                    Constant.CONSOLE_WINDOW_LOG_DETAILS_MESSAGE_STRING, color.r, color.g,
-                                    color.b, color.a, m_selectedLogNode.LogMessage, m_selectedLogNode.StackTrace,
-                                    Environment.NewLine), "label"))
+                        GUILayout.Label("<b>Details</b>", DebuggerStyles.LabelStyle);
+                        GUILayout.FlexibleSpace();
+                        if (m_selectedLogNode != null)
                         {
-                            CopyToClipboard(Utility.StringUtil.Format("{0}{2}{2}{1}", m_selectedLogNode.LogMessage,
-                                m_selectedLogNode.StackTrace, Environment.NewLine));
+                            if (GUILayout.Button("Copy", DebuggerStyles.ButtonStyle, GUILayout.Width(60f), GUILayout.Height(DebuggerStyles.SmallButtonHeight)))
+                            {
+                                CopyToClipboard(Utility.StringUtil.Format("{0}{2}{2}{1}",
+                                    m_selectedLogNode.LogMessage, m_selectedLogNode.StackTrace, Environment.NewLine));
+                            }
+                        }
+                    }
+                    GUILayout.EndHorizontal();
+
+                    m_stackTraceScrollPosition = GUILayout.BeginScrollView(m_stackTraceScrollPosition);
+                    {
+                        if (m_selectedLogNode != null)
+                        {
+                            Color32 color = GetLogStringColor(m_selectedLogNode.LogType);
+                            string detailsText = Utility.StringUtil.Format(
+                                "<color=#{0:x2}{1:x2}{2:x2}{3:x2}><b>{4}</b></color>\n\n<color=#888888>{5}</color>",
+                                color.r, color.g, color.b, color.a,
+                                m_selectedLogNode.LogMessage,
+                                m_selectedLogNode.StackTrace);
+
+                            GUILayout.Label(detailsText, _detailsStyle);
+                        }
+                        else
+                        {
+                            GUILayout.Label("<color=#666666>Select a log entry to view details...</color>",
+                                DebuggerStyles.CenteredLabelStyle);
                         }
                     }
                     GUILayout.EndScrollView();
@@ -245,6 +399,7 @@ namespace DGame
             {
                 m_logNodeQueue.Clear();
                 m_logNodes.Clear();
+                m_selectedLogNode = null;
             }
 
             public void RefreshCount()
@@ -327,7 +482,46 @@ namespace DGame
             private string GetLogString(LogNode logNode)
             {
                 Color32 color = GetLogStringColor(logNode.LogType);
-                return Utility.StringUtil.Format(Constant.CONSOLE_WINDOW_LOG_SINGLE_MESSAGE_STRING, color.r, color.g, color.b, color.a, logNode.LogTime.ToLocalTime(), logNode.LogFrameCount, logNode.LogMessage);
+                string icon = GetLogIcon(logNode.LogType);
+                return Utility.StringUtil.Format("<color=#{0:x2}{1:x2}{2:x2}{3:x2}>{4} [{5:HH:mm:ss}] {6}</color>",
+                    color.r, color.g, color.b, color.a,
+                    icon,
+                    logNode.LogTime.ToLocalTime(),
+                    TruncateString(logNode.LogMessage, 100));
+            }
+
+            private string GetLogIcon(LogType logType)
+            {
+                switch (logType)
+                {
+                    case LogType.Log:
+                        return "[I]";
+                    case LogType.Warning:
+                        return "[W]";
+                    case LogType.Error:
+                        return "[E]";
+                    case LogType.Exception:
+                        return "[!]";
+                    default:
+                        return "[-]";
+                }
+            }
+
+            private string TruncateString(string str, int maxLength)
+            {
+                if (string.IsNullOrEmpty(str) || str.Length <= maxLength)
+                {
+                    return str;
+                }
+
+                // 截取第一行
+                int newlineIndex = str.IndexOf('\n');
+                if (newlineIndex >= 0 && newlineIndex < maxLength)
+                {
+                    return str.Substring(0, newlineIndex) + "...";
+                }
+
+                return str.Substring(0, maxLength) + "...";
             }
 
             internal Color32 GetLogStringColor(LogType logType)

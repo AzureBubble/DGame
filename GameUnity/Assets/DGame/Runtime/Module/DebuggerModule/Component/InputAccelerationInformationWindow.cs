@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 namespace DGame
 {
@@ -8,33 +8,69 @@ namespace DGame
         {
             protected override void OnDrawScrollableWindow()
             {
-                GUILayout.Label("<b>Input Acceleration Information</b>");
-                GUILayout.BeginVertical("box");
+                DrawSectionTitle("Current Acceleration");
+                BeginPanel();
                 {
-                    DrawItem("Acceleration", Input.acceleration.ToString(), "当前设备的瞬时加速度向量");
-                    DrawItem("Acceleration Event Count", Input.accelerationEventCount.ToString(), "当前帧中累积的加速度事件数量");
-                    DrawItem("Acceleration Events", GetAccelerationEventsString(Input.accelerationEvents),
-                        "当前帧内所有加速度事件的详细数组");
+                    Vector3 accel = Input.acceleration;
+                    DrawItem("Acceleration X", Utility.StringUtil.Format("{0:F4} g", accel.x), "X轴加速度");
+                    DrawItem("Acceleration Y", Utility.StringUtil.Format("{0:F4} g", accel.y), "Y轴加速度");
+                    DrawItem("Acceleration Z", Utility.StringUtil.Format("{0:F4} g", accel.z), "Z轴加速度");
+                    DrawItem("Magnitude", Utility.StringUtil.Format("{0:F4} g", accel.magnitude), "加速度向量长度");
                 }
-                GUILayout.EndVertical();
-            }
+                EndPanel();
 
-            private string GetAccelerationEventString(AccelerationEvent accelerationEvent)
-            {
-                return Utility.StringUtil.Format("{0}, {1}", accelerationEvent.acceleration,
-                    accelerationEvent.deltaTime);
-            }
-
-            private string GetAccelerationEventsString(AccelerationEvent[] accelerationEvents)
-            {
-                string[] accelerationEventStrings = new string[accelerationEvents.Length];
-
-                for (int i = 0; i < accelerationEvents.Length; i++)
+                DrawSectionTitle("Acceleration Events");
+                BeginPanel();
                 {
-                    accelerationEventStrings[i] = GetAccelerationEventString(accelerationEvents[i]);
-                }
+                    ResetRowIndex();
+                    int eventCount = Input.accelerationEventCount;
+                    Color32 countColor = eventCount > 0 ? DebuggerStyles.PrimaryColor : DebuggerStyles.TextColor;
+                    DrawItemColored("Event Count", eventCount.ToString(), countColor);
 
-                return string.Join("\n", accelerationEventStrings);
+                    if (eventCount > 0)
+                    {
+                        GUILayout.Space(8);
+
+                        // 表格头
+                        DrawTableHeader(
+                            ("#", 30f),
+                            ("Acceleration (X, Y, Z)", 0),
+                            ("Delta Time", 80f)
+                        );
+
+                        // 加速度事件数据行
+                        AccelerationEvent[] events = Input.accelerationEvents;
+                        int displayCount = Mathf.Min(events.Length, 10); // 最多显示10条
+
+                        for (int i = 0; i < displayCount; i++)
+                        {
+                            DrawTableRow(i % 2 == 1,
+                                (i.ToString(), 30f),
+                                (Utility.StringUtil.Format("({0:F3}, {1:F3}, {2:F3})",
+                                    events[i].acceleration.x,
+                                    events[i].acceleration.y,
+                                    events[i].acceleration.z), 0),
+                                (Utility.StringUtil.Format("{0:F4}s", events[i].deltaTime), 80f)
+                            );
+                        }
+
+                        if (events.Length > 10)
+                        {
+                            GUILayout.Space(4);
+                            GUILayout.Label(
+                                DebuggerStyles.ColorText(
+                                    Utility.StringUtil.Format("... and {0} more events", events.Length - 10),
+                                    DebuggerStyles.SecondaryTextColor),
+                                DebuggerStyles.RichLabelStyle);
+                        }
+                    }
+                    else
+                    {
+                        GUILayout.Space(4);
+                        DrawInfoMessage("No acceleration events this frame...");
+                    }
+                }
+                EndPanel();
             }
         }
     }

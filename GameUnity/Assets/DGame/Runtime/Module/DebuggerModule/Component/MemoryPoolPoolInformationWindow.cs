@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -17,17 +17,26 @@ namespace DGame
 
             protected override void OnDrawScrollableWindow()
             {
-                GUILayout.Label("<b>Memory Pool Information</b>");
-                GUILayout.BeginVertical("box");
+                DrawSectionTitle("Memory Pool Overview");
+                BeginPanel();
                 {
-                    // 强制检查开关
-                    DrawItem("Enable Strict Check", MemoryPool.EnableStrictCheck.ToString(), "强制检查开关");
-                    // 获取内存收集对象数量
-                    DrawItem("Memory Pool Count", MemoryPool.Capacity.ToString(), "内存收集对象数量");
-                }
-                GUILayout.EndVertical();
+                    Color32 checkColor = MemoryPool.EnableStrictCheck ? DebuggerStyles.WarningColor : DebuggerStyles.TextColor;
+                    DrawItemColored("Enable Strict Check", MemoryPool.EnableStrictCheck.ToString(), checkColor);
 
-                m_showFullClassName = GUILayout.Toggle(m_showFullClassName, "Show Full Class Name");
+                    int capacity = MemoryPool.Capacity;
+                    Color32 capacityColor = capacity > 0 ? DebuggerStyles.PrimaryColor : DebuggerStyles.TextColor;
+                    DrawItemColored("Total Memory Collectors", capacity.ToString(), capacityColor);
+                }
+                EndPanel();
+
+                DrawSectionTitle("Display Options");
+                BeginPanel();
+                {
+                    m_showFullClassName = GUILayout.Toggle(m_showFullClassName, "  Show Full Class Name", DebuggerStyles.ToggleStyle);
+                }
+                EndPanel();
+
+                // 收集并分组内存池信息
                 m_memoryPoolInfos.Clear();
                 var memoryPoolInfos = MemoryPool.GetAllMemoryCollectorInfos();
 
@@ -45,56 +54,90 @@ namespace DGame
                     results.Add(memoryPoolInfo);
                 }
 
-                foreach (KeyValuePair<string, List<MemoryCollectorInfo>> assemblyMemoryPoolInfo in m_memoryPoolInfos)
+                if (m_memoryPoolInfos.Count == 0)
                 {
-                    GUILayout.Label(Utility.StringUtil.Format("<b>Assembly: {0}</b>", assemblyMemoryPoolInfo.Key));
-                    GUILayout.BeginVertical("box");
+                    DrawSectionTitle("Memory Collectors");
+                    BeginPanel();
                     {
-                        GUILayout.BeginHorizontal();
-                        {
-                            GUILayout.Label(m_showFullClassName ? "<b>Full Class Name</b>" : "<b>Class Name</b>");
-                            GUILayout.Label("<b>Unused</b>", GUILayout.Width(60f));
-                            GUILayout.Label("<b>Using</b>", GUILayout.Width(60f));
-                            GUILayout.Label("<b>Spawn</b>", GUILayout.Width(60f));
-                            GUILayout.Label("<b>Recycle</b>", GUILayout.Width(60f));
-                            GUILayout.Label("<b>Add</b>", GUILayout.Width(60f));
-                            GUILayout.Label("<b>Remove</b>", GUILayout.Width(60f));
-                        }
-                        GUILayout.EndHorizontal();
-
-                        if (assemblyMemoryPoolInfo.Value.Count > 0)
-                        {
-                            assemblyMemoryPoolInfo.Value.Sort(m_showFullClassName
-                                ? m_fullClassNameComparer
-                                : m_normalClassNameComparer);
-
-                            foreach (var memoryPoolInfo in assemblyMemoryPoolInfo.Value)
-                            {
-                                DrawMemoryPoolInfo(memoryPoolInfo);
-                            }
-                        }
-                        else
-                        {
-                            GUILayout.Label("<i>Memory Pool is Empty ...</i>");
-                        }
+                        DrawInfoMessage("No memory collectors registered yet...");
                     }
-                    GUILayout.EndVertical();
+                    EndPanel();
+                }
+                else
+                {
+                    foreach (KeyValuePair<string, List<MemoryCollectorInfo>> assemblyMemoryPoolInfo in m_memoryPoolInfos)
+                    {
+                        DrawAssemblySection(assemblyMemoryPoolInfo.Key, assemblyMemoryPoolInfo.Value);
+                    }
                 }
             }
 
-            private void DrawMemoryPoolInfo(MemoryCollectorInfo memoryPoolInfo)
+            private void DrawAssemblySection(string assemblyName, List<MemoryCollectorInfo> infos)
             {
-                GUILayout.BeginHorizontal();
+                DrawSectionTitle(Utility.StringUtil.Format("Assembly: {0}", assemblyName));
+                BeginPanel();
                 {
-                    GUILayout.Label(m_showFullClassName ? memoryPoolInfo.ClassType.FullName : memoryPoolInfo.ClassType.Name);
-                    GUILayout.Label(memoryPoolInfo.UnusedCount.ToString(), GUILayout.Width(60f));
-                    GUILayout.Label(memoryPoolInfo.UsingCount.ToString(), GUILayout.Width(60f));
-                    GUILayout.Label(memoryPoolInfo.SpawnCount.ToString(), GUILayout.Width(60f));
-                    GUILayout.Label(memoryPoolInfo.RecycleCount.ToString(), GUILayout.Width(60f));
-                    GUILayout.Label(memoryPoolInfo.AddCount.ToString(), GUILayout.Width(60f));
-                    GUILayout.Label(memoryPoolInfo.RemoveCount.ToString(), GUILayout.Width(60f));
+                    if (infos.Count == 0)
+                    {
+                        DrawInfoMessage("No memory collectors in this assembly...");
+                    }
+                    else
+                    {
+                        infos.Sort(m_showFullClassName ? m_fullClassNameComparer : m_normalClassNameComparer);
+
+                        // 表格头
+                        DrawTableHeader(
+                            (m_showFullClassName ? "Full Class Name" : "Class Name", 0),
+                            ("Unused", 55f),
+                            ("Using", 50f),
+                            ("Spawn", 50f),
+                            ("Recycle", 55f),
+                            ("Add", 45f),
+                            ("Remove", 55f)
+                        );
+
+                        // 数据行
+                        for (int i = 0; i < infos.Count; i++)
+                        {
+                            DrawMemoryPoolRow(infos[i], i % 2 == 1);
+                        }
+                    }
                 }
-                GUILayout.EndHorizontal();
+                EndPanel();
+            }
+
+            private void DrawMemoryPoolRow(MemoryCollectorInfo info, bool isAlt)
+            {
+                string className = m_showFullClassName ? info.ClassType.FullName : info.ClassType.Name;
+                bool hasActivity = info.UsingCount > 0 || info.SpawnCount > 0;
+
+                if (hasActivity)
+                {
+                    // 高亮活跃的内存池
+                    GUILayout.BeginHorizontal(DebuggerStyles.PrimaryBoxStyle);
+                    {
+                        GUILayout.Label(DebuggerStyles.ColorText(className, DebuggerStyles.PrimaryColor), DebuggerStyles.RichLabelStyle);
+                        GUILayout.Label(DebuggerStyles.ColorText(info.UnusedCount.ToString(), DebuggerStyles.PrimaryColor), DebuggerStyles.RichLabelStyle, GUILayout.Width(55f));
+                        GUILayout.Label(DebuggerStyles.ColorText(info.UsingCount.ToString(), DebuggerStyles.PrimaryColor), DebuggerStyles.RichLabelStyle, GUILayout.Width(50f));
+                        GUILayout.Label(DebuggerStyles.ColorText(info.SpawnCount.ToString(), DebuggerStyles.PrimaryColor), DebuggerStyles.RichLabelStyle, GUILayout.Width(50f));
+                        GUILayout.Label(DebuggerStyles.ColorText(info.RecycleCount.ToString(), DebuggerStyles.PrimaryColor), DebuggerStyles.RichLabelStyle, GUILayout.Width(55f));
+                        GUILayout.Label(DebuggerStyles.ColorText(info.AddCount.ToString(), DebuggerStyles.PrimaryColor), DebuggerStyles.RichLabelStyle, GUILayout.Width(45f));
+                        GUILayout.Label(DebuggerStyles.ColorText(info.RemoveCount.ToString(), DebuggerStyles.PrimaryColor), DebuggerStyles.RichLabelStyle, GUILayout.Width(55f));
+                    }
+                    GUILayout.EndHorizontal();
+                }
+                else
+                {
+                    DrawTableRow(isAlt,
+                        (className, 0),
+                        (info.UnusedCount.ToString(), 55f),
+                        (info.UsingCount.ToString(), 50f),
+                        (info.SpawnCount.ToString(), 50f),
+                        (info.RecycleCount.ToString(), 55f),
+                        (info.AddCount.ToString(), 45f),
+                        (info.RemoveCount.ToString(), 55f)
+                    );
+                }
             }
 
             private static int NormalClassNameComparer(MemoryCollectorInfo a, MemoryCollectorInfo b)

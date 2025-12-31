@@ -1,43 +1,88 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 namespace DGame
 {
     public partial class DebuggerDriver
     {
-        private class InputGyroscopeInformationWindow: ScrollableDebuggerWindowBase
+        private class InputGyroscopeInformationWindow : ScrollableDebuggerWindowBase
         {
             protected override void OnDrawScrollableWindow()
             {
-                GUILayout.Label("<b>Input Gyroscope Information</b>");
-                GUILayout.BeginVertical("box");
+                DrawSectionTitle("Gyroscope Control");
+                BeginPanel();
                 {
                     GUILayout.BeginHorizontal();
                     {
                         // 启用陀螺仪传感器
-                        if (GUILayout.Button("Enable", GUILayout.Height(30f)))
+                        if (GUILayout.Button("Enable Gyroscope", DebuggerStyles.ButtonStyle,
+                            GUILayout.Height(DebuggerStyles.ButtonHeight)))
                         {
                             Input.gyro.enabled = true;
                         }
+
+                        GUILayout.Space(8);
+
                         // 禁用陀螺仪传感器
-                        if (GUILayout.Button("Disable", GUILayout.Height(30f)))
+                        if (GUILayout.Button("Disable Gyroscope", DebuggerStyles.ButtonStyle,
+                            GUILayout.Height(DebuggerStyles.ButtonHeight)))
                         {
                             Input.gyro.enabled = false;
                         }
                     }
                     GUILayout.EndHorizontal();
 
-                    DrawItem("Enabled", Input.gyro.enabled.ToString(), "陀螺仪是否已启用");
-                    if (Input.gyro.enabled)
-                    {
-                        DrawItem("Update Interval", Input.gyro.updateInterval.ToString(), "更新间隔（秒）");
-                        DrawItem("Attitude", Input.gyro.attitude.eulerAngles.ToString(), "设备姿态（欧拉角）");
-                        DrawItem("Gravity", Input.gyro.gravity.ToString(), "重力加速度向量");
-                        DrawItem("Rotation Rate", Input.gyro.rotationRate.ToString(), "旋转速率");
-                        DrawItem("Rotation Rate Unbiased", Input.gyro.rotationRateUnbiased.ToString(), "无偏旋转速率");
-                        DrawItem("User Acceleration", Input.gyro.userAcceleration.ToString(), "用户加速度");
-                    }
+                    GUILayout.Space(8);
+
+                    Color32 enabledColor = Input.gyro.enabled ? DebuggerStyles.SuccessColor : DebuggerStyles.SecondaryTextColor;
+                    DrawItemColored("Enabled", Input.gyro.enabled.ToString(), enabledColor);
+                    DrawItem("Update Interval", Utility.StringUtil.Format("{0:F4} s", Input.gyro.updateInterval), "更新间隔（秒）");
                 }
-                GUILayout.EndVertical();
+                EndPanel();
+
+                if (Input.gyro.enabled)
+                {
+                    DrawSectionTitle("Device Attitude");
+                    BeginPanel();
+                    {
+                        ResetRowIndex();
+                        Vector3 euler = Input.gyro.attitude.eulerAngles;
+                        DrawItem("Pitch (X)", Utility.StringUtil.Format("{0:F2}°", euler.x), "俯仰角");
+                        DrawItem("Yaw (Y)", Utility.StringUtil.Format("{0:F2}°", euler.y), "偏航角");
+                        DrawItem("Roll (Z)", Utility.StringUtil.Format("{0:F2}°", euler.z), "翻滚角");
+                    }
+                    EndPanel();
+
+                    DrawSectionTitle("Motion Data");
+                    BeginPanel();
+                    {
+                        ResetRowIndex();
+                        Vector3 gravity = Input.gyro.gravity;
+                        DrawItem("Gravity", Utility.StringUtil.Format("({0:F3}, {1:F3}, {2:F3})",
+                            gravity.x, gravity.y, gravity.z), "重力加速度向量");
+
+                        Vector3 rotRate = Input.gyro.rotationRate;
+                        DrawItem("Rotation Rate", Utility.StringUtil.Format("({0:F3}, {1:F3}, {2:F3})",
+                            rotRate.x, rotRate.y, rotRate.z), "旋转速率（rad/s）");
+
+                        Vector3 rotRateUnbiased = Input.gyro.rotationRateUnbiased;
+                        DrawItem("Rotation Rate Unbiased", Utility.StringUtil.Format("({0:F3}, {1:F3}, {2:F3})",
+                            rotRateUnbiased.x, rotRateUnbiased.y, rotRateUnbiased.z), "无偏旋转速率");
+
+                        Vector3 userAccel = Input.gyro.userAcceleration;
+                        DrawItem("User Acceleration", Utility.StringUtil.Format("({0:F3}, {1:F3}, {2:F3})",
+                            userAccel.x, userAccel.y, userAccel.z), "用户加速度");
+                    }
+                    EndPanel();
+                }
+                else
+                {
+                    DrawSectionTitle("Gyroscope Data");
+                    BeginPanel();
+                    {
+                        DrawInfoMessage("Enable gyroscope to view motion data...");
+                    }
+                    EndPanel();
+                }
             }
         }
     }

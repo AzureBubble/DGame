@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using UnityEngine;
 
 namespace DGame
@@ -20,66 +20,122 @@ namespace DGame
 
             protected override void OnDrawScrollableWindow()
             {
-                GUILayout.Label("<b>Object Pool Information</b>");
-                GUILayout.BeginVertical("box");
+                DrawSectionTitle("Object Pool Overview");
+                BeginPanel();
                 {
-                    DrawItem("Object Pool Count", m_objectPool.Count.ToString(), "对象池数量");
+                    int poolCount = m_objectPool.Count;
+                    Color32 countColor = poolCount > 0 ? DebuggerStyles.PrimaryColor : DebuggerStyles.TextColor;
+                    DrawItemColored("Total Object Pools", poolCount.ToString(), countColor);
                 }
-                GUILayout.EndVertical();
+                EndPanel();
+
                 BaseObjectPool[] objectPools = m_objectPool.GetAllObjectPools(true);
-                for (int i = 0; i < objectPools.Length; i++)
+
+                if (objectPools.Length == 0)
                 {
-                    DrawObjectPool(objectPools[i]);
+                    DrawSectionTitle("Pool Details");
+                    BeginPanel();
+                    {
+                        DrawInfoMessage("No object pools created yet...");
+                    }
+                    EndPanel();
+                }
+                else
+                {
+                    for (int i = 0; i < objectPools.Length; i++)
+                    {
+                        DrawObjectPool(objectPools[i], i);
+                    }
                 }
             }
 
-            private void DrawObjectPool(BaseObjectPool objectPool)
+            private void DrawObjectPool(BaseObjectPool objectPool, int index)
             {
-                GUILayout.Label(Utility.StringUtil.Format("<b>Object Pool: {0}</b>", objectPool.FullName));
-                GUILayout.BeginVertical("box");
+                DrawSectionTitle(Utility.StringUtil.Format("Pool #{0}: {1}", index + 1, objectPool.Name));
+                BeginPanel();
                 {
-                    DrawItem("Name", objectPool.Name, "对象池名称");
-                    DrawItem("Type", objectPool.ObjectType.FullName, "对象池类型");
-                    DrawItem("Auto Release Interval", objectPool.AutoReleaseInterval.ToString(CultureInfo.InvariantCulture), "自动释放可释放对象的间隔（秒）");
-                    DrawItem("Capacity", objectPool.Capacity.ToString(), "对象池容量");
-                    DrawItem("Used Count", objectPool.Count.ToString(), "对象的数量");
-                    DrawItem("Can Release Count", objectPool.CanReleaseCount.ToString(), "可以释放的对象数量 （回收到内存池）");
-                    DrawItem("Expire Time", objectPool.ExpireTime.ToString(CultureInfo.InvariantCulture), "对象池对象过期回收时间（秒）");
-                    DrawItem("Priority", objectPool.Priority.ToString(), "对象池优先级");
-                    PoolObjectInfo[] objectInfos = objectPool.GetAllPoolObjectInfos();
-                    GUILayout.BeginHorizontal();
-                    {
-                        GUILayout.Label("<b>Name</b>");
-                        GUILayout.Label("<b>Locked</b>", GUILayout.Width(60f));
-                        GUILayout.Label(objectPool.AllowMultiSpawn ? "<b>Count</b>" : "<b>In Use</b>", GUILayout.Width(60f));
-                        GUILayout.Label("<b>Flag</b>", GUILayout.Width(60f));
-                        GUILayout.Label("<b>Priority</b>", GUILayout.Width(60f));
-                        GUILayout.Label("<b>Last Use Time</b>", GUILayout.Width(120f));
-                    }
-                    GUILayout.EndHorizontal();
+                    ResetRowIndex();
+                    DrawItem("Full Name", objectPool.FullName, "对象池完整名称");
+                    DrawItem("Object Type", objectPool.ObjectType.Name, "对象池类型");
 
-                    if (objectInfos.Length > 0)
+                    GUILayout.Space(4);
+
+                    // 容量信息
+                    int usedCount = objectPool.Count;
+                    int capacity = objectPool.Capacity;
+                    float usagePercent = capacity > 0 ? (float)usedCount / capacity : 0f;
+                    Color32 usageColor = usagePercent > 0.8f ? DebuggerStyles.WarningColor :
+                                         usagePercent > 0.5f ? DebuggerStyles.PrimaryColor : DebuggerStyles.SuccessColor;
+
+                    DrawItemColored("Usage", Utility.StringUtil.Format("{0} / {1} ({2:P0})", usedCount, capacity, usagePercent), usageColor);
+                    DrawItem("Can Release Count", objectPool.CanReleaseCount.ToString(), "可以释放的对象数量");
+
+                    GUILayout.Space(4);
+
+                    DrawItem("Auto Release Interval", Utility.StringUtil.Format("{0} s", objectPool.AutoReleaseInterval.ToString(CultureInfo.InvariantCulture)), "自动释放间隔");
+                    DrawItem("Expire Time", Utility.StringUtil.Format("{0} s", objectPool.ExpireTime.ToString(CultureInfo.InvariantCulture)), "对象过期时间");
+                    DrawItem("Priority", objectPool.Priority.ToString(), "对象池优先级");
+                    DrawItem("Allow Multi Spawn", objectPool.AllowMultiSpawn.ToString(), "是否允许多次获取");
+                }
+                EndPanel();
+
+                // 对象详情表格
+                PoolObjectInfo[] objectInfos = objectPool.GetAllPoolObjectInfos();
+                if (objectInfos.Length > 0)
+                {
+                    BeginPanel();
                     {
+                        // 表格头
+                        DrawTableHeader(
+                            ("Name", 0),
+                            ("Locked", 50f),
+                            (objectPool.AllowMultiSpawn ? "Count" : "In Use", 50f),
+                            ("Flag", 40f),
+                            ("Priority", 55f),
+                            ("Last Use", 130f)
+                        );
+
+                        // 数据行
                         for (int i = 0; i < objectInfos.Length; i++)
                         {
-                            GUILayout.BeginHorizontal();
+                            string nameText = string.IsNullOrEmpty(objectInfos[i].Name) ? "(unnamed)" : objectInfos[i].Name;
+                            string statusText = objectPool.AllowMultiSpawn
+                                ? objectInfos[i].SpawnCount.ToString()
+                                : objectInfos[i].IsUsing.ToString();
+
+                            // 如果对象正在使用，用特殊颜色标记
+                            bool isActive = objectPool.AllowMultiSpawn
+                                ? objectInfos[i].SpawnCount > 0
+                                : objectInfos[i].IsUsing;
+
+                            if (isActive)
                             {
-                                GUILayout.Label(string.IsNullOrEmpty(objectInfos[i].Name) ? "<None>" : objectInfos[i].Name);
-                                GUILayout.Label(objectInfos[i].Locked.ToString(), GUILayout.Width(60f));
-                                GUILayout.Label(objectPool.AllowMultiSpawn ? objectInfos[i].SpawnCount.ToString() : objectInfos[i].IsUsing.ToString(), GUILayout.Width(60f));
-                                GUILayout.Label(objectInfos[i].CustomCanReleaseFlag.ToString(), GUILayout.Width(60f));
-                                GUILayout.Label(objectInfos[i].Priority.ToString(), GUILayout.Width(60f));
-                                GUILayout.Label(objectInfos[i].LastUseTime.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss"), GUILayout.Width(120f));
+                                GUILayout.BeginHorizontal(DebuggerStyles.PrimaryBoxStyle);
+                                {
+                                    GUILayout.Label(DebuggerStyles.ColorText(nameText, DebuggerStyles.PrimaryColor), DebuggerStyles.RichLabelStyle);
+                                    GUILayout.Label(DebuggerStyles.ColorText(objectInfos[i].Locked.ToString(), DebuggerStyles.PrimaryColor), DebuggerStyles.RichLabelStyle, GUILayout.Width(50f));
+                                    GUILayout.Label(DebuggerStyles.ColorText(statusText, DebuggerStyles.PrimaryColor), DebuggerStyles.RichLabelStyle, GUILayout.Width(50f));
+                                    GUILayout.Label(DebuggerStyles.ColorText(objectInfos[i].CustomCanReleaseFlag.ToString(), DebuggerStyles.PrimaryColor), DebuggerStyles.RichLabelStyle, GUILayout.Width(40f));
+                                    GUILayout.Label(DebuggerStyles.ColorText(objectInfos[i].Priority.ToString(), DebuggerStyles.PrimaryColor), DebuggerStyles.RichLabelStyle, GUILayout.Width(55f));
+                                    GUILayout.Label(DebuggerStyles.ColorText(objectInfos[i].LastUseTime.ToLocalTime().ToString("MM-dd HH:mm:ss"), DebuggerStyles.PrimaryColor), DebuggerStyles.RichLabelStyle, GUILayout.Width(130f));
+                                }
+                                GUILayout.EndHorizontal();
                             }
-                            GUILayout.EndHorizontal();
+                            else
+                            {
+                                DrawTableRow(i % 2 == 1,
+                                    (nameText, 0),
+                                    (objectInfos[i].Locked.ToString(), 50f),
+                                    (statusText, 50f),
+                                    (objectInfos[i].CustomCanReleaseFlag.ToString(), 40f),
+                                    (objectInfos[i].Priority.ToString(), 55f),
+                                    (objectInfos[i].LastUseTime.ToLocalTime().ToString("MM-dd HH:mm:ss"), 130f)
+                                );
+                            }
                         }
                     }
-                    else
-                    {
-                        GUILayout.Label("<i>Object Pool is Empty ...</i>");
-                    }
+                    EndPanel();
                 }
-                GUILayout.EndVertical();
             }
         }
     }

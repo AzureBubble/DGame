@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 namespace DGame
 {
@@ -14,6 +14,10 @@ namespace DGame
             private float m_lastWindowWidth;
             private float m_lastWindowHeight;
             private float m_lastWindowScale;
+
+            // 预设的缩放选项
+            private static readonly float[] ScalePresets = { 0.5f, 1.0f, 1.5f, 2.0f, 2.5f, 3.0f };
+            private static readonly string[] ScaleLabels = { "0.5x", "1.0x", "1.5x", "2.0x", "2.5x", "3.0x" };
 
             public override void Initialize(params object[] args)
             {
@@ -84,137 +88,162 @@ namespace DGame
 
             protected override void OnDrawScrollableWindow()
             {
-                GUILayout.Label("<b>Window Settings</b>");
-                GUILayout.BeginVertical("box");
+                // 窗口设置区段
+                DrawSectionTitle("Window Settings");
+                BeginPanel();
+                {
+                    // 位置说明
+                    DrawItem("Position", "Drag window title to move");
+
+                    // 当前尺寸显示
+                    DrawItem("Current Size", $"{m_debuggerDriver.WindowRect.width:F0} x {m_debuggerDriver.WindowRect.height:F0}");
+                    DrawItem("Current Scale", $"{m_debuggerDriver.WindowScale:F2}x");
+
+                    GUILayout.Space(8);
+
+                    // 宽度调整
+                    DrawSliderWithButtons("Width", ref m_debuggerDriver, true);
+
+                    GUILayout.Space(4);
+
+                    // 高度调整
+                    DrawSliderWithButtons("Height", ref m_debuggerDriver, false);
+
+                    GUILayout.Space(4);
+
+                    // 缩放调整
+                    DrawScaleSlider();
+                }
+                EndPanel();
+
+                GUILayout.Space(8);
+
+                // 缩放预设区段
+                DrawSectionTitle("Scale Presets");
+                BeginPanel();
                 {
                     GUILayout.BeginHorizontal();
                     {
-                        GUILayout.Label("Position:", GUILayout.Width(60f));
-                        GUILayout.Label("Drag window caption to move position.");
+                        for (int i = 0; i < ScalePresets.Length; i++)
+                        {
+                            bool isSelected = Mathf.Abs(m_debuggerDriver.WindowScale - ScalePresets[i]) < 0.01f;
+                            string label = isSelected ? $"<b>{ScaleLabels[i]}</b>" : ScaleLabels[i];
+
+                            if (GUILayout.Button(label, DebuggerStyles.ButtonStyle, GUILayout.Height(DebuggerStyles.LargeButtonHeight)))
+                            {
+                                m_debuggerDriver.WindowScale = ScalePresets[i];
+                            }
+                        }
                     }
                     GUILayout.EndHorizontal();
+                }
+                EndPanel();
 
+                GUILayout.Space(8);
+
+                // 重置区段
+                DrawSectionTitle("Reset");
+                BeginPanel();
+                {
                     GUILayout.BeginHorizontal();
                     {
-                        float width = m_debuggerDriver.WindowRect.width;
-                        GUILayout.Label("Width:", GUILayout.Width(60f));
-                        if (GUILayout.RepeatButton("-", GUILayout.Width(30f)))
+                        if (GUILayout.Button("Reset Layout", DebuggerStyles.ButtonStyle, GUILayout.Height(DebuggerStyles.ButtonHeight)))
                         {
-                            width--;
+                            m_debuggerDriver.ResetWindowLayout();
                         }
 
-                        width = GUILayout.HorizontalSlider(width, 100f, Screen.width - 20f);
-                        if (GUILayout.RepeatButton("+", GUILayout.Width(30f)))
+                        if (GUILayout.Button("Reset Scale Only", DebuggerStyles.ButtonStyle, GUILayout.Height(DebuggerStyles.ButtonHeight)))
                         {
-                            width++;
-                        }
-
-                        width = Mathf.Clamp(width, 100f, Screen.width - 20f);
-                        if (Mathf.Abs(width - m_debuggerDriver.WindowRect.width) > 0.01f)
-                        {
-                            m_debuggerDriver.WindowRect = new Rect(m_debuggerDriver.WindowRect.x, m_debuggerDriver.WindowRect.y, width,
-                                m_debuggerDriver.WindowRect.height);
+                            m_debuggerDriver.WindowScale = DefaultWindowScale;
                         }
                     }
                     GUILayout.EndHorizontal();
+                }
+                EndPanel();
+            }
 
-                    GUILayout.BeginHorizontal();
+            private void DrawSliderWithButtons(string label, ref DebuggerDriver driver, bool isWidth)
+            {
+                GUILayout.BeginHorizontal();
+                {
+                    GUILayout.Label(label + ":", DebuggerStyles.LabelStyle, GUILayout.Width(70f));
+
+                    float value = isWidth ? driver.WindowRect.width : driver.WindowRect.height;
+                    float maxValue = isWidth ? Screen.width - 20f : Screen.height - 20f;
+
+                    // 减少按钮
+                    if (GUILayout.RepeatButton("-", DebuggerStyles.ButtonStyle, GUILayout.Width(30f), GUILayout.Height(DebuggerStyles.SmallButtonHeight)))
                     {
-                        float height = m_debuggerDriver.WindowRect.height;
-                        GUILayout.Label("Height:", GUILayout.Width(60f));
-                        if (GUILayout.RepeatButton("-", GUILayout.Width(30f)))
-                        {
-                            height--;
-                        }
+                        value -= 5f;
+                    }
 
-                        height = GUILayout.HorizontalSlider(height, 100f, Screen.height - 20f);
-                        if (GUILayout.RepeatButton("+", GUILayout.Width(30f)))
-                        {
-                            height++;
-                        }
+                    // 滑块
+                    value = GUILayout.HorizontalSlider(value, 100f, maxValue, GUILayout.Height(20f));
 
-                        height = Mathf.Clamp(height, 100f, Screen.height - 20f);
-                        if (Mathf.Abs(height - m_debuggerDriver.WindowRect.height) > 0.01f)
+                    // 增加按钮
+                    if (GUILayout.RepeatButton("+", DebuggerStyles.ButtonStyle, GUILayout.Width(30f), GUILayout.Height(DebuggerStyles.SmallButtonHeight)))
+                    {
+                        value += 5f;
+                    }
+
+                    // 数值显示
+                    GUILayout.Label($"{value:F0}", DebuggerStyles.ValueStyle, GUILayout.Width(50f));
+
+                    value = Mathf.Clamp(value, 100f, maxValue);
+
+                    // 应用变更
+                    if (isWidth)
+                    {
+                        if (Mathf.Abs(value - driver.WindowRect.width) > 0.01f)
                         {
-                            m_debuggerDriver.WindowRect = new Rect(m_debuggerDriver.WindowRect.x, m_debuggerDriver.WindowRect.y,
-                                m_debuggerDriver.WindowRect.width, height);
+                            driver.WindowRect = new Rect(driver.WindowRect.x, driver.WindowRect.y, value, driver.WindowRect.height);
                         }
                     }
-                    GUILayout.EndHorizontal();
-
-                    GUILayout.BeginHorizontal();
+                    else
                     {
-                        float scale = m_debuggerDriver.WindowScale;
-                        GUILayout.Label("Scale:", GUILayout.Width(60f));
-                        if (GUILayout.RepeatButton("-", GUILayout.Width(30f)))
+                        if (Mathf.Abs(value - driver.WindowRect.height) > 0.01f)
                         {
-                            scale -= 0.01f;
+                            driver.WindowRect = new Rect(driver.WindowRect.x, driver.WindowRect.y, driver.WindowRect.width, value);
                         }
-
-                        scale = GUILayout.HorizontalSlider(scale, 0.5f, 4f);
-                        if (GUILayout.RepeatButton("+", GUILayout.Width(30f)))
-                        {
-                            scale += 0.01f;
-                        }
-
-                        scale = Mathf.Clamp(scale, 0.5f, 4f);
-                        if (Mathf.Abs(scale - m_debuggerDriver.WindowScale) > 0.01f)
-                        {
-                            m_debuggerDriver.WindowScale = scale;
-                        }
-                    }
-                    GUILayout.EndHorizontal();
-
-                    GUILayout.BeginHorizontal();
-                    {
-                        if (GUILayout.Button("0.5x", GUILayout.Height(60f)))
-                        {
-                            m_debuggerDriver.WindowScale = 0.5f;
-                        }
-
-                        if (GUILayout.Button("1.0x", GUILayout.Height(60f)))
-                        {
-                            m_debuggerDriver.WindowScale = 1f;
-                        }
-
-                        if (GUILayout.Button("1.5x", GUILayout.Height(60f)))
-                        {
-                            m_debuggerDriver.WindowScale = 1.5f;
-                        }
-
-                        if (GUILayout.Button("2.0x", GUILayout.Height(60f)))
-                        {
-                            m_debuggerDriver.WindowScale = 2f;
-                        }
-
-                        if (GUILayout.Button("2.5x", GUILayout.Height(60f)))
-                        {
-                            m_debuggerDriver.WindowScale = 2.5f;
-                        }
-
-                        if (GUILayout.Button("3.0x", GUILayout.Height(60f)))
-                        {
-                            m_debuggerDriver.WindowScale = 3f;
-                        }
-
-                        if (GUILayout.Button("3.5x", GUILayout.Height(60f)))
-                        {
-                            m_debuggerDriver.WindowScale = 3.5f;
-                        }
-
-                        if (GUILayout.Button("4.0x", GUILayout.Height(60f)))
-                        {
-                            m_debuggerDriver.WindowScale = 4f;
-                        }
-                    }
-                    GUILayout.EndHorizontal();
-
-                    if (GUILayout.Button("Reset Layout", GUILayout.Height(30f)))
-                    {
-                        m_debuggerDriver.ResetWindowLayout();
                     }
                 }
-                GUILayout.EndVertical();
+                GUILayout.EndHorizontal();
+            }
+
+            private void DrawScaleSlider()
+            {
+                GUILayout.BeginHorizontal();
+                {
+                    GUILayout.Label("Scale:", DebuggerStyles.LabelStyle, GUILayout.Width(70f));
+
+                    float scale = m_debuggerDriver.WindowScale;
+
+                    // 减少按钮
+                    if (GUILayout.RepeatButton("-", DebuggerStyles.ButtonStyle, GUILayout.Width(30f), GUILayout.Height(DebuggerStyles.SmallButtonHeight)))
+                    {
+                        scale -= 0.05f;
+                    }
+
+                    // 滑块
+                    scale = GUILayout.HorizontalSlider(scale, 0.5f, 4f, GUILayout.Height(20f));
+
+                    // 增加按钮
+                    if (GUILayout.RepeatButton("+", DebuggerStyles.ButtonStyle, GUILayout.Width(30f), GUILayout.Height(DebuggerStyles.SmallButtonHeight)))
+                    {
+                        scale += 0.05f;
+                    }
+
+                    // 数值显示
+                    GUILayout.Label($"{scale:F2}x", DebuggerStyles.ValueStyle, GUILayout.Width(50f));
+
+                    scale = Mathf.Clamp(scale, 0.5f, 4f);
+
+                    if (Mathf.Abs(scale - m_debuggerDriver.WindowScale) > 0.01f)
+                    {
+                        m_debuggerDriver.WindowScale = scale;
+                    }
+                }
+                GUILayout.EndHorizontal();
             }
 
             public override void OnExit()

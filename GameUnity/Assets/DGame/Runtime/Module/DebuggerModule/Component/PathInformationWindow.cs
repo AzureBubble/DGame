@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 namespace DGame
@@ -9,19 +9,39 @@ namespace DGame
         {
             protected override void OnDrawScrollableWindow()
             {
-                GUILayout.Label("<b>Path Information</b>");
-                GUILayout.BeginVertical("box");
+                DrawSectionTitle("Application Paths");
+                BeginPanel();
                 {
-                    DrawItem("Current Directory", Utility.PathUtil.GetRegularPath(Environment.CurrentDirectory), "当前工作目录");
-                    DrawItem("Data Path", Utility.PathUtil.GetRegularPath(Application.dataPath), "数据资源路径");
-                    DrawItem("Persistent Data Path", Utility.PathUtil.GetRegularPath(Application.persistentDataPath), "持久化数据路径");
-                    DrawItem("Streaming Assets Path", Utility.PathUtil.GetRegularPath(Application.streamingAssetsPath), "流式资源路径");
+                    DrawItem("Data Path", Utility.PathUtil.GetRegularPath(Application.dataPath), "数据资源路径（只读）");
+                    DrawItem("Persistent Data Path", Utility.PathUtil.GetRegularPath(Application.persistentDataPath), "持久化数据路径（可读写）");
+                    DrawItem("Streaming Assets Path", Utility.PathUtil.GetRegularPath(Application.streamingAssetsPath), "流式资源路径（只读）");
                     DrawItem("Temporary Cache Path", Utility.PathUtil.GetRegularPath(Application.temporaryCachePath), "临时缓存路径");
+                }
+                EndPanel();
+
+                DrawSectionTitle("System Paths");
+                BeginPanel();
+                {
+                    ResetRowIndex();
+                    DrawItem("Current Directory", Utility.PathUtil.GetRegularPath(Environment.CurrentDirectory), "当前工作目录");
 #if UNITY_2018_3_OR_NEWER
-                    DrawItem("Console Log Path", Utility.PathUtil.GetRegularPath(Application.consoleLogPath), "控制台日志文件路径");
+                    string logPath = Application.consoleLogPath;
+                    DrawItem("Console Log Path", string.IsNullOrEmpty(logPath) ? "(not available)" : Utility.PathUtil.GetRegularPath(logPath), "控制台日志文件路径");
 #endif
                 }
-                GUILayout.EndVertical();
+                EndPanel();
+
+                DrawSectionTitle("Path Notes");
+                BeginPanel();
+                {
+                    GUILayout.Label(DebuggerStyles.ColorText(
+                        "Data Path: Contains read-only application resources.\n" +
+                        "Persistent Path: For user data that persists between sessions.\n" +
+                        "Streaming Assets: Raw files bundled with the application.\n" +
+                        "Temporary Cache: For temporary files that can be cleared.",
+                        DebuggerStyles.SecondaryTextColor), DebuggerStyles.RichLabelStyle);
+                }
+                EndPanel();
             }
         }
     }

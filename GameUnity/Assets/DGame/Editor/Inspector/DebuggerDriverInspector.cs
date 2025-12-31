@@ -304,7 +304,7 @@ namespace DGame
                     EditorGUILayout.Space(5);
 
                     // 性能分析
-                    EditorGUILayout.LabelField("⚡ 性能分析", EditorStyles.boldLabel);
+                    EditorGUILayout.LabelField("性能分析", EditorStyles.boldLabel);
                     EditorGUILayout.HelpBox("性能分析模块提供:\n• CPU使用率监控\n• GPU性能统计\n• 渲染批次分析", MessageType.Info);
 
                     EditorGUILayout.Space(3);

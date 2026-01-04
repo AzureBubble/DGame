@@ -11,17 +11,56 @@ namespace DGame
         public virtual void OnCreate(IFsm<T> fsm)
         {
             m_fsm = fsm;
+            AddAnimationClip(Wrapper);
         }
 
-        public abstract void OnEnter();
+        public virtual void OnEnter()
+        {
+            PlayAnimation();
+        }
 
-        public abstract void OnUpdate(float elapseSeconds, float realElapseSeconds);
+        public virtual void OnUpdate(float elapseSeconds, float realElapseSeconds) { }
 
-        public abstract void OnFixedUpdate();
+        public virtual void OnFixedUpdate() { }
 
-        public abstract void OnExit();
+        public virtual void OnExit() { }
 
-        public abstract void OnDestroy();
+        public virtual void OnDestroy() { }
+
+        #region 动画相关
+
+        /// <summary>
+        /// 播放动画
+        /// </summary>
+        /// <param name="animationName">动画名称</param>
+        /// <param name="fadeDuration">过渡时间</param>
+        protected void PlayAnimation(string animationName, float fadeDuration = 0.25f)
+        {
+            m_fsm?.PlayAnimation(animationName, fadeDuration);
+        }
+
+        /// <summary>
+        /// 播放动画
+        /// </summary>
+        protected void PlayAnimation()
+        {
+            if (Wrapper == null || Wrapper.Clip == null || string.IsNullOrEmpty(Wrapper.Clip.name))
+            {
+                return;
+            }
+            PlayAnimation(Wrapper.Clip.name, Wrapper.FadeDuration);
+        }
+
+        /// <summary>
+        /// 添加动画片段
+        /// </summary>
+        /// <param name="wrapper">动画片段</param>
+        protected void AddAnimationClip(AnimationWrapper wrapper)
+        {
+            m_fsm?.AddAnimationClip(wrapper);
+        }
+
+        #endregion
 
         #region 切换状态
 
@@ -52,7 +91,7 @@ namespace DGame
         /// </summary>
         /// <param name="name">状态机数据名称</param>
         /// <returns></returns>
-        bool ContainsShareData(string name)
+        protected bool ContainsShareData(string name)
         {
             return m_fsm.ContainsShareData(name);
         }
@@ -63,7 +102,7 @@ namespace DGame
         /// <param name="name"></param>
         /// <typeparam name="TData"></typeparam>
         /// <returns></returns>
-        TData GetShareData<TData>(string name)
+        protected TData GetShareData<TData>(string name)
         {
             return m_fsm.GetShareData<TData>(name);
         }
@@ -75,7 +114,7 @@ namespace DGame
         /// <param name="data"></param>
         /// <typeparam name="TData"></typeparam>
         /// <returns></returns>
-        bool TryGetShareData<TData>(string name, out TData data)
+        protected bool TryGetShareData<TData>(string name, out TData data)
         {
             return m_fsm.TryGetShareData<TData>(name, out data);
         }
@@ -86,7 +125,7 @@ namespace DGame
         /// <param name="name">数据名称</param>
         /// <param name="data">数据</param>
         /// <typeparam name="TData">数据类型</typeparam>
-        void AddShareData<TData>(string name, TData data)
+        protected void AddShareData<TData>(string name, TData data)
         {
             m_fsm.AddShareData(name, data);
         }
@@ -97,7 +136,7 @@ namespace DGame
         /// <param name="name">数据名称</param>
         /// <param name="data">数据</param>
         /// <typeparam name="TData">数据类型</typeparam>
-        void UpdateShareData<TData>(string name, TData data)
+        protected void UpdateShareData<TData>(string name, TData data)
         {
             m_fsm.UpdateShareData(name, data);
         }
@@ -107,7 +146,7 @@ namespace DGame
         /// </summary>
         /// <param name="name">数据名称</param>
         /// <returns></returns>
-        bool RemoveShareData(string name)
+        protected bool RemoveShareData(string name)
         {
             return m_fsm.RemoveShareData(name);
         }
@@ -115,7 +154,7 @@ namespace DGame
         /// <summary>
         /// 清空数据
         /// </summary>
-        void ClearShareData()
+        protected void ClearShareData()
         {
             m_fsm.ClearShareData();
         }

@@ -203,6 +203,11 @@ namespace DGame
                 throw new DGameException("有限状态机持有对象无效");
             }
 
+            if (animator == null)
+            {
+                throw new DGameException("animator对象无效");
+            }
+
             if (states == null || states.Count <= 0)
             {
                 throw new DGameException("有限状态机状态数组无效");
@@ -315,6 +320,11 @@ namespace DGame
             if (owner == null)
             {
                 throw new DGameException("有限状态机持有对象无效");
+            }
+
+            if (animator == null)
+            {
+                throw new DGameException("animator对象无效");
             }
 
             if (states == null || states.Count <= 0)
@@ -487,7 +497,7 @@ namespace DGame
         {
             if (states == null)
             {
-                throw new DGameException("传入参数无效");
+                states = new List<IFsmState<T>>();
             }
 
             states.Clear();
@@ -504,6 +514,11 @@ namespace DGame
                 throw new DGameException("动画控制器无效");
             }
 
+            if (animations == null || animations.Length <= 0)
+            {
+                return;
+            }
+
             for (int i = 0; i < animations.Length; i++)
             {
                 var animation = animations[i];
@@ -518,11 +533,32 @@ namespace DGame
                 throw new DGameException("动画控制器无效");
             }
 
+            if (animations == null || animations.Count <= 0)
+            {
+                return;
+            }
+
             for (int i = 0; i < animations.Count; i++)
             {
                 var animation = animations[i];
                 m_animPlayable.AddAnimationClip(animation.Clip.name, animation.Clip, animation.Layer);
             }
+        }
+
+        public void AddAnimationClip(AnimationWrapper animation)
+        {
+            if (m_animPlayable == null)
+            {
+                throw new DGameException("动画控制器无效");
+            }
+
+            if (animation == null || animation.Clip == null)
+            {
+                DLogger.Warning("动画片段无效");
+                return;
+            }
+
+            m_animPlayable.AddAnimationClip(animation.Clip.name, animation.Clip, animation.Layer);
         }
 
         #region 黑板共享数据

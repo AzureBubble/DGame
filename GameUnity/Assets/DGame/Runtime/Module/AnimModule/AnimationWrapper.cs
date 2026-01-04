@@ -9,5 +9,6 @@ namespace DGame
         public int Layer;
         public WrapMode WrapMode;
         public AnimationClip Clip;
+        public float FadeDuration = 0.25f;
     }
 }

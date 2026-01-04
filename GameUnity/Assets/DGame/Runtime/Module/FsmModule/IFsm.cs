@@ -115,6 +115,10 @@ namespace DGame
 
         void AddAnimationClip(List<AnimationWrapper> animations);
 
+        void AddAnimationClip(AnimationWrapper animation);
+
+        void PlayAnimation(string animationName, float fadeDuration = 0.25f);
+
         #region 状态机共享数据
 
         /// <summary>

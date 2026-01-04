@@ -112,26 +112,30 @@ namespace DGame
         public IAnimPlayable CreateAnimPlayable(Animator animator, List<AnimationWrapper> animations)
         {
             var animPlayable = AnimPlayable.Create(animator);
-
+            if (!m_animPlayables.TryAdd(animPlayable.Name, animPlayable))
+            {
+                throw new DGameException($"已存在同名的动画图: {animPlayable.Name}");
+            }
             for (int i = 0; i < animations.Count; i++)
             {
                 var animation = animations[i];
                 animPlayable.AddAnimationClip(animation.Clip.name, animation.Clip, animation.Layer);
             }
-            m_animPlayables.Add(animPlayable.Name, animPlayable);
             return animPlayable;
         }
 
         public IAnimPlayable CreateAnimPlayable(Animator animator, params AnimationWrapper[] animations)
         {
             var animPlayable = AnimPlayable.Create(animator);
-
+            if (!m_animPlayables.TryAdd(animPlayable.Name, animPlayable))
+            {
+                throw new DGameException($"已存在同名的动画图: {animPlayable.Name}");
+            }
             for (int i = 0; i < animations.Length; i++)
             {
                 var animation = animations[i];
                 animPlayable.AddAnimationClip(animation.Clip.name, animation.Clip, animation.Layer);
             }
-            m_animPlayables.Add(animPlayable.Name, animPlayable);
             return animPlayable;
         }
 

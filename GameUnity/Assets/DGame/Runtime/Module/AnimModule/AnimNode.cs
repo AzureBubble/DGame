@@ -87,7 +87,7 @@ namespace DGame
         {
             if (m_isFading)
             {
-                Weight = Mathf.MoveTowards(Weight, m_fadeWeight, elapsedSeconds / m_fadeSpeed);
+                Weight = Mathf.MoveTowards(Weight, m_fadeWeight, elapsedSeconds * m_fadeSpeed); // 原本是 / 改成了 * 有问题再看
 
                 if (Mathf.Approximately(Weight, m_fadeWeight))
                 {

@@ -511,7 +511,8 @@ namespace DGame
         {
             if (m_animPlayable == null)
             {
-                throw new DGameException("动画控制器无效");
+                return;
+                // throw new DGameException("动画控制器无效");
             }
 
             if (animations == null || animations.Length <= 0)
@@ -530,7 +531,8 @@ namespace DGame
         {
             if (m_animPlayable == null)
             {
-                throw new DGameException("动画控制器无效");
+                return;
+                // throw new DGameException("动画控制器无效");
             }
 
             if (animations == null || animations.Count <= 0)
@@ -549,12 +551,13 @@ namespace DGame
         {
             if (m_animPlayable == null)
             {
-                throw new DGameException("动画控制器无效");
+                return;
+                // throw new DGameException("动画控制器无效");
             }
 
             if (animation == null || animation.Clip == null)
             {
-                DLogger.Warning("动画片段无效");
+                // DLogger.Warning("动画片段无效");
                 return;
             }
 

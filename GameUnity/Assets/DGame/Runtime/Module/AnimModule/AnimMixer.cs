@@ -71,7 +71,7 @@ namespace DGame
             for (int i = 0; i < m_animClips.Count; i++)
             {
                 var animClip = m_animClips[i];
-                if (animClip != null)
+                if (animClip != null && animClip.IsConnected)
                 {
                     animClip.Disconnect();
                     m_animClips[i] = null;
@@ -163,6 +163,11 @@ namespace DGame
             if (animClip == null)
             {
                 return;
+            }
+
+            if (animClip.IsConnected)
+            {
+                animClip.Disconnect();
             }
 
             m_animClips[animClip.InputPort] = null;

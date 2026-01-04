@@ -63,8 +63,14 @@ namespace DGame
         /// </summary>
         public float Weight
         {
-            get => m_parent.GetInputWeight(InputPort);
-            set => m_parent.SetInputWeight(InputPort, value);
+            get => IsConnected ? m_parent.GetInputWeight(InputPort) : 0f;
+            set
+            {
+                if (IsConnected)
+                {
+                    m_parent.SetInputWeight(InputPort, value);
+                }
+            }
         }
 
         public AnimNode(PlayableGraph graph)

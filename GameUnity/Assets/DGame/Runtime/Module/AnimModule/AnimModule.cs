@@ -101,7 +101,11 @@ namespace DGame
         public IAnimPlayable CreateAnimPlayable(Animator animator)
         {
             var animPlayable = AnimPlayable.Create(animator);
-            m_animPlayables.Add(animPlayable.Name, animPlayable);
+            if (!m_animPlayables.TryAdd(animPlayable.Name, animPlayable))
+            {
+                throw new DGameException($"已存在同名的动画图: {animPlayable.Name}");
+            }
+
             return animPlayable;
         }
 

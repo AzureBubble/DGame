@@ -666,7 +666,7 @@ namespace DGame
 
         public void ClearShareData()
         {
-            m_shareData.Clear();
+            m_shareData?.Clear();
             m_shareData = null;
         }
 
@@ -688,7 +688,7 @@ namespace DGame
             {
                 return;
             }
-            m_currentStateTime += GameTime.FixedDeltaTime;
+            // m_currentStateTime += GameTime.FixedDeltaTime;
             m_currentState?.OnFixedUpdate();
         }
 

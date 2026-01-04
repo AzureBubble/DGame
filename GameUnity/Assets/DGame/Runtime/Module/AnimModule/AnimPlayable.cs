@@ -222,7 +222,7 @@ namespace DGame
 
             if (layer < 0)
             {
-                throw new DGameException("动画层级必须大于0");
+                throw new DGameException("动画层级必须大于等于0");
             }
 
             if (ContainsAnimationClip(name))

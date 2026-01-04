@@ -161,8 +161,9 @@ namespace DGame
                         wordWrap = false,
                         fixedHeight = 22f
                     };
-                    _logToggleStyle.normal.textColor = DebuggerStyles.TextColor;
-                    _logToggleStyle.onNormal.textColor = DebuggerStyles.TextColor;
+                    // 使用白色以确保富文本 <color> 标签的颜色能正确显示
+                    _logToggleStyle.normal.textColor = Color.white;
+                    _logToggleStyle.onNormal.textColor = Color.white;
                 }
 
                 if (_filterToggleStyle == null)
@@ -325,6 +326,11 @@ namespace DGame
                 style.normal.background = bgTexture;
                 style.onNormal.background = CreateTexture(2, 2, new Color(0.2f, 0.4f, 0.6f, 0.8f));
 
+                // 显式设置以确保富文本颜色生效
+                style.richText = true;
+                style.normal.textColor = Color.white;
+                style.onNormal.textColor = Color.white;
+
                 return style;
             }
 
@@ -482,29 +488,8 @@ namespace DGame
             private string GetLogString(LogNode logNode)
             {
                 Color32 color = GetLogStringColor(logNode.LogType);
-                string icon = GetLogIcon(logNode.LogType);
-                return Utility.StringUtil.Format("<color=#{0:x2}{1:x2}{2:x2}{3:x2}>{4} [{5:HH:mm:ss}] {6}</color>",
-                    color.r, color.g, color.b, color.a,
-                    icon,
-                    logNode.LogTime.ToLocalTime(),
-                    TruncateString(logNode.LogMessage, 100));
-            }
-
-            private string GetLogIcon(LogType logType)
-            {
-                switch (logType)
-                {
-                    case LogType.Log:
-                        return "[I]";
-                    case LogType.Warning:
-                        return "[W]";
-                    case LogType.Error:
-                        return "[E]";
-                    case LogType.Exception:
-                        return "[!]";
-                    default:
-                        return "[-]";
-                }
+                return Utility.StringUtil.Format(Constant.CONSOLE_WINDOW_LOG_SINGLE_MESSAGE_STRING, color.r, color.g,
+                    color.b, color.a, logNode.LogTime.ToLocalTime(), logNode.LogFrameCount, logNode.LogMessage);
             }
 
             private string TruncateString(string str, int maxLength)

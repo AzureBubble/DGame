@@ -27,7 +27,7 @@ MonoBehaviour:
     - Assembly-CSharp
     - Launcher
     additionalAssemblySearchPaths: []
-    obfuscateObfuzRuntime: 1
+    obfuscateObfuzRuntime: 0
   obfuscationPassSettings:
     enabledPasses: -1
     ruleFiles: []

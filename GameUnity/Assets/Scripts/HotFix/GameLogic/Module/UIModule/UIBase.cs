@@ -4,6 +4,9 @@ using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using DGame;
+#if ENABLE_OBFUZ
+using Obfuz;
+#endif
 using UnityEngine;
 
 namespace GameLogic
@@ -11,6 +14,9 @@ namespace GameLogic
     /// <summary>
     /// UI基类
     /// </summary>
+#if ENABLE_OBFUZ
+    [ObfuzIgnore(ObfuzScope.TypeName, ApplyToChildTypes = true)]
+#endif
     public abstract class UIBase
     {
         protected UIBase m_parent = null;

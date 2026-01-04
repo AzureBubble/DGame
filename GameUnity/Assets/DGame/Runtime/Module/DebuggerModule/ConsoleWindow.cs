@@ -60,6 +60,14 @@ namespace DGame
             private GUIStyle _filterToggleStyle;
             private GUIStyle _detailsStyle;
 
+            // 日志行样式缓存（避免每帧创建新对象导致内存泄漏）
+            private GUIStyle _logRowStyleNormal;
+            private GUIStyle _logRowStyleAlt;
+            private GUIStyle _logRowStyleSelected;
+            private Texture2D _bgTextureNormal;
+            private Texture2D _bgTextureAlt;
+            private Texture2D _bgTextureSelected;
+
             public void Initialize(params object[] args)
             {
                 Application.logMessageReceived += OnLogMessageReceive;
@@ -191,6 +199,37 @@ namespace DGame
                     };
                     _detailsStyle.normal.textColor = DebuggerStyles.TextColor;
                 }
+
+                // 初始化日志行样式缓存
+                InitializeLogRowStyles();
+            }
+
+            private void InitializeLogRowStyles()
+            {
+                if (_bgTextureNormal == null)
+                {
+                    _bgTextureNormal = CreateTexture(2, 2, new Color(0.18f, 0.18f, 0.22f, 0.6f));
+                    _bgTextureAlt = CreateTexture(2, 2, new Color(0.22f, 0.22f, 0.26f, 0.6f));
+                    _bgTextureSelected = CreateTexture(2, 2, new Color(0.2f, 0.4f, 0.6f, 0.8f));
+                }
+
+                if (_logRowStyleNormal == null)
+                {
+                    _logRowStyleNormal = CreateLogRowStyle(_bgTextureNormal);
+                    _logRowStyleAlt = CreateLogRowStyle(_bgTextureAlt);
+                    _logRowStyleSelected = CreateLogRowStyle(_bgTextureSelected);
+                }
+            }
+
+            private GUIStyle CreateLogRowStyle(Texture2D bgTexture)
+            {
+                GUIStyle style = new GUIStyle(_logToggleStyle);
+                style.normal.background = bgTexture;
+                style.onNormal.background = _bgTextureSelected;
+                style.richText = true;
+                style.normal.textColor = Color.white;
+                style.onNormal.textColor = Color.white;
+                return style;
             }
 
             private void DrawToolbar()
@@ -306,32 +345,19 @@ namespace DGame
 
             private GUIStyle GetLogRowStyle(LogType logType, bool isAlt, bool isSelected)
             {
-                GUIStyle style = new GUIStyle(_logToggleStyle);
-
-                Color bgColor;
+                // 使用缓存的样式，避免每帧创建新对象导致内存泄漏
                 if (isSelected)
                 {
-                    bgColor = new Color(0.2f, 0.4f, 0.6f, 0.8f);
+                    return _logRowStyleSelected;
                 }
                 else if (isAlt)
                 {
-                    bgColor = new Color(0.22f, 0.22f, 0.26f, 0.6f);
+                    return _logRowStyleAlt;
                 }
                 else
                 {
-                    bgColor = new Color(0.18f, 0.18f, 0.22f, 0.6f);
+                    return _logRowStyleNormal;
                 }
-
-                Texture2D bgTexture = CreateTexture(2, 2, bgColor);
-                style.normal.background = bgTexture;
-                style.onNormal.background = CreateTexture(2, 2, new Color(0.2f, 0.4f, 0.6f, 0.8f));
-
-                // 显式设置以确保富文本颜色生效
-                style.richText = true;
-                style.normal.textColor = Color.white;
-                style.onNormal.textColor = Color.white;
-
-                return style;
             }
 
             private static Texture2D CreateTexture(int width, int height, Color color)
@@ -399,6 +425,27 @@ namespace DGame
             {
                 Application.logMessageReceived -= OnLogMessageReceive;
                 Clear();
+
+                // 释放缓存的纹理资源
+                if (_bgTextureNormal != null)
+                {
+                    UnityEngine.Object.Destroy(_bgTextureNormal);
+                    _bgTextureNormal = null;
+                }
+                if (_bgTextureAlt != null)
+                {
+                    UnityEngine.Object.Destroy(_bgTextureAlt);
+                    _bgTextureAlt = null;
+                }
+                if (_bgTextureSelected != null)
+                {
+                    UnityEngine.Object.Destroy(_bgTextureSelected);
+                    _bgTextureSelected = null;
+                }
+
+                _logRowStyleNormal = null;
+                _logRowStyleAlt = null;
+                _logRowStyleSelected = null;
             }
 
             private void Clear()

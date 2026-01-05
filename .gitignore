@@ -3,6 +3,7 @@ Ignore/
 Tools/LubanTools
 Tools/Generata Tools/SourceGenerator/SourceGenerator/bin
 UnityPackage/*.unitypackage
+GameConfig/Tools/LubanTools/
 
 *.vs
 *.idea

@@ -52,7 +52,7 @@ public class ConfigSystem
         {
             m_resourceModule = ModuleSystem.GetModule<IResourceModule>();
         }
-        TextAsset textAsset = m_resourceModule.LoadAssetSync<TextAsset>(file);
+        TextAsset textAsset = m_resourceModule.LoadAsset<TextAsset>(file);
         return JsonUtility.FromJson<JSONNode>(textAsset.text);
     }
 }

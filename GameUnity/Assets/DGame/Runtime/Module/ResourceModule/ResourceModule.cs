@@ -256,9 +256,9 @@ namespace DGame
 
         #endregion
 
-        #region GetPacketVersion And UpdatePackageManifest And CreateResourceDownloader
+        #region GetPackageVersion And UpdatePackageManifest And CreateResourceDownloader
 
-        public string GetPacketVersion(string customPackageName = "")
+        public string GetPackageVersion(string customPackageName = "")
         {
             var package = string.IsNullOrEmpty(customPackageName)
                 ? YooAssets.GetPackage(DefaultPackageName)

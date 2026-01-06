@@ -358,7 +358,7 @@ namespace DGame
         /// </summary>
         /// <param name="customPackageName">指定资源包的名称。不传使用默认资源包</param>
         /// <returns></returns>
-        string GetPacketVersion(string customPackageName = "");
+        string GetPackageVersion(string customPackageName = "");
 
         /// <summary>
         /// 异步请求资源清单的版本信息

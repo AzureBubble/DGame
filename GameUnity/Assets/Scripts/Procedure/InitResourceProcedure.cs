@@ -152,7 +152,7 @@ namespace Procedure
                 m_resourceModule.PlayMode == EPlayMode.WebPlayMode)
             {
                 // 线上最新版本 operation1.PackageVersion
-                DLogger.Log($"======== 更新资源版本: {m_resourceModule.GetPacketVersion()} => {m_resourceModule.PackageVersion}");
+                DLogger.Log($"======== 更新资源版本: {m_resourceModule.GetPackageVersion()} => {m_resourceModule.PackageVersion}");
                 // 注意：保存资源版本号作为下次默认启动的版本
                 // 如果当前是WebGL或者边玩边下直接进入预加载阶段
                 if (m_resourceModule.PlayMode == EPlayMode.WebPlayMode || m_resourceModule.UpdatableWhilePlaying)

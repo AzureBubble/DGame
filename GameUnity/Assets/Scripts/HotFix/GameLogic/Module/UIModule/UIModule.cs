@@ -157,10 +157,10 @@ namespace GameLogic
 
             float rateX = scaler.referenceResolution.x / Screen.width;
             float rateY = scaler.referenceResolution.y / Screen.height;
-            float posX = (int)(safeRect.position.x / rateX);
-            float posY = (int)(safeRect.position.y / rateY);
-            float width = (int)(safeRect.size.x / rateX);
-            float height = (int)(safeRect.size.y / rateY);
+            float posX = (int)(safeRect.position.x * rateX);
+            float posY = (int)(safeRect.position.y * rateY);
+            float width = (int)(safeRect.size.x * rateX);
+            float height = (int)(safeRect.size.y * rateY);
 
             float offsetX = scaler.referenceResolution.x - width - posX;
             float offsetY = scaler.referenceResolution.y - height - posY;

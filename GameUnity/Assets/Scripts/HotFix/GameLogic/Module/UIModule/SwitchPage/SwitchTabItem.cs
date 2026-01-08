@@ -49,7 +49,7 @@ namespace GameLogic
             {
                 m_noSelectNode = FindChild("NoSelectNode");
                 m_tfRedNode =  FindChild("m_tfRedNode");
-                m_tfRedNode.SetActive(false);
+                m_tfRedNode?.SetActive(false);
                 if (m_noSelectNode != null)
                 {
                     m_noSelectBg = FindChildComponent<Image>(m_noSelectNode, "noSelectBg");
@@ -80,8 +80,14 @@ namespace GameLogic
 
         public void SetTabIconPos(Vector2 selectedIconPos, Vector2 noSelectIconPos)
         {
-            ((RectTransform)m_selectedIcon.transform).localPosition = selectedIconPos;
-            ((RectTransform)m_noSelectIcon.transform).localPosition = noSelectIconPos;
+            if (m_selectedIcon != null && m_selectedIcon.rectTransform != null)
+            {
+                m_selectedIcon.rectTransform.localPosition = selectedIconPos;
+            }
+            if (m_noSelectIcon != null && m_noSelectIcon.rectTransform != null)
+            {
+                m_noSelectIcon.rectTransform.localPosition = noSelectIconPos;
+            }
         }
 
         public void UpdateTabName(string tabName)
@@ -166,7 +172,7 @@ namespace GameLogic
 
         public virtual void SetRedNodeActive(bool isActive)
         {
-            m_tfRedNode.SetActive(isActive);
+            m_tfRedNode?.SetActive(isActive);
         }
 
         #endregion

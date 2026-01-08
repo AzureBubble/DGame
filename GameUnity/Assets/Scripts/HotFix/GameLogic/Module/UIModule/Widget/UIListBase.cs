@@ -141,7 +141,7 @@ namespace GameLogic
         /// <summary>
         /// 数据数量
         /// </summary>
-        public int DataNum => m_datas?.Count != null ? m_datas.Count : 0;
+        public int DataNum => m_datas != null ? m_datas.Count : 0;
 
         /// <summary>
         /// 数量

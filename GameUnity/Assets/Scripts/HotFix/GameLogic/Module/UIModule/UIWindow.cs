@@ -36,16 +36,9 @@ namespace GameLogic
         private CanvasGroup m_canvasGroup;
 
         public CanvasGroup CanvasGroup
-        {
-            get
-            {
-                if (m_canvasGroup == null)
-                {
-                    m_canvasGroup = DGame.Utility.UnityUtil.AddMonoBehaviour<CanvasGroup>(gameObject);
-                }
-                return m_canvasGroup;
-            }
-        }
+            => m_canvasGroup == null
+                ? m_canvasGroup = DGame.Utility.UnityUtil.AddMonoBehaviour<CanvasGroup>(gameObject)
+                : m_canvasGroup;
 
         private readonly CancellationTokenSource m_cancellationTokenSource = new CancellationTokenSource();
 
@@ -166,7 +159,7 @@ namespace GameLogic
 
         protected override bool Visible
         {
-            get => m_canvas != null && CanvasGroup?.alpha >= 1;
+            get => m_canvas != null && m_canvasGroup?.alpha >= 1;
             set
             {
                 if (m_canvas == null || !IsPrepared || IsDestroyed)

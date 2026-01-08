@@ -67,7 +67,7 @@ namespace GameLogic
         /// </summary>
         protected override bool Visible
         {
-            get => gameObject.activeSelf;
+            get => gameObject != null && gameObject.activeSelf;
             set
             {
                 if (gameObject.activeSelf == value)
@@ -95,7 +95,7 @@ namespace GameLogic
                 return false;
             }
 
-            List<UIWidget> listNextUpdateChild = new List<UIWidget>();
+            List<UIWidget> listNextUpdateChild = null;
 
             if (ChildList != null && ChildList.Count > 0)
             {
@@ -144,16 +144,18 @@ namespace GameLogic
 
             bool needUpdate = false;
 
-            if (listNextUpdateChild is not null && listNextUpdateChild.Count > 0)
+            if (listNextUpdateChild is null || listNextUpdateChild.Count <= 0)
             {
                 m_hasOverrideUpdate = true;
+                OnUpdate();
                 needUpdate = m_hasOverrideUpdate;
             }
             else
             {
+                OnUpdate();
                 needUpdate = true;
             }
-            OnUpdate();
+
             return needUpdate;
         }
 
@@ -202,6 +204,10 @@ namespace GameLogic
             ResetChildCanvas(parentUI);
             m_parent = parentUI;
             Parent.AddChild(this);
+            if (gameObject.GetComponent<Canvas>())
+            {
+                (Parent as UIWindow)?.MakeChildCanvasDirty();
+            }
             ScriptGenerator();
             BindMemberProperty();
             RegisterEvent();
@@ -228,10 +234,6 @@ namespace GameLogic
 
             WidgetName = GetType().Name;
             gameObject = go;
-            if (gameObject.GetComponent<Canvas>())
-            {
-                (Parent as UIWindow)?.MakeChildCanvasDirty();
-            }
             DLogger.Assert(rectTransform != null, $"{go.name} UI元素必须具有 RectTransform");
             return true;
         }

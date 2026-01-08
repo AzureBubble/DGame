@@ -230,7 +230,7 @@ namespace GameLogic
 
         private GameEventDriver m_eventDriver;
 
-        protected GameEventDriver EventDriver => m_eventDriver == null ? MemoryPool.Spawn<GameEventDriver>() : m_eventDriver;
+        protected GameEventDriver EventDriver => m_eventDriver == null ? m_eventDriver = MemoryPool.Spawn<GameEventDriver>() : m_eventDriver;
 
         public void AddUIEvent(int eventID, Action handler)
         {
@@ -390,7 +390,8 @@ namespace GameLogic
         {
             if (itemList == null)
             {
-                itemList = new List<T>();
+                Debug.LogError("itemList is null");
+                return;
             }
 
             if (itemList.Count < count)
@@ -422,7 +423,8 @@ namespace GameLogic
         {
             if (itemList == null)
             {
-                itemList = new List<T>();
+                Debug.LogError("itemList is null");
+                return;
             }
 
             int createCnt = 0;

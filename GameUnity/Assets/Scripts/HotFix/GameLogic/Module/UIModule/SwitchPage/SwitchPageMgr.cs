@@ -10,7 +10,7 @@ namespace GameLogic
         private class TabPageInfo
         {
             public string TabName { get; set; }
-            public HashSet<Type> PageTypes { get; set; } = new HashSet<Type>();
+            public HashSet<Type> PageTypes { get; set; } = new HashSet<Type>(8);
             public GameObject ExistPage { get; set; }
             public SwitchTabItem TabItem { get; set; }
         }
@@ -25,9 +25,9 @@ namespace GameLogic
         // 子UI父节点
         public Transform TfChildPageParent { get; private set; }
 
-        private readonly Dictionary<int, TabPageInfo> m_tabPageInfoDict = new Dictionary<int, TabPageInfo>();
-        private readonly Dictionary<Type, BaseChildPage> m_childPageDict = new Dictionary<Type, BaseChildPage>();
-        protected readonly List<int> m_idList = new List<int>();
+        private readonly Dictionary<int, TabPageInfo> m_tabPageInfoDict = new Dictionary<int, TabPageInfo>(8);
+        private readonly Dictionary<Type, BaseChildPage> m_childPageDict = new Dictionary<Type, BaseChildPage>(8);
+        protected readonly List<int> m_idList = new List<int>(8);
         private readonly UIWindow m_parentWindow;
         protected int m_curSelectChildID = -100;
         private readonly ChildPageShareData m_shareData = new ChildPageShareData();
@@ -131,12 +131,12 @@ namespace GameLogic
             InternalCreateTab<T>(tabID, tabTemp, true, setSizeDelta, false);
         }
 
-        public void CreatTabByType<T>(int tabID, bool setSizeDelta = true) where T : SwitchTabItem, new()
+        public void CreateTabByType<T>(int tabID, bool setSizeDelta = true) where T : SwitchTabItem, new()
         {
             InternalCreateTab<T>(tabID, null, true, setSizeDelta, false);
         }
 
-        public void CreatTabByType<T>(int tabID, Action<int, T> action, bool setSizeDelta = true) where T : SwitchTabItem, new()
+        public void CreateTabByType<T>(int tabID, Action<int, T> action, bool setSizeDelta = true) where T : SwitchTabItem, new()
         {
             InternalCreateTab<T>(tabID, null, true, setSizeDelta, false, action);
         }
@@ -256,13 +256,14 @@ namespace GameLogic
                     var page = item.Value;
                     bool beShow = curTabInfo.PageTypes.Contains(pageType);
 
-                    if (page.gameObject != null)
+                    if (page != null && page.gameObject != null)
                     {
                         page.Show(beShow);
-                    }
-                    if (beShow)
-                    {
-                        page.OnPageShowed(m_curSelectChildID, tabID);
+
+                        if (beShow)
+                        {
+                            page.OnPageShowed(m_curSelectChildID, tabID);
+                        }
                     }
                 }
 
@@ -279,9 +280,14 @@ namespace GameLogic
                 }
             }
 
+            // 如果相同值则不触发切换回调
             var oldID = m_curSelectChildID;
             m_curSelectChildID = tabID;
-            m_switchTabAction?.Invoke(oldID, tabID);
+
+            if (oldID != tabID)
+            {
+                m_switchTabAction?.Invoke(oldID, tabID);
+            }
         }
 
         private void OnTabClick(SwitchTabItem tabItem)
@@ -400,7 +406,7 @@ namespace GameLogic
         {
             if (m_tabPageInfoDict.TryGetValue(tabID, out var tabInfo))
             {
-                tabInfo.TabItem?.SetSelectedState(isShow);
+                tabInfo.TabItem?.SetRedNodeActive(isShow);
             }
         }
 

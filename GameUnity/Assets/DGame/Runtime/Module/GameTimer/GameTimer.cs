@@ -70,7 +70,6 @@ namespace DGame
             LoopCount = 0;
             IsLoop = false;
             IsNeedRemove = false;
-            IsDestroyed = false;
             IsRunning = false;
             IsUnscaled = false;
             Args = null;

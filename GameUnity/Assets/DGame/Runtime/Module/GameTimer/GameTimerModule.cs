@@ -107,10 +107,10 @@ namespace DGame
 
                 curNode = nextNode;
 
-                if (curNode == m_gameTimers.First)
-                {
-                    return;
-                }
+                // if (curNode == m_gameTimers.First)
+                // {
+                //     return;
+                // }
             }
 
             m_hasBadFrame = hasBadFrame;
@@ -128,7 +128,8 @@ namespace DGame
                 {
                     var nextNode = curNode.Next;
 
-                    if (curNode.Value.IsLoop && curNode.Value.TriggerTime <= 0)
+                    if (curNode.Value.IsLoop && curNode.Value.TriggerTime <= 0
+                        && !curNode.Value.IsNeedRemove && curNode.Value.IsRunning)
                     {
                         curNode.Value.Handler?.Invoke(curNode.Value.Args);
 
@@ -234,10 +235,10 @@ namespace DGame
 
                 curNode = nextNode;
 
-                if (curNode == m_unscaleGameTimers.First)
-                {
-                    return;
-                }
+                // if (curNode == m_unscaleGameTimers.First)
+                // {
+                //     return;
+                // }
             }
 
             m_hasUnscaleBadFrame = hasUnscaledBadFrame;
@@ -255,7 +256,8 @@ namespace DGame
                 {
                     var nextNode = curNode.Next;
 
-                    if (curNode.Value.IsLoop && curNode.Value.TriggerTime <= 0)
+                    if (curNode.Value.IsLoop && curNode.Value.TriggerTime <= 0
+                        && !curNode.Value.IsNeedRemove && curNode.Value.IsRunning)
                     {
                         curNode.Value.Handler?.Invoke(curNode.Value.Args);
                         if (curNode.Value.HasLoopCount)
@@ -402,6 +404,8 @@ namespace DGame
                 timer.IsDestroyed = false;
                 timer.IsRunning = true;
                 timer.Handler = handler;
+                timer.HasLoopCount = false;
+                timer.LoopCount = 0;
                 if (timer.IsUnscaled != isUnscaled)
                 {
                     DestroyGameTimerImmediate(timer);
@@ -421,6 +425,8 @@ namespace DGame
                 timer.IsNeedRemove = false;
                 timer.IsDestroyed = false;
                 timer.IsRunning = true;
+                timer.HasLoopCount = false;
+                timer.LoopCount = 0;
                 if (timer.IsUnscaled != isUnscaled)
                 {
                     DestroyGameTimerImmediate(timer);
@@ -545,6 +551,7 @@ namespace DGame
                 if (ticker != null)
                 {
                     ticker.Stop();
+                    ticker.Dispose();
                 }
             }
             m_tickers.Clear();

@@ -418,6 +418,14 @@ namespace GameLogic
             }
         }
 
+        public void SetTabIconPos(int tabID, Vector2 selectedIconPos, Vector2 noSelectIconPos)
+        {
+            if (m_tabPageInfoDict.TryGetValue(tabID, out var tabInfo))
+            {
+                tabInfo.TabItem?.SetTabIconPos(selectedIconPos, noSelectIconPos);
+            }
+        }
+
         public void SetTabTextFontSize(int tabID, int fontSize)
         {
             if (m_tabPageInfoDict.TryGetValue(tabID, out var tabInfo))

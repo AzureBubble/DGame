@@ -127,8 +127,12 @@ namespace DGame
                     return;
                 }
 
-                m_audioGroupCategories[(int)AudioType.Music].Enable = value;
-                AudioMixer.SetFloat(MUSIC_VOLUME_NAME, value ? Mathf.Log10(m_categoriesVolume[(int)AudioType.Music] * 20f) : -80f);
+                if (m_audioGroupCategories[(int)AudioType.Music] != null)
+                {
+                    m_audioGroupCategories[(int)AudioType.Music].Enable = value;
+                }
+
+                AudioMixer.SetFloat(MUSIC_VOLUME_NAME, value ? Mathf.Log10(m_categoriesVolume[(int)AudioType.Music]) * 20f : -80f);
             }
         }
 
@@ -142,8 +146,11 @@ namespace DGame
                     return;
                 }
 
-                m_audioGroupCategories[(int)AudioType.Sound].Enable = value;
-                AudioMixer.SetFloat(SOUND_VOLUME_NAME, value ? Mathf.Log10(m_categoriesVolume[(int)AudioType.Sound] * 20f) : -80f);
+                if (m_audioGroupCategories[(int)AudioType.Sound] != null)
+                {
+                    m_audioGroupCategories[(int)AudioType.Sound].Enable = value;
+                }
+                AudioMixer.SetFloat(SOUND_VOLUME_NAME, value ? Mathf.Log10(m_categoriesVolume[(int)AudioType.Sound]) * 20f : -80f);
             }
         }
 
@@ -157,8 +164,11 @@ namespace DGame
                     return;
                 }
 
-                m_audioGroupCategories[(int)AudioType.UISound].Enable = value;
-                AudioMixer.SetFloat(UI_SOUND_VOLUME_NAME, value ? Mathf.Log10(m_categoriesVolume[(int)AudioType.UISound] * 20f) : -80f);
+                if (m_audioGroupCategories[(int)AudioType.UISound] != null)
+                {
+                    m_audioGroupCategories[(int)AudioType.UISound].Enable = value;
+                }
+                AudioMixer.SetFloat(UI_SOUND_VOLUME_NAME, value ? Mathf.Log10(m_categoriesVolume[(int)AudioType.UISound]) * 20f : -80f);
             }
         }
 
@@ -172,8 +182,11 @@ namespace DGame
                     return;
                 }
 
-                m_audioGroupCategories[(int)AudioType.Voice].Enable = value;
-                AudioMixer.SetFloat(VOICE_VOLUME_NAME, value ? Mathf.Log10(m_categoriesVolume[(int)AudioType.Voice] * 20f) : -80f);
+                if (m_audioGroupCategories[(int)AudioType.Voice] != null)
+                {
+                    m_audioGroupCategories[(int)AudioType.Voice].Enable = value;
+                }
+                AudioMixer.SetFloat(VOICE_VOLUME_NAME, value ? Mathf.Log10(m_categoriesVolume[(int)AudioType.Voice]) * 20f : -80f);
             }
         }
 
@@ -269,22 +282,22 @@ namespace DGame
                 {
                     case AudioType.Music:
                         MusicVolume = audioGroupConfig.Volume;
-                        MusicEnable = audioGroupConfig.Mute;
+                        MusicEnable = !audioGroupConfig.Mute;
                         break;
 
                     case AudioType.Sound:
                         SoundVolume = audioGroupConfig.Volume;
-                        SoundEnable = audioGroupConfig.Mute;
+                        SoundEnable = !audioGroupConfig.Mute;
                         break;
 
                     case AudioType.UISound:
                         UISoundVolume = audioGroupConfig.Volume;
-                        UISoundEnable = audioGroupConfig.Mute;
+                        UISoundEnable = !audioGroupConfig.Mute;
                         break;
 
                     case AudioType.Voice:
                         VoiceVolume = audioGroupConfig.Volume;
-                        VoiceEnable = audioGroupConfig.Mute;
+                        VoiceEnable = !audioGroupConfig.Mute;
                         break;
                 }
             }
@@ -308,10 +321,8 @@ namespace DGame
                     {
                         var agent = category.audioAgents[j];
                         agent?.Destroy();
-                        agent = null;
                     }
                 }
-                category = null;
             }
 
             Initialize(Settings.AudioSetting.audioGroupConfigs);
@@ -325,7 +336,7 @@ namespace DGame
                 return null;
             }
 
-            var audioSourceAgent = m_audioGroupCategories[(int)audioType].Play(path, isAsync, isInPool);
+            var audioSourceAgent = m_audioGroupCategories[(int)audioType]?.Play(path, isAsync, isInPool);
             if (audioSourceAgent != null)
             {
                 audioSourceAgent.IsLoop = isLoop;

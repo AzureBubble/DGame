@@ -102,7 +102,7 @@ namespace DGame
         /// </summary>
         public Vector3 Position
         {
-            get => m_transform.position;
+            get => m_transform == null ? Vector3.zero : m_transform.position;
             set => m_transform.position = value;
         }
 
@@ -220,7 +220,7 @@ namespace DGame
             {
                 if (fadeOut)
                 {
-                    m_fadeOutTime = FADEIN_DURATION;
+                    m_fadeOutTime = FADEOUT_DURATION;
                     m_audioAgentRuntimeState = AudioAgentRuntimeState.FadingOut;
                 }
                 else

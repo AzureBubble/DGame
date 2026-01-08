@@ -83,7 +83,9 @@ namespace DGame
             }
             else
             {
-                m_audioMixerGroup = audioMixer.FindMatchingGroups("Master")[0];
+                var masterGroups = audioMixer.FindMatchingGroups("Master");
+                m_audioMixerGroup = masterGroups.Length > 0 ? masterGroups[0] : null;
+                // m_audioMixerGroup = audioMixer.FindMatchingGroups("Master")[0];
             }
 
             audioAgents = new List<AudioSourceAgent>(32);

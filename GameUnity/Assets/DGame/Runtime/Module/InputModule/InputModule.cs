@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
 
 namespace DGame
 {
@@ -14,8 +13,7 @@ namespace DGame
         private readonly List<InputCommand> m_inputCommands = new List<InputCommand>(32);
         private readonly List<InputCommand> m_toDelete = new List<InputCommand>(32);
         // key -> oldKey value -> newKey
-        private Dictionary<KeyCode, KeyCode> m_keyRebuildMap = new Dictionary<KeyCode, KeyCode>(32);
-        private readonly Dictionary<KeyCode, InputType> m_keyInputTypeMap = new Dictionary<KeyCode, InputType>(32);
+        private Dictionary<KeyCode, KeyCode> m_keyRebuildMap;
 
         private bool CanInput { get; set; } = true;
 
@@ -28,39 +26,48 @@ namespace DGame
         {
             m_inputCommands.Clear();
             m_keyRebuildMap.Clear();
-            m_keyInputTypeMap.Clear();
             m_toDelete.Clear();
         }
 
         public void RegisterInputCommand(InputType inputType, KeyCode keyCode, Action<KeyCode> action)
         {
-            if (m_keyInputTypeMap.TryGetValue(keyCode, out InputType oldInputType))
+            for (int i = 0; i < m_inputCommands.Count; i++)
             {
-                if (oldInputType == inputType)
+                var inputCommand = m_inputCommands[i];
+                if (inputCommand.keyCode == keyCode && inputCommand.inputType == inputType)
                 {
-                    for (int i = 0; i < m_inputCommands.Count; i++)
-                    {
-                        var inputCommand = m_inputCommands[i];
-                        if (inputCommand.keyCode == keyCode && inputCommand.inputType == inputType)
-                        {
-                            inputCommand.keyCodeAction += action;
-                            return;
-                        }
-                    }
+                    inputCommand.keyCodeAction += action;
+                    return;
                 }
             }
-
             m_inputCommands.Add(new InputCommand(this, inputType, keyCode, action));
-            m_keyInputTypeMap.Add(keyCode, inputType);
         }
 
         public void RegisterInputCommand(InputType inputType, int mouseID, Action<int> action)
         {
+            for (int i = 0; i < m_inputCommands.Count; i++)
+            {
+                var inputCommand = m_inputCommands[i];
+                if (inputCommand.mouseID == mouseID && inputCommand.inputType == inputType)
+                {
+                    inputCommand.mouseAction += action;
+                    return;
+                }
+            }
             m_inputCommands.Add(new InputCommand(inputType, mouseID, action));
         }
 
         public void RegisterInputCommand(InputType inputType, HotKeyType hotKeyType, Action<float> action)
         {
+            for (int i = 0; i < m_inputCommands.Count; i++)
+            {
+                var inputCommand = m_inputCommands[i];
+                if (inputCommand.hotKeyName == hotKeyType && inputCommand.inputType == inputType)
+                {
+                    inputCommand.hotKeyAction += action;
+                    return;
+                }
+            }
             m_inputCommands.Add(new InputCommand(inputType, hotKeyType, action));
         }
 
@@ -180,7 +187,8 @@ namespace DGame
         private Dictionary<KeyCode, KeyCode> LoadRebindKeyMap()
         {
             string jsonStr = Utility.PlayerPrefsUtil.GetString(SAVE_KEY);
-            return Utility.JsonUtil.ToObject<Dictionary<KeyCode, KeyCode>>(jsonStr);
+            return Utility.JsonUtil.ToObject<Dictionary<KeyCode, KeyCode>>(jsonStr)
+                   ?? new Dictionary<KeyCode, KeyCode>(32);
         }
     }
 }

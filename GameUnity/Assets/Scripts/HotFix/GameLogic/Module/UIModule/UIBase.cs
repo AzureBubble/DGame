@@ -238,6 +238,7 @@ namespace GameLogic
             if (m_eventDriver != null)
             {
                 MemoryPool.Release(m_eventDriver);
+                m_eventDriver = null;
             }
         }
 
@@ -297,6 +298,10 @@ namespace GameLogic
         /// <returns></returns>
         public T CreateWidget<T>(GameObject goRoot, bool visible = true) where T : UIWidget, new()
         {
+            if (goRoot == null)
+            {
+                return null;
+            }
             var widget = new T();
             if (widget.Create(this, goRoot, visible))
             {
@@ -443,6 +448,24 @@ namespace GameLogic
                 itemList.RemoveAt(i);
                 item.Destroy();
             }
+        }
+
+        #endregion
+
+        #region 红点相关
+
+        public async UniTask<RedDotItem> CreateRedDotAsync(int redDotNodeID, Transform parent)
+        {
+            var item = await CreateWidgetByTypeAsync<RedDotItem>(parent);
+            item?.Init(redDotNodeID);
+            return item;
+        }
+
+        public RedDotItem CreateRedDot(int redDotNodeID, Transform parent)
+        {
+            var item = CreateWidgetByType<RedDotItem>(parent);
+            item?.Init(redDotNodeID);
+            return item;
         }
 
         #endregion

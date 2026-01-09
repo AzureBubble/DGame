@@ -454,7 +454,7 @@ namespace GameLogic
 
         internal bool InternalUpdate()
         {
-            if (!IsPrepared || !Visible)
+            if (!IsPrepared || !Visible || IsDestroyed)
             {
                 return false;
             }
@@ -563,14 +563,13 @@ namespace GameLogic
                 return;
             }
 
-            IsLoadDone = true;
-
             if (IsDestroyed)
             {
                 Object.Destroy(windowGo);
                 return;
             }
 
+            IsLoadDone = true;
             windowGo.name = GetType().Name;
             gameObject = windowGo;
             windowGo.transform.localPosition = Vector3.zero;

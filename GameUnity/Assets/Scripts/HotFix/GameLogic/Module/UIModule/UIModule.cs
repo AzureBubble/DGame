@@ -65,6 +65,8 @@ namespace GameLogic
                 s_uiCanvas.gameObject.layer = LayerMask.NameToLayer("UI");
             }
 
+            RedDotModule.Instance.Initialize();
+
             if (DebuggerDriver.Instance != null)
             {
                 switch (DebuggerDriver.Instance.ActiveWindowType)
@@ -132,7 +134,7 @@ namespace GameLogic
             {
                 UnityEngine.Object.Destroy(s_uiCanvas.parent.gameObject);
             }
-
+            RedDotModule.Instance.Destroy();
             ClearWindowQueue();
         }
 

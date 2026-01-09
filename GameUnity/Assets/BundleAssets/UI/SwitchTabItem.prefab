@@ -286,6 +286,10 @@ MonoBehaviour:
     m_radius: 100
     m_spaceCoff: 1
     m_angleOffset: 0
+  m_uiTextLocalizationExtend:
+    m_useI2Localization: 0
+    m_hasParams: 0
+    m_textDefine: 0
   m_isUseBestFitFont: 0
 --- !u!1 &3613131319769772451
 GameObject:
@@ -498,6 +502,10 @@ MonoBehaviour:
     m_radius: 100
     m_spaceCoff: 1
     m_angleOffset: 0
+  m_uiTextLocalizationExtend:
+    m_useI2Localization: 0
+    m_hasParams: 0
+    m_textDefine: 0
   m_isUseBestFitFont: 0
 --- !u!1 &7289501538341033656
 GameObject:
@@ -759,7 +767,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -9, y: -171}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 170, y: 70}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &5577931873410672811

@@ -73,7 +73,7 @@ namespace GameLogic
 
         public bool InternalUpdate()
         {
-            if (!IsPrepared || IsDestroyed)
+            if (!IsPrepared || IsDestroyed || !Visible)
             {
                 return false;
             }

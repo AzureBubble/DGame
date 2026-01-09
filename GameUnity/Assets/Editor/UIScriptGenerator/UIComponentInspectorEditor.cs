@@ -37,9 +37,22 @@ namespace GameLogic
             m_uiType = serializedObject.FindProperty("uiType");
 
             serializedObject.Update();
-            m_className.stringValue = target.name;
-            m_genCodePath.stringValue = UIScriptGeneratorSettings.GetGenCodePath();
-            m_impCodePath.stringValue = UIScriptGeneratorSettings.GetImpCodePath();
+            // m_className.stringValue = target.name;
+            // m_genCodePath.stringValue = UIScriptGeneratorSettings.GetGenCodePath();
+            // m_impCodePath.stringValue = UIScriptGeneratorSettings.GetImpCodePath();
+            // 仅在首次（为空）时初始化，避免覆盖用户在 UIComponentEditor.cs 中配置的持久化数据
+            if (string.IsNullOrEmpty(m_className.stringValue))
+            {
+                m_className.stringValue = target.name;
+            }
+            if (string.IsNullOrEmpty(m_genCodePath.stringValue))
+            {
+                m_genCodePath.stringValue = UIScriptGeneratorSettings.GetGenCodePath();
+            }
+            if (string.IsNullOrEmpty(m_impCodePath.stringValue))
+            {
+                m_impCodePath.stringValue = UIScriptGeneratorSettings.GetImpCodePath();
+            }
             serializedObject.ApplyModifiedProperties();
             CreateReorderableList();
         }
@@ -183,7 +196,34 @@ namespace GameLogic
                 // 确保有选项时才显示 Popup
                 if (m_uiTypeOptions.Length > 0)
                 {
-                    m_selectedIndex = EditorGUILayout.Popup("UI类型", m_selectedIndex, m_uiTypeOptions);
+                    // m_selectedIndex = EditorGUILayout.Popup("UI类型", m_selectedIndex, m_uiTypeOptions);
+                    // 优先根据 uiType(字符串) 还原选择，避免规则顺序变化导致 index 错位
+                    if (m_uiType != null && !string.IsNullOrEmpty(m_uiType.stringValue))
+                    {
+                        int indexByName = System.Array.IndexOf(m_uiTypeOptions, m_uiType.stringValue);
+                        if (indexByName >= 0)
+                        {
+                            m_selectedIndex = indexByName;
+                        }
+                    }
+
+                    // index 越界保护（规则数量变更/配置变更）
+                    m_selectedIndex = Mathf.Clamp(m_selectedIndex, 0, m_uiTypeOptions.Length - 1);
+
+                    int newIndex = EditorGUILayout.Popup("UI类型", m_selectedIndex, m_uiTypeOptions);
+                    if (newIndex != m_selectedIndex)
+                    {
+                        m_selectedIndex = newIndex;
+                    }
+
+                    if (m_uiType != null)
+                    {
+                        string selectedTypeName = m_uiTypeOptions[m_selectedIndex];
+                        if (m_uiType.stringValue != selectedTypeName)
+                        {
+                            m_uiType.stringValue = selectedTypeName;
+                        }
+                    }
                 }
                 else
                 {

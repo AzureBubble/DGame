@@ -213,6 +213,11 @@ namespace GameLogic
 
         private bool m_isTweenPopping = false;
 
+        /// <summary>
+        /// 是否队列弹窗
+        /// </summary>
+        public bool IsInQueue { get; set; } = false;
+
         #endregion
 
         public void Init(string windowName, string assetLocation)

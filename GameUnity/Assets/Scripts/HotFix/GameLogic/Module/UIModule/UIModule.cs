@@ -24,7 +24,6 @@ namespace GameLogic
         private readonly Dictionary<string, UIWindow> m_uiFullNameMap = new Dictionary<string, UIWindow>(32);
         private readonly Dictionary<uint, UIWindow> m_uiMap = new Dictionary<uint, UIWindow>(32);
         private readonly Queue<UIWindow> m_popWindowQueue = new Queue<UIWindow>(16);
-        private readonly HashSet<UIWindow> m_poppedWindowSet = new HashSet<UIWindow>(16);
         private bool m_isPoppingWindowQueue = false;
         private Action m_escCloseLastOneWindowCallback;
         private ErrorLogger m_errorLogger;
@@ -207,6 +206,7 @@ namespace GameLogic
         public void PushWindowToQueue<T>() where T : UIWindow, new()
         {
             T window = new T();
+            window.IsInQueue = true;
             m_popWindowQueue.Enqueue(window);
         }
 
@@ -222,8 +222,9 @@ namespace GameLogic
 
         private void PopQueueNextWindow(UIWindow window)
         {
-            if (window != null && m_isPoppingWindowQueue && m_poppedWindowSet.Contains(window))
+            if (window != null && window.IsInQueue && m_isPoppingWindowQueue)
             {
+                window.IsInQueue = false;
                 PopWindowQueue().Forget();
             }
         }
@@ -233,12 +234,10 @@ namespace GameLogic
             if (m_popWindowQueue.Count > 0)
             {
                 var uiWindow =  m_popWindowQueue.Dequeue();
-                var popWindow = await ShowWindowAsyncAwait(uiWindow, null);
-                m_poppedWindowSet.Add(popWindow);
+                await ShowWindowAsyncAwait(uiWindow, null);
             }
             else
             {
-                m_poppedWindowSet.Clear();
                 m_isPoppingWindowQueue = false;
             }
         }
@@ -246,7 +245,6 @@ namespace GameLogic
         public void ClearWindowQueue()
         {
             m_popWindowQueue.Clear();
-            m_poppedWindowSet.Clear();
         }
 
         #endregion
@@ -726,10 +724,7 @@ namespace GameLogic
             {
                 return;
             }
-            if (!window.IsHide)
-            {
-                PopQueueNextWindow(window);
-            }
+            PopQueueNextWindow(window);
             window.Destroy();
             Pop(window);
             OnSortWindowSortingOrder(window.WindowLayer);

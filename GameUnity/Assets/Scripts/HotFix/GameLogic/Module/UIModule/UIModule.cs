@@ -464,7 +464,7 @@ namespace GameLogic
                 window.InternalLoad(window.AssetLocation, OnWindowPrepare, isAsync, userDatas).Forget();
                 float time = 0f;
 
-                while (!window.IsLoadDone)
+                while (!window.IsLoadDone) // 观察是否需要加上 && !window.IsDestroyed
                 {
                     time += Time.deltaTime;
 

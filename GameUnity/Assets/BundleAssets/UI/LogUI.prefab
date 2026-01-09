@@ -372,7 +372,6 @@ GameObject:
   - component: {fileID: 8855478010105986774}
   - component: {fileID: 8855478010105986778}
   - component: {fileID: 8855478010105986772}
-  - component: {fileID: 7570264457643090118}
   m_Layer: 5
   m_Name: LogUI
   m_TagString: Untagged
@@ -441,23 +440,3 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 55
---- !u!114 &7570264457643090118
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8855478010105986775}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3c214bba284f768498dab757b3245745, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_components:
-  - {fileID: 7118409505170531040}
-  - {fileID: 6805831647112239378}
-  genCodePath: Assets/Scripts/HotFix/GameLogic/UI/Gen
-  className: LogUI
-  impCodePath: Assets/Scripts/HotFix/GameLogic/UI
-  isGenImpClass: 0
-  uiType: 

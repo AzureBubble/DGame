@@ -4,7 +4,6 @@ using UnityEngine.UI;
 
 namespace GameLogic
 {
-	[Window(UILayer.System)]
 	public partial class LogUI : UIWindow
 	{
 		#region 脚本工具生成的代码
@@ -22,7 +21,6 @@ namespace GameLogic
 		}
 
 		#endregion
-
 
 		#region override
 

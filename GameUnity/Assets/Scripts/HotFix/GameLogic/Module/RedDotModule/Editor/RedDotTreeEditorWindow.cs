@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿#if UNITY_EDITOR
+
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using UnityEditor;
@@ -1030,3 +1032,5 @@ namespace GameLogic
         #endregion
     }
 }
+
+#endif

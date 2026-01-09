@@ -1,4 +1,6 @@
-﻿using UnityEditor;
+﻿#if UNITY_EDITOR
+
+using UnityEditor;
 using UnityEngine;
 
 namespace GameLogic
@@ -91,3 +93,5 @@ namespace GameLogic
         }
     }
 }
+
+#endif

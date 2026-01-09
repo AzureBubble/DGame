@@ -218,6 +218,13 @@ namespace GameLogic
         /// </summary>
         public bool IsInQueue { get; set; } = false;
 
+        /// <summary>
+        /// 是否可以通过返回关闭
+        /// </summary>
+        public virtual bool CanEscClose { get; set; } = true;
+
+        public System.Action OnEscCloseLastOneWindowCallback { get; private set; }
+
         #endregion
 
         public void Init(string windowName, string assetLocation)
@@ -304,6 +311,9 @@ namespace GameLogic
 
             return ModelType.NormalType;
         }
+
+        public void SetEscCloseLastOneWindowCallback(System.Action callback)
+            => OnEscCloseLastOneWindowCallback = callback;
 
         internal void TryInvokePrepareCallback(System.Action<UIWindow> prepareCallback, System.Object[] userData)
         {
@@ -515,6 +525,7 @@ namespace GameLogic
 
         protected internal void Destroy()
         {
+            OnEscCloseLastOneWindowCallback = null;
             if (IsDestroyed)
             {
                 return;

@@ -25,7 +25,6 @@ namespace GameLogic
         private readonly Dictionary<uint, UIWindow> m_uiMap = new Dictionary<uint, UIWindow>(32);
         private readonly Queue<UIWindow> m_popWindowQueue = new Queue<UIWindow>(16);
         private bool m_isPoppingWindowQueue = false;
-        private Action m_escCloseLastOneWindowCallback;
         private ErrorLogger m_errorLogger;
 
         /// <summary>
@@ -135,7 +134,6 @@ namespace GameLogic
             }
 
             ClearWindowQueue();
-            m_escCloseLastOneWindowCallback = null;
         }
 
         #region 设置安全区域
@@ -288,96 +286,81 @@ namespace GameLogic
         public bool GetAndCloseTopWindow(int excludeLayer)
         {
             UIWindow lastOne = null;
-            bool foundMultiple = false;
             for (int i = 0; i < m_uiStack.Count; i++)
             {
                 if (m_uiStack[i].WindowLayer != excludeLayer)
                 {
-                    if (lastOne != null)
-                    {
-                        foundMultiple = true;
-                    }
                     lastOne = m_uiStack[i];
                 }
-            }
-
-            if (!foundMultiple)
-            {
-                m_escCloseLastOneWindowCallback?.Invoke();
-                return false;
             }
 
             if (lastOne == null)
             {
                 return false;
             }
-            CloseWindow(lastOne);
-            return true;
+
+            if (lastOne.CanEscClose)
+            {
+                CloseWindow(lastOne);
+                return true;
+            }
+
+            lastOne.OnEscCloseLastOneWindowCallback?.Invoke();
+            return false;
         }
 
         public bool GetAndCloseTopWindow(List<int> excludeLayers)
         {
             UIWindow lastOne = null;
-            bool foundMultiple = false;
             for (int i = 0; i < m_uiStack.Count; i++)
             {
                 if (!excludeLayers.Contains(m_uiStack[i].WindowLayer))
                 {
-                    if (lastOne != null)
-                    {
-                        foundMultiple = true;
-                    }
                     lastOne = m_uiStack[i];
                 }
-            }
-
-            if (!foundMultiple)
-            {
-                m_escCloseLastOneWindowCallback?.Invoke();
-                return false;
             }
 
             if (lastOne == null)
             {
                 return false;
             }
-            CloseWindow(lastOne);
-            return true;
+
+            if (lastOne.CanEscClose)
+            {
+                CloseWindow(lastOne);
+                return true;
+            }
+
+            lastOne.OnEscCloseLastOneWindowCallback?.Invoke();
+            return false;
         }
 
         public bool GetAndCloseTopWindow(List<int> excludeLayers, List<UIWindow> excludeWindows)
         {
             UIWindow lastOne = null;
-            bool foundMultiple = false;
             for (int i = 0; i < m_uiStack.Count; i++)
             {
                 var window = m_uiStack[i];
                 if (!excludeLayers.Contains(window.WindowLayer) && !excludeWindows.Contains(window))
                 {
-                    if (lastOne != null)
-                    {
-                        foundMultiple = true;
-                    }
                     lastOne = window;
                 }
-            }
-
-            if (!foundMultiple)
-            {
-                m_escCloseLastOneWindowCallback?.Invoke();
-                return false;
             }
 
             if (lastOne == null)
             {
                 return false;
             }
-            CloseWindow(lastOne);
-            return true;
-        }
 
-        public void SetEscCloseLastOneWindowCallback(Action callback)
-            => m_escCloseLastOneWindowCallback = callback;
+            if (lastOne.CanEscClose)
+            {
+                CloseWindow(lastOne);
+                return true;
+            }
+
+            lastOne.OnEscCloseLastOneWindowCallback?.Invoke();
+            return false;
+        }
 
         #endregion
 

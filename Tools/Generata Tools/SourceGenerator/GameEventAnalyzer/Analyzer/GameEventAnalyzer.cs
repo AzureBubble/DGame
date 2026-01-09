@@ -8,7 +8,7 @@ namespace EventAnalyzer;
 
 /// <summary>
 /// 游戏事件分析器
-/// 用于在编译时检测 AddUIEvent/AddEventListener 调用的泛型参数
+/// 用于在编译时检测 事件监听方法 调用的泛型参数
 /// 是否与对应接口方法的参数类型一致
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]

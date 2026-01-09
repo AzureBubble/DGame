@@ -8,8 +8,8 @@ namespace EventAnalyzer;
 
 /// <summary>
 /// 游戏事件分析器
-/// 用于在编译时检测 事件监听方法 调用的泛型参数
-/// 是否与对应接口方法的参数类型一致
+/// <remarks>用于在编译时检测 事件监听方法 调用的泛型参数</remarks>
+/// <remarks>是否与对应接口方法的参数类型一致</remarks>
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class GameEventAnalyzer : DiagnosticAnalyzer
@@ -18,20 +18,20 @@ public class GameEventAnalyzer : DiagnosticAnalyzer
 
     /// <summary>
     /// 参数类型不匹配规则
-    /// 当泛型参数类型与接口方法参数类型不一致时触发
+    /// <remarks>当泛型参数类型与接口方法参数类型不一致时触发</remarks>
     /// </summary>
     private static readonly DiagnosticDescriptor m_ruleTypeMismatch = new DiagnosticDescriptor(
-        Definition.DiagnosticId,                // 诊断ID（唯一标识符）
-        Definition.Title,                       // 标题（简短描述）
-        Definition.MessageFormat,               // 错误消息模板（支持格式化参数）
-        Definition.Category,                    // 类别（用于分组）
-        DiagnosticSeverity.Error,               // 严重级别
-        isEnabledByDefault: true,               // 是否默认启用
-        description: Definition.Description);   // 详细说明（可选）
+        Definition.DiagnosticId, // 诊断ID（唯一标识符）
+        Definition.Title, // 标题（简短描述）
+        Definition.MessageFormat, // 错误消息模板（支持格式化参数）
+        Definition.Category, // 类别（用于分组）
+        DiagnosticSeverity.Error, // 严重级别
+        isEnabledByDefault: true, // 是否默认启用
+        description: Definition.Description); // 详细说明（可选）
 
     /// <summary>
     /// 参数数量不匹配规则
-    /// 当泛型参数数量与接口方法参数数量不一致时触发
+    /// <remarks>当泛型参数数量与接口方法参数数量不一致时触发</remarks>
     /// </summary>
     private static readonly DiagnosticDescriptor m_ruleParamCountMismatch = new DiagnosticDescriptor(
         Definition.DiagnosticId_ParamCount,
@@ -66,8 +66,8 @@ public class GameEventAnalyzer : DiagnosticAnalyzer
 
     /// <summary>
     /// 分析方法调用表达式
-    /// 检测 事件监听方法 调用的泛型参数是否与接口方法参数匹配
     /// </summary>
+    /// <remarks>检测 事件监听方法 调用的泛型参数是否与接口方法参数匹配</remarks>
     /// <param name="context">语法节点分析上下文</param>
     private void AnalyzeInvocation(SyntaxNodeAnalysisContext context)
     {
@@ -132,12 +132,12 @@ public class GameEventAnalyzer : DiagnosticAnalyzer
         if (typeArguments.Length != parameterTypes.Count)
         {
             var diagnostic = Diagnostic.Create(
-                m_ruleParamCountMismatch,       // 诊断规则描述符
-                invocation.GetLocation(),                // 错误位置
-                typeArguments.Length,   // 调用的参数数量
-                interfaceName,                            // "ILoginUI"
-                methodName,                               // "Test"
-                parameterTypes.Count);                    // 原始方法参数数量
+                m_ruleParamCountMismatch, // 诊断规则描述符
+                invocation.GetLocation(), // 错误位置
+                typeArguments.Length, // 调用的参数数量
+                interfaceName, // "ILoginUI"
+                methodName, // "Test"
+                parameterTypes.Count); // 原始方法参数数量
 
             context.ReportDiagnostic(diagnostic);
             return;
@@ -152,13 +152,13 @@ public class GameEventAnalyzer : DiagnosticAnalyzer
             if (!SymbolEqualityComparer.Default.Equals(actualType, expectedType))
             {
                 var diagnostic = Diagnostic.Create(
-                    m_ruleTypeMismatch,                // 诊断规则描述符
-                    invocation.GetLocation(),                   // 错误位置
-                    GetTypeName(actualType),   // 实际的参数类型
-                    interfaceName,                              // "ILoginUI"
-                    methodName,                                 // "Test"
-                    GetTypeName(expectedType),                  // 期望的参数类型
-                    i + 1);                                     // 参数位置（从1开始）
+                    m_ruleTypeMismatch, // 诊断规则描述符
+                    invocation.GetLocation(), // 错误位置
+                    GetTypeName(actualType), // 实际的参数类型
+                    interfaceName, // "ILoginUI"
+                    methodName, // "Test"
+                    GetTypeName(expectedType), // 期望的参数类型
+                    i + 1); // 参数位置（从1开始）
 
                 context.ReportDiagnostic(diagnostic);
             }
@@ -167,7 +167,7 @@ public class GameEventAnalyzer : DiagnosticAnalyzer
 
     /// <summary>
     /// 解析事件ID参数，提取接口名和方法名
-    /// 例如: ITestUI_Event.Test -> interfaceName="ITestUI", methodName="Test"
+    /// <remarks>e.g.: ITestUI_Event.Test -> interfaceName="ITestUI", methodName="Test"</remarks>
     /// </summary>
     private bool TryParseEventId(ExpressionSyntax expression, SemanticModel semanticModel,
         out string interfaceName, out string methodName, out string eventClassName)
@@ -192,7 +192,8 @@ public class GameEventAnalyzer : DiagnosticAnalyzer
                 // 从 ITestUI_Event 推导出 ITestUI
                 if (eventClassName.EndsWith(Definition.EventClassNameEndsWith))
                 {
-                    interfaceName = eventClassName.Substring(0, eventClassName.Length - Definition.EventClassNameEndsWith.Length);
+                    interfaceName = eventClassName.Substring(0,
+                        eventClassName.Length - Definition.EventClassNameEndsWith.Length);
                     return true;
                 }
             }
@@ -203,7 +204,8 @@ public class GameEventAnalyzer : DiagnosticAnalyzer
                 // 从 ITestUI_Event 推导出 ITestUI
                 if (eventClassName.EndsWith(Definition.EventClassNameEndsWith))
                 {
-                    interfaceName = eventClassName.Substring(0, eventClassName.Length - Definition.EventClassNameEndsWith.Length);
+                    interfaceName = eventClassName.Substring(0,
+                        eventClassName.Length - Definition.EventClassNameEndsWith.Length);
                     return true;
                 }
             }
@@ -214,7 +216,7 @@ public class GameEventAnalyzer : DiagnosticAnalyzer
 
     /// <summary>
     /// 查找对应的接口类型
-    /// 先尝试常见命名空间，再遍历所有语法树查找
+    /// <remarks>先尝试常见命名空间，再遍历所有语法树查找</remarks>
     /// </summary>
     /// <param name="compilation">编译对象</param>
     /// <param name="interfaceName">接口名称（如 ITestUI）</param>
@@ -270,7 +272,7 @@ public class GameEventAnalyzer : DiagnosticAnalyzer
 
     /// <summary>
     /// 获取类型的显示名称
-    /// 将系统类型转换为 C# 关键字别名（如 System.Int32 -> int）
+    /// <remarks>将系统类型转换为 C# 关键字别名（e.g. System.Int32 -> int）</remarks>
     /// </summary>
     /// <param name="type">类型符号</param>
     /// <returns>类型的显示名称</returns>

@@ -54,10 +54,10 @@ public sealed class Definition
 
     /// <summary>
     /// 参数数量不匹配错误消息格式
-    /// {0}: 实际泛型参数数量
-    /// {1}: 接口名
-    /// {2}: 方法名
-    /// {3}: 期望的参数数量
+    /// <remarks>{0}: 实际泛型参数数量</remarks>
+    /// <remarks>{1}: 接口名</remarks>
+    /// <remarks>{2}: 方法名</remarks>
+    /// <remarks>{3}: 期望的参数数量</remarks>
     /// </summary>
     public static readonly LocalizableString MessageFormatParamCount = "泛型参数数量 ({0}) 与接口方法 '{1}.{2}' 的参数数量 ({3}) 不匹配";
 
@@ -78,8 +78,7 @@ public sealed class Definition
     /// </summary>
     public static readonly List<string> CheckMethodNameList =
     [
-        "AddUIEvent", // UI事件注册方法
-        "AddEventListener" // 通用事件监听方法
+        "AddUIEvent", "AddEventListener"
     ];
 
     /// <summary>

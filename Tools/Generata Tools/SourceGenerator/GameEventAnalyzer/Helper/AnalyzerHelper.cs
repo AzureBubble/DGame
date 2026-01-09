@@ -1,5 +1,7 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace EventAnalyzer;
@@ -151,5 +153,91 @@ public static class AnalyzerHelper
             default:
                 return type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
         }
+    }
+
+    /// <summary>
+    /// 获取接口方法的参数信息列表
+    /// </summary>
+    /// <param name="interfaceMethod">接口方法符号</param>
+    /// <returns>参数信息列表（类型名，参数名）</returns>
+    public static List<(string TypeName, string ParamName)> GetParameterInfos(IMethodSymbol interfaceMethod)
+    {
+        return interfaceMethod.Parameters
+            .Select(p => (GetTypeName(p.Type), p.Name))
+            .ToList();
+    }
+
+    /// <summary>
+    /// 构建正确的方法参数列表语法
+    /// </summary>
+    /// <param name="parameterInfos">参数信息列表</param>
+    /// <returns>参数列表语法</returns>
+    public static ParameterListSyntax BuildParameterList(List<(string TypeName, string ParamName)> parameterInfos)
+    {
+        var parameters = parameterInfos.Select(info =>
+            SyntaxFactory.Parameter(SyntaxFactory.Identifier(info.ParamName))
+                .WithType(SyntaxFactory.ParseTypeName(info.TypeName)
+                    .WithTrailingTrivia(SyntaxFactory.Space)));
+
+        return SyntaxFactory.ParameterList(SyntaxFactory.SeparatedList(parameters));
+    }
+
+    /// <summary>
+    /// 查找回调方法的声明
+    /// </summary>
+    /// <param name="callbackExpression">回调表达式（e.g. Test）</param>
+    /// <param name="semanticModel">语义模型</param>
+    /// <param name="root">语法树根节点</param>
+    /// <returns>方法声明语法，未找到返回 null</returns>
+    public static MethodDeclarationSyntax? FindCallbackMethodDeclaration(
+        ExpressionSyntax callbackExpression,
+        SemanticModel semanticModel,
+        SyntaxNode root)
+    {
+        // 获取回调方法的符号
+        var callbackSymbolInfo = semanticModel.GetSymbolInfo(callbackExpression);
+
+        if (!(callbackSymbolInfo.Symbol is IMethodSymbol callbackMethodSymbol))
+        {
+            return null;
+        }
+
+        // 获取方法声明的位置
+        var declaringReferences = callbackMethodSymbol.DeclaringSyntaxReferences;
+
+        if (declaringReferences.Length == 0)
+        {
+            return null;
+        }
+
+        // 优先在当前语法树中查找
+        foreach (var reference in declaringReferences)
+        {
+            if (reference.SyntaxTree == root.SyntaxTree)
+            {
+                var syntax = reference.GetSyntax();
+
+                if (syntax is MethodDeclarationSyntax methodDecl)
+                {
+                    return methodDecl;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// 修复回调方法的参数列表
+    /// </summary>
+    /// <param name="methodDeclaration">方法声明</param>
+    /// <param name="parameterInfos">正确的参数信息</param>
+    /// <returns>修复后的方法声明</returns>
+    public static MethodDeclarationSyntax FixCallbackMethodParameters(
+        MethodDeclarationSyntax methodDeclaration,
+        List<(string TypeName, string ParamName)> parameterInfos)
+    {
+        var newParameterList = BuildParameterList(parameterInfos);
+        return methodDeclaration.WithParameterList(newParameterList);
     }
 }

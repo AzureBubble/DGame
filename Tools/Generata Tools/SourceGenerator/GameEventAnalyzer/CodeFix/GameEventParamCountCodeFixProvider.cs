@@ -94,12 +94,13 @@ public class GameEventParamCountCodeFixProvider : CodeFixProvider
         // 获取第一个参数（事件ID）
         var arguments = invocation.ArgumentList.Arguments;
 
-        if (arguments.Count == 0)
+        if (arguments.Count < 2)
         {
             return document;
         }
 
         var firstArg = arguments[0].Expression;
+        var secondArg = arguments[1].Expression; // 回调方法
 
         // 解析事件ID参数，获取接口名和方法名
         if (!AnalyzerHelper.TryParseEventId(firstArg, semanticModel, out var interfaceName, out var methodName,
@@ -147,12 +148,18 @@ public class GameEventParamCountCodeFixProvider : CodeFixProvider
             return document;
         }
 
+        // 获取接口方法的参数信息
+        var parameterInfos = AnalyzerHelper.GetParameterInfos(interfaceMethod);
+
+        // 查找回调方法声明
+        var callbackMethodDecl = AnalyzerHelper.FindCallbackMethodDeclaration(secondArg, semanticModel, root);
+
         SyntaxNode newRoot;
 
         // 处理不同的调用形式
         if (invocation.Expression is MemberAccessExpressionSyntax memberAccess)
         {
-            // 形如: obj.Method<T>()
+            // e.g.: obj.Method<T>()
             if (memberAccess.Name is GenericNameSyntax genericName)
             {
                 var newGenericName = genericName.WithTypeArgumentList(
@@ -161,7 +168,24 @@ public class GameEventParamCountCodeFixProvider : CodeFixProvider
 
                 var newMemberAccess = memberAccess.WithName(newGenericName);
                 var newInvocation = invocation.WithExpression(newMemberAccess);
-                newRoot = root.ReplaceNode(invocation, newInvocation);
+
+                // 同时替换调用和回调方法
+                if (callbackMethodDecl != null)
+                {
+                    var fixedCallbackMethod = AnalyzerHelper.FixCallbackMethodParameters(callbackMethodDecl, parameterInfos);
+                    newRoot = root.ReplaceNodes(
+                        new SyntaxNode[] { invocation, callbackMethodDecl },
+                        (original, _) =>
+                        {
+                            if (original == invocation) return newInvocation;
+                            if (original == callbackMethodDecl) return fixedCallbackMethod;
+                            return original;
+                        });
+                }
+                else
+                {
+                    newRoot = root.ReplaceNode(invocation, newInvocation);
+                }
             }
             else if (memberAccess.Name is IdentifierNameSyntax identifierName)
             {
@@ -175,12 +199,37 @@ public class GameEventParamCountCodeFixProvider : CodeFixProvider
 
                     var newMemberAccess = memberAccess.WithName(newGenericName);
                     var newInvocation = invocation.WithExpression(newMemberAccess);
-                    newRoot = root.ReplaceNode(invocation, newInvocation);
+
+                    // 同时替换调用和回调方法
+                    if (callbackMethodDecl != null)
+                    {
+                        var fixedCallbackMethod = AnalyzerHelper.FixCallbackMethodParameters(callbackMethodDecl, parameterInfos);
+                        newRoot = root.ReplaceNodes(
+                            new SyntaxNode[] { invocation, callbackMethodDecl },
+                            (original, _) =>
+                            {
+                                if (original == invocation) return newInvocation;
+                                if (original == callbackMethodDecl) return fixedCallbackMethod;
+                                return original;
+                            });
+                    }
+                    else
+                    {
+                        newRoot = root.ReplaceNode(invocation, newInvocation);
+                    }
                 }
                 else
                 {
-                    // 不需要泛型参数
-                    return document;
+                    // 不需要泛型参数，只修复回调方法
+                    if (callbackMethodDecl != null)
+                    {
+                        var fixedCallbackMethod = AnalyzerHelper.FixCallbackMethodParameters(callbackMethodDecl, parameterInfos);
+                        newRoot = root.ReplaceNode(callbackMethodDecl, fixedCallbackMethod);
+                    }
+                    else
+                    {
+                        return document;
+                    }
                 }
             }
             else
@@ -190,17 +239,34 @@ public class GameEventParamCountCodeFixProvider : CodeFixProvider
         }
         else if (invocation.Expression is GenericNameSyntax directGenericName)
         {
-            // 形如: Method<T>()
+            // e.g.: Method<T>()
             var newGenericName = directGenericName.WithTypeArgumentList(
                 SyntaxFactory.TypeArgumentList(
                     SyntaxFactory.SeparatedList(correctedTypeArguments)));
 
             var newInvocation = invocation.WithExpression(newGenericName);
-            newRoot = root.ReplaceNode(invocation, newInvocation);
+
+            // 同时替换调用和回调方法
+            if (callbackMethodDecl != null)
+            {
+                var fixedCallbackMethod = AnalyzerHelper.FixCallbackMethodParameters(callbackMethodDecl, parameterInfos);
+                newRoot = root.ReplaceNodes(
+                    new SyntaxNode[] { invocation, callbackMethodDecl },
+                    (original, _) =>
+                    {
+                        if (original == invocation) return newInvocation;
+                        if (original == callbackMethodDecl) return fixedCallbackMethod;
+                        return original;
+                    });
+            }
+            else
+            {
+                newRoot = root.ReplaceNode(invocation, newInvocation);
+            }
         }
         else if (invocation.Expression is IdentifierNameSyntax identifierName)
         {
-            // 形如: Method() 没有泛型参数
+            // e.g.: Method() 没有泛型参数
             if (parameterTypes.Count > 0)
             {
                 var newGenericName = SyntaxFactory.GenericName(identifierName.Identifier)
@@ -209,11 +275,37 @@ public class GameEventParamCountCodeFixProvider : CodeFixProvider
                             SyntaxFactory.SeparatedList(correctedTypeArguments)));
 
                 var newInvocation = invocation.WithExpression(newGenericName);
-                newRoot = root.ReplaceNode(invocation, newInvocation);
+
+                // 同时替换调用和回调方法
+                if (callbackMethodDecl != null)
+                {
+                    var fixedCallbackMethod = AnalyzerHelper.FixCallbackMethodParameters(callbackMethodDecl, parameterInfos);
+                    newRoot = root.ReplaceNodes(
+                        new SyntaxNode[] { invocation, callbackMethodDecl },
+                        (original, _) =>
+                        {
+                            if (original == invocation) return newInvocation;
+                            if (original == callbackMethodDecl) return fixedCallbackMethod;
+                            return original;
+                        });
+                }
+                else
+                {
+                    newRoot = root.ReplaceNode(invocation, newInvocation);
+                }
             }
             else
             {
-                return document;
+                // 只修复回调方法
+                if (callbackMethodDecl != null)
+                {
+                    var fixedCallbackMethod = AnalyzerHelper.FixCallbackMethodParameters(callbackMethodDecl, parameterInfos);
+                    newRoot = root.ReplaceNode(callbackMethodDecl, fixedCallbackMethod);
+                }
+                else
+                {
+                    return document;
+                }
             }
         }
         else

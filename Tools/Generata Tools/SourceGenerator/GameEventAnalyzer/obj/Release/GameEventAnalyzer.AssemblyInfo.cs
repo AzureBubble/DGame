@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("GameEventAnalyzer")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b73b3c851bd465d3f9f2f0a73ae7048eec2f489c")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1abbee5ecf1b548041e5c26a473f1e598e91a476")]
 [assembly: System.Reflection.AssemblyProductAttribute("GameEventAnalyzer")]
 [assembly: System.Reflection.AssemblyTitleAttribute("GameEventAnalyzer")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -119,17 +119,12 @@ namespace GameLogic
         /// <summary>
         /// 窗口更新
         /// </summary>
-        protected virtual void OnUpdate()
-        {
-            m_hasOverrideUpdate = false;
-        }
+        protected virtual void OnUpdate() => m_hasOverrideUpdate = false;
 
         /// <summary>
         /// 窗口销毁
         /// </summary>
-        protected virtual void OnDestroy()
-        {
-        }
+        protected virtual void OnDestroy() { }
 
         /// <summary>
         /// 当触发窗口的层级排序。
@@ -141,7 +136,7 @@ namespace GameLogic
             {
                 for (int i = 0; i < ChildList.Count; i++)
                 {
-                    ChildList[i].OnSortingOrderChange();
+                    ChildList[i]?.OnSortingOrderChange();
                 }
             }
 
@@ -193,36 +188,21 @@ namespace GameLogic
         #region FindChildComponent
 
         protected Transform FindChild(string path)
-        {
-            return FindChildImp(rectTransform, path);
-        }
+            => FindChildImp(rectTransform, path);
 
         private Transform FindChild(Transform trans, string path)
-        {
-            return FindChildImp(trans, path);
-        }
+            => FindChildImp(trans, path);
 
         public T FindChildComponent<T>(string path) where T : Component
-        {
-            return FindChildComponentImp<T>(rectTransform, path);
-        }
+            => FindChildComponentImp<T>(rectTransform, path);
 
         protected T FindChildComponent<T>(Transform trans, string path) where T : Component
-        {
-            return FindChildComponentImp<T>(trans, path);
-        }
+            => FindChildComponentImp<T>(trans, path);
 
-        private static Transform FindChildImp(Transform trans, string path)
-        {
-            var findTrans = trans.Find(path);
-            return findTrans == null ? null : findTrans;
-        }
+        private static Transform FindChildImp(Transform trans, string path) => trans.Find(path);
 
         private static T FindChildComponentImp<T>(Transform trans, string path) where T : Component
-        {
-            var findTrans = trans.Find(path);
-            return findTrans == null ? null : findTrans.gameObject.GetComponent<T>();
-        }
+            => trans.Find(path)?.gameObject.GetComponent<T>();
 
         #endregion
 
@@ -233,39 +213,25 @@ namespace GameLogic
         protected GameEventDriver EventDriver => m_eventDriver == null ? m_eventDriver = MemoryPool.Spawn<GameEventDriver>() : m_eventDriver;
 
         public void AddUIEvent(int eventID, Action handler)
-        {
-            EventDriver.AddUIEvent(eventID, handler);
-        }
+            => EventDriver.AddUIEvent(eventID, handler);
 
         public void AddUIEvent<T>(int eventID, Action<T> handler)
-        {
-            EventDriver.AddUIEvent(eventID, handler);
-        }
+            => EventDriver.AddUIEvent(eventID, handler);
 
         public void AddUIEvent<T1, T2>(int eventID, Action<T1, T2> handler)
-        {
-            EventDriver.AddUIEvent(eventID, handler);
-        }
+            => EventDriver.AddUIEvent(eventID, handler);
 
         public void AddUIEvent<T1, T2, T3>(int eventID, Action<T1, T2, T3> handler)
-        {
-            EventDriver.AddUIEvent(eventID, handler);
-        }
+            => EventDriver.AddUIEvent(eventID, handler);
 
         public void AddUIEvent<T1, T2, T3, T4>(int eventID, Action<T1, T2, T3, T4> handler)
-        {
-            EventDriver.AddUIEvent(eventID, handler);
-        }
+            => EventDriver.AddUIEvent(eventID, handler);
 
         public void AddUIEvent<T1, T2, T3, T4, T5>(int eventID, Action<T1, T2, T3, T4, T5> handler)
-        {
-            EventDriver.AddUIEvent(eventID, handler);
-        }
+            => EventDriver.AddUIEvent(eventID, handler);
 
         public void AddUIEvent<T1, T2, T3, T4, T5, T6>(int eventID, Action<T1, T2, T3, T4, T5, T6> handler)
-        {
-            EventDriver.AddUIEvent(eventID, handler);
-        }
+            => EventDriver.AddUIEvent(eventID, handler);
 
         protected void RemoveAllUIEvents()
         {
@@ -357,6 +323,10 @@ namespace GameLogic
         public async UniTask<T> CreateWidgetByPathAsync<T>(Transform parentTrans, string assetLocation, bool visible = true)
             where T : UIWidget, new()
         {
+            if (gameObject == null)
+            {
+                return null;
+            }
             GameObject goInst = await UIModule.ResourceLoader.LoadGameObjectAsync(assetLocation, parentTrans, gameObject.GetCancellationTokenOnDestroy());
             return CreateWidget<T>(goInst, visible);
         }
@@ -376,15 +346,11 @@ namespace GameLogic
 
         public T CreateWidgetByType<T>(Transform parentTrans, bool visible = true)
             where T : UIWidget, new()
-        {
-            return CreateWidgetByPath<T>(parentTrans, typeof(T).Name, visible);
-        }
+            => CreateWidgetByPath<T>(parentTrans, typeof(T).Name, visible);
 
         public async UniTask<T> CreateWidgetByTypeAsync<T>(Transform parentTrans, bool visible = true)
             where T : UIWidget, new()
-        {
-            return await CreateWidgetByPathAsync<T>(parentTrans, typeof(T).Name, visible);
-        }
+            => await CreateWidgetByPathAsync<T>(parentTrans, typeof(T).Name, visible);
 
         public void AdjustItemNum<T>(List<T> itemList, int count, Transform parentTrans, GameObject prefab = null, string assetLocation = "") where T : UIWidget, new()
         {
@@ -413,10 +379,8 @@ namespace GameLogic
         public void AsyncAdjustItemNum<T>(List<T> itemList, int count, Transform parentTrans, GameObject prefab = null,
             string assetLocation = "", int maxNumPerFrame = 5, Action<T, int> updateAction = null)
             where T : UIWidget, new()
-        {
-            AsyncAdjustItemNumInternal(itemList, count, parentTrans, maxNumPerFrame, updateAction, prefab,
+            => AsyncAdjustItemNumInternal(itemList, count, parentTrans, maxNumPerFrame, updateAction, prefab,
                 assetLocation).Forget();
-        }
 
         private async UniTaskVoid AsyncAdjustItemNumInternal<T>(List<T> itemList, int count, Transform parentTrans,
             int maxCntPerFrame, Action<T, int> updateAction, GameObject prefab, string assetLocation) where T : UIWidget, new()
@@ -473,20 +437,10 @@ namespace GameLogic
 
         private void RemoveUnUseItem<T>(List<T> itemList, int count) where T : UIWidget
         {
-            var removeList = new List<T>();
-
-            for (int i = 0; i < itemList.Count; i++)
+            for (int i = itemList.Count - 1; i >= count; i--)
             {
-                if (i >= count)
-                {
-                    removeList.Add(itemList[i]);
-                }
-            }
-
-            for (int i = 0; i < removeList.Count; i++)
-            {
-                var item = removeList[i];
-                itemList.Remove(item);
+                var item = itemList[i];
+                itemList.RemoveAt(i);
                 item.Destroy();
             }
         }

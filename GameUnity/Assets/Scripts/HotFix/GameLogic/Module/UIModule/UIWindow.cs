@@ -42,33 +42,15 @@ namespace GameLogic
 
         private readonly CancellationTokenSource m_cancellationTokenSource = new CancellationTokenSource();
 
-        private Transform m_transform;
-
         /// <summary>
         /// 窗口位置组件
         /// </summary>
-        public override Transform transform
-        {
-            get
-            {
-                if (m_transform != null)
-                    return m_transform;
-
-                if (gameObject == null)
-                    return null;
-
-                m_transform = gameObject.transform;
-                return m_transform;
-            }
-        }
-
-        private RectTransform m_rectTransform;
+        public override Transform transform => gameObject?.transform;
 
         /// <summary>
         /// 窗口矩阵位置组件
         /// </summary>
-        public override RectTransform rectTransform => m_rectTransform != null
-            ? m_rectTransform : m_rectTransform = transform as RectTransform;
+        public override RectTransform rectTransform => gameObject?.transform as RectTransform;
 
         /// <summary>
         /// 窗口实例化资源对象
@@ -159,7 +141,7 @@ namespace GameLogic
 
         protected override bool Visible
         {
-            get => m_canvas != null && m_canvasGroup?.alpha >= 1;
+            get => m_canvas != null && CanvasGroup?.alpha >= 1;
             set
             {
                 if (m_canvas == null || !IsPrepared || IsDestroyed)
@@ -418,17 +400,21 @@ namespace GameLogic
                 return;
             }
             GameObject modelObj = UIModule.ResourceLoader.LoadGameObject(m_modelSpritePath, transform);
-            modelObj.transform.SetAsFirstSibling();
-            modelObj.transform.localScale = Vector3.one;
-            modelObj.transform.localPosition = Vector3.zero;
-            modelObj.name = m_modelSpritePath;
-            if (canClose)
+
+            if (modelObj != null)
             {
-                m_modelCloseBtn = DGame.Utility.UnityUtil.AddMonoBehaviour<UIButton>(modelObj);
-                m_modelCloseBtn.onClick.AddListener(Close);
+                modelObj.transform.SetAsFirstSibling();
+                modelObj.transform.localScale = Vector3.one;
+                modelObj.transform.localPosition = Vector3.zero;
+                modelObj.name = m_modelSpritePath;
+                if (canClose)
+                {
+                    m_modelCloseBtn = DGame.Utility.UnityUtil.AddMonoBehaviour<UIButton>(modelObj);
+                    m_modelCloseBtn.onClick.AddListener(Close);
+                }
+                m_modelSprite = DGame.Utility.UnityUtil.AddMonoBehaviour<UIImage>(modelObj);
+                m_modelSprite.color = new Color(0, 0, 0, m_curModelAlpha);
             }
-            m_modelSprite = DGame.Utility.UnityUtil.AddMonoBehaviour<UIImage>(modelObj);
-            m_modelSprite.color = new Color(0, 0, 0, m_curModelAlpha);
         }
 
         private void TweenPop()
@@ -531,9 +517,10 @@ namespace GameLogic
 
             transform?.DOKill();
             m_cancellationTokenSource?.Cancel();
+            m_cancellationTokenSource?.Dispose();
             RemoveAllUIEvents();
 
-            for (int i = 0; i < ChildList.Count; i++)
+            for (int i = ChildList.Count - 1; i >= 0; i--)
             {
                 var uiChild = ChildList[i];
                 uiChild?.Destroy();

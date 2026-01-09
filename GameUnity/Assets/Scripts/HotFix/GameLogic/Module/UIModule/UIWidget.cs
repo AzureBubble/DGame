@@ -8,31 +8,15 @@ namespace GameLogic
     {
         public override GameObject gameObject { get; protected set; }
 
-        private RectTransform m_rectTransform;
         /// <summary>
         /// 矩阵位置组件
         /// </summary>
-        public override RectTransform rectTransform => m_rectTransform != null
-            ? m_rectTransform : m_rectTransform = transform as RectTransform;
+        public override RectTransform rectTransform => gameObject?.transform as RectTransform;
 
-        private Transform m_transform;
         /// <summary>
         /// 位置组件
         /// </summary>
-        public override Transform transform
-        {
-            get
-            {
-                if (m_transform != null)
-                    return m_transform;
-
-                if (gameObject == null)
-                    return null;
-
-                m_transform = gameObject.transform;
-                return m_transform;
-            }
-        }
+        public override Transform transform => gameObject?.transform;
 
         public override UIType Type => UIType.Widget;
 
@@ -70,13 +54,12 @@ namespace GameLogic
             get => gameObject != null && gameObject.activeSelf;
             set
             {
-                if (gameObject.activeSelf == value)
+                if (gameObject == null || gameObject.activeSelf == value)
                 {
                     return;
                 }
 
-                gameObject?.SetActive(value);
-
+                gameObject.SetActive(value);
                 if (value)
                 {
                     OnVisible();
@@ -272,7 +255,7 @@ namespace GameLogic
         {
             RemoveAllUIEvents();
 
-            for (int i = 0; i < ChildList.Count; i++)
+            for (int i = ChildList.Count - 1; i >= 0; i--)
             {
                 ChildList[i]?.Destroy();
             }
@@ -295,12 +278,9 @@ namespace GameLogic
             {
                 return;
             }
-            if (Parent != null)
-            {
-                Parent.RemoveChild(this);
-                OnDestroy();
-                InternalDestroyWidget();
-            }
+            Parent?.RemoveChild(this);
+            OnDestroy();
+            InternalDestroyWidget();
         }
 
         #endregion

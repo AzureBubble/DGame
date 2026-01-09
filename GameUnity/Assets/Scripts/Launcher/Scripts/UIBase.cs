@@ -8,8 +8,9 @@ namespace Launcher
         private const float NORMAL_TWEEN_POP_TIME = 0.3f;
         public GameObject gameObject;
 
-        public Transform transform { get { if (gameObject != null) { return gameObject.transform; } return null; } }
-        public RectTransform rectTransform => transform as RectTransform;
+        private Transform m_transform;
+        public Transform transform => m_transform != null ? m_transform : m_transform = gameObject?.transform;
+        public RectTransform rectTransform => m_transform as RectTransform;
 
         protected virtual bool NeedTween => true;
         protected virtual bool FullScreen => false;

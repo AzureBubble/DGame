@@ -470,6 +470,7 @@ namespace GameLogic
 
                     if (time > 60f)
                     {
+                        DLogger.Warning($"窗口 {windowName} 加载超时(60s)");
                         break;
                     }
                     await UniTask.Yield();
@@ -500,6 +501,7 @@ namespace GameLogic
 
                     if (time > 60f)
                     {
+                        DLogger.Warning($"窗口 {window.WindowFullName} 加载超时(60s)");
                         break;
                     }
                     await UniTask.Yield();
@@ -626,6 +628,7 @@ namespace GameLogic
 
                 if (time > 60f)
                 {
+                    DLogger.Warning($"窗口 {window.WindowFullName} 加载超时(60s)");
                     break;
                 }
                 await UniTask.Yield(cancellationToken);

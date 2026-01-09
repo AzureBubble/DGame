@@ -276,7 +276,6 @@ public class GameEventAnalyzer : DiagnosticAnalyzer
     /// <returns>类型的显示名称</returns>
     private string GetTypeName(ITypeSymbol type)
     {
-        // 处理基础类型的别名
         switch (type.SpecialType)
         {
             case SpecialType.System_Int32:

@@ -12,7 +12,7 @@ public sealed class Definition
     /// <summary>
     /// 参数类型不匹配的诊断ID
     /// </summary>
-    public const string DiagnosticId = "EVENT001";
+    public const string DiagnosticId_TypeMatch = "EVENT001";
 
     /// <summary>
     /// 参数数量不匹配的诊断ID
@@ -26,7 +26,7 @@ public sealed class Definition
     /// <summary>
     /// 类型不匹配错误标题
     /// </summary>
-    public static readonly LocalizableString Title = "事件参数类型不匹配";
+    public static readonly LocalizableString TitleTypeMatch = "事件参数类型不匹配";
 
     /// <summary>
     /// 类型不匹配错误消息格式
@@ -36,12 +36,12 @@ public sealed class Definition
     /// {3}: 期望的参数类型
     /// {4}: 参数位置
     /// </summary>
-    public static readonly LocalizableString MessageFormat = "泛型参数类型 '{0}' 与接口方法 '{1}.{2}' 的参数类型 '{3}' 不匹配 (第 {4} 个参数)";
+    public static readonly LocalizableString MessageFormatTypeMatch = "泛型参数类型 '{0}' 与接口方法 '{1}.{2}' 的参数类型 '{3}' 不匹配 (第 {4} 个参数)";
 
     /// <summary>
     /// 类型不匹配错误描述
     /// </summary>
-    public static readonly LocalizableString Description = "事件监听方法的泛型参数类型必须与对应接口方法的参数类型一致。";
+    public static readonly LocalizableString DescriptionTypeMatch = "事件监听方法的泛型参数类型必须与对应接口方法的参数类型一致。";
 
     #endregion
 

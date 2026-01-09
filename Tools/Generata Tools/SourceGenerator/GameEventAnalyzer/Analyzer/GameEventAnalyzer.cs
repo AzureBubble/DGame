@@ -21,13 +21,13 @@ public class GameEventAnalyzer : DiagnosticAnalyzer
     /// <remarks>当泛型参数类型与接口方法参数类型不一致时触发</remarks>
     /// </summary>
     private static readonly DiagnosticDescriptor m_ruleTypeMismatch = new DiagnosticDescriptor(
-        Definition.DiagnosticId, // 诊断ID（唯一标识符）
-        Definition.Title, // 标题（简短描述）
-        Definition.MessageFormat, // 错误消息模板（支持格式化参数）
+        Definition.DiagnosticId_TypeMatch, // 诊断ID（唯一标识符）
+        Definition.TitleTypeMatch, // 标题（简短描述）
+        Definition.MessageFormatTypeMatch, // 错误消息模板（支持格式化参数）
         Definition.Category, // 类别（用于分组）
         DiagnosticSeverity.Error, // 严重级别
         isEnabledByDefault: true, // 是否默认启用
-        description: Definition.Description); // 详细说明（可选）
+        description: Definition.DescriptionTypeMatch); // 详细说明（可选）
 
     /// <summary>
     /// 参数数量不匹配规则
@@ -101,14 +101,14 @@ public class GameEventAnalyzer : DiagnosticAnalyzer
         var firstArg = arguments[0].Expression;
 
         // 解析事件ID参数，获取接口名和方法名
-        if (!TryParseEventId(firstArg, context.SemanticModel, out var interfaceName, out var methodName,
+        if (!AnalyzerHelper.TryParseEventId(firstArg, context.SemanticModel, out var interfaceName, out var methodName,
                 out var eventClassName))
         {
             return;
         }
 
         // 查找对应的接口
-        var interfaceSymbol = FindInterface(context.Compilation, interfaceName, eventClassName);
+        var interfaceSymbol = AnalyzerHelper.FindInterface(context.Compilation, interfaceName, eventClassName);
 
         if (interfaceSymbol == null)
         {
@@ -154,161 +154,14 @@ public class GameEventAnalyzer : DiagnosticAnalyzer
                 var diagnostic = Diagnostic.Create(
                     m_ruleTypeMismatch, // 诊断规则描述符
                     invocation.GetLocation(), // 错误位置
-                    GetTypeName(actualType), // 实际的参数类型
+                    AnalyzerHelper.GetTypeName(actualType), // 实际的参数类型
                     interfaceName, // "ILoginUI"
                     methodName, // "Test"
-                    GetTypeName(expectedType), // 期望的参数类型
+                    AnalyzerHelper.GetTypeName(expectedType), // 期望的参数类型
                     i + 1); // 参数位置（从1开始）
 
                 context.ReportDiagnostic(diagnostic);
             }
-        }
-    }
-
-    /// <summary>
-    /// 解析事件ID参数，提取接口名和方法名
-    /// <remarks>e.g.: ITestUI_Event.Test -> interfaceName="ITestUI", methodName="Test"</remarks>
-    /// </summary>
-    private bool TryParseEventId(ExpressionSyntax expression, SemanticModel semanticModel,
-        out string interfaceName, out string methodName, out string eventClassName)
-    {
-        interfaceName = string.Empty;
-        methodName = string.Empty;
-        eventClassName = string.Empty;
-
-        // 处理 ITestUI_Event.Test 这种成员访问表达式
-        if (expression is MemberAccessExpressionSyntax memberAccess)
-        {
-            // 获取成员名（方法名） Test
-            methodName = memberAccess.Name.Identifier.Text;
-
-            // 获取类名 ITestUI_Event
-            var symbolInfo = semanticModel.GetSymbolInfo(memberAccess.Expression);
-
-            if (symbolInfo.Symbol is INamedTypeSymbol typeSymbol)
-            {
-                eventClassName = typeSymbol.Name;
-
-                // 从 ITestUI_Event 推导出 ITestUI
-                if (eventClassName.EndsWith(Definition.EventClassNameEndsWith))
-                {
-                    interfaceName = eventClassName.Substring(0,
-                        eventClassName.Length - Definition.EventClassNameEndsWith.Length);
-                    return true;
-                }
-            }
-            else if (memberAccess.Expression is IdentifierNameSyntax identifier)
-            {
-                eventClassName = identifier.Identifier.Text;
-
-                // 从 ITestUI_Event 推导出 ITestUI
-                if (eventClassName.EndsWith(Definition.EventClassNameEndsWith))
-                {
-                    interfaceName = eventClassName.Substring(0,
-                        eventClassName.Length - Definition.EventClassNameEndsWith.Length);
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    /// <summary>
-    /// 查找对应的接口类型
-    /// <remarks>先尝试常见命名空间，再遍历所有语法树查找</remarks>
-    /// </summary>
-    /// <param name="compilation">编译对象</param>
-    /// <param name="interfaceName">接口名称（如 ITestUI）</param>
-    /// <param name="eventClassName">事件类名称（如 ITestUI_Event）</param>
-    /// <returns>找到的接口符号，未找到返回 null</returns>
-    private INamedTypeSymbol? FindInterface(Compilation compilation, string interfaceName, string eventClassName)
-    {
-        foreach (var ns in Definition.CommonNamespaces)
-        {
-            var fullName = string.IsNullOrEmpty(ns) ? interfaceName : $"{ns}.{interfaceName}";
-            var symbol = compilation.GetTypeByMetadataName(fullName);
-
-            if (symbol != null && symbol.TypeKind == TypeKind.Interface)
-            {
-                return symbol;
-            }
-        }
-
-        // 遍历所有语法树查找接口
-        foreach (var syntaxTree in compilation.SyntaxTrees)
-        {
-            var root = syntaxTree.GetRoot();
-
-            // 查找接口声明
-            var interfaces = root.DescendantNodes()
-                .OfType<InterfaceDeclarationSyntax>()
-                .Where(i => i.Identifier.Text == interfaceName);
-
-            foreach (var interfaceDecl in interfaces)
-            {
-                // 获取命名空间
-                var namespaceDecl = interfaceDecl.Ancestors()
-                    .OfType<NamespaceDeclarationSyntax>()
-                    .FirstOrDefault();
-
-                string? namespaceName = namespaceDecl?.Name.ToString();
-
-                if (namespaceName != null)
-                {
-                    var fullInterfaceName = $"{namespaceName}.{interfaceName}";
-                    var interfaceSymbol = compilation.GetTypeByMetadataName(fullInterfaceName);
-
-                    if (interfaceSymbol != null && interfaceSymbol.TypeKind == TypeKind.Interface)
-                    {
-                        return interfaceSymbol;
-                    }
-                }
-            }
-        }
-
-        return null;
-    }
-
-    /// <summary>
-    /// 获取类型的显示名称
-    /// <remarks>将系统类型转换为 C# 关键字别名（e.g. System.Int32 -> int）</remarks>
-    /// </summary>
-    /// <param name="type">类型符号</param>
-    /// <returns>类型的显示名称</returns>
-    private string GetTypeName(ITypeSymbol type)
-    {
-        switch (type.SpecialType)
-        {
-            case SpecialType.System_Int32:
-                return "int";
-
-            case SpecialType.System_String:
-                return "string";
-
-            case SpecialType.System_Boolean:
-                return "bool";
-
-            case SpecialType.System_Single:
-                return "float";
-
-            case SpecialType.System_Double:
-                return "double";
-
-            case SpecialType.System_Int64:
-                return "long";
-
-            case SpecialType.System_Byte:
-                return "byte";
-
-            case SpecialType.System_Char:
-                return "char";
-
-            case SpecialType.System_Object:
-                return "object";
-
-            default:
-                return type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
         }
     }
 }

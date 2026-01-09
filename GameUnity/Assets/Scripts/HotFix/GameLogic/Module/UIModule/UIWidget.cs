@@ -8,15 +8,17 @@ namespace GameLogic
     {
         public override GameObject gameObject { get; protected set; }
 
+        private Transform m_transform;
+
         /// <summary>
         /// 矩阵位置组件
         /// </summary>
-        public override RectTransform rectTransform => gameObject?.transform as RectTransform;
+        public override RectTransform rectTransform => m_transform as RectTransform;
 
         /// <summary>
         /// 位置组件
         /// </summary>
-        public override Transform transform => gameObject?.transform;
+        public override Transform transform => m_transform;
 
         public override UIType Type => UIType.Widget;
 
@@ -217,6 +219,7 @@ namespace GameLogic
 
             WidgetName = GetType().Name;
             gameObject = go;
+            m_transform = gameObject?.transform;
             DLogger.Assert(rectTransform != null, $"{go.name} UI元素必须具有 RectTransform");
             return true;
         }

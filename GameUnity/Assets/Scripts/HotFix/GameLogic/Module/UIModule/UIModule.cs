@@ -134,7 +134,7 @@ namespace GameLogic
             {
                 UnityEngine.Object.Destroy(s_uiCanvas.parent.gameObject);
             }
-            RedDotModule.Instance.Destroy();
+            // RedDotModule.Instance.Destroy();
             ClearWindowQueue();
         }
 
@@ -721,7 +721,7 @@ namespace GameLogic
             for (int i = 0; i < m_uiStack.Count; i++)
             {
                 UIWindow window = m_uiStack[i];
-                window.Destroy();
+                window?.Destroy();
             }
             m_uiStack.Clear();
             m_uiMap.Clear();

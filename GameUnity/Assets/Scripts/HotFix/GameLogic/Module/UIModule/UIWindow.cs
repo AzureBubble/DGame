@@ -42,15 +42,17 @@ namespace GameLogic
 
         private readonly CancellationTokenSource m_cancellationTokenSource = new CancellationTokenSource();
 
+        private Transform m_transform;
+
         /// <summary>
         /// 窗口位置组件
         /// </summary>
-        public override Transform transform => gameObject?.transform;
+        public override Transform transform => m_transform;
 
         /// <summary>
         /// 窗口矩阵位置组件
         /// </summary>
-        public override RectTransform rectTransform => gameObject?.transform as RectTransform;
+        public override RectTransform rectTransform => m_transform as RectTransform;
 
         /// <summary>
         /// 窗口实例化资源对象
@@ -572,6 +574,7 @@ namespace GameLogic
             IsLoadDone = true;
             windowGo.name = GetType().Name;
             gameObject = windowGo;
+            m_transform = gameObject?.transform;
             windowGo.transform.localPosition = Vector3.zero;
 
             // UIDebugBehaviour.AddUIDebugBehaviour(windowGo);

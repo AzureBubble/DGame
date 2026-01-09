@@ -10,7 +10,7 @@ namespace Launcher
 
         private Transform m_transform;
         public Transform transform => m_transform != null ? m_transform : m_transform = gameObject?.transform;
-        public RectTransform rectTransform => m_transform as RectTransform;
+        public RectTransform rectTransform => transform as RectTransform;
 
         protected virtual bool NeedTween => true;
         protected virtual bool FullScreen => false;

@@ -165,12 +165,23 @@ public class GameEventTypeCodeFixProvider : CodeFixProvider
             // e.g.: obj.Method<T>()
             if (memberAccess.Name is GenericNameSyntax genericName)
             {
-                var newGenericName = genericName.WithTypeArgumentList(
-                    SyntaxFactory.TypeArgumentList(
-                        SyntaxFactory.SeparatedList(correctedTypeArguments)));
+                ExpressionSyntax newExpression;
 
-                var newMemberAccess = memberAccess.WithName(newGenericName);
-                var newInvocation = invocation.WithExpression(newMemberAccess);
+                // 无参情况：移除泛型参数
+                if (parameterTypes.Count == 0)
+                {
+                    var newIdentifierName = SyntaxFactory.IdentifierName(genericName.Identifier);
+                    newExpression = memberAccess.WithName(newIdentifierName);
+                }
+                else
+                {
+                    var newGenericName = genericName.WithTypeArgumentList(
+                        SyntaxFactory.TypeArgumentList(
+                            SyntaxFactory.SeparatedList(correctedTypeArguments)));
+                    newExpression = memberAccess.WithName(newGenericName);
+                }
+
+                var newInvocation = invocation.WithExpression(newExpression);
 
                 // 同时替换调用和回调方法
                 if (callbackMethodDecl != null)
@@ -198,11 +209,21 @@ public class GameEventTypeCodeFixProvider : CodeFixProvider
         else if (invocation.Expression is GenericNameSyntax directGenericName)
         {
             // e.g.: Method<T>()
-            var newGenericName = directGenericName.WithTypeArgumentList(
-                SyntaxFactory.TypeArgumentList(
-                    SyntaxFactory.SeparatedList(correctedTypeArguments)));
+            ExpressionSyntax newExpression;
 
-            var newInvocation = invocation.WithExpression(newGenericName);
+            // 无参情况：移除泛型参数
+            if (parameterTypes.Count == 0)
+            {
+                newExpression = SyntaxFactory.IdentifierName(directGenericName.Identifier);
+            }
+            else
+            {
+                newExpression = directGenericName.WithTypeArgumentList(
+                    SyntaxFactory.TypeArgumentList(
+                        SyntaxFactory.SeparatedList(correctedTypeArguments)));
+            }
+
+            var newInvocation = invocation.WithExpression(newExpression);
 
             // 同时替换调用和回调方法
             if (callbackMethodDecl != null)

@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "9UZDX3TXJ4Y=",
+  "dgSpecHash": "VZ1iJQWXe5Q=",
   "success": true,
-  "projectFilePath": "D:\\Unity\\GitHub Project\\DGame\\Tools\\Generata Tools\\SourceGenerator\\SourceGenerator\\SourceGenerator.csproj",
+  "projectFilePath": "D:\\Unity\\GitHub Project\\DGame\\Tools\\Generata Tools\\SourceGenerator\\GameEventAnalyzer\\GameEventAnalyzer.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\QZJ\\.nuget\\packages\\microsoft.codeanalysis.analyzers\\3.3.4\\microsoft.codeanalysis.analyzers.3.3.4.nupkg.sha512",
     "C:\\Users\\QZJ\\.nuget\\packages\\microsoft.codeanalysis.common\\3.8.0\\microsoft.codeanalysis.common.3.8.0.nupkg.sha512",

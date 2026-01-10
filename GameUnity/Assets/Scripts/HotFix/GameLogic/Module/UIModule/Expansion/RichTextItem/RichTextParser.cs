@@ -39,7 +39,11 @@ namespace GameLogic
                 return s_resultCache;
             }
 
-            text = text.Replace("\t", "    ");
+            // 仅在包含 Tab 时才进行替换，避免不必要的字符串分配
+            if (text.Contains('\t'))
+            {
+                text = text.Replace("\t", "    ");
+            }
 
             var currentElement = RichTextElement.Create(RichTextElementType.Text);
             int length = text.Length;
@@ -293,33 +297,35 @@ namespace GameLogic
         }
 
         /// <summary>
-        /// 解析链接标签，返回 LinkData 对象
+        /// 解析链接标签，返回 LinkData 对象（使用对象池）
         /// </summary>
         public static LinkData ParseLink(string tagContent)
         {
             var match = s_linkRegex.Match(tagContent);
             if (!match.Success) return null;
 
-            var data = new LinkData
-            {
-                LinkID = int.Parse(match.Groups[1].Value),
-                LinkText = match.Groups[2].Value,
-                LinkColor = match.Groups[3].Success && !string.IsNullOrEmpty(match.Groups[3].Value)
-                    ? match.Groups[3].Value
-                    : null,
-                Style = RichTextLinkStyle.Normal
-            };
+            string color = match.Groups[3].Success && !string.IsNullOrEmpty(match.Groups[3].Value)
+                ? match.Groups[3].Value
+                : null;
 
+            var style = RichTextLinkStyle.Normal;
             if (match.Groups[4].Success && !string.IsNullOrEmpty(match.Groups[4].Value))
             {
-                string styleStr = match.Groups[4].Value.ToLower();
-                if (styleStr == "underline" || styleStr == "u")
+                string styleStr = match.Groups[4].Value;
+                // 使用 OrdinalIgnoreCase 避免 ToLower 的字符串分配
+                if (string.Equals(styleStr, "underline", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(styleStr, "u", StringComparison.OrdinalIgnoreCase))
                 {
-                    data.Style = RichTextLinkStyle.Underline;
+                    style = RichTextLinkStyle.Underline;
                 }
             }
 
-            return data;
+            return LinkData.Create(
+                int.Parse(match.Groups[1].Value),
+                match.Groups[2].Value,
+                color,
+                style
+            );
         }
     }
 }

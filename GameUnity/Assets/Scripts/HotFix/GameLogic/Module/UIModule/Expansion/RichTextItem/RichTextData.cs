@@ -55,6 +55,37 @@ namespace GameLogic
         public string LinkColor;              // 链接颜色 (如 "#00BFFF")
         public RichTextLinkStyle Style;       // 链接样式
 
+        private static readonly Stack<LinkData> s_pool = new Stack<LinkData>(16);
+
+        public static LinkData Create(int id, string text, string color = null, RichTextLinkStyle style = RichTextLinkStyle.Normal)
+        {
+            LinkData data;
+            if (s_pool.Count > 0)
+            {
+                data = s_pool.Pop();
+            }
+            else
+            {
+                data = new LinkData();
+            }
+
+            data.LinkID = id;
+            data.LinkText = text;
+            data.LinkColor = color;
+            data.Style = style;
+            return data;
+        }
+
+        public void Dispose()
+        {
+            LinkID = 0;
+            LinkText = null;
+            LinkColor = null;
+            Style = RichTextLinkStyle.Normal;
+            s_pool.Push(this);
+        }
+
+        // 保留原有构造函数以兼容
         public LinkData() { }
 
         public LinkData(int id, string text, string color = null, RichTextLinkStyle style = RichTextLinkStyle.Normal)
@@ -269,28 +300,78 @@ namespace GameLogic
         private string m_lastSpriteName;
         private bool m_isLoading;
 
-        /// <summary>
-        /// 播放下一帧
-        /// </summary>
-        /// <param name="setSprite">设置精灵的回调 (image, spriteName, onComplete)</param>
-        public void NextFrame(Action<UIImage, string, Action> setSprite)
+        private static readonly Stack<EmojiAnimationInstance> s_pool = new Stack<EmojiAnimationInstance>(16);
+
+        public static EmojiAnimationInstance Create(UIImage targetImage, EmojiAnimationData animData)
         {
-            if (AnimationData == null || AnimationData.FrameCount == 0) return;
+            EmojiAnimationInstance instance;
+            if (s_pool.Count > 0)
+            {
+                instance = s_pool.Pop();
+            }
+            else
+            {
+                instance = new EmojiAnimationInstance();
+            }
 
-            // 如果上一帧还在加载中，跳过本次更新，避免取消导致的错误
-            if (m_isLoading) return;
+            instance.TargetImage = targetImage;
+            instance.AnimationData = animData;
+            instance.CurrentFrame = 0;
+            instance.m_lastSpriteName = null;
+            instance.m_isLoading = false;
+            return instance;
+        }
 
-            var spriteName = AnimationData.GetFrame(CurrentFrame);
+        public void Dispose()
+        {
+            TargetImage = null;
+            AnimationData = null;
+            CurrentFrame = 0;
+            m_lastSpriteName = null;
+            m_isLoading = false;
+            s_pool.Push(this);
+        }
 
-            // 只在精灵名称实际变化时才调用 setSprite
+        /// <summary>
+        /// 尝试获取下一帧信息（无闭包版本）
+        /// </summary>
+        /// <param name="image">输出：目标 Image</param>
+        /// <param name="spriteName">输出：精灵名称</param>
+        /// <returns>是否需要更新精灵</returns>
+        public bool TryGetNextFrame(out UIImage image, out string spriteName)
+        {
+            image = null;
+            spriteName = null;
+
+            if (AnimationData == null || AnimationData.FrameCount == 0)
+                return false;
+
+            // 如果上一帧还在加载中，跳过本次更新
+            if (m_isLoading)
+                return false;
+
+            spriteName = AnimationData.GetFrame(CurrentFrame);
+
+            // 只在精灵名称实际变化时才需要更新
             if (spriteName != m_lastSpriteName)
             {
                 m_lastSpriteName = spriteName;
                 m_isLoading = true;
-                setSprite?.Invoke(TargetImage, spriteName, () => m_isLoading = false);
+                image = TargetImage;
+                CurrentFrame = (CurrentFrame + 1) % AnimationData.FrameCount;
+                return true;
             }
 
             CurrentFrame = (CurrentFrame + 1) % AnimationData.FrameCount;
+            return false;
+        }
+
+        /// <summary>
+        /// 标记加载完成
+        /// </summary>
+        public void MarkLoadComplete()
+        {
+            m_isLoading = false;
         }
 
         public void Reset()
@@ -298,6 +379,29 @@ namespace GameLogic
             CurrentFrame = 0;
             m_lastSpriteName = null;
             m_isLoading = false;
+        }
+    }
+
+    /// <summary>
+    /// 链接点击处理器组件（避免 Lambda 闭包）
+    /// </summary>
+    internal class LinkClickHandler : MonoBehaviour
+    {
+        public LinkData Data;
+        public Action<LinkData> Callback;
+
+        public void OnClick()
+        {
+            if (Data != null)
+            {
+                Callback?.Invoke(Data);
+            }
+        }
+
+        public void Clear()
+        {
+            Data = null;
+            Callback = null;
         }
     }
 }

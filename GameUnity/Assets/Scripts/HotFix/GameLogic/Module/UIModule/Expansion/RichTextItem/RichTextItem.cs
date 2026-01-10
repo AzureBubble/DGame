@@ -75,11 +75,23 @@ namespace GameLogic
         private RichTextParams m_currentParams;
         private CancellationTokenSource m_cts;
 
+        // 静态缓存 - 减少 GC 分配
+        [ThreadStatic] private static StringBuilder s_textBuilder;
+        [ThreadStatic] private static StringBuilder s_colorBuilder;
+
+        private static StringBuilder TextBuilder => s_textBuilder ??= new StringBuilder(256);
+        private static StringBuilder ColorBuilder => s_colorBuilder ??= new StringBuilder(128);
+
+        // 缓存的参数对象，避免每次创建新实例
+        private RichTextParams m_cachedParams;
+
         // 对象池
         private readonly List<UIText> m_textPool = new List<UIText>();
         private readonly List<UIImage> m_imagePool = new List<UIImage>();
         private readonly List<UIText> m_activeTexts = new List<UIText>();
         private readonly List<UIImage> m_activeImages = new List<UIImage>();
+        private readonly List<UIImage> m_underlinePool = new List<UIImage>();
+        private readonly List<UIImage> m_activeUnderlines = new List<UIImage>();
 
         // 表情动画
         private readonly List<EmojiAnimationInstance> m_emojiInstances = new List<EmojiAnimationInstance>();
@@ -92,11 +104,16 @@ namespace GameLogic
         // 延迟应用特效
         private bool m_pendingEffects = false;
 
-        // 链接元素
-        private readonly List<(UIText text, LinkData data)> m_linkElements = new List<(UIText, LinkData)>();
+        // 链接元素 - 只存储 text，LinkData 单独管理避免重复 Dispose
+        private readonly List<UIText> m_linkTexts = new List<UIText>();
+        // 唯一的 LinkData 列表，避免重复 Dispose
+        private readonly List<LinkData> m_linkDataList = new List<LinkData>();
 
         // 异步渲染状态
         private bool m_isRendering = false;
+
+        // 图标加载上下文（避免 Lambda 闭包）
+        private readonly Dictionary<Image, float> m_pendingIconSizes = new Dictionary<Image, float>();
 
         #endregion
 
@@ -216,28 +233,8 @@ namespace GameLogic
                 // 立即标记为渲染中，防止 LateUpdate 操作正在被回收的资源
                 m_isRendering = true;
 
-                // 使用异步分帧渲染 (fire-and-forget)
-                BuildLayoutAsync(elements, token)
-                    .ContinueWith(() =>
-                    {
-                        // 检查是否已被取消
-                        if (token.IsCancellationRequested)
-                        {
-                            // 清理元素但不执行渲染
-                            foreach (var element in elements)
-                            {
-                                element.Dispose();
-                            }
-
-                            m_isRendering = false;
-                            return;
-                        }
-
-                        ApplyLayout();
-                        FinalizeRendering(elements, token);
-                        m_isRendering = false;
-                    })
-                    .Forget();
+                // 使用异步分帧渲染 (fire-and-forget) - 使用私有方法避免 Lambda 闭包
+                RenderAsyncInternal(elements, token).Forget();
                 return;
             }
 
@@ -371,7 +368,7 @@ namespace GameLogic
             ClearLinkElements();
             RecycleAllElements();
             ClearRows();
-            m_emojiInstances.Clear();
+            RecycleEmojiInstances();
             m_hasEmojis = false;
             m_pendingEffects = false;
             RectTransform.sizeDelta = Vector2.zero;
@@ -416,9 +413,64 @@ namespace GameLogic
         private void OnDestroy()
         {
             CancelPendingOperations();
-            Clear();
 
-            // 销毁对象池中的对象
+            // 清理 Action 回调，防止外部对象通过委托持有引用
+            OnLinkClicked = null;
+            OnRenderProgress = null;
+            OnRenderComplete = null;
+
+            // 清理链接事件
+            foreach (var text in m_linkTexts)
+            {
+                if (text != null)
+                {
+                    var button = text.GetComponent<UIButton>();
+                    if (button != null)
+                    {
+                        button.onClick.RemoveAllListeners();
+                    }
+
+                    // 清理 LinkClickHandler
+                    var clickHandler = text.GetComponent<LinkClickHandler>();
+                    if (clickHandler != null)
+                    {
+                        clickHandler.Clear();
+                    }
+                }
+            }
+
+            m_linkTexts.Clear();
+
+            // 回收 LinkData（每个只 Dispose 一次）
+            foreach (var data in m_linkDataList)
+            {
+                data?.Dispose();
+            }
+
+            m_linkDataList.Clear();
+
+            // 回收表情实例到对象池（不涉及 GameObject 操作）
+            foreach (var instance in m_emojiInstances)
+            {
+                instance.Dispose();
+            }
+
+            m_emojiInstances.Clear();
+
+            // 清理行数据
+            foreach (var row in m_rows)
+            {
+                row.Dispose();
+            }
+
+            m_rows.Clear();
+
+            // 销毁所有活动元素（OnDestroy 时不需要回收，直接清理列表即可，GameObject 会随父对象销毁）
+            m_activeTexts.Clear();
+            m_activeImages.Clear();
+            m_activeUnderlines.Clear();
+
+            // 销毁对象池中的对象（这些是隐藏的，需要手动销毁）
             foreach (var text in m_textPool)
             {
                 if (text != null) Destroy(text.gameObject);
@@ -429,8 +481,17 @@ namespace GameLogic
                 if (image != null) Destroy(image.gameObject);
             }
 
+            foreach (var underline in m_underlinePool)
+            {
+                if (underline != null) Destroy(underline.gameObject);
+            }
+
             m_textPool.Clear();
             m_imagePool.Clear();
+            m_underlinePool.Clear();
+
+            m_hasEmojis = false;
+            m_pendingEffects = false;
         }
 
         #endregion
@@ -447,7 +508,7 @@ namespace GameLogic
             ClearLinkElements();
             RecycleAllElements();
             ClearRows();
-            m_emojiInstances.Clear();
+            RecycleEmojiInstances();
             m_hasEmojis = false;
 
             // 根据溢出设置使用原始尺寸
@@ -510,7 +571,7 @@ namespace GameLogic
             ClearLinkElements();
             RecycleAllElements();
             ClearRows();
-            m_emojiInstances.Clear();
+            RecycleEmojiInstances();
             m_hasEmojis = false;
 
             bool isWrapMode = m_currentParams.HorizontalOverflow == HorizontalWrapMode.Wrap;
@@ -610,22 +671,55 @@ namespace GameLogic
             OnRenderComplete?.Invoke();
         }
 
+        /// <summary>
+        /// 内部异步渲染方法（避免 Lambda 闭包）
+        /// </summary>
+        private async UniTaskVoid RenderAsyncInternal(List<RichTextElement> elements, CancellationToken token)
+        {
+            try
+            {
+                await BuildLayoutAsync(elements, token);
+
+                // 检查是否已被取消
+                if (token.IsCancellationRequested)
+                {
+                    // 清理元素但不执行渲染
+                    foreach (var element in elements)
+                    {
+                        element.Dispose();
+                    }
+
+                    m_isRendering = false;
+                    return;
+                }
+
+                ApplyLayout();
+                FinalizeRendering(elements, token);
+            }
+            finally
+            {
+                m_isRendering = false;
+            }
+        }
+
         private void ProcessTextElement(RichTextElement element, ref RichTextRow currentRow)
         {
             string text = element.GetText();
             if (string.IsNullOrEmpty(text)) return;
 
             m_font.RequestCharactersInTexture(text, m_currentParams.FontSize);
-            char[] chars = text.ToCharArray();
 
-            StringBuilder sb = new StringBuilder(64);
+            // 使用静态缓存的 StringBuilder，避免每次调用都分配
+            var sb = TextBuilder;
+            sb.Clear();
+
             float currentWidth = 0;
             bool shouldWrap = m_layoutWidth > 0; // 使用 m_layoutWidth 决定是否换行
             float charSpacing = m_currentParams.CharacterSpacing;
 
-            for (int i = 0; i < chars.Length; i++)
+            for (int i = 0; i < text.Length; i++)
             {
-                char c = chars[i];
+                char c = text[i];
 
                 // 处理换行符
                 if (c == '\n')
@@ -677,17 +771,12 @@ namespace GameLogic
             SetupImageCommon(image, element.RaycastEnabled);
 
             float size = m_currentParams.IconSize;
-            float aspectRatio = 1f;
 
-            // 加载图片并调整尺寸
-            RichTextConfig.SetSprite(image, element.FormatData, true, img =>
-            {
-                if (img != null && img.sprite != null)
-                {
-                    aspectRatio = img.sprite.rect.width / img.sprite.rect.height;
-                    img.rectTransform.sizeDelta = new Vector2(size * aspectRatio, size);
-                }
-            }, m_cts?.Token ?? default);
+            // 存储图标尺寸到字典，供回调使用（避免 Lambda 闭包）
+            m_pendingIconSizes[image] = size;
+
+            // 加载图片并调整尺寸 - 使用实例方法避免闭包
+            RichTextConfig.SetSprite(image, element.FormatData, true, OnIconSpriteLoaded, m_cts?.Token ?? default);
 
             image.rectTransform.sizeDelta = new Vector2(size, size);
 
@@ -705,6 +794,21 @@ namespace GameLogic
             m_activeImages.Add(image);
         }
 
+        /// <summary>
+        /// 图标精灵加载完成回调（避免 Lambda 闭包）
+        /// </summary>
+        private void OnIconSpriteLoaded(Image img)
+        {
+            if (img == null || img.sprite == null) return;
+
+            if (m_pendingIconSizes.TryGetValue(img, out float size))
+            {
+                float aspectRatio = img.sprite.rect.width / img.sprite.rect.height;
+                img.rectTransform.sizeDelta = new Vector2(size * aspectRatio, size);
+                m_pendingIconSizes.Remove(img);
+            }
+        }
+
         private void ProcessEmojiElement(RichTextElement element, ref RichTextRow currentRow)
         {
             var emojiData = RichTextConfig.GetEmojiData(element.FormatData);
@@ -716,13 +820,8 @@ namespace GameLogic
             float size = m_currentParams.IconSize;
             image.rectTransform.sizeDelta = new Vector2(size, size);
 
-            // 设置表情动画
-            var animInstance = new EmojiAnimationInstance
-            {
-                TargetImage = image,
-                AnimationData = emojiData,
-                CurrentFrame = 0
-            };
+            // 使用对象池创建表情动画实例
+            var animInstance = EmojiAnimationInstance.Create(image, emojiData);
             m_emojiInstances.Add(animInstance);
             m_hasEmojis = true;
 
@@ -750,6 +849,9 @@ namespace GameLogic
                 ProcessTextElement(element, ref currentRow);
                 return;
             }
+
+            // 将 LinkData 添加到列表中（只添加一次，避免重复 Dispose）
+            m_linkDataList.Add(linkData);
 
             // 确定链接颜色
             Color linkColor = m_defaultLinkColor;
@@ -781,7 +883,9 @@ namespace GameLogic
             else
             {
                 // 换行模式：逐字符处理，必要时拆分链接
-                StringBuilder sb = new StringBuilder(64);
+                // 使用静态缓存的 StringBuilder
+                var sb = TextBuilder;
+                sb.Clear();
                 float currentWidth = 0;
 
                 for (int i = 0; i < linkText.Length; i++)
@@ -824,13 +928,20 @@ namespace GameLogic
             var label = GetOrCreateText();
             SetupTextCommon(label);
 
-            // 构建显示文本
-            label.text = $"<color=#{ColorUtility.ToHtmlStringRGB(linkColor)}>{text}</color>";
+            // 使用缓存的 StringBuilder 构建显示文本，避免字符串分配
+            var sb = ColorBuilder;
+            sb.Clear();
+            sb.Append("<color=#");
+            sb.Append(ColorUtility.ToHtmlStringRGB(linkColor));
+            sb.Append('>');
+            sb.Append(text);
+            sb.Append("</color>");
+            label.text = sb.ToString();
 
             // 启用射线检测以支持点击
             label.raycastTarget = true;
 
-            // 添加点击事件
+            // 添加点击事件 - 使用 LinkClickHandler 避免 Lambda 闭包
             var button = label.gameObject.GetComponent<UIButton>();
 
             if (button == null)
@@ -842,8 +953,17 @@ namespace GameLogic
             // 关闭按钮点击缩放功能
             button.ClickScaleExtend.IsUseClickScale = false;
             button.onClick.RemoveAllListeners();
-            var capturedLinkData = linkData;
-            button.onClick.AddListener(() => OnLinkClicked?.Invoke(capturedLinkData));
+
+            // 获取或添加 LinkClickHandler 组件
+            var clickHandler = label.gameObject.GetComponent<LinkClickHandler>();
+            if (clickHandler == null)
+            {
+                clickHandler = label.gameObject.AddComponent<LinkClickHandler>();
+            }
+
+            clickHandler.Data = linkData;
+            clickHandler.Callback = OnLinkClicked;
+            button.onClick.AddListener(clickHandler.OnClick);
 
             float height = m_currentParams.FontSize + m_currentParams.LineSpacing;
             label.rectTransform.sizeDelta = new Vector2(width, height);
@@ -866,28 +986,42 @@ namespace GameLogic
             layoutElement.Height = height;
             currentRow.AddElement(layoutElement);
             m_activeTexts.Add(label);
-            m_linkElements.Add((label, linkData));
+            m_linkTexts.Add(label);
         }
 
         /// <summary>
-        /// 为链接创建下划线
+        /// 为链接创建下划线（使用对象池）
         /// </summary>
         private void CreateUnderline(RectTransform parent, float width, Color color)
         {
-            var underlineGo = new GameObject("Underline", typeof(RectTransform));
-            underlineGo.layer = gameObject.layer;
-            underlineGo.transform.SetParent(parent, false);
+            UIImage underlineImage;
 
-            var underlineImage = underlineGo.AddComponent<UIImage>();
+            if (m_underlinePool.Count > 0)
+            {
+                underlineImage = m_underlinePool[m_underlinePool.Count - 1];
+                m_underlinePool.RemoveAt(m_underlinePool.Count - 1);
+                underlineImage.gameObject.SetActive(true);
+                underlineImage.transform.SetParent(parent, false);
+            }
+            else
+            {
+                var underlineGo = new GameObject("Underline", typeof(RectTransform));
+                underlineGo.layer = gameObject.layer;
+                underlineGo.transform.SetParent(parent, false);
+                underlineImage = underlineGo.AddComponent<UIImage>();
+
+                var underlineRect = underlineImage.rectTransform;
+                underlineRect.anchorMin = new Vector2(0, 0);
+                underlineRect.anchorMax = new Vector2(0, 0);
+                underlineRect.pivot = new Vector2(0, 0);
+            }
+
             underlineImage.color = color;
             underlineImage.raycastTarget = false;
+            underlineImage.rectTransform.anchoredPosition = new Vector2(0, 0);
+            underlineImage.rectTransform.sizeDelta = new Vector2(width, m_underlineHeight);
 
-            var underlineRect = underlineGo.GetComponent<RectTransform>();
-            underlineRect.anchorMin = new Vector2(0, 0);
-            underlineRect.anchorMax = new Vector2(0, 0);
-            underlineRect.pivot = new Vector2(0, 0);
-            underlineRect.anchoredPosition = new Vector2(0, 0); // 在文本底部
-            underlineRect.sizeDelta = new Vector2(width, m_underlineHeight);
+            m_activeUnderlines.Add(underlineImage);
         }
 
         private void CreateTextLabel(string text, string colorValue, float width, ref RichTextRow currentRow)
@@ -898,7 +1032,15 @@ namespace GameLogic
             // 应用颜色格式
             if (!string.IsNullOrEmpty(colorValue))
             {
-                label.text = $"<color={colorValue}>{text}</color>";
+                // 使用缓存的 StringBuilder，避免字符串分配
+                var sb = ColorBuilder;
+                sb.Clear();
+                sb.Append("<color=");
+                sb.Append(colorValue);
+                sb.Append('>');
+                sb.Append(text);
+                sb.Append("</color>");
+                label.text = sb.ToString();
             }
             else
             {
@@ -1215,6 +1357,27 @@ namespace GameLogic
             }
 
             m_activeImages.Clear();
+
+            // 清理待处理的图标尺寸
+            m_pendingIconSizes.Clear();
+
+            // 回收下划线
+            RecycleUnderlines();
+        }
+
+        private void RecycleUnderlines()
+        {
+            foreach (var underline in m_activeUnderlines)
+            {
+                if (underline != null)
+                {
+                    underline.gameObject.SetActive(false);
+                    underline.transform.SetParent(transform, false);
+                    m_underlinePool.Add(underline);
+                }
+            }
+
+            m_activeUnderlines.Clear();
         }
 
         private void ClearRows()
@@ -1229,7 +1392,7 @@ namespace GameLogic
 
         private void ClearLinkElements()
         {
-            foreach (var (text, _) in m_linkElements)
+            foreach (var text in m_linkTexts)
             {
                 if (text != null)
                 {
@@ -1239,10 +1402,35 @@ namespace GameLogic
                     {
                         button.onClick.RemoveAllListeners();
                     }
+
+                    // 清理 LinkClickHandler
+                    var clickHandler = text.GetComponent<LinkClickHandler>();
+                    if (clickHandler != null)
+                    {
+                        clickHandler.Clear();
+                    }
                 }
             }
 
-            m_linkElements.Clear();
+            m_linkTexts.Clear();
+
+            // 回收 LinkData 到对象池（每个只 Dispose 一次）
+            foreach (var data in m_linkDataList)
+            {
+                data?.Dispose();
+            }
+
+            m_linkDataList.Clear();
+        }
+
+        private void RecycleEmojiInstances()
+        {
+            foreach (var instance in m_emojiInstances)
+            {
+                instance.Dispose();
+            }
+
+            m_emojiInstances.Clear();
         }
 
         #endregion
@@ -1250,25 +1438,40 @@ namespace GameLogic
         #region 表情动画
 
         /// <summary>
-        /// 用于 LateUpdate 动画循环的表情帧更新
-        /// 不传递 CancellationToken，让资源系统自行管理请求取消
+        /// 用于 LateUpdate 动画循环的表情帧更新（无闭包版本）
         /// </summary>
         private void UpdateEmojiFramesForAnimation()
         {
             foreach (var instance in m_emojiInstances)
             {
-                if (instance.TargetImage == null) continue;
-                instance.NextFrame((image, spriteName, onComplete) =>
+                if (instance.TryGetNextFrame(out var image, out var spriteName))
                 {
-                    if (image == null || string.IsNullOrEmpty(spriteName))
+                    if (image != null && !string.IsNullOrEmpty(spriteName))
                     {
-                        onComplete?.Invoke();
-                        return;
+                        // 使用实例方法作为回调，避免 Lambda 闭包
+                        RichTextConfig.SetSprite(image, spriteName, false, OnEmojiSpriteLoaded, default);
                     }
+                    else
+                    {
+                        instance.MarkLoadComplete();
+                    }
+                }
+            }
+        }
 
-                    // 使用回调通知加载完成，防止快速切换帧时产生取消错误
-                    RichTextConfig.SetSprite(image, spriteName, false, _ => onComplete?.Invoke(), default);
-                });
+        /// <summary>
+        /// 表情精灵加载完成回调（静态化避免闭包）
+        /// </summary>
+        private void OnEmojiSpriteLoaded(Image img)
+        {
+            // 查找对应的 EmojiAnimationInstance 并标记加载完成
+            foreach (var instance in m_emojiInstances)
+            {
+                if (instance.TargetImage == img)
+                {
+                    instance.MarkLoadComplete();
+                    break;
+                }
             }
         }
 
@@ -1283,26 +1486,18 @@ namespace GameLogic
 
             foreach (var instance in m_emojiInstances)
             {
-                instance.NextFrame((image, spriteName, onComplete) =>
-                    OnSetEmojiSprite(image, spriteName, token, onComplete));
+                if (instance.TryGetNextFrame(out var image, out var spriteName))
+                {
+                    if (image != null && !string.IsNullOrEmpty(spriteName) && !token.IsCancellationRequested)
+                    {
+                        RichTextConfig.SetSprite(image, spriteName, false, OnEmojiSpriteLoaded, token);
+                    }
+                    else
+                    {
+                        instance.MarkLoadComplete();
+                    }
+                }
             }
-        }
-
-        private void OnSetEmojiSprite(UIImage image, string spriteName, CancellationToken token, Action onComplete)
-        {
-            if (image == null || string.IsNullOrEmpty(spriteName))
-            {
-                onComplete?.Invoke();
-                return;
-            }
-
-            if (token.IsCancellationRequested)
-            {
-                onComplete?.Invoke();
-                return;
-            }
-
-            RichTextConfig.SetSprite(image, spriteName, false, _ => onComplete?.Invoke(), token);
         }
 
         #endregion
@@ -1311,30 +1506,35 @@ namespace GameLogic
 
         private RichTextParams CreateParamsFromInspector()
         {
-            return new RichTextParams
+            // 复用缓存的参数对象，避免每次分配
+            if (m_cachedParams == null)
             {
-                FontSize = m_fontSize,
-                IconSize = m_iconSize,
-                TextColor = m_fontColor,
-                Alignment = m_alignment,
-                IconAlignment = m_iconAlignment,
-                CharacterSpacing = m_characterSpacing,
-                LineSpacing = m_lineSpacing,
-                SupportRichText = m_supportRichText,
-                HorizontalOverflow = m_horizontalOverflow,
-                VerticalOverflow = m_verticalOverflow,
-                // 阴影
-                EnableShadow = m_enableShadow,
-                ShadowEffectDistance = m_shadowEffectDistance,
-                ShadowTopLeftColor = m_shadowTopLeftColor,
-                ShadowTopRightColor = m_shadowTopRightColor,
-                ShadowBottomLeftColor = m_shadowBottomLeftColor,
-                ShadowBottomRightColor = m_shadowBottomRightColor,
-                // 描边
-                EnableOutline = m_enableOutline,
-                OutlineColor = m_outlineColor,
-                OutlineWidth = m_outlineWidth
-            };
+                m_cachedParams = new RichTextParams();
+            }
+
+            m_cachedParams.FontSize = m_fontSize;
+            m_cachedParams.IconSize = m_iconSize;
+            m_cachedParams.TextColor = m_fontColor;
+            m_cachedParams.Alignment = m_alignment;
+            m_cachedParams.IconAlignment = m_iconAlignment;
+            m_cachedParams.CharacterSpacing = m_characterSpacing;
+            m_cachedParams.LineSpacing = m_lineSpacing;
+            m_cachedParams.SupportRichText = m_supportRichText;
+            m_cachedParams.HorizontalOverflow = m_horizontalOverflow;
+            m_cachedParams.VerticalOverflow = m_verticalOverflow;
+            // 阴影
+            m_cachedParams.EnableShadow = m_enableShadow;
+            m_cachedParams.ShadowEffectDistance = m_shadowEffectDistance;
+            m_cachedParams.ShadowTopLeftColor = m_shadowTopLeftColor;
+            m_cachedParams.ShadowTopRightColor = m_shadowTopRightColor;
+            m_cachedParams.ShadowBottomLeftColor = m_shadowBottomLeftColor;
+            m_cachedParams.ShadowBottomRightColor = m_shadowBottomRightColor;
+            // 描边
+            m_cachedParams.EnableOutline = m_enableOutline;
+            m_cachedParams.OutlineColor = m_outlineColor;
+            m_cachedParams.OutlineWidth = m_outlineWidth;
+
+            return m_cachedParams;
         }
 
         private void CancelPendingOperations()

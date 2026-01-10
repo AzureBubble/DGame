@@ -20,6 +20,10 @@ namespace GameLogic
         private static readonly Dictionary<string, EmojiAnimationData> s_emojiRegistry =
             new Dictionary<string, EmojiAnimationData>();
 
+        // 缓存表情键列表，避免每次迭代 Dictionary.Keys 通常在场景切换时可选清理
+        private static readonly List<string> s_emojiKeyCache = new List<string>(32);
+        private static bool s_keyCacheDirty = true;
+
         /// <summary>
         /// 注册带动画帧的表情
         /// </summary>
@@ -34,6 +38,7 @@ namespace GameLogic
                 data = new EmojiAnimationData();
                 data.RaycastEnabled = raycastEnabled;
                 s_emojiRegistry[tag] = data;
+                s_keyCacheDirty = true;
             }
 
             while (data.FrameSprites.Count < frameIndex)
@@ -56,9 +61,26 @@ namespace GameLogic
         /// </summary>
         public static bool IsEmojiSpan(ReadOnlySpan<char> tag)
         {
-            foreach (var key in s_emojiRegistry.Keys)
+            // 无表情时快速返回
+            if (s_emojiRegistry.Count == 0)
+                return false;
+
+            // 更新键缓存
+            if (s_keyCacheDirty)
             {
-                if (tag.SequenceEqual(key.AsSpan()))
+                s_emojiKeyCache.Clear();
+                s_emojiKeyCache.AddRange(s_emojiRegistry.Keys);
+                s_keyCacheDirty = false;
+            }
+
+            int tagLength = tag.Length;
+
+            // 使用缓存的键列表迭代，避免 Dictionary.Keys 枚举器开销
+            for (int i = 0; i < s_emojiKeyCache.Count; i++)
+            {
+                string key = s_emojiKeyCache[i];
+                // 先检查长度，避免不必要的比较
+                if (key.Length == tagLength && tag.SequenceEqual(key.AsSpan()))
                 {
                     return true;
                 }
@@ -82,6 +104,8 @@ namespace GameLogic
         public static void ClearAll()
         {
             s_emojiRegistry.Clear();
+            s_emojiKeyCache.Clear();
+            s_keyCacheDirty = true;
         }
 
         /// <summary>

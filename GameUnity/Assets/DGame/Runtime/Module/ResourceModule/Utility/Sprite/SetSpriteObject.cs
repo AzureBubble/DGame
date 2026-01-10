@@ -109,6 +109,7 @@ namespace DGame
             setSpriteObject.m_setType = SetType.Image;
             setSpriteObject.m_image = image;
             setSpriteObject.m_cancellationToken = ct;
+            setSpriteObject.TargetObject = image;
             return setSpriteObject;
         }
 
@@ -121,6 +122,7 @@ namespace DGame
             setSpriteObject.m_setType = SetType.SpriteRender;
             setSpriteObject.m_spriteRenderer = spriteRenderer;
             setSpriteObject.m_cancellationToken = ct;
+            setSpriteObject.TargetObject = spriteRenderer;
             return setSpriteObject;
         }
     }

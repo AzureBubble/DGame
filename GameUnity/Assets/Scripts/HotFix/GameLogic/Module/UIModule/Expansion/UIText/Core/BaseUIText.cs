@@ -23,6 +23,7 @@ namespace GameLogic
         public UITextGradientColorExtend UITextGradientColorExtend => m_uiTextGradientColorExtend;
         public UITextShadowExtend UITextShadowExtend => m_uiTextShadowExtend;
         public UITextLocalizationExtend UITextLocalizationExtend => m_uiTextLocalizationExtend;
+        public UITextSpacingExtend UITextSpacingExtend => m_uiTextSpacingExtend;
 
         /// <summary>
         /// 当前可见的文字行数
@@ -34,6 +35,7 @@ namespace GameLogic
         {
             base.Awake();
             UITextOutlineExtend?.Initialize(this);
+            UITextShadowExtend?.Initialize(this);
             UITextGradientColorExtend?.Initialize(this);
             m_uiTextLocalizationExtend?.Initialize(this);
         }

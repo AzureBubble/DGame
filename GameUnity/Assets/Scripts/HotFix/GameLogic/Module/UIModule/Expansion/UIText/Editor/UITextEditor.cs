@@ -91,6 +91,7 @@ namespace GameLogic
             m_textLocalizationPanelOpen = EditorPrefs.GetBool("UIText.m_textLocalizationPanelOpen", m_textLocalizationPanelOpen);
 
             m_uiText.UITextOutlineExtend.Initialize(m_uiText);
+            m_uiText.UITextShadowExtend.Initialize(m_uiText);
             m_uiText.UITextGradientColorExtend.Initialize(m_uiText);
             m_text = serializedObject.FindProperty("m_Text");
             m_fontData = serializedObject.FindProperty("m_FontData");

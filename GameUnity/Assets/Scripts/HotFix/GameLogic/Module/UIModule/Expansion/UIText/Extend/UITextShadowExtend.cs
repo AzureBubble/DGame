@@ -17,12 +17,57 @@ namespace GameLogic
         [SerializeField] private Vector2 m_effectDistance = new Vector2(1f, -1f);
         private const float MAX_EFFECT_DISTANCE = 600f;
         private Vector2 m_vectorColorOffset = Vector2.zero;
+        private Text m_text;
 
-        public bool UseShadow { get => m_isUseTextShadow; set => m_isUseTextShadow = value; }
-        public Color TopLeftColor { get => m_shadowTopLeftColor; set => m_shadowTopLeftColor = value; }
-        public Color TopRightColor { get => m_shadowTopRightColor; set => m_shadowTopRightColor = value; }
-        public Color BottomLeftColor { get => m_shadowBottomLeftColor; set => m_shadowBottomLeftColor = value; }
-        public Color BottomRightColor { get => m_shadowBottomRightColor; set => m_shadowBottomRightColor = value; }
+        public bool UseShadow
+        {
+            get => m_isUseTextShadow;
+            set
+            {
+                m_isUseTextShadow = value;
+                Refresh();
+            }
+        }
+
+        public Color TopLeftColor
+        {
+            get => m_shadowTopLeftColor;
+            set
+            {
+                m_shadowTopLeftColor = value;
+                Refresh();
+            }
+        }
+
+        public Color TopRightColor
+        {
+            get => m_shadowTopRightColor;
+            set
+            {
+                m_shadowTopRightColor = value;
+                Refresh();
+            }
+        }
+
+        public Color BottomLeftColor
+        {
+            get => m_shadowBottomLeftColor;
+            set
+            {
+                m_shadowBottomLeftColor = value;
+                Refresh();
+            }
+        }
+
+        public Color BottomRightColor
+        {
+            get => m_shadowBottomRightColor;
+            set
+            {
+                m_shadowBottomRightColor = value;
+                Refresh();
+            }
+        }
 
         public Vector2 EffectDistance
         {
@@ -55,7 +100,13 @@ namespace GameLogic
                 }
 
                 m_effectDistance = value;
+                Refresh();
             }
+        }
+
+        public void Initialize(Text text)
+        {
+            m_text = text;
         }
 
         public void PopulateMesh(VertexHelper vh, RectTransform rectTransform, Color color)
@@ -125,6 +176,20 @@ namespace GameLogic
             //使用全新颜色 不继承原有的
             return newColor;
             //return color * newColor;
+        }
+
+        public void SetShadowColor(Color32 topLeftColor, Color32 topRightColor, Color32 bottomLeftColor, Color32 bottomRightColor)
+        {
+            m_shadowTopLeftColor = topLeftColor;
+            m_shadowTopRightColor = topRightColor;
+            m_shadowBottomLeftColor = bottomLeftColor;
+            m_shadowBottomRightColor = bottomRightColor;
+            Refresh();
+        }
+
+        public void Refresh()
+        {
+            m_text?.SetVerticesDirty();
         }
     }
 }

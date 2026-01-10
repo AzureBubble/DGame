@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
@@ -19,6 +18,12 @@ namespace GameLogic
 
         [SerializeField] private bool m_isUseDoTween = true; // 开启缩放动画效果
         [SerializeField] private bool m_reboundEffect = true; // 回弹效果开启
+
+        public bool IsUseClickScale
+        {
+            get => m_isUseClickScale;
+            set => m_isUseClickScale = value;
+        }
 
         public void OnPointerDown(Transform transf, bool interactable)
         {

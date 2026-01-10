@@ -25,6 +25,8 @@ namespace GameLogic
         private PointerEventData m_pointerEventData;
         public Action OnPointerUpEvent; // 按钮不可点击也触发
 
+        public UIButtonClickScaleExtend ClickScaleExtend => m_uiButtonClickScale;
+
         #endregion
 
         protected override void Awake()

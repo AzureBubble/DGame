@@ -1,0 +1,81 @@
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
+
+namespace GameLogic
+{
+    /// <summary>
+    /// 解决嵌套使用ScrollRect时的Drag冲突问题。请将该脚本放置到内层ScrollRect上(外层的ScrollRect的Drag事件会被内层的拦截)
+    /// </summary>
+    public class NestedScrollRect : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
+    {
+        /// <summary>
+        /// 外层被拦截需要正常拖动的ScrollRect，可不指定，默认在父对象中找
+        /// </summary>
+        public ScrollRect anotherScrollRect;
+
+        /// <summary>
+        /// 当前的ScrollRect（本脚本所放置的物体上）的拖动方向默认为上下拖动，否则为左右拖动型
+        /// </summary>
+        public bool ThisIsUpAndDown { get; set; } = true;
+
+        private ScrollRect m_curScrollRect;
+        private EventTrigger m_anotherEventTrigger;
+        private bool m_isDragUpOrDown = false;
+
+        private void Awake()
+        {
+            m_curScrollRect = GetComponent<ScrollRect>();
+            if (anotherScrollRect == null)
+            {
+                Transform parent = transform.parent;
+                while (parent != null)
+                {
+                    var scroll = parent.GetComponent<ScrollRect>();
+                    if (scroll != null)
+                    {
+                        anotherScrollRect = scroll;
+                        break;
+                    }
+                    parent = parent.parent;
+                }
+            }
+            if (anotherScrollRect != null)
+            {
+                m_anotherEventTrigger = anotherScrollRect.GetComponent<EventTrigger>();
+            }
+        }
+
+        public void OnBeginDrag(PointerEventData eventData)
+        {
+            float angle = Vector2.Angle(eventData.delta, Vector2.up);
+            m_isDragUpOrDown = !(angle > 45f && angle < 135f);
+            m_curScrollRect.enabled = m_isDragUpOrDown == ThisIsUpAndDown;
+            if (m_isDragUpOrDown != ThisIsUpAndDown)
+            {
+                anotherScrollRect?.OnBeginDrag(eventData);
+                m_anotherEventTrigger?.OnBeginDrag(eventData);
+            }
+        }
+
+        public void OnDrag(PointerEventData eventData)
+        {
+            if (m_isDragUpOrDown != ThisIsUpAndDown)
+            {
+                anotherScrollRect?.OnDrag(eventData);
+                m_anotherEventTrigger?.OnDrag(eventData);
+            }
+        }
+
+        public void OnEndDrag(PointerEventData eventData)
+        {
+            if (m_isDragUpOrDown != ThisIsUpAndDown)
+            {
+                anotherScrollRect?.OnEndDrag(eventData);
+                m_anotherEventTrigger?.OnEndDrag(eventData);
+            }
+
+            m_curScrollRect.enabled = true;
+        }
+    }
+}

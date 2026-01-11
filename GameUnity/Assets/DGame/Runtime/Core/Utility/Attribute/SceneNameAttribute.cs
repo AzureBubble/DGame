@@ -78,8 +78,18 @@ namespace DGame
                 EditorGUIUtility.IconContent("SceneAsset Icon").image,
                 "Choose a scene from the Build Settings"
             );
-            EditorGUILayout.BeginHorizontal();
-            int selectedIndex = EditorGUILayout.Popup(sceneLabel, currentIndex, sceneNames.ToArray(), GUILayout.Width(350));
+
+            // 计算控件位置
+            float buttonWidth = 70f;
+            float spacing = 5f;
+            float labelWidth = EditorGUIUtility.labelWidth;
+
+            Rect labelRect = new Rect(position.x, position.y, labelWidth, EditorGUIUtility.singleLineHeight);
+            Rect popupRect = new Rect(position.x + labelWidth, position.y, position.width - labelWidth - buttonWidth - spacing, EditorGUIUtility.singleLineHeight);
+            Rect buttonRect = new Rect(position.xMax - buttonWidth, position.y, buttonWidth, EditorGUIUtility.singleLineHeight);
+
+            EditorGUI.LabelField(labelRect, sceneLabel);
+            int selectedIndex = EditorGUI.Popup(popupRect, currentIndex, sceneNames.ToArray());
 
             GUIContent refreshButton = new GUIContent(
                 " Refresh",
@@ -88,14 +98,13 @@ namespace DGame
             );
 
             // 刷新按钮
-            if (GUILayout.Button(refreshButton))
+            if (GUI.Button(buttonRect, refreshButton))
             {
                 ClearCache();
                 sceneNames = GetSceneNames(sceneAttribute.IncludeNoneOption);
                 selectedIndex = sceneNames.IndexOf(displayValue);
                 if (selectedIndex == -1) selectedIndex = 0;
             }
-            EditorGUILayout.EndHorizontal();
 
             if (selectedIndex >= 0 && selectedIndex < sceneNames.Count)
             {
@@ -161,7 +170,7 @@ namespace DGame
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
-            return EditorGUIUtility.singleLineHeight * 0.1f;
+            return EditorGUIUtility.singleLineHeight;
         }
     }
 

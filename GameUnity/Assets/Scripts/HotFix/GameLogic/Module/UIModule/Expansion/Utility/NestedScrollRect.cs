@@ -17,7 +17,7 @@ namespace GameLogic
         /// <summary>
         /// 当前的ScrollRect（本脚本所放置的物体上）的拖动方向默认为上下拖动，否则为左右拖动型
         /// </summary>
-        public bool ThisIsUpAndDown { get; set; } = true;
+        public bool thisIsUpAndDown = true;
 
         private ScrollRect m_curScrollRect;
         private EventTrigger m_anotherEventTrigger;
@@ -48,10 +48,17 @@ namespace GameLogic
 
         public void OnBeginDrag(PointerEventData eventData)
         {
-            float angle = Vector2.Angle(eventData.delta, Vector2.up);
-            m_isDragUpOrDown = !(angle > 45f && angle < 135f);
-            m_curScrollRect.enabled = m_isDragUpOrDown == ThisIsUpAndDown;
-            if (m_isDragUpOrDown != ThisIsUpAndDown)
+            if (eventData.delta.sqrMagnitude < 0.001f)
+            {
+                m_isDragUpOrDown = thisIsUpAndDown;
+            }
+            else
+            {
+                float angle = Vector2.Angle(eventData.delta, Vector2.up);
+                m_isDragUpOrDown = !(angle is >= 45f and <= 135f);
+            }
+            m_curScrollRect.enabled = m_isDragUpOrDown == thisIsUpAndDown;
+            if (m_isDragUpOrDown != thisIsUpAndDown)
             {
                 anotherScrollRect?.OnBeginDrag(eventData);
                 m_anotherEventTrigger?.OnBeginDrag(eventData);
@@ -60,7 +67,7 @@ namespace GameLogic
 
         public void OnDrag(PointerEventData eventData)
         {
-            if (m_isDragUpOrDown != ThisIsUpAndDown)
+            if (m_isDragUpOrDown != thisIsUpAndDown)
             {
                 anotherScrollRect?.OnDrag(eventData);
                 m_anotherEventTrigger?.OnDrag(eventData);
@@ -69,7 +76,7 @@ namespace GameLogic
 
         public void OnEndDrag(PointerEventData eventData)
         {
-            if (m_isDragUpOrDown != ThisIsUpAndDown)
+            if (m_isDragUpOrDown != thisIsUpAndDown)
             {
                 anotherScrollRect?.OnEndDrag(eventData);
                 m_anotherEventTrigger?.OnEndDrag(eventData);

@@ -162,6 +162,8 @@ namespace GameLogic
                     return;
                 }
                 m_canvasGroup.alpha = alpha;
+                // 关闭CanvasGroup上的射线检测
+                m_canvasGroup.blocksRaycasts = value;
                 Interactable = value;
 
                 if (m_isSortingOrderDirty)

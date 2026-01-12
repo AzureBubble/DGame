@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace I2.Loc
+namespace DGame.I2.Loc
 {
 	[AddComponentMenu("I2/Localization/SetLanguage Button")]
 	public class SetLanguage : MonoBehaviour 

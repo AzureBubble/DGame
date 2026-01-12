@@ -2,7 +2,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace I2.Loc
+namespace DGame.I2.Loc
 {
 	// This class is used to spawn coroutines from outside of MonoBehaviors
 	public class CoroutineManager : MonoBehaviour 

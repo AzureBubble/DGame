@@ -2,7 +2,7 @@
 using System.Text;
 using UnityEngine;
 
-namespace I2.Loc
+namespace DGame.I2.Loc
 {
     public partial class LanguageSourceData
     {

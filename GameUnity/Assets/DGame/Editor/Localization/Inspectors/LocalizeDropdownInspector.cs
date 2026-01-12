@@ -4,7 +4,7 @@ using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
 
-namespace I2.Loc
+namespace DGame.I2.Loc
 {
 	#if !UNITY_5_0 && !UNITY_5_1
 

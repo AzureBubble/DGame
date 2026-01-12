@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using I2.Loc;
+using DGame.I2.Loc;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -221,10 +221,10 @@ namespace GameLogic
 
         private string GetTranslation(string term)
         {
-            if (I2.Loc.LocalizationManager.Sources.Count == 0)
+            if (DGame.I2.Loc.LocalizationManager.Sources.Count == 0)
                 return term;
 
-            string translation = I2.Loc.LocalizationManager.GetTranslation(term);
+            string translation = DGame.I2.Loc.LocalizationManager.GetTranslation(term);
             return string.IsNullOrEmpty(translation) ? term : translation;
         }
 

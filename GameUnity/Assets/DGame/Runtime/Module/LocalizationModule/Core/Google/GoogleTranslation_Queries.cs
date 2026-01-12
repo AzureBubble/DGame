@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace I2.Loc
+namespace DGame.I2.Loc
 {
 	using TranslationDictionary = Dictionary<string, TranslationQuery>;
 

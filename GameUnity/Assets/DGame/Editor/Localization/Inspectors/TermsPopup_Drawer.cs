@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-namespace I2.Loc
+namespace DGame.I2.Loc
 {
     [CustomPropertyDrawer (typeof (TermsPopup))]
 	public class TermsPopup_Drawer : PropertyDrawer 

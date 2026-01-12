@@ -1,4 +1,4 @@
-﻿namespace I2.Loc
+﻿namespace DGame.I2.Loc
 {
     public class PostProcessBuild_UnloadLanguages
     {

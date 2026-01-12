@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-namespace I2.Loc
+namespace DGame.I2.Loc
 {
     [AddComponentMenu("I2/Localization/Source")]
     [ExecuteInEditMode]

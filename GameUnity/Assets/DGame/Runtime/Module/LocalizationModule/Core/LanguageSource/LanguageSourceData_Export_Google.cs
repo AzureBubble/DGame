@@ -3,7 +3,7 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
 
-namespace I2.Loc
+namespace DGame.I2.Loc
 {
 	public enum eSpreadsheetUpdateMode { None, Replace, Merge, AddNewTerms }
 

@@ -4,7 +4,7 @@ using System.IO;
 using System.Text;
 using UnityEngine;
 
-namespace I2.Loc
+namespace DGame.I2.Loc
 {
 	public class LocalizationReader 
 	{

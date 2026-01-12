@@ -51,7 +51,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 
-namespace I2.Loc.SimpleJSON
+namespace DGame.I2.Loc.SimpleJSON
 {
 	public enum JSONBinaryTag
 	{

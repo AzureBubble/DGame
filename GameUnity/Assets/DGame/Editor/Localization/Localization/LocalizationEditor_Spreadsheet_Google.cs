@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using I2.Loc.SimpleJSON;
+using DGame.I2.Loc.SimpleJSON;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
 
-namespace I2.Loc
+namespace DGame.I2.Loc
 {
 	public partial class LocalizationEditor
 	{

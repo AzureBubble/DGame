@@ -4,7 +4,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace I2.Loc
+namespace DGame.I2.Loc
 {
 	public partial class LocalizationEditor
 	{

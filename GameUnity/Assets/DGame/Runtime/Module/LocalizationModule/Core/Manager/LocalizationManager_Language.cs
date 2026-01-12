@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading;
 
-namespace I2.Loc
+namespace DGame.I2.Loc
 {
     public static partial class LocalizationManager
     {

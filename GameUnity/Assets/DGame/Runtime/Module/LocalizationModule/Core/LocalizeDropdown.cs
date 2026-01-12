@@ -3,7 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace I2.Loc
+namespace DGame.I2.Loc
 {
 	#if !UNITY_5_0 && !UNITY_5_1
     [AddComponentMenu("I2/Localization/Localize Dropdown")]

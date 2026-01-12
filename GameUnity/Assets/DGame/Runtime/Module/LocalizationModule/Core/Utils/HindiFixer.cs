@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 
-namespace I2.Loc
+namespace DGame.I2.Loc
 {
 
     public class HindiFixer

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 #endif
 
-namespace I2.Loc
+namespace DGame.I2.Loc
 {
 	public interface IResourceManager_Bundles
 	{

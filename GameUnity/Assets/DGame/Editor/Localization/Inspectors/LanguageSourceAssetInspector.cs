@@ -1,6 +1,6 @@
 ﻿using UnityEditor;
 
-namespace I2.Loc
+namespace DGame.I2.Loc
 {
     [CustomEditor(typeof(LanguageSourceAsset))]
     public class LanguageSourceAssetInspector : LocalizationEditor

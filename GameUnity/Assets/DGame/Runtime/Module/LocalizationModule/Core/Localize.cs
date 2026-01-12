@@ -11,7 +11,7 @@ using UnityEditor.Events;
 using UnityEditor;
 #endif
 
-namespace I2.Loc
+namespace DGame.I2.Loc
 {
 	[DisallowMultipleComponent]
     [AddComponentMenu("I2/Localization/I2 Localize")]

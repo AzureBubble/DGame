@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
 
-namespace I2.Loc
+namespace DGame.I2.Loc
 {
     // Simple String Obfucator 
     // (not particularly safe, but will stop most players from hacking your strings and its FAST)

@@ -7,7 +7,7 @@ using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
 
-namespace I2.Loc
+namespace DGame.I2.Loc
 {
 	public partial class LanguageSourceData
 	{

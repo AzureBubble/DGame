@@ -4,7 +4,7 @@ using System.Collections.Generic;
     using UnityEngine.InputSystem;
 #endif
 
-namespace I2.Loc
+namespace DGame.I2.Loc
 {
     public class BaseSpecializationManager
     {

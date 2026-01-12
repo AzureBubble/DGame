@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Cysharp.Threading.Tasks;
-using I2.Loc;
+using DGame.I2.Loc;
 using UnityEngine;
 
 namespace DGame

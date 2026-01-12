@@ -10,7 +10,7 @@ using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace I2.Loc
+namespace DGame.I2.Loc
 {
 	[CustomEditor(typeof(Localize))]
 	[CanEditMultipleObjects]

@@ -1,7 +1,7 @@
 ﻿using UnityEditor;
 using UnityEngine;
 
-namespace I2.Loc
+namespace DGame.I2.Loc
 {
     #if UNITY_EDITOR
     [InitializeOnLoad] 

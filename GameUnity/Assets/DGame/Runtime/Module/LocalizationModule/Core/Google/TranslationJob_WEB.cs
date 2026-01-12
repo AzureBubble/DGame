@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.Networking;
 
-namespace I2.Loc
+namespace DGame.I2.Loc
 {
     using TranslationDictionary = Dictionary<string, TranslationQuery>;
 

@@ -2,7 +2,7 @@
 using UnityEditorInternal;
 using UnityEngine;
 
-namespace I2.Loc
+namespace DGame.I2.Loc
 {
     [CustomEditor(typeof(LocalizationParamsManager))]
 	public class LocalizationParamsManagerInspector : Editor

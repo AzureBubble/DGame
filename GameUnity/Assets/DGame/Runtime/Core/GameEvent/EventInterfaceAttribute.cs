@@ -1,7 +1,7 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+#if ENABLE_OBFUZ
+using Obfuz;
+#endif
 
 namespace DGame
 {
@@ -19,6 +19,9 @@ namespace DGame
     }
 
     [AttributeUsage(AttributeTargets.Interface)]
+#if ENABLE_OBFUZ
+    [ObfuzIgnore]
+#endif
     public class EventInterfaceAttribute : Attribute
     {
         public EEventGroup EventGroup { get; }

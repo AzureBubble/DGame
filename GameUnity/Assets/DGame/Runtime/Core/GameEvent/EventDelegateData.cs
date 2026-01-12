@@ -77,7 +77,6 @@ namespace DGame
             }
         }
 
-
         #region Callback
 
         public void Callback()

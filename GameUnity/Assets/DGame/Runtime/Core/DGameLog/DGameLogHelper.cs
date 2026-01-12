@@ -150,8 +150,8 @@ namespace DGame
 
                 case ELogLevel.Assert:
                     m_stringBuilder.AppendFormat(showColor
-                        ? $"<color=#FF00BD><b>[{DateTime.Now:HH:mm:ss-fff}] [ASSERT] ► </b></color> - <color=green>{{logStr}}</color>"
-                        : $"<color=#FF00BD><b>[{DateTime.Now:HH:mm:ss-fff}] [ASSERT] ► </b></color> - {{logStr}}");
+                        ? $"<color=#FF00BD><b>[{DateTime.Now:HH:mm:ss-fff}] [ASSERT] ► </b></color> - <color=green>{logStr}</color>"
+                        : $"<color=#FF00BD><b>[{DateTime.Now:HH:mm:ss-fff}] [ASSERT] ► </b></color> - {logStr}");
                     break;
 
                 case ELogLevel.Warning:

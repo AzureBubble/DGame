@@ -387,7 +387,13 @@ namespace GameLogic
             => AsyncAdjustItemNumInternal(itemList, count, parentTrans, maxNumPerFrame, updateAction, prefab,
                 assetLocation).Forget();
 
-        private async UniTaskVoid AsyncAdjustItemNumInternal<T>(List<T> itemList, int count, Transform parentTrans,
+        public async UniTask AsyncAwaitAdjustItemNum<T>(List<T> itemList, int count, Transform parentTrans,
+            GameObject prefab = null, string assetLocation = "", int maxNumPerFrame = 5, Action<T, int> updateAction = null)
+            where T : UIWidget, new()
+            => await AsyncAdjustItemNumInternal(itemList, count, parentTrans, maxNumPerFrame, updateAction, prefab,
+                assetLocation);
+
+        private async UniTask AsyncAdjustItemNumInternal<T>(List<T> itemList, int count, Transform parentTrans,
             int maxCntPerFrame, Action<T, int> updateAction, GameObject prefab, string assetLocation) where T : UIWidget, new()
         {
             if (itemList == null)

@@ -62,7 +62,7 @@ namespace DGame
             return timer == null || timer.IsDestroyed;
         }
 
-        public void Destroy()
+        internal void Destroy()
         {
             TimerID = 0;
             IntervalTime = 0;

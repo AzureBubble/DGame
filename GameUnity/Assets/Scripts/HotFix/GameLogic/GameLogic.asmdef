@@ -11,7 +11,9 @@
         "GUID:2dddb440eda277e4ab5997b385c0b2bd",
         "GUID:05296613c39b1924fbd548dd3b1f1ab9",
         "GUID:4140bd2e2764f1f47ab93125ecb61942",
-        "GUID:5c01126466f01474daeed348e8810aef"
+        "GUID:5c01126466f01474daeed348e8810aef",
+        "GUID:72d1fea872bd7a449bf3818f2b0a6708",
+        "GUID:68765d262e2128e4ab49c983f3411946"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -20,6 +22,17 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "com.esotericsoftware.spine.spine-unity",
+            "expression": "4.2",
+            "define": "SPINE_UNITY"
+        },
+        {
+            "name": "com.esotericsoftware.spine.spine-csharp",
+            "expression": "4.2",
+            "define": "SPINE_CSHARP"
+        }
+    ],
     "noEngineReferences": false
 }

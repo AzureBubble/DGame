@@ -19,9 +19,9 @@ public class DEventInterfaceGenerator : ISourceGenerator
         // 获取当前语法树
         var syntaxTrees = context.Compilation.SyntaxTrees;
         GenerateGameEventExecute(context, syntaxTrees);
-        GenerateRuntimeInitializeOnLoadMethodExecute(context, syntaxTrees);
-        GenerateRequireComponentExecute(context, syntaxTrees);
-        GenerateTextDefineEnumExecute(context, syntaxTrees);
+        //GenerateRuntimeInitializeOnLoadMethodExecute(context, syntaxTrees);
+        //GenerateRequireComponentExecute(context, syntaxTrees);
+        //GenerateTextDefineEnumExecute(context, syntaxTrees);
     }
 
     #region GenerateGameEvent

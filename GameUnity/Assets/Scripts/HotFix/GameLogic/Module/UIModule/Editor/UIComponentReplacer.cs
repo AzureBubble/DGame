@@ -46,7 +46,7 @@ namespace GameLogic
                 UIText uiText = go.GetComponent<UIText>();
                 if (uiText != null)
                 {
-                    uiText.SetUITextLocalizationActive(false);
+                    // uiText.SetUITextLocalizationActive(false);
                     ReplaceComponent<UIText, Text>(go);
                     textCount++;
                 }

@@ -9,3 +9,14 @@ D:\Unity\GitHub Project\DGame\Tools\Generata Tools\SourceGenerator\GameEventAnal
 D:\Unity\GitHub Project\DGame\Tools\Generata Tools\SourceGenerator\GameEventAnalyzer\obj\Release\GameEventAnalyzer.sourcelink.json
 D:\Unity\GitHub Project\DGame\Tools\Generata Tools\SourceGenerator\GameEventAnalyzer\obj\Release\GameEventAnalyzer.dll
 D:\Unity\GitHub Project\DGame\Tools\Generata Tools\SourceGenerator\GameEventAnalyzer\obj\Release\GameEventAnalyzer.pdb
+D:\UnityProjects\DGame\Tools\Generata Tools\SourceGenerator\GameEventAnalyzer\bin\Release\GameEventAnalyzer.deps.json
+D:\UnityProjects\DGame\Tools\Generata Tools\SourceGenerator\GameEventAnalyzer\bin\Release\GameEventAnalyzer.dll
+D:\UnityProjects\DGame\Tools\Generata Tools\SourceGenerator\GameEventAnalyzer\bin\Release\GameEventAnalyzer.pdb
+D:\UnityProjects\DGame\Tools\Generata Tools\SourceGenerator\GameEventAnalyzer\obj\Release\GameEventAnalyzer.csproj.AssemblyReference.cache
+D:\UnityProjects\DGame\Tools\Generata Tools\SourceGenerator\GameEventAnalyzer\obj\Release\GameEventAnalyzer.GeneratedMSBuildEditorConfig.editorconfig
+D:\UnityProjects\DGame\Tools\Generata Tools\SourceGenerator\GameEventAnalyzer\obj\Release\GameEventAnalyzer.AssemblyInfoInputs.cache
+D:\UnityProjects\DGame\Tools\Generata Tools\SourceGenerator\GameEventAnalyzer\obj\Release\GameEventAnalyzer.AssemblyInfo.cs
+D:\UnityProjects\DGame\Tools\Generata Tools\SourceGenerator\GameEventAnalyzer\obj\Release\GameEventAnalyzer.csproj.CoreCompileInputs.cache
+D:\UnityProjects\DGame\Tools\Generata Tools\SourceGenerator\GameEventAnalyzer\obj\Release\GameEventAnalyzer.sourcelink.json
+D:\UnityProjects\DGame\Tools\Generata Tools\SourceGenerator\GameEventAnalyzer\obj\Release\GameEventAnalyzer.dll
+D:\UnityProjects\DGame\Tools\Generata Tools\SourceGenerator\GameEventAnalyzer\obj\Release\GameEventAnalyzer.pdb

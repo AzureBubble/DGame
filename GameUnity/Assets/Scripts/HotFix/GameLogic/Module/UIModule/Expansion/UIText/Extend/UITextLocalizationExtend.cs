@@ -27,7 +27,7 @@ namespace GameLogic
                 if (m_textDefine != value)
                 {
                     m_textDefine = value;
-                    SetTerm(m_textDefine);
+                    // SetTerm(m_textDefine);
                 }
             }
         }
@@ -149,7 +149,7 @@ namespace GameLogic
                 SafeDestroyComponent(ref m_localizationParamsManager);
             }
 
-            SetTerm(m_textDefine);
+            // SetTerm(m_textDefine);
         }
 
         // 安全的组件销毁方法
@@ -183,90 +183,90 @@ namespace GameLogic
             }
         }
 
-        public string GetParameterValue(int ParamName)
-            => m_localizationParamsManager.GetParameterValue(ParamName);
-
-        public string GetParameterValue(string ParamName)
-            => m_localizationParamsManager.GetParameterValue(ParamName);
-
-
-        public void SetParameterValue(int ParamName, string ParamValue, bool localize = true)
-        {
-            if (!UseI2Localization)
-            {
-                UseI2Localization = true;
-            }
-            if (!HasParams)
-            {
-                HasParams = true;
-            }
-
-            m_localizationParamsManager.SetParameterValue(ParamName, ParamValue, localize);
-            SetTerm(m_textDefine);
-        }
-
-        public void SetParameterValue(string paramName, TextDefine termDefine, bool localize = true)
-        {
-            string term = termDefine.ToString();
-            string translatedValue = GetTranslation(term);
-            SetParameterValue(paramName, translatedValue, localize);
-        }
-
-        public void SetParameterValue(int paramName, TextDefine termDefine, bool localize = true)
-        {
-            string term = termDefine.ToString();
-            string translatedValue = GetTranslation(term);
-            SetParameterValue(paramName, translatedValue, localize);
-        }
-
-        private string GetTranslation(string term)
-        {
-            if (DGame.I2.Loc.LocalizationManager.Sources.Count == 0)
-                return term;
-
-            string translation = DGame.I2.Loc.LocalizationManager.GetTranslation(term);
-            return string.IsNullOrEmpty(translation) ? term : translation;
-        }
-
-        public void SetParameterValue(string ParamName, string ParamValue, bool localize = true)
-        {
-            if (!UseI2Localization)
-            {
-                UseI2Localization = true;
-            }
-            if (!HasParams)
-            {
-                HasParams = true;
-            }
-            m_localizationParamsManager.SetParameterValue(ParamName, ParamValue, localize);
-            SetTerm(m_textDefine);
-        }
-
-        public void SetParameterValue(List<int> ParamNames, List<string> ParamValues, bool localize = true)
-        {
-            if (!UseI2Localization)
-            {
-                UseI2Localization = true;
-            }
-            if (!HasParams)
-            {
-                HasParams = true;
-            }
-            for (int i = 0; i < ParamNames.Count && i < ParamValues.Count; i++)
-            {
-                m_localizationParamsManager.SetParameterValue(ParamNames[i], ParamValues[i], localize);
-            }
-            SetTerm(m_textDefine);
-        }
-
-        public void SetTerm(TextDefine textDefine)
-        {
-            if (!UseI2Localization)
-            {
-                UseI2Localization = true;
-            }
-            m_textDefine = textDefine;
-            m_localize?.SetTerm(m_textDefine.Convert());
-        }
+        // public string GetParameterValue(int ParamName)
+        //     => m_localizationParamsManager.GetParameterValue(ParamName);
+        //
+        // public string GetParameterValue(string ParamName)
+        //     => m_localizationParamsManager.GetParameterValue(ParamName);
+        //
+        //
+        // public void SetParameterValue(int ParamName, string ParamValue, bool localize = true)
+        // {
+        //     if (!UseI2Localization)
+        //     {
+        //         UseI2Localization = true;
+        //     }
+        //     if (!HasParams)
+        //     {
+        //         HasParams = true;
+        //     }
+        //
+        //     m_localizationParamsManager.SetParameterValue(ParamName, ParamValue, localize);
+        //     SetTerm(m_textDefine);
+        // }
+        //
+        // public void SetParameterValue(string paramName, TextDefine termDefine, bool localize = true)
+        // {
+        //     string term = termDefine.ToString();
+        //     string translatedValue = GetTranslation(term);
+        //     SetParameterValue(paramName, translatedValue, localize);
+        // }
+        //
+        // public void SetParameterValue(int paramName, TextDefine termDefine, bool localize = true)
+        // {
+        //     string term = termDefine.ToString();
+        //     string translatedValue = GetTranslation(term);
+        //     SetParameterValue(paramName, translatedValue, localize);
+        // }
+        //
+        // private string GetTranslation(string term)
+        // {
+        //     if (DGame.I2.Loc.LocalizationManager.Sources.Count == 0)
+        //         return term;
+        //
+        //     string translation = DGame.I2.Loc.LocalizationManager.GetTranslation(term);
+        //     return string.IsNullOrEmpty(translation) ? term : translation;
+        // }
+        //
+        // public void SetParameterValue(string ParamName, string ParamValue, bool localize = true)
+        // {
+        //     if (!UseI2Localization)
+        //     {
+        //         UseI2Localization = true;
+        //     }
+        //     if (!HasParams)
+        //     {
+        //         HasParams = true;
+        //     }
+        //     m_localizationParamsManager.SetParameterValue(ParamName, ParamValue, localize);
+        //     SetTerm(m_textDefine);
+        // }
+        //
+        // public void SetParameterValue(List<int> ParamNames, List<string> ParamValues, bool localize = true)
+        // {
+        //     if (!UseI2Localization)
+        //     {
+        //         UseI2Localization = true;
+        //     }
+        //     if (!HasParams)
+        //     {
+        //         HasParams = true;
+        //     }
+        //     for (int i = 0; i < ParamNames.Count && i < ParamValues.Count; i++)
+        //     {
+        //         m_localizationParamsManager.SetParameterValue(ParamNames[i], ParamValues[i], localize);
+        //     }
+        //     SetTerm(m_textDefine);
+        // }
+        //
+        // public void SetTerm(TextDefine textDefine)
+        // {
+        //     if (!UseI2Localization)
+        //     {
+        //         UseI2Localization = true;
+        //     }
+        //     m_textDefine = textDefine;
+        //     m_localize?.SetTerm(m_textDefine.Convert());
+        // }
     }
 }

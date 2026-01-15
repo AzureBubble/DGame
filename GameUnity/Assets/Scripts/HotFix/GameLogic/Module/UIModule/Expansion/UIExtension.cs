@@ -301,10 +301,10 @@ namespace GameLogic
 
         #region UIText多语言
 
-        public static string Convert(this TextDefine textDefine)
-        {
-            return TextDefineConverter.Convert(textDefine);
-        }
+        // public static string Convert(this TextDefine textDefine)
+        // {
+        //     return TextDefineConverter.Convert(textDefine);
+        // }
 
         #endregion
     }

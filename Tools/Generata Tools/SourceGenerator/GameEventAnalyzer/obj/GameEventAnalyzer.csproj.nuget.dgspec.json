@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Unity\\GitHub Project\\DGame\\Tools\\Generata Tools\\SourceGenerator\\GameEventAnalyzer\\GameEventAnalyzer.csproj": {}
+    "D:\\UnityProjects\\DGame\\Tools\\Generata Tools\\SourceGenerator\\GameEventAnalyzer\\GameEventAnalyzer.csproj": {}
   },
   "projects": {
-    "D:\\Unity\\GitHub Project\\DGame\\Tools\\Generata Tools\\SourceGenerator\\GameEventAnalyzer\\GameEventAnalyzer.csproj": {
+    "D:\\UnityProjects\\DGame\\Tools\\Generata Tools\\SourceGenerator\\GameEventAnalyzer\\GameEventAnalyzer.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Unity\\GitHub Project\\DGame\\Tools\\Generata Tools\\SourceGenerator\\GameEventAnalyzer\\GameEventAnalyzer.csproj",
+        "projectUniqueName": "D:\\UnityProjects\\DGame\\Tools\\Generata Tools\\SourceGenerator\\GameEventAnalyzer\\GameEventAnalyzer.csproj",
         "projectName": "GameEventAnalyzer",
-        "projectPath": "D:\\Unity\\GitHub Project\\DGame\\Tools\\Generata Tools\\SourceGenerator\\GameEventAnalyzer\\GameEventAnalyzer.csproj",
-        "packagesPath": "C:\\Users\\QZJ\\.nuget\\packages\\",
-        "outputPath": "D:\\Unity\\GitHub Project\\DGame\\Tools\\Generata Tools\\SourceGenerator\\GameEventAnalyzer\\obj\\",
+        "projectPath": "D:\\UnityProjects\\DGame\\Tools\\Generata Tools\\SourceGenerator\\GameEventAnalyzer\\GameEventAnalyzer.csproj",
+        "packagesPath": "C:\\Users\\Jun\\.nuget\\packages\\",
+        "outputPath": "D:\\UnityProjects\\DGame\\Tools\\Generata Tools\\SourceGenerator\\GameEventAnalyzer\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
-          "D:\\Code IDE\\Microsoft\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\QZJ\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Jun\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],

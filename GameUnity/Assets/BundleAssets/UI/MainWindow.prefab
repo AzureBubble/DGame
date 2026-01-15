@@ -901,7 +901,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a481e758e8c3c8a4c844cb42c122922d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 2100000, guid: 9ed70d45835321148b8af9fcd0c2d99f, type: 2}
   m_Color: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
@@ -942,10 +942,10 @@ MonoBehaviour:
     m_shadowBottomRightColor: {r: 1, g: 1, b: 1, a: 1}
     m_effectDistance: {x: 1, y: -1}
   m_uiTextOutlineExtend:
-    m_isUseTextOutline: 0
-    m_isOpenShaderOutline: 0
+    m_isUseTextOutline: 1
+    m_isOpenShaderOutline: 1
     m_outLineWidth: 1
-    m_outLineColor: {r: 1, g: 1, b: 1, a: 1}
+    m_outLineColor: {r: 1, g: 0, b: 0, a: 1}
     m_camera: {fileID: 0}
     m_alpha: 1
   m_uiTextGradientColorExtend:
@@ -2505,7 +2505,7 @@ MonoBehaviour:
   className: MainWindow
   impCodePath: Assets/Scripts/HotFix/GameLogic/UI
   isGenImpClass: 0
-  uiType: 
+  uiType: UIWindow
 --- !u!1 &8898977438107111340
 GameObject:
   m_ObjectHideFlags: 0

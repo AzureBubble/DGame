@@ -1,12 +1,27 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
-using DGame;
 
 namespace GameLogic
 {
-	public partial class RedDotItem
+	public class RedDotItem : UIWidget
 	{
+		#region 脚本工具生成的代码
+
+		private Image m_imgRed;
+		private Image m_imgTextRed;
+		private Text m_textRed;
+		private GameObject m_goNewRed;
+
+		protected override void ScriptGenerator()
+		{
+			m_imgRed = FindChildComponent<Image>("m_imgRed");
+			m_imgTextRed = FindChildComponent<Image>("m_imgTextRed");
+			m_textRed = FindChildComponent<Text>("m_imgTextRed/m_textRed");
+			m_goNewRed = FindChild("m_goNewRed").gameObject;
+		}
+
+		#endregion
+
 		#region 字段
 
 		private RedDotNode m_redDotNode;

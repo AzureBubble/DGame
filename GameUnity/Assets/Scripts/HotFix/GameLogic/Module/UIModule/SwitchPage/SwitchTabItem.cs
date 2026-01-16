@@ -6,67 +6,37 @@ namespace GameLogic
 {
     public class SwitchTabItem : UIEventItem<SwitchTabItem>
     {
-        #region Properties
+        #region 脚本工具生成的代码
 
-        protected SwitchTabItemDataComponent m_dataComponent;
-        protected Transform m_noSelectNode;
-        protected Image m_noSelectBg;
-        protected Image m_noSelectIcon;
-        protected Text m_noSelectText;
+        private Transform m_tfNoSelectNode;
+        private Image m_imgNoSelectBg;
+        private Image m_imgNoSelectIcon;
+        private Text m_textNoSelectText;
+        private Transform m_tfSelectedNode;
+        private Image m_imgSelectedBg;
+        private Image m_imgSelectedIcon;
+        private Text m_textSelectedText;
+        private Transform m_tfRedNode;
 
-        protected Transform m_selectedNode;
-        protected Image m_selectedBg;
-        protected Image m_selectedIcon;
-        protected Text m_selectedText;
-
-        protected Transform m_tfRedNode;
-
-        protected bool m_selected;
-        public bool Selected { get => m_selected; set => SetSelectedState(value); }
+        protected override void ScriptGenerator()
+        {
+            m_tfNoSelectNode = FindChild("m_tfNoSelectNode");
+            m_imgNoSelectBg = FindChildComponent<Image>("m_tfNoSelectNode/m_imgNoSelectBg");
+            m_imgNoSelectIcon = FindChildComponent<Image>("m_tfNoSelectNode/m_imgNoSelectIcon");
+            m_textNoSelectText = FindChildComponent<Text>("m_tfNoSelectNode/m_textNoSelectText");
+            m_tfSelectedNode = FindChild("m_tfSelectedNode");
+            m_imgSelectedBg = FindChildComponent<Image>("m_tfSelectedNode/m_imgSelectedBg");
+            m_imgSelectedIcon = FindChildComponent<Image>("m_tfSelectedNode/m_imgSelectedIcon");
+            m_textSelectedText = FindChildComponent<Text>("m_tfSelectedNode/m_textSelectedText");
+            m_tfRedNode = FindChild("m_tfRedNode");
+        }
 
         #endregion
 
-        #region override
+        #region Properties
 
-        protected override void BindMemberProperty()
-        {
-            base.BindMemberProperty();
-            m_dataComponent = gameObject.GetComponent<SwitchTabItemDataComponent>();
-
-            if (m_dataComponent != null)
-            {
-                m_noSelectNode = m_dataComponent.m_noSelectNode;
-                m_noSelectBg = m_dataComponent.m_noSelectBg;
-                m_noSelectIcon = m_dataComponent.m_noSelectIcon;
-                m_noSelectText = m_dataComponent.m_noSelectText;
-                m_selectedNode = m_dataComponent.m_selectedNode;
-                m_selectedBg = m_dataComponent.m_selectedBg;
-                m_selectedIcon = m_dataComponent.m_selectedIcon;
-                m_selectedText = m_dataComponent.m_selectedText;
-                m_tfRedNode = m_dataComponent.m_tfRedNode;
-            }
-            else
-            {
-                m_noSelectNode = FindChild("NoSelectNode");
-                m_tfRedNode =  FindChild("m_tfRedNode");
-                m_tfRedNode?.SetActive(false);
-                if (m_noSelectNode != null)
-                {
-                    m_noSelectBg = FindChildComponent<Image>(m_noSelectNode, "noSelectBg");
-                    m_noSelectIcon = FindChildComponent<Image>(m_noSelectNode, "noSelectIcon");
-                    m_noSelectText = FindChildComponent<Text>(m_noSelectNode, "noSelectText");
-                }
-
-                m_selectedNode =  FindChild("SelectedNode");
-                if (m_selectedNode != null)
-                {
-                    m_selectedBg = FindChildComponent<Image>(m_selectedNode, "selectedBg");
-                    m_selectedIcon = FindChildComponent<Image>(m_selectedNode, "selectedIcon");
-                    m_selectedText = FindChildComponent<Text>(m_selectedNode, "selectedText");
-                }
-            }
-
-        }
+        protected bool m_selected;
+        public bool Selected { get => m_selected; set => SetSelectedState(value); }
 
         #endregion
 
@@ -74,80 +44,80 @@ namespace GameLogic
 
         public void SetTabIcon(string selectedIconPath, string noSelectIconPath)
         {
-            m_selectedIcon?.SetSprite(selectedIconPath, true);
-            m_noSelectIcon?.SetSprite(noSelectIconPath, true);
+            m_imgSelectedIcon?.SetSprite(selectedIconPath, true);
+            m_imgNoSelectIcon?.SetSprite(noSelectIconPath, true);
         }
 
         public void SetTabIconPos(Vector2 selectedIconPos, Vector2 noSelectIconPos)
         {
-            if (m_selectedIcon != null && m_selectedIcon.rectTransform != null)
+            if (m_imgSelectedIcon != null && m_imgSelectedIcon.rectTransform != null)
             {
-                m_selectedIcon.rectTransform.localPosition = selectedIconPos;
+                m_imgSelectedIcon.rectTransform.localPosition = selectedIconPos;
             }
-            if (m_noSelectIcon != null && m_noSelectIcon.rectTransform != null)
+            if (m_imgNoSelectIcon != null && m_imgNoSelectIcon.rectTransform != null)
             {
-                m_noSelectIcon.rectTransform.localPosition = noSelectIconPos;
+                m_imgNoSelectIcon.rectTransform.localPosition = noSelectIconPos;
             }
         }
 
         public void UpdateTabName(string tabName)
         {
-            if (m_selectedText != null)
+            if (m_textSelectedText != null)
             {
-                m_selectedText.text = tabName;
+                m_textSelectedText.text = tabName;
             }
-            if (m_noSelectText != null)
+            if (m_textNoSelectText != null)
             {
-                m_noSelectText.text = tabName;
+                m_textNoSelectText.text = tabName;
             }
         }
 
         public void UpdateTabNameChangeSize(string tabName, bool isChangeSize = true)
         {
-            if (m_selectedText != null)
+            if (m_textSelectedText != null)
             {
-                m_selectedText.text = tabName;
+                m_textSelectedText.text = tabName;
 
                 if (isChangeSize)
                 {
-                    m_selectedText.rectTransform.sizeDelta = new Vector2(m_selectedText.preferredWidth,
-                        m_selectedText.rectTransform.sizeDelta.y);
+                    m_textSelectedText.rectTransform.sizeDelta = new Vector2(m_textSelectedText.preferredWidth,
+                        m_textSelectedText.rectTransform.sizeDelta.y);
                 }
             }
-            if (m_noSelectText != null)
+            if (m_textNoSelectText != null)
             {
-                m_noSelectText.text = tabName;
+                m_textNoSelectText.text = tabName;
                 if (isChangeSize)
                 {
-                    m_noSelectText.rectTransform.sizeDelta = new Vector2(m_noSelectText.preferredWidth,
-                        m_noSelectText.rectTransform.sizeDelta.y);
+                    m_textNoSelectText.rectTransform.sizeDelta = new Vector2(m_textNoSelectText.preferredWidth,
+                        m_textNoSelectText.rectTransform.sizeDelta.y);
                 }
             }
         }
 
         public void SetTabTextFontSize(int fontSize)
         {
-            if (m_selectedText != null)
+            if (m_textSelectedText != null)
             {
-                m_selectedText.fontSize = fontSize;
+                m_textSelectedText.fontSize = fontSize;
             }
 
-            if (m_noSelectText != null)
+            if (m_textNoSelectText != null)
             {
-                m_noSelectText.fontSize = fontSize;
+                m_textNoSelectText.fontSize = fontSize;
             }
         }
 
         public void SetTabTextColor(string selectedTextColor, string noSelectTextColor)
         {
-            if (m_selectedText != null)
+            if (m_textSelectedText != null)
             {
-                m_selectedText.color = DGame.Utility.Converter.HexToColor(selectedTextColor);
+                m_textSelectedText.color = DGame.Utility.Converter.HexToColor(selectedTextColor);
             }
 
-            if (m_noSelectText != null)
+            if (m_textNoSelectText != null)
             {
-                m_noSelectText.color = DGame.Utility.Converter.HexToColor(noSelectTextColor);
+                m_textNoSelectText.color = DGame.Utility.Converter.HexToColor(noSelectTextColor);
             }
         }
 
@@ -155,19 +125,19 @@ namespace GameLogic
         {
             if (!string.IsNullOrEmpty(selectedBgPath))
             {
-                m_selectedBg?.SetSprite(selectedBgPath);
+                m_imgSelectedBg?.SetSprite(selectedBgPath);
             }
             if (!string.IsNullOrEmpty(noSelectBgPath))
             {
-                m_noSelectBg?.SetSprite(noSelectBgPath);
+                m_imgNoSelectBg?.SetSprite(noSelectBgPath);
             }
         }
 
         public virtual void SetSelectedState(bool isSelected)
         {
             m_selected = isSelected;
-            m_selectedNode?.SetActive(isSelected);
-            m_noSelectNode?.SetActive(!isSelected);
+            m_tfSelectedNode?.SetActive(isSelected);
+            m_tfNoSelectNode?.SetActive(!isSelected);
         }
 
         public virtual void SetRedNodeActive(bool isActive)

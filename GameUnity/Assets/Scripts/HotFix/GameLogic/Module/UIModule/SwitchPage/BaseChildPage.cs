@@ -29,14 +29,10 @@
         }
 
         public virtual void OnPageShowed(int oldShowType, int newShowType)
-        {
-
-        }
+        { }
 
         public virtual void RefreshCurrentChildPage()
-        {
-
-        }
+        { }
 
         public object ShareData1 {get => m_shareData.ShareData1; set => m_shareData.SetShareData(0, value); }
         public object ShareData2 {get => m_shareData.ShareData2; set => m_shareData.SetShareData(1, value); }

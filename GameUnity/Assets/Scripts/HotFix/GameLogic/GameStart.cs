@@ -25,7 +25,8 @@ public partial class GameStart
     {
         m_hotfixAssembly = (List<Assembly>)objects[0];
         GameEventLauncher.Init();
-        RuntimeInitializeOnLoadMethodCollector.ExecuteMethods();
+        // HybridCLR 不支持的特性
+        // RuntimeInitializeOnLoadMethodCollector.ExecuteMethods();
         DGame.Utility.UnityUtil.AddDestroyListener(OnDestroy);
         DLogger.Warning("======= 看到此条日志代表你成功运行了热更新代码 =======");
         DLogger.Warning("======= Entrance GameStart =======");

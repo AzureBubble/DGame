@@ -25,6 +25,26 @@ namespace GameLogic
             set => m_isUseClickScale = value;
         }
 
+        public void OnEnable(Transform transf)
+        {
+            KillTween(transf);
+            // 恢复正常缩放，防止上次禁用时缩放动画未完成
+            if (transf != null)
+            {
+                transf.localScale = m_normalScale;
+            }
+            if (m_childList != null && m_childList.Count > 0)
+            {
+                foreach (var child in m_childList)
+                {
+                    if (child != null)
+                    {
+                        child.localScale = m_normalScale;
+                    }
+                }
+            }
+        }
+
         public void OnPointerDown(Transform transf, bool interactable)
         {
             if (m_isUseClickScale && interactable)

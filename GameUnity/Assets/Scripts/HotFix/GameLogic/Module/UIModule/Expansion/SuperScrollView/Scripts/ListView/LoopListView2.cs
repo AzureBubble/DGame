@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using GameLogic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
@@ -713,7 +714,11 @@ namespace SuperScrollView
             ItemPool pool = null;
             if (mItemPoolDict.TryGetValue(itemPrefabName, out pool) == false)
             {
-                return null;
+                pool = TryCreateItemPool(itemPrefabName);
+                if (pool == null)
+                {
+                    return null;
+                }
             }
             LoopListViewItem2 item = pool.GetItem(mCurCreatingItemIndex);
             RectTransform rf = item.GetComponent<RectTransform>();
@@ -724,6 +729,42 @@ namespace SuperScrollView
             item.ParentListView = this;
             return item;
         }
+        
+        #region TryCreateItemPool
+
+        private ItemPool TryCreateItemPool(string itemPrefabName)
+        {
+            string resPath = itemPrefabName;
+            GameObject go = GameModule.ResourceModule.LoadGameObject(resPath, parent: mContainerTrans);
+            if (go != null)
+            {
+                go.SetActive(false);
+                go.name = itemPrefabName;
+                ItemPool pool = new ItemPool();
+                pool.Init(go, 0, 0, 0, mContainerTrans);
+                mItemPoolDict.Add(itemPrefabName, pool);
+                mItemPoolList.Add(pool);
+                return pool;
+            }
+
+            return null;
+        }
+
+        private ItemPool TryCreateItemPool(GameObject itemPrefab)
+        {
+            if (itemPrefab != null)
+            {
+                itemPrefab.SetActive(false);
+                ItemPool pool = new ItemPool();
+                pool.Init(itemPrefab, 0, 0, 0, mContainerTrans);
+                mItemPoolDict.Add(itemPrefab.name, pool);
+                mItemPoolList.Add(pool);
+                return pool;
+            }
+            return null;
+        }
+
+        #endregion
 
 
         public LoopListViewItem2 GetItemFromTmpPool(int itemIndex)
@@ -739,7 +780,6 @@ namespace SuperScrollView
             }
             return null;
         }
-
 
         /*
         For a vertical scrollrect, when a visible item’s height changed at runtime, then this method should be called to let the LoopListView2 component reposition all visible items’ position.

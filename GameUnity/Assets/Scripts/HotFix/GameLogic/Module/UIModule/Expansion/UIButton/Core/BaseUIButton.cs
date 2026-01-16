@@ -38,6 +38,7 @@ namespace GameLogic
         protected override void OnEnable()
         {
             m_uiButtonClickProtect?.OnEnable();
+            m_uiButtonClickScale?.OnEnable(transform);
         }
 
         public void OnUpdateSelected(BaseEventData eventData)

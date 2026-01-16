@@ -34,7 +34,7 @@ namespace GameLogic
         /// <summary>
         /// 自定义数据集
         /// </summary>
-        public System.Object UserDatas => m_userDatas;
+        public System.Object[] UserDatas => m_userDatas;
 
         /// <summary>
         /// 窗口的实例资源对象

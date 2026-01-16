@@ -27,6 +27,35 @@ namespace GameLogic
         private bool m_isPoppingWindowQueue = false;
         private ErrorLogger m_errorLogger;
 
+        #region UIController
+
+        private List<IUIController> m_uiControllers = new List<IUIController>();
+
+        private void RegisterAllController()
+        {
+            AddUIController<CommonUIController>();
+        }
+
+        private void AddUIController<T>() where T : IUIController, new()
+        {
+            for (int i = 0; i < m_uiControllers.Count; i++)
+            {
+                var type = m_uiControllers[i].GetType();
+                if (type == typeof(T))
+                {
+                    DLogger.Fatal("repeat controller type: {0}", typeof(T).Name);
+                    return;
+                }
+            }
+
+            var controller = new T();
+            m_uiControllers.Add(controller);
+
+            controller.RegUIMessage();
+        }
+
+        #endregion
+
         /// <summary>
         /// 资源加载接口
         /// </summary>
@@ -65,6 +94,7 @@ namespace GameLogic
                 s_uiCanvas.gameObject.layer = LayerMask.NameToLayer("UI");
             }
 
+            RegisterAllController();
             RedDotModule.Instance.Initialize();
 
             if (DebuggerDriver.Instance != null)

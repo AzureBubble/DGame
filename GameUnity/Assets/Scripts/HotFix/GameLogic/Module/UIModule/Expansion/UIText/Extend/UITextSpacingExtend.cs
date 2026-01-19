@@ -55,7 +55,7 @@ namespace GameLogic
                     }
                 }
             }
-            finally{}
+            finally
             {
                 if (verts != null)
                 {

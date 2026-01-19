@@ -13,9 +13,8 @@ namespace GameLogic
         [SerializeField, Range(0, 10)] private float m_spaceCoff = 1f;
         [SerializeField, Range(0, 360)] private float m_angleOffset = 0;
 
-         // 缓存计算用的变量，避免在循环中重复创建
+        // 缓存计算用的变量，避免在循环中重复创建
         private readonly UIVertex[] m_vertices = new UIVertex[4];
-        private Matrix4x4 m_transformMatrix;
 
         public void ModifyMesh(VertexHelper vh)
         {
@@ -27,6 +26,8 @@ namespace GameLogic
             // 预先计算常用值
             float radiusReciprocal = 1f / m_radius;
             int quadCount = vh.currentVertCount >> 2; // vh.currentVertCount / 4
+            float angleOffsetRad = m_angleOffset * Mathf.Deg2Rad;
+            float halfPI = Mathf.PI * 0.5f;
 
             for (int i = 0; i < quadCount; i++)
             {
@@ -37,50 +38,53 @@ namespace GameLogic
                     vh.PopulateUIVertex(ref m_vertices[j], vertexIndex + j);
                 }
 
-                // 计算中心点
-                Vector3 center = Vector3.Lerp(m_vertices[0].position, m_vertices[2].position, 0.5f);
+                // 计算中心点（手动插值避免Vector3.Lerp）
+                Vector3 p0 = m_vertices[0].position;
+                Vector3 p2 = m_vertices[2].position;
+                float centerX = (p0.x + p2.x) * 0.5f;
+                float centerY = (p0.y + p2.y) * 0.5f;
+                float centerZ = (p0.z + p2.z) * 0.5f;
 
-                // 预先计算角度和位置
-                float angle = Mathf.PI * 0.5f - (center.x * m_spaceCoff * radiusReciprocal) + m_angleOffset * Mathf.Deg2Rad;
+                // 预先计算角度
+                float angle = halfPI - (centerX * m_spaceCoff * radiusReciprocal) + angleOffsetRad;
                 float cosAngle = Mathf.Cos(angle);
                 float sinAngle = Mathf.Sin(angle);
 
-                // 计算目标位置和旋转
-                Vector3 targetPosition = new Vector3(cosAngle, sinAngle, 0f) * m_radius;
-                Quaternion rotation = Quaternion.Euler(0f, 0f, angle * Mathf.Rad2Deg - 90f);
+                // 目标位置
+                float targetX = cosAngle * m_radius;
+                float targetY = sinAngle * m_radius;
 
-                // 构建变换矩阵
-                BuildTransformMatrix(center, targetPosition, rotation);
+                // 旋转角度（绕Z轴）
+                float rotationAngle = angle - halfPI; // angle * Rad2Deg - 90 转换为弧度
+                float cosRot = Mathf.Cos(rotationAngle);
+                float sinRot = Mathf.Sin(rotationAngle);
 
-                // 应用变换并调整高度
-                float verticalOffset = -m_radius + center.y;
+                // 垂直偏移
+                float verticalOffset = -m_radius + centerY;
 
+                // 直接计算变换后的位置，避免创建Matrix4x4
                 for (int j = 0; j < 4; j++)
                 {
-                    Vector3 transformedPosition = m_transformMatrix.MultiplyPoint(m_vertices[j].position);
-                    transformedPosition.y += verticalOffset;
-                    m_vertices[j].position = transformedPosition;
+                    Vector3 pos = m_vertices[j].position;
+
+                    // Step 1: 平移到原点 (pos - center)
+                    float localX = pos.x - centerX;
+                    float localY = pos.y - centerY;
+
+                    // Step 2: 绕Z轴旋转
+                    float rotatedX = localX * cosRot - localY * sinRot;
+                    float rotatedY = localX * sinRot + localY * cosRot;
+
+                    // Step 3: 平移到目标位置 + 垂直偏移
+                    m_vertices[j].position = new Vector3(
+                        rotatedX + targetX,
+                        rotatedY + targetY + verticalOffset,
+                        pos.z
+                    );
+
                     vh.SetUIVertex(m_vertices[j], vertexIndex + j);
                 }
             }
-        }
-
-        /// <summary>
-        /// 构建变换矩阵：place * rotate * move
-        /// </summary>
-        private void BuildTransformMatrix(Vector3 center, Vector3 targetPosition, Quaternion rotation)
-        {
-            // move: 平移到原点
-            Matrix4x4 moveMatrix = Matrix4x4.Translate(center * -1f);
-
-            // rotate: 旋转
-            Matrix4x4 rotateMatrix = Matrix4x4.Rotate(rotation);
-
-            // place: 平移到目标位置
-            Matrix4x4 placeMatrix = Matrix4x4.Translate(targetPosition);
-
-            // 组合变换矩阵
-            m_transformMatrix = placeMatrix * rotateMatrix * moveMatrix;
         }
     }
 }

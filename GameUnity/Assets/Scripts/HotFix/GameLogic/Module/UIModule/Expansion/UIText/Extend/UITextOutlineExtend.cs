@@ -1,55 +1,119 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
 namespace GameLogic
 {
+    /// <summary>
+    /// 描边材质缓存管理器 - 相同Shader的材质复用，减少材质实例和DrawCall
+    /// </summary>
+    public static class OutlineMaterialCache
+    {
+        private static readonly Dictionary<string, MaterialCacheEntry> s_materialCache = new Dictionary<string, MaterialCacheEntry>();
+        private static Shader s_cachedShader;
+
+        private class MaterialCacheEntry
+        {
+            public Material Material;
+            public int ReferenceCount;
+        }
+
+        public static Material GetOrCreateMaterial(string shaderName, Texture fontTexture)
+        {
+            string cacheKey = fontTexture != null ? $"{shaderName}_{fontTexture.GetInstanceID()}" : shaderName;
+
+            if (s_materialCache.TryGetValue(cacheKey, out var entry))
+            {
+                entry.ReferenceCount++;
+                return entry.Material;
+            }
+
+            if (s_cachedShader == null || s_cachedShader.name != shaderName)
+            {
+                s_cachedShader = Shader.Find(shaderName);
+            }
+
+            if (s_cachedShader == null)
+            {
+                Debug.LogError($"Shader not found: {shaderName}");
+                return null;
+            }
+
+            var material = new Material(s_cachedShader);
+            if (fontTexture != null)
+            {
+                material.mainTexture = fontTexture;
+            }
+
+            s_materialCache[cacheKey] = new MaterialCacheEntry
+            {
+                Material = material,
+                ReferenceCount = 1
+            };
+
+            return material;
+        }
+
+        public static void ReleaseMaterial(string shaderName, Texture fontTexture)
+        {
+            string cacheKey = fontTexture != null ? $"{shaderName}_{fontTexture.GetInstanceID()}" : shaderName;
+
+            if (s_materialCache.TryGetValue(cacheKey, out var entry))
+            {
+                entry.ReferenceCount--;
+                if (entry.ReferenceCount <= 0)
+                {
+                    if (entry.Material != null)
+                    {
+                        Object.Destroy(entry.Material);
+                    }
+                    s_materialCache.Remove(cacheKey);
+                }
+            }
+        }
+
+        public static void ClearCache()
+        {
+            foreach (var entry in s_materialCache.Values)
+            {
+                if (entry.Material != null)
+                {
+                    Object.Destroy(entry.Material);
+                }
+            }
+            s_materialCache.Clear();
+        }
+    }
+
+    /// <summary>
+    /// UI文本Shader描边扩展
+    /// 注意：如需非Shader描边，请直接使用Unity内置的Outline组件
+    /// </summary>
     [Serializable]
     public class UITextOutlineExtend
     {
-#pragma warning disable 0414
-
         [SerializeField] private bool m_isUseTextOutline;
-        [SerializeField] private bool m_isOpenShaderOutline;
         [SerializeField, Range(1, 10)] private int m_outLineWidth = 1;
         [SerializeField] private Color m_outLineColor = Color.white;
         [SerializeField] private Camera m_camera;
         [SerializeField, Range(0f, 1f)] private float m_alpha = 1f;
 
         private List<UIVertex> m_vertexList;
-        private Vector3[] m_outLineDis = new Vector3[4];
-
         private Text m_text;
         private const string OutLineShaderName = "UGUIPro/UIText";
         private bool m_initParams;
+        private Texture m_cachedFontTexture;
+        private bool m_materialFromCache;
 
         public bool UseTextOutline
         {
             get => m_isUseTextOutline;
             set
             {
-                if (m_isUseTextOutline == value)
-                {
-                    return;
-                }
+                if (m_isUseTextOutline == value) return;
                 m_isUseTextOutline = value;
-                Refresh();
-            }
-        }
-
-        public bool isOpenShaderOutline
-        {
-            get => m_isOpenShaderOutline;
-            set
-            {
-                if (m_isOpenShaderOutline == value)
-                {
-                    return;
-                }
-                m_isOpenShaderOutline = value;
                 Refresh();
             }
         }
@@ -59,10 +123,7 @@ namespace GameLogic
             get => m_outLineWidth;
             set
             {
-                if (m_outLineWidth == value)
-                {
-                    return;
-                }
+                if (m_outLineWidth == value) return;
                 m_outLineWidth = value;
                 Refresh();
             }
@@ -73,10 +134,7 @@ namespace GameLogic
             get => m_outLineColor;
             set
             {
-                if (m_outLineColor == value)
-                {
-                    return;
-                }
+                if (m_outLineColor == value) return;
                 m_outLineColor = value;
                 Refresh();
             }
@@ -87,10 +145,7 @@ namespace GameLogic
             get => m_alpha;
             set
             {
-                if (m_alpha == value)
-                {
-                    return;
-                }
+                if (Mathf.Approximately(m_alpha, value)) return;
                 m_alpha = value;
                 Refresh();
             }
@@ -104,36 +159,24 @@ namespace GameLogic
         public void SetOutLineColor(Color outlineColor)
         {
             m_isUseTextOutline = true;
-            m_isOpenShaderOutline = true;
-            outLineColor = outlineColor;
+            m_outLineColor = outlineColor;
+            Refresh();
         }
 
         public void SetOutLineWidth(int outlineWidth)
         {
             m_isUseTextOutline = true;
-            m_isOpenShaderOutline = true;
-            outLineWidth = outlineWidth;
+            m_outLineWidth = outlineWidth;
+            Refresh();
         }
 
         public void SetAlpha(float setAlphaValue)
         {
             m_isUseTextOutline = true;
-            m_isOpenShaderOutline = true;
             m_alpha = setAlphaValue;
-            byte alphaByte = (byte)(setAlphaValue * 255);
-            m_outLineColor.a = alphaByte;
+            m_outLineColor.a = setAlphaValue;
             Refresh();
         }
-
-        public void SetUseShaderOutLine(bool openShaderOutLine)
-        {
-            m_isUseTextOutline = true;
-            m_isOpenShaderOutline = openShaderOutLine;
-            UpdateOutLineInfos();
-            Refresh();
-        }
-
-#pragma warning restore 0414
 
         public void Initialize(Text text)
         {
@@ -152,10 +195,6 @@ namespace GameLogic
                 }
             }
 
-            if (m_camera == null)
-            {
-                Debug.LogError("No Find The Main Camera!");
-            }
             Refresh();
         }
 
@@ -174,9 +213,9 @@ namespace GameLogic
 
         #region ShaderOutLine
 
-        public void ShaderOutLineModifyMesh(VertexHelper vh)
+        public void ModifyMesh(VertexHelper vh)
         {
-            if (m_text?.IsActive() == false || !this.m_isOpenShaderOutline)
+            if (m_text?.IsActive() == false || !m_isUseTextOutline)
             {
                 return;
             }
@@ -185,195 +224,96 @@ namespace GameLogic
             {
                 m_vertexList = ListPool<UIVertex>.Get();
             }
+
+            m_vertexList.Clear();
             vh.GetUIVertexStream(m_vertexList);
-            _ProcessVertices();
+            ProcessVertices();
 
             vh.Clear();
             vh.AddUIVertexTriangleStream(m_vertexList);
         }
 
-        private void _ProcessVertices2()
+        private void ProcessVertices()
         {
-            bool isUpRect = false;
-            for (int i = 0, count = m_vertexList.Count - 6; i <= count; i += 6)
+            int count = m_vertexList.Count - 3;
+            if (count < 0) return;
+
+            Vector2 col_rg = new Vector2(m_outLineColor.r, m_outLineColor.g);
+            Vector4 col_ba = new Vector4(0, 0, m_outLineColor.b, m_outLineColor.a);
+            Vector3 normal = new Vector3(0, 0, m_outLineWidth);
+            float outlineWidth = m_outLineWidth;
+
+            for (int i = 0; i <= count; i += 3)
             {
-                isUpRect = i % 12 < 6 ? true : false;
                 var v1 = m_vertexList[i];
                 var v2 = m_vertexList[i + 1];
                 var v3 = m_vertexList[i + 2];
 
-                var v4 = m_vertexList[i + 3];
-                var v5 = m_vertexList[i + 4];
-                var v6 = m_vertexList[i + 5];
+                Vector3 p1 = v1.position;
+                Vector3 p2 = v2.position;
+                Vector3 p3 = v3.position;
 
-                bool v1_offset = isUpRect ? true : false;
-                bool v2_offset = isUpRect ? true : false;
-                bool v3_offset = isUpRect ? false : true;
-                bool v4_offset = isUpRect ? false : true;
-                bool v5_offset = isUpRect ? false : true;
-                bool v6_offset = isUpRect ? true : false;
+                float minX = p1.x < p2.x ? (p1.x < p3.x ? p1.x : p3.x) : (p2.x < p3.x ? p2.x : p3.x);
+                float minY = p1.y < p2.y ? (p1.y < p3.y ? p1.y : p3.y) : (p2.y < p3.y ? p2.y : p3.y);
+                float maxX = p1.x > p2.x ? (p1.x > p3.x ? p1.x : p3.x) : (p2.x > p3.x ? p2.x : p3.x);
+                float maxY = p1.y > p2.y ? (p1.y > p3.y ? p1.y : p3.y) : (p2.y > p3.y ? p2.y : p3.y);
 
-                // 计算原顶点坐标中心点
-                //
-                var minX = _Min(v1.position.x, v2.position.x, v3.position.x, v4.position.x, v5.position.x, v6.position.x);
-                var minY = _Min(v1.position.y, v2.position.y, v3.position.y, v4.position.y, v5.position.y, v6.position.y);
-                var maxX = _Max(v1.position.x, v2.position.x, v3.position.x, v4.position.x, v5.position.x, v6.position.x);
-                var maxY = _Max(v1.position.y, v2.position.y, v3.position.y, v4.position.y, v5.position.y, v6.position.y);
-                var posCenter = new Vector2(minX + maxX, minY + maxY) * 0.5f;
-                // 计算原始顶点坐标和UV的方向
-                //
-                Vector2 triX, triY, uvX, uvY;
-                Vector2 triX1, triY1, uvX1, uvY1;
+                float posCenterX = (minX + maxX) * 0.5f;
+                float posCenterY = (minY + maxY) * 0.5f;
 
-                Vector2 pos1 = v1.position;
-                Vector2 pos2 = v2.position;
-                Vector2 pos3 = v3.position;
+                Vector2 pos1 = new Vector2(p1.x, p1.y);
+                Vector2 pos2 = new Vector2(p2.x, p2.y);
+                Vector2 pos3 = new Vector2(p3.x, p3.y);
 
-                Vector2 pos4 = v4.position;
-                Vector2 pos5 = v5.position;
-                Vector2 pos6 = v6.position;
+                Vector2 diff21 = pos2 - pos1;
+                Vector2 diff32 = pos3 - pos2;
 
-                if (Mathf.Abs(Vector2.Dot((pos2 - pos1).normalized, Vector2.right))
-                    > Mathf.Abs(Vector2.Dot((pos3 - pos2).normalized, Vector2.right)))
+                Vector2 triX, triY;
+                Vector4 uvX, uvY;
+
+                float dot21 = Mathf.Abs(diff21.x);
+                float dot32 = Mathf.Abs(diff32.x);
+                float mag21 = diff21.magnitude;
+                float mag32 = diff32.magnitude;
+
+                if (mag21 > 0.0001f) dot21 /= mag21;
+                if (mag32 > 0.0001f) dot32 /= mag32;
+
+                if (dot21 > dot32)
                 {
-                    triX = pos2 - pos1;
-                    triY = pos3 - pos2;
+                    triX = diff21;
+                    triY = diff32;
                     uvX = v2.uv0 - v1.uv0;
                     uvY = v3.uv0 - v2.uv0;
                 }
                 else
                 {
-                    triX = pos3 - pos2;
-                    triY = pos2 - pos1;
+                    triX = diff32;
+                    triY = diff21;
                     uvX = v3.uv0 - v2.uv0;
                     uvY = v2.uv0 - v1.uv0;
                 }
 
-                if (Mathf.Abs(Vector2.Dot((pos5 - pos4).normalized, Vector2.right))
-                    > Mathf.Abs(Vector2.Dot((pos6 - pos5).normalized, Vector2.right)))
-                {
-                    triX1 = pos5 - pos4;
-                    triY1 = pos6 - pos5;
-                    uvX1 = v5.uv0 - v4.uv0;
-                    uvY1 = v6.uv0 - v5.uv0;
-                }
-                else
-                {
-                    triX1 = pos6 - pos5;
-                    triY1 = pos5 - pos4;
-                    uvX1 = v6.uv0 - v5.uv0;
-                    uvY1 = v5.uv0 - v4.uv0;
-                }
+                Vector4 uv1 = v1.uv0, uv2 = v2.uv0, uv3 = v3.uv0;
+                Vector2 uvMin = new Vector2(
+                    uv1.x < uv2.x ? (uv1.x < uv3.x ? uv1.x : uv3.x) : (uv2.x < uv3.x ? uv2.x : uv3.x),
+                    uv1.y < uv2.y ? (uv1.y < uv3.y ? uv1.y : uv3.y) : (uv2.y < uv3.y ? uv2.y : uv3.y)
+                );
+                Vector2 uvMax = new Vector2(
+                    uv1.x > uv2.x ? (uv1.x > uv3.x ? uv1.x : uv3.x) : (uv2.x > uv3.x ? uv2.x : uv3.x),
+                    uv1.y > uv2.y ? (uv1.y > uv3.y ? uv1.y : uv3.y) : (uv2.y > uv3.y ? uv2.y : uv3.y)
+                );
 
-                // 计算原始UV框
-                var uvMin = _Min(v1.uv0, v2.uv0, v3.uv0, v4.uv0, v5.uv0, v6.uv0);
-                var uvMax = _Max(v1.uv0, v2.uv0, v3.uv0, v4.uv0, v5.uv0, v6.uv0);
-                //OutlineColor 和 OutlineWidth 也传入，避免出现不同的材质球
-                var col_rg = new Vector2(m_outLineColor.r, m_outLineColor.g); //描边颜色 用uv3 和 tangent的 zw传递
-                var col_ba1 = new Vector4(0, 0, m_outLineColor.b, m_outLineColor.a);
-                var col_ba2 = new Vector4(0, 0, m_outLineColor.b, m_outLineColor.a);
-                var col_ba3 = new Vector4(0, 0, m_outLineColor.b, m_outLineColor.a);
-                var col_ba4 = new Vector4(0, 0, m_outLineColor.b, m_outLineColor.a);
-                var col_ba5 = new Vector4(0, 0, m_outLineColor.b, m_outLineColor.a);
-                var col_ba6 = new Vector4(0, 0, m_outLineColor.b, m_outLineColor.a);
-                var normal = new Vector3(0, 0, m_outLineWidth); //描边的宽度 用normal的z传递
+                float triXMag = triX.magnitude;
+                float triYMag = triY.magnitude;
+                float invTriXMag = triXMag > 0.0001f ? 1f / Mathf.Min(triXMag, 18f) : 0f;
+                float invTriYMag = triYMag > 0.0001f ? 1f / Mathf.Min(triYMag, 18f) : 0f;
+                float triXSign = Vector2.Dot(triX, Vector2.right) > 0 ? 1f : -1f;
+                float triYSign = Vector2.Dot(triY, Vector2.up) > 0 ? 1f : -1f;
 
-                // 为每个顶点设置新的Position和UV，并传入原始UV框
-                v1 = _SetNewPosAndUV(v1, this.m_outLineWidth, posCenter, triX, triY, uvX, uvY, uvMin, uvMax, v1_offset);
-                v1.uv3 = col_rg;
-                v1.tangent = col_ba1;
-                v1.normal = normal;
-                v2 = _SetNewPosAndUV(v2, this.m_outLineWidth, posCenter, triX, triY, uvX, uvY, uvMin, uvMax, v2_offset);
-                v2.uv3 = col_rg;
-                v2.tangent = col_ba2;
-                v2.normal = normal;
-                v3 = _SetNewPosAndUV(v3, this.m_outLineWidth, posCenter, triX, triY, uvX, uvY, uvMin, uvMax, v3_offset);
-                v3.uv3 = col_rg;
-                v3.tangent = col_ba3;
-                v3.normal = normal;
-
-                v4 = _SetNewPosAndUV(v4, this.m_outLineWidth, posCenter, triX1, triY1, uvX1, uvY1, uvMin, uvMax, v4_offset);
-                v4.uv3 = col_rg;
-                v4.tangent = col_ba4;
-                v4.normal = normal;
-
-                v5 = _SetNewPosAndUV(v5, this.m_outLineWidth, posCenter, triX1, triY1, uvX1, uvY1, uvMin, uvMax, v5_offset);
-                v5.uv3 = col_rg;
-                v5.tangent = col_ba5;
-                v5.normal = normal;
-
-                v6 = _SetNewPosAndUV(v6, this.m_outLineWidth, posCenter, triX1, triY1, uvX1, uvY1, uvMin, uvMax, v6_offset);
-                v6.uv3 = col_rg;
-                v6.tangent = col_ba6;
-                v6.normal = normal;
-
-                m_vertexList[i] = v1;
-                m_vertexList[i + 1] = v2;
-                m_vertexList[i + 2] = v3;
-                m_vertexList[i + 3] = v4;
-                m_vertexList[i + 4] = v5;
-                m_vertexList[i + 5] = v6;
-
-            }
-        }
-
-        private void _ProcessVertices()
-        {
-            for (int i = 0, count = m_vertexList.Count - 3; i <= count; i += 3)
-            {
-                var v1 = m_vertexList[i];
-                var v2 = m_vertexList[i + 1];
-                var v3 = m_vertexList[i + 2];
-                // 计算原顶点坐标中心点
-                var minX = _Min(v1.position.x, v2.position.x, v3.position.x);
-                var minY = _Min(v1.position.y, v2.position.y, v3.position.y);
-                var maxX = _Max(v1.position.x, v2.position.x, v3.position.x);
-                var maxY = _Max(v1.position.y, v2.position.y, v3.position.y);
-                var posCenter = new Vector2(minX + maxX, minY + maxY) * 0.5f;
-                // 计算原始顶点坐标和UV的方向
-                //
-                Vector2 triX, triY, uvX, uvY;
-                Vector2 pos1 = v1.position;
-                Vector2 pos2 = v2.position;
-                Vector2 pos3 = v3.position;
-                if (Mathf.Abs(Vector2.Dot((pos2 - pos1).normalized, Vector2.right))> Mathf.Abs(Vector2.Dot((pos3 - pos2).normalized, Vector2.right)))
-                {
-                    triX = pos2 - pos1;
-                    triY = pos3 - pos2;
-                    uvX = v2.uv0 - v1.uv0;
-                    uvY = v3.uv0 - v2.uv0;
-                }
-                else
-                {
-                    triX = pos3 - pos2;
-                    triY = pos2 - pos1;
-                    uvX = v3.uv0 - v2.uv0;
-                    uvY = v2.uv0 - v1.uv0;
-                }
-
-                // 计算原始UV框
-                var uvMin = _Min(v1.uv0, v2.uv0, v3.uv0);
-                var uvMax = _Max(v1.uv0, v2.uv0, v3.uv0);
-                //OutlineColor 和 OutlineWidth 也传入，避免出现不同的材质球
-                var col_rg = new Vector2(m_outLineColor.r, m_outLineColor.g); //描边颜色 用uv3 和 tangent的 zw传递
-                var col_ba = new Vector4(0, 0, m_outLineColor.b, m_outLineColor.a);
-                var normal = new Vector3(0, 0, m_outLineWidth); //描边的宽度 用normal的z传递
-
-                // 为每个顶点设置新的Position和UV，并传入原始UV框
-                v1 = _SetNewPosAndUV(v1, this.m_outLineWidth, posCenter, triX, triY, uvX, uvY, uvMin, uvMax, name: m_text.gameObject.name);
-                v1.uv3 = col_rg;
-                v1.tangent = col_ba;
-                v1.normal = normal;
-
-                v2 = _SetNewPosAndUV(v2, this.m_outLineWidth, posCenter, triX, triY, uvX, uvY, uvMin, uvMax, name: m_text.gameObject.name);
-                v2.uv3 = col_rg;
-                v2.tangent = col_ba;
-                v2.normal = normal;
-
-                v3 = _SetNewPosAndUV(v3, this.m_outLineWidth, posCenter, triX, triY, uvX, uvY, uvMin, uvMax,name:m_text.gameObject.name);
-                v3.uv3 = col_rg;
-                v3.tangent = col_ba;
-                v3.normal = normal;
+                v1 = SetVertexData(v1, outlineWidth, posCenterX, posCenterY, uvX, uvY, uvMin, uvMax, invTriXMag, invTriYMag, triXSign, triYSign, col_rg, col_ba, normal);
+                v2 = SetVertexData(v2, outlineWidth, posCenterX, posCenterY, uvX, uvY, uvMin, uvMax, invTriXMag, invTriYMag, triXSign, triYSign, col_rg, col_ba, normal);
+                v3 = SetVertexData(v3, outlineWidth, posCenterX, posCenterY, uvX, uvY, uvMin, uvMax, invTriXMag, invTriYMag, triXSign, triYSign, col_rg, col_ba, normal);
 
                 m_vertexList[i] = v1;
                 m_vertexList[i + 1] = v2;
@@ -381,112 +321,53 @@ namespace GameLogic
             }
         }
 
-        private static UIVertex _SetNewPosAndUV(UIVertex pVertex, float pOutLineWidth,Vector2 pPosCenter,Vector2 pTriangleX, Vector2 pTriangleY,
-            Vector2 pUVX, Vector2 pUVY,Vector2 pUVOriginMin, Vector2 pUVOriginMax,bool needOffset = true,string name="")
+        private static UIVertex SetVertexData(UIVertex vertex, float outLineWidth,
+            float posCenterX, float posCenterY, Vector4 uvX, Vector4 uvY,
+            Vector2 uvMin, Vector2 uvMax,
+            float invTriXMag, float invTriYMag, float triXSign, float triYSign,
+            Vector2 col_rg, Vector4 col_ba, Vector3 normal)
         {
-            // Position
-            var pos = pVertex.position;
-            var posXOffset = pos.x > pPosCenter.x ? pOutLineWidth : -pOutLineWidth;
-            var posYOffset = pos.y > pPosCenter.y ? pOutLineWidth : -pOutLineWidth;
+            Vector3 pos = vertex.position;
+            float posXOffset = pos.x > posCenterX ? outLineWidth : -outLineWidth;
+            float posYOffset = pos.y > posCenterY ? outLineWidth : -outLineWidth;
             pos.x += posXOffset;
             pos.y += posYOffset;
-            pVertex.position = pos;
-#if UNITY_2020_1_OR_NEWER
-            var uv = pVertex.uv0;
-            Vector2 vx = new Vector2(uv.x, uv.y);
-            //Debuger.Log($"name:{name} pUVX:{pUVX}  pTriangleX.magnitude:{Mathf.Min(pTriangleX.magnitude, 18) }     pTriangleY.magnitude:{Mathf.Min(pTriangleY.magnitude, 18) } posXOffset:{posXOffset}  Dot:{(Vector2.Dot(pTriangleX, Vector2.right) > 0 ? 1 : -1)}");
-            vx += pUVX / Mathf.Min(pTriangleX.magnitude, 18) * posXOffset * (Vector2.Dot(pTriangleX, Vector2.right) > 0 ? 1 : -1);
-            vx += pUVY / Mathf.Min(pTriangleY.magnitude, 18) * posYOffset * (Vector2.Dot(pTriangleY, Vector2.up) > 0 ? 1 : -1);
-            uv = new Vector4(vx.x, vx.y, uv.z, uv.w);
-            pVertex.uv0 = uv;
-#else
-            var uv = pVertex.uv0;
-            uv += pUVX / pTriangleX.magnitude * posXOffset * (Vector2.Dot(pTriangleX, Vector2.right) > 0 ? 1 : -1);
-            uv += pUVY / pTriangleY.magnitude * posYOffset * (Vector2.Dot(pTriangleY, Vector2.up) > 0 ? 1 : -1);
-            pVertex.uv0 = uv;
-#endif
-            pVertex.uv1 = pUVOriginMin; //uv1 uv2 可用  tangent  normal 在缩放情况 会有问题
-            pVertex.uv2 = pUVOriginMax;
+            vertex.position = pos;
 
-            return pVertex;
-        }
+            Vector4 uv = vertex.uv0;
+            float uvOffsetX = posXOffset * invTriXMag * triXSign;
+            float uvOffsetY = posYOffset * invTriYMag * triYSign;
+            uv.x += uvX.x * uvOffsetX + uvY.x * uvOffsetY;
+            uv.y += uvX.y * uvOffsetX + uvY.y * uvOffsetY;
+            vertex.uv0 = uv;
 
-        private static float _Min(float pA, float pB, float pC, float pD, float pE, float pF)
-        {
-            return Mathf.Min(Mathf.Min(Mathf.Min(Mathf.Min(Mathf.Min(pA, pB), pC), pD), pE), pF);
-        }
+            vertex.uv1 = uvMin;
+            vertex.uv2 = uvMax;
+            vertex.uv3 = col_rg;
+            vertex.tangent = col_ba;
+            vertex.normal = normal;
 
-        private static float _Max(float pA, float pB, float pC, float pD, float pE, float pF)
-        {
-            return Mathf.Max(Mathf.Max(Mathf.Max(Mathf.Max(Mathf.Max(pA, pB), pC), pD), pE), pF);
-        }
-
-        private static float _Min(float pA, float pB, float pC, float pD)
-        {
-            return Mathf.Min(Mathf.Min(Mathf.Min(pA, pB), pC), pD);
-        }
-
-        private static float _Max(float pA, float pB, float pC, float pD)
-        {
-            return Mathf.Max(Mathf.Max(Mathf.Max(pA, pB), pC), pD);
-        }
-
-        private static float _Min(float pA, float pB, float pC)
-        {
-            return Mathf.Min(Mathf.Min(pA, pB), pC);
-        }
-
-        private static float _Max(float pA, float pB, float pC)
-        {
-            return Mathf.Max(Mathf.Max(pA, pB), pC);
-        }
-
-        private static Vector2 _Min(Vector2 pA, Vector2 pB, Vector2 pC, Vector2 pD)
-        {
-            return new Vector2(_Min(pA.x, pB.x, pC.x, pD.x), _Min(pA.y, pB.y, pC.y, pD.y));
-        }
-
-        private static Vector2 _Max(Vector2 pA, Vector2 pB, Vector2 pC, Vector2 pD)
-        {
-            return new Vector2(_Max(pA.x, pB.x, pC.x, pD.x), _Max(pA.y, pB.y, pC.y, pD.y));
-        }
-
-        private static Vector2 _Min(Vector2 pA, Vector2 pB, Vector2 pC, Vector2 pD, Vector2 pE, Vector2 pF)
-        {
-            return new Vector2(_Min(pA.x, pB.x, pC.x, pD.x, pE.x, pF.x), _Min(pA.y, pB.y, pC.y, pD.y, pE.y, pF.y));
-        }
-
-        private static Vector2 _Max(Vector2 pA, Vector2 pB, Vector2 pC, Vector2 pD, Vector2 pE, Vector2 pF)
-        {
-            return new Vector2(_Max(pA.x, pB.x, pC.x, pD.x, pE.x, pF.x), _Max(pA.y, pB.y, pC.y, pD.y, pE.y, pF.y));
-        }
-
-        private static Vector2 _Min(Vector2 pA, Vector2 pB, Vector2 pC)
-        {
-            return new Vector2(_Min(pA.x, pB.x, pC.x), _Min(pA.y, pB.y, pC.y));
-        }
-
-        private static Vector2 _Max(Vector2 pA, Vector2 pB, Vector2 pC)
-        {
-            return new Vector2(_Max(pA.x, pB.x, pC.x), _Max(pA.y, pB.y, pC.y));
+            return vertex;
         }
 
         #endregion
 
-        #region NormalOutLine
+        #region Material Management
 
         public void OnDestroy()
         {
             if (m_vertexList != null)
             {
                 ListPool<UIVertex>.Recycle(m_vertexList);
+                m_vertexList = null;
             }
+            ReleaseMaterial();
         }
 
         public void SetCamera(Camera c)
         {
             if (m_camera == c) return;
-            this.m_camera = c;
+            m_camera = c;
         }
 
         public void UpdateOutLineInfos()
@@ -497,238 +378,91 @@ namespace GameLogic
 
         private void UpdateOutLineMaterial()
         {
-            if (!m_isUseTextOutline || !m_isOpenShaderOutline) return;
-#if !UNITY_EDITOR
+            if (!m_isUseTextOutline || m_text == null) return;
 
-            if (m_text && m_text.material == m_text.defaultMaterial)
+            Texture fontTexture = null;
+            if (m_text.font != null && m_text.font.material != null)
             {
-                Shader shader = Shader.Find(OutLineShaderName);
-                if (shader)
-                {
-                    m_text.material = new Material(shader);
-                }
+                fontTexture = m_text.font.material.mainTexture;
             }
 
+#if !UNITY_EDITOR
+            if (m_text.material == m_text.defaultMaterial)
+            {
+                var cachedMaterial = OutlineMaterialCache.GetOrCreateMaterial(OutLineShaderName, fontTexture);
+                if (cachedMaterial != null)
+                {
+                    m_text.material = cachedMaterial;
+                    m_cachedFontTexture = fontTexture;
+                    m_materialFromCache = true;
+                }
+            }
 #else
             if (!Application.isPlaying)
             {
-                if (m_text && m_text.material == m_text.defaultMaterial)
+                if (m_text.material == m_text.defaultMaterial)
                 {
-                    Material material= UnityEditor.AssetDatabase.LoadAssetAtPath<Material>("Assets/Scripts/HotFix/GameLogic/Module/UIModule/Expansion/UIText/Shaders/UGUIPro_UIText.mat");
-
+                    Material material = UnityEditor.AssetDatabase.LoadAssetAtPath<Material>("Assets/Scripts/HotFix/GameLogic/Module/UIModule/Expansion/UIText/Shaders/UGUIPro_UIText.mat");
                     if (material == null)
                     {
                         Debug.LogError("Text Out Line Material Not Find Please Check Material Path!");
                     }
                     m_text.material = material;
+                    m_materialFromCache = false;
                 }
             }
             else
             {
-                if (m_text && m_text.material == m_text.defaultMaterial)
+                if (m_text.material == m_text.defaultMaterial)
                 {
-                    Shader shader = Shader.Find(OutLineShaderName);
-                    if (shader)
+                    var cachedMaterial = OutlineMaterialCache.GetOrCreateMaterial(OutLineShaderName, fontTexture);
+                    if (cachedMaterial != null)
                     {
-                        m_text.material = new Material(shader);
+                        m_text.material = cachedMaterial;
+                        m_cachedFontTexture = fontTexture;
+                        m_materialFromCache = true;
                     }
                 }
             }
 #endif
-            if (m_text)
-            {
-                Texture fontTexture = null;
-                if (m_text && m_text.font)
-                {
-                    fontTexture = m_text.font.material.mainTexture;
-                }
+        }
 
-                if (m_text.material && m_text.material != m_text.defaultMaterial)
-                    m_text.material.mainTexture = fontTexture;
+        public void ReleaseMaterial()
+        {
+            if (m_materialFromCache)
+            {
+                OutlineMaterialCache.ReleaseMaterial(OutLineShaderName, m_cachedFontTexture);
+                m_materialFromCache = false;
+                m_cachedFontTexture = null;
             }
         }
 
         private void OpenShaderParams()
         {
-            if (!m_isUseTextOutline || !m_isOpenShaderOutline) return;
-            if (m_text && !m_initParams)
+            if (!m_isUseTextOutline || m_text == null || m_initParams) return;
+
+            if (m_text.canvas != null)
             {
-                if (m_text.canvas)
-                {
-                    var v1 = m_text.canvas.additionalShaderChannels;
-                    var v2 = AdditionalCanvasShaderChannels.TexCoord1;
-                    if ((v1 & v2) != v2)
-                    {
-                        m_text.canvas.additionalShaderChannels |= v2;
-                    }
+                var channels = m_text.canvas.additionalShaderChannels;
 
-                    v2 = AdditionalCanvasShaderChannels.TexCoord2;
-                    if ((v1 & v2) != v2)
-                    {
-                        m_text.canvas.additionalShaderChannels |= v2;
-                    }
+                channels |= AdditionalCanvasShaderChannels.TexCoord1;
+                channels |= AdditionalCanvasShaderChannels.TexCoord2;
+                channels |= AdditionalCanvasShaderChannels.TexCoord3;
+                channels |= AdditionalCanvasShaderChannels.Tangent;
+                channels |= AdditionalCanvasShaderChannels.Normal;
 
-                    v2 = AdditionalCanvasShaderChannels.TexCoord3;
-                    if ((v1 & v2) != v2)
-                    {
-                        m_text.canvas.additionalShaderChannels |= v2;
-                    }
-
-                    v2 = AdditionalCanvasShaderChannels.Tangent;
-                    if ((v1 & v2) != v2)
-                    {
-                        m_text.canvas.additionalShaderChannels |= v2;
-                    }
-
-                    v2 = AdditionalCanvasShaderChannels.Normal;
-                    if ((v1 & v2) != v2)
-                    {
-                        m_text.canvas.additionalShaderChannels |= v2;
-                    }
-                    m_initParams = true;
-                }
+                m_text.canvas.additionalShaderChannels = channels;
+                m_initParams = true;
             }
-        }
-
-        private void _ProcessVertices(VertexHelper vh)
-        {
-            if (m_text?.IsActive() == false || !m_isUseTextOutline)
-            {
-                return;
-            }
-
-            var count = vh.currentVertCount;
-            if (count == 0)
-                return;
-
-            /*
-             *  TL--------TR
-             *  |          |^
-             *  |          ||
-             *  CL--------CR
-             *  |          ||
-             *  |          |v
-             *  BL--------BR
-             * **/
-
-            for (int i = 0; i < count; i++)
-            {
-                UIVertex vertex = UIVertex.simpleVert;
-                vh.PopulateUIVertex(ref vertex, i);
-                this.m_vertexList.Add(vertex);
-            }
-            vh.Clear();
-
-            if (!this.m_isOpenShaderOutline)
-            {
-                for (int i = 0; i < this.m_vertexList.Count; i += 4)
-                {
-
-                    UIVertex TL = GeneralUIVertex(this.m_vertexList[i + 0]);
-                    UIVertex TR = GeneralUIVertex(this.m_vertexList[i + 1]);
-                    UIVertex BR = GeneralUIVertex(this.m_vertexList[i + 2]);
-                    UIVertex BL = GeneralUIVertex(this.m_vertexList[i + 3]);
-
-                    //先绘制上四个
-                    // UIVertex CR = default(UIVertex);
-                    // UIVertex CL = default(UIVertex);
-
-                    this.m_outLineDis[0].Set(-this.m_outLineWidth, this.m_outLineWidth, 0); //LT
-                    this.m_outLineDis[1].Set(this.m_outLineWidth, this.m_outLineWidth, 0); //RT
-                    this.m_outLineDis[2].Set(-this.m_outLineWidth, -this.m_outLineWidth, 0); //LB
-                    this.m_outLineDis[3].Set(this.m_outLineWidth, -this.m_outLineWidth, 0); //RB
-
-                    for (int j = 0; j < 4; j++)
-                    {
-                        //四个方向
-                        UIVertex o_TL = GeneralUIVertex(TL);
-                        UIVertex o_TR = GeneralUIVertex(TR);
-                        UIVertex o_BR = GeneralUIVertex(BR);
-                        UIVertex o_BL = GeneralUIVertex(BL);
-
-
-                        o_TL.position += this.m_outLineDis[j];
-                        o_TR.position += this.m_outLineDis[j];
-                        o_BR.position += this.m_outLineDis[j];
-                        o_BL.position += this.m_outLineDis[j];
-
-                        o_TL.color = this.m_outLineColor;
-                        o_TR.color = this.m_outLineColor;
-                        o_BR.color = this.m_outLineColor;
-                        o_BL.color = this.m_outLineColor;
-
-                        vh.AddVert(o_TL);
-                        vh.AddVert(o_TR);
-
-                        vh.AddVert(o_BR);
-                        vh.AddVert(o_BL);
-                    }
-
-                    vh.AddVert(TL);
-                    vh.AddVert(TR);
-
-                    vh.AddVert(BR);
-                    vh.AddVert(BL);
-                }
-
-                for (int i = 0; i < vh.currentVertCount; i += 4)
-                {
-                    vh.AddTriangle(i + 0, i + 1, i + 2);
-                    vh.AddTriangle(i + 2, i + 3, i + 0);
-                }
-            }
-        }
-
-        public void NormalOutLineModifyMesh(VertexHelper vh)
-        {
-            if (!m_isUseTextOutline) return;
-
-            if (m_vertexList == null)
-            {
-                m_vertexList = ListPool<UIVertex>.Get();
-            }
-
-            m_vertexList.Clear();
-            //if (m_Text.text.Equals("Bonus"))
-            //{
-            //    Debug.ColorLog(LogColor.Yellow, "Bonus>>>>>>>>>>>>>Start>>>>>>>>>>>>>>Bonus>>>>>>");
-            //}
-
-            if (m_isOpenShaderOutline)
-            {
-                ShaderOutLineModifyMesh(vh);
-            }
-            else
-            {
-                _ProcessVertices(vh);
-            }
-            //if (m_Text.text.Equals("Bonus"))
-            //{
-            //    Debug.ColorLog(LogColor.Cyan, "Bonus>>>>>>>>>>>>>End>>>>>>>>>>>>>>Bonus>>>>>>");
-            //}
         }
 
 #if UNITY_EDITOR
-
         public void OnValidate()
         {
-            if (!m_isUseTextOutline || !m_isOpenShaderOutline) return;
+            if (!m_isUseTextOutline) return;
             UpdateOutLineMaterial();
         }
-
 #endif
-
-        public static UIVertex GeneralUIVertex(UIVertex vertex)
-        {
-            UIVertex result = UIVertex.simpleVert;
-            result.normal = new Vector3(vertex.normal.x, vertex.normal.y, vertex.normal.z);
-            result.position = new Vector3(vertex.position.x, vertex.position.y, vertex.position.z);
-            result.tangent = new Vector4(vertex.tangent.x, vertex.tangent.y, vertex.tangent.z, vertex.tangent.w);
-            result.uv0 = new Vector2(vertex.uv0.x, vertex.uv0.y);
-            result.uv1 = new Vector2(vertex.uv1.x, vertex.uv1.y);
-            result.color = vertex.color;
-            return result;
-        }
 
         #endregion
     }

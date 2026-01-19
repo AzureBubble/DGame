@@ -1329,7 +1329,7 @@ namespace GameLogic
                     text.SetOutLineColor(m_currentParams.OutlineColor, m_currentParams.OutlineWidth);
                 }
 
-                outlineExtend.SetUseShaderOutLine(m_currentParams.EnableOutline);
+                outlineExtend.SetUseTextOutline(m_currentParams.EnableOutline);
             }
         }
 

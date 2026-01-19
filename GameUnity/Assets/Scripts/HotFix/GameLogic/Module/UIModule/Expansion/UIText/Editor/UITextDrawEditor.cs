@@ -121,9 +121,9 @@ namespace GameLogic
 
         #region 字体描边
 
-        public static void DrawTextOutLineAndGradientGUI(string title, ref bool isPanelOpen,
+        public static void DrawTextOutLineGUI(string title, ref bool isPanelOpen,
             SerializedProperty isUseTextOutLine,
-            SerializedProperty isOpenShaderOutLine, SerializedProperty outLineColor,
+            SerializedProperty outLineColor,
             SerializedProperty outLineWidth, SerializedProperty alpha)
         {
             UnityEditorUtil.LayoutFrameBox(() =>
@@ -132,9 +132,7 @@ namespace GameLogic
                 if (isUseTextOutLine.boolValue)
                 {
                     EditorGUI.indentLevel++;
-
                     EditorGUILayout.PropertyField(alpha, new GUIContent("透明度"));
-                    EditorGUILayout.PropertyField(isOpenShaderOutLine, new GUIContent("开启Shader描边"));
                     EditorGUILayout.PropertyField(outLineWidth, new GUIContent("描边大小"));
                     EditorGUILayout.PropertyField(outLineColor, new GUIContent("描边颜色"));
                     EditorGUI.indentLevel--;

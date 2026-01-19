@@ -138,26 +138,31 @@ namespace GameLogic
 
         private void ApplyShadow(List<UIVertex> verts, Vector2 min, Vector2 max, Color32 color, float x, float y)
         {
-            UIVertex vt;
-            int start = 0;
             int end = verts.Count;
             // 扩容顶点数量 把 shadow 的顶点加入到 verts 里
-            var neededCapacity = verts.Count * 2;
+            var neededCapacity = end << 1; // end * 2
 
             if (verts.Capacity < neededCapacity)
             {
                 verts.Capacity = neededCapacity;
             }
 
-            for (int i = start; i < end; i++)
+            // 预计算避免循环内重复除法
+            float invWidth = max.x != min.x ? 1f / (max.x - min.x) : 0f;
+            float invHeight = max.y != min.y ? 1f / (max.y - min.y) : 0f;
+            float offsetX = m_vectorColorOffset.x;
+            float offsetY = m_vectorColorOffset.y;
+
+            for (int i = 0; i < end; i++)
             {
-                vt = verts[i];
+                UIVertex vt = verts[i];
                 verts.Add(vt);
+
                 Vector3 vtPos = vt.position;
                 vtPos.x += x;
                 vtPos.y += y;
                 vt.position = vtPos;
-                vt.color = RemapColor(min, max, color, vtPos);
+                vt.color = RemapColorOptimized(min, invWidth, invHeight, vtPos, offsetX, offsetY);
                 verts[i] = vt;
             }
         }
@@ -176,6 +181,33 @@ namespace GameLogic
             //使用全新颜色 不继承原有的
             return newColor;
             //return color * newColor;
+        }
+
+        // 优化版本：预计算除法，手动插值避免Color.Lerp
+        private Color RemapColorOptimized(Vector2 min, float invWidth, float invHeight, Vector3 vtPos, float offsetX, float offsetY)
+        {
+            float x01 = Mathf.Clamp01((vtPos.x - min.x) * invWidth);
+            float y01 = Mathf.Clamp01((vtPos.y - min.y) * invHeight);
+
+            x01 -= offsetX * (offsetX > 0f ? x01 : (1f - x01));
+            y01 -= offsetY * (offsetY > 0f ? y01 : (1f - y01));
+
+            // 手动双线性插值，避免3次Color.Lerp调用
+            float invX = 1f - x01;
+            float invY = 1f - y01;
+
+            // 双线性插值：Lerp(Lerp(BL, BR, x), Lerp(TL, TR, x), y)
+            Color result;
+            result.r = (m_shadowBottomLeftColor.r * invX + m_shadowBottomRightColor.r * x01) * invY +
+                       (m_shadowTopLeftColor.r * invX + m_shadowTopRightColor.r * x01) * y01;
+            result.g = (m_shadowBottomLeftColor.g * invX + m_shadowBottomRightColor.g * x01) * invY +
+                       (m_shadowTopLeftColor.g * invX + m_shadowTopRightColor.g * x01) * y01;
+            result.b = (m_shadowBottomLeftColor.b * invX + m_shadowBottomRightColor.b * x01) * invY +
+                       (m_shadowTopLeftColor.b * invX + m_shadowTopRightColor.b * x01) * y01;
+            result.a = (m_shadowBottomLeftColor.a * invX + m_shadowBottomRightColor.a * x01) * invY +
+                       (m_shadowTopLeftColor.a * invX + m_shadowTopRightColor.a * x01) * y01;
+
+            return result;
         }
 
         public void SetShadowColor(Color32 topLeftColor, Color32 topRightColor, Color32 bottomLeftColor, Color32 bottomRightColor)

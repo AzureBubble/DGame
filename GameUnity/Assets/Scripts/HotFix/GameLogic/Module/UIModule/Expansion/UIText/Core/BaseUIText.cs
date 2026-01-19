@@ -136,7 +136,7 @@ namespace GameLogic
             if (OverrideForBestFit(verts))
             {
                 m_uiTextCircleExtend.ModifyMesh(verts);
-                UITextOutlineExtend.NormalOutLineModifyMesh(verts);
+                UITextOutlineExtend.ModifyMesh(verts);
                 m_uiTextVertexColorExtend?.PopulateMesh(verts, rectTransform, color);
                 UITextGradientColorExtend?.ModifyMesh(verts);
                 m_uiTextShadowExtend?.PopulateMesh(verts, rectTransform, color);
@@ -145,7 +145,7 @@ namespace GameLogic
 
             m_uiTextSpacingExtend?.PopulateMesh(verts);
             m_uiTextCircleExtend.ModifyMesh(verts);
-            UITextOutlineExtend.NormalOutLineModifyMesh(verts);
+            UITextOutlineExtend.ModifyMesh(verts);
             m_uiTextVertexColorExtend?.PopulateMesh(verts, rectTransform, color);
             UITextGradientColorExtend?.ModifyMesh(verts);
             m_uiTextShadowExtend?.PopulateMesh(verts, rectTransform, color);
@@ -161,12 +161,12 @@ namespace GameLogic
             m_uiTextOutlineExtend.SetAlpha(alpha);
         }
 
-        public void SetOutLineColor(Color32 color32, bool isOpenShaderOutline = true)
+        public void SetOutLineColor(Color32 color32)
         {
-            SetOutLineColor(color32, 1, isOpenShaderOutline);
+            SetOutLineColor(color32, 1);
         }
 
-        public void SetOutLineColor(Color32 color32, int outlineWidth, bool isOpenShaderOutline = true)
+        public void SetOutLineColor(Color32 color32, int outlineWidth)
         {
             if (m_uiTextOutlineExtend == null)
             {
@@ -174,10 +174,6 @@ namespace GameLogic
             }
             m_uiTextOutlineExtend.SetOutLineColor(color32);
             m_uiTextOutlineExtend.SetOutLineWidth(outlineWidth);
-            if (!isOpenShaderOutline)
-            {
-                m_uiTextOutlineExtend.isOpenShaderOutline = false;
-            }
         }
 
         public void SetGradientColor(Color32 topColor, Color32 bottomColor, Color32 leftColor = default, Color32 rightColor = default, float verticalOffset = 0f, float horizontalOffset = 0f, bool splitTextGradient = false)

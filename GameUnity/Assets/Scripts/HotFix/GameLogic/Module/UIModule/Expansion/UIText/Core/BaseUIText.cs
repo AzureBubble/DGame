@@ -133,6 +133,17 @@ namespace GameLogic
         public void ModifyMesh(VertexHelper verts)
         {
             if(!IsActive() || verts.currentVertCount == 0) return;
+
+            // 快速检查：如果没有任何扩展启用且不使用BestFit，直接返回
+            bool hasAnyExtend = m_isUseBestFitFont ||
+                                m_uiTextSpacingExtend.IsUseTextSpacing ||
+                                m_uiTextCircleExtend.UseTextCircle ||
+                                m_uiTextOutlineExtend.UseTextOutline ||
+                                m_uiTextVertexColorExtend.UseVertexColor ||
+                                m_uiTextGradientColorExtend.isUseGradientColor ||
+                                m_uiTextShadowExtend.UseShadow;
+            if (!hasAnyExtend) return;
+
             if (OverrideForBestFit(verts))
             {
                 m_uiTextCircleExtend.ModifyMesh(verts);

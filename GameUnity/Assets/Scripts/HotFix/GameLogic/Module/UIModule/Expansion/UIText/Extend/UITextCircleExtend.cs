@@ -13,6 +13,8 @@ namespace GameLogic
         [SerializeField, Range(0, 10)] private float m_spaceCoff = 1f;
         [SerializeField, Range(0, 360)] private float m_angleOffset = 0;
 
+        public bool UseTextCircle => m_useTextCircle;
+
         // 缓存计算用的变量，避免在循环中重复创建
         private readonly UIVertex[] m_vertices = new UIVertex[4];
 

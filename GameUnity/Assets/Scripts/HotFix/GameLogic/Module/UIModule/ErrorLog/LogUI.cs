@@ -20,18 +20,16 @@ namespace GameLogic
 
 		#endregion
 
-		#region override
+		#region Override
 
 		protected override void OnCreate()
 		{
-			base.OnCreate();
 			RefreshUI();
 		}
 
-		protected override ModelType GetModelType()
-		{
-			return ModelType.NoneType;
-		}
+		protected override ModelType GetModelType() => ModelType.NoneType;
+
+		protected override UILayer windowLayer => UILayer.System;
 
 		#endregion
 

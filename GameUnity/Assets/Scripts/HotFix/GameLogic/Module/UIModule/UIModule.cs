@@ -8,7 +8,7 @@ using UnityEngine.UI;
 
 namespace GameLogic
 {
-    public sealed class UIModule : Singleton<UIModule>, IUpdate
+    public sealed partial class UIModule : Singleton<UIModule>, IUpdate
     {
         #region 常量定义
 

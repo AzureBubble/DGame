@@ -10,10 +10,10 @@ namespace GameLogic
     public class UITextShadowExtend
     {
         [SerializeField] private bool m_isUseTextShadow;
-        [SerializeField] private Color m_shadowTopLeftColor = Color.white;
-        [SerializeField] private Color m_shadowTopRightColor = Color.white;
-        [SerializeField] private Color m_shadowBottomLeftColor = Color.white;
-        [SerializeField] private Color m_shadowBottomRightColor = Color.white;
+        [SerializeField] private Color m_shadowTopLeftColor = Color.black;
+        [SerializeField] private Color m_shadowTopRightColor = Color.black;
+        [SerializeField] private Color m_shadowBottomLeftColor = Color.black;
+        [SerializeField] private Color m_shadowBottomRightColor = Color.black;
         [SerializeField] private Vector2 m_effectDistance = new Vector2(1f, -1f);
         private const float MAX_EFFECT_DISTANCE = 600f;
         private Vector2 m_vectorColorOffset = Vector2.zero;

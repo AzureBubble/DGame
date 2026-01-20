@@ -96,7 +96,7 @@ namespace GameLogic
     {
         [SerializeField] private bool m_isUseTextOutline;
         [SerializeField, Range(1, 10)] private int m_outLineWidth = 1;
-        [SerializeField] private Color m_outLineColor = Color.white;
+        [SerializeField] private Color m_outLineColor = Color.black;
         [SerializeField] private Camera m_camera;
         [SerializeField, Range(0f, 1f)] private float m_alpha = 1f;
 

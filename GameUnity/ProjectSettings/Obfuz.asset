@@ -20,8 +20,8 @@ MonoBehaviour:
     targetRuntime: 0
   assemblySettings:
     assembliesToObfuscate:
-    - GameLogic
     - GameProto
+    - GameLogic
     nonObfuscatedButReferencingObfuscatedAssemblies:
     - DGame.Runtime
     - Assembly-CSharp
@@ -50,7 +50,8 @@ MonoBehaviour:
     keepUnknownSymbolInSymbolMappingFile: 1
     symbolMappingFile: Assets/Obfuz/SymbolObfus/symbol-mapping.xml
     debugSymbolMappingFile: Assets/Obfuz/SymbolObfus/symbol-mapping-debug.xml
-    ruleFiles: []
+    ruleFiles:
+    - Assets/Obfuz/SkipObfusRules.xml
     customRenamePolicyTypes: []
   constEncryptSettings:
     encryptionLevel: 1

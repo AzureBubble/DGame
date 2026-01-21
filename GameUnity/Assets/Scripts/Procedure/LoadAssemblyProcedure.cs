@@ -310,13 +310,13 @@ namespace Procedure
         private void SetUpStaticSecretKey()
         {
 #if ENABLE_OBFUZ
-            Debug.Log("Enable Obfuz");
-            Debug.Log("SetUpStaticSecret begin");
+            DLogger.Info("Enable Obfuz");
+            DLogger.Info("SetUpStaticSecret begin");
             EncryptionService<DefaultStaticEncryptionScope>.Encryptor =
                 new GeneratedEncryptionVirtualMachine(Resources.Load<TextAsset>("Obfuz/defaultStaticSecretKey").bytes);
-            Debug.Log("SetUpStaticSecret end");
+            DLogger.Info("SetUpStaticSecret end");
 #else
-            Debug.Log("Disable Obfuz");
+            DLogger.Info("Disable Obfuz");
 #endif
         }
 

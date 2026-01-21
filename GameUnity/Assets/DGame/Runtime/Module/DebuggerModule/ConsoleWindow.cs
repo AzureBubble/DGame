@@ -75,7 +75,7 @@ namespace DGame
                 infoFilter = m_lastInfoFilter = Utility.PlayerPrefsUtil.GetBool(Constant.CONSOLE_WINDOW_INFO_FILTER);
                 warningFilter = m_lastWarningFilter = Utility.PlayerPrefsUtil.GetBool(Constant.CONSOLE_WINDOW_WARNING_FILTER);
                 fatalFilter = m_lastFatalFilter = Utility.PlayerPrefsUtil.GetBool(Constant.CONSOLE_WINDOW_FATAL_FILTER);
-                errorFilter = m_lastFatalFilter = Utility.PlayerPrefsUtil.GetBool(Constant.CONSOLE_WINDOW_ERROR_FILTER);
+                errorFilter = m_lastErrorFilter = Utility.PlayerPrefsUtil.GetBool(Constant.CONSOLE_WINDOW_ERROR_FILTER);
             }
 
             private void OnLogMessageReceive(string logMessage, string stacktrace, LogType type)
@@ -125,7 +125,7 @@ namespace DGame
                 if (m_lastErrorFilter != errorFilter)
                 {
                     m_lastErrorFilter = errorFilter;
-                    Utility.PlayerPrefsUtil.SetBool(Constant.CONSOLE_WINDOW_ERROR_FILTER, m_lastWarningFilter);
+                    Utility.PlayerPrefsUtil.SetBool(Constant.CONSOLE_WINDOW_ERROR_FILTER, m_lastErrorFilter);
                 }
 
                 if (m_lastFatalFilter != fatalFilter)
@@ -535,25 +535,57 @@ namespace DGame
             private string GetLogString(LogNode logNode)
             {
                 Color32 color = GetLogStringColor(logNode.LogType);
+                // 对于Exception类型，Unity传递的logMessage已包含堆栈，只显示第一行
+                string displayMessage = logNode.LogMessage;
+                if (logNode.LogType == LogType.Exception)
+                {
+                    displayMessage = TruncateString(displayMessage, 500);
+                }
                 return Utility.StringUtil.Format(Constant.CONSOLE_WINDOW_LOG_SINGLE_MESSAGE_STRING, color.r, color.g,
-                    color.b, color.a, logNode.LogTime.ToLocalTime(), logNode.LogFrameCount, logNode.LogMessage);
+                    color.b, color.a, logNode.LogTime.ToLocalTime(), logNode.LogFrameCount, displayMessage);
             }
 
             private string TruncateString(string str, int maxLength)
             {
-                if (string.IsNullOrEmpty(str) || str.Length <= maxLength)
+                if (string.IsNullOrEmpty(str))
                 {
                     return str;
                 }
 
-                // 截取第一行
-                int newlineIndex = str.IndexOf('\n');
-                if (newlineIndex >= 0 && newlineIndex < maxLength)
+                // 移除Exception错误消息开头的"Exception:"前缀
+                if (str.StartsWith("Exception: "))
                 {
-                    return str.Substring(0, newlineIndex) + "...";
+                    str = str.Substring("Exception: ".Length);
                 }
 
-                return str.Substring(0, maxLength) + "...";
+                // 先移除富文本标签，避免截断时破坏标签导致富文本解析失败
+                string plainText = RemoveRichTextTags(str);
+
+                if (plainText.Length <= maxLength)
+                {
+                    return plainText;
+                }
+
+                // 截取第一行
+                int newlineIndex = plainText.IndexOf('\n');
+                if (newlineIndex >= 0 && newlineIndex < maxLength)
+                {
+                    return plainText.Substring(0, newlineIndex) + "...";
+                }
+
+                return plainText.Substring(0, maxLength) + "...";
+            }
+
+            private string RemoveRichTextTags(string str)
+            {
+                if (string.IsNullOrEmpty(str))
+                {
+                    return str;
+                }
+
+                // 移除常见的富文本标签: <color>, <b>, <i>, <size>, </color>, </b>, </i>, </size> 等
+                var result = System.Text.RegularExpressions.Regex.Replace(str, @"<[^>]+>", string.Empty);
+                return result;
             }
 
             internal Color32 GetLogStringColor(LogType logType)

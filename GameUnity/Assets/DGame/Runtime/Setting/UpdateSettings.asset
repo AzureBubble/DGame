@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   projectName: Demo
   HotUpdateAssemblies:
-  - GameLogic.dll
   - GameProto.dll
+  - GameLogic.dll
   AOTMetaAssemblies:
   - mscorlib.dll
   - System.dll

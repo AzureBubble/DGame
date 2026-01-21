@@ -163,23 +163,24 @@ namespace GameLogic
 
         public void SetOutLineColor(Color outlineColor)
         {
-            m_isUseTextOutline = true;
             m_outLineColor = outlineColor;
+            UseTextOutline = true;
+            UpdateOutLineInfos();
             Refresh();
         }
 
         public void SetOutLineWidth(int outlineWidth)
         {
-            m_isUseTextOutline = true;
             m_outLineWidth = outlineWidth;
+            UseTextOutline = true;
             Refresh();
         }
 
         public void SetAlpha(float setAlphaValue)
         {
-            m_isUseTextOutline = true;
             m_alpha = setAlphaValue;
             m_outLineColor.a = setAlphaValue;
+            UseTextOutline = true;
             Refresh();
         }
 

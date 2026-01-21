@@ -114,6 +114,11 @@ namespace GameLogic
             {
                 if (m_isUseTextOutline == value) return;
                 m_isUseTextOutline = value;
+
+                if (value)
+                {
+                    UpdateOutLineInfos();
+                }
                 Refresh();
             }
         }

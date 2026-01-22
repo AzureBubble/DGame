@@ -12,13 +12,20 @@ namespace GameLogic
     public static class OutlineMaterialCache
     {
         private static readonly Dictionary<string, MaterialCacheEntry> s_materialCache = new Dictionary<string, MaterialCacheEntry>();
-        private static Shader s_cachedShader;
+        private static Material s_baseMaterial;
 
         private class MaterialCacheEntry
         {
             public Material Material;
             public int ReferenceCount;
         }
+
+        /// <summary>
+        /// UIText 预制材质在 YooAsset 中的地址
+        /// 对应文件路径: Assets/BundleAssets/Materials/UGUIPro_UIText.mat
+        /// Addressable规则: AddressByFileName (地址=文件名，不含扩展名)
+        /// </summary>
+        private const string UITextMaterialAddress = "UGUIPro_UIText";
 
         public static Material GetOrCreateMaterial(string shaderName, Texture fontTexture)
         {
@@ -30,18 +37,28 @@ namespace GameLogic
                 return entry.Material;
             }
 
-            if (s_cachedShader == null || s_cachedShader.name != shaderName)
+            // 使用 ResourceModule 加载预制材质
+            if (s_baseMaterial == null)
             {
-                s_cachedShader = Shader.Find(shaderName);
+                try
+                {
+                    s_baseMaterial = GameModule.ResourceModule.LoadAsset<Material>(UITextMaterialAddress);
+                }
+                catch (System.Exception e)
+                {
+                    Debug.LogError($"[OutlineMaterialCache] Failed to load material from YooAsset (address: {UITextMaterialAddress}): {e.Message}");
+                    return null;
+                }
             }
 
-            if (s_cachedShader == null)
+            if (s_baseMaterial == null)
             {
-                Debug.LogError($"Shader not found: {shaderName}");
+                Debug.LogError($"[OutlineMaterialCache] Material not found from YooAsset address: {UITextMaterialAddress}");
                 return null;
             }
 
-            var material = new Material(s_cachedShader);
+            // 为每个字体纹理创建材质实例
+            var material = new Material(s_baseMaterial);
             if (fontTexture != null)
             {
                 material.mainTexture = fontTexture;
@@ -102,7 +119,7 @@ namespace GameLogic
 
         private List<UIVertex> m_vertexList;
         private Text m_text;
-        private const string OutLineShaderName = "UGUIPro/UIText";
+        private const string OutLineShaderName = "UIText";
         private bool m_initParams;
         private Texture m_cachedFontTexture;
         private bool m_materialFromCache;

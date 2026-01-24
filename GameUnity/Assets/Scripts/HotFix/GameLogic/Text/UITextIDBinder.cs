@@ -1,7 +1,10 @@
-using System;
 using GameProto;
 using UnityEngine;
 using UnityEngine.UI;
+
+#if TextMeshPro
+using TMPro;
+#endif
 
 namespace GameLogic
 {
@@ -31,9 +34,6 @@ namespace GameLogic
     [DisallowMultipleComponent]
     public class UITextIDBinder : MonoBehaviour
     {
-        private static readonly Color32 SuccessColor = new Color32(0, 200, 0, 255);
-        private static readonly Color32 ErrorColor = new Color32(200, 0, 0, 255);
-
         [SerializeField]
         [Header("文本配置ID")]
         private int m_textID;
@@ -82,6 +82,12 @@ namespace GameLogic
 
         public Text TextBinder => m_textBinder == null ? m_textBinder = GetComponent<Text>() : m_textBinder;
 
+#if TextMeshPro
+        private TextMeshProUGUI m_textProBinder;
+
+        public TextMeshProUGUI TextProBinder => m_textProBinder == null ? m_textProBinder = GetComponent<TextMeshProUGUI>() : m_textProBinder;
+#endif
+
         private void Awake()
         {
             UpdateTextContent();
@@ -96,7 +102,12 @@ namespace GameLogic
             }
 #endif
 
-            if (TextBinder == null)
+            bool hasText = TextBinder != null;
+#if TextMeshPro
+            hasText = hasText || TextProBinder != null;
+#endif
+
+            if (!hasText)
             {
                 return UITextIDBinderResultType.NoTextCom;
             }
@@ -121,7 +132,18 @@ namespace GameLogic
             }
 
             m_previewText = textConfig.Content[langIndex];
-            TextBinder.text = m_previewText;
+
+#if TextMeshPro
+            if (TextProBinder != null)
+            {
+                TextProBinder.text = m_previewText;
+            }
+            else
+#endif
+            if (TextBinder != null)
+            {
+                TextBinder.text = m_previewText;
+            }
 
             return UITextIDBinderResultType.Success;
         }
@@ -131,9 +153,23 @@ namespace GameLogic
         /// </summary>
         public void SetText(params object[] args)
         {
-            if (TextBinder != null && m_textID != 0)
+            if (m_textID == 0)
             {
-                TextBinder.text = TextConfigMgr.Instance.GetText(m_textID, args);
+                return;
+            }
+
+            string text = TextConfigMgr.Instance.GetText(m_textID, args);
+
+#if TextMeshPro
+            if (TextProBinder != null)
+            {
+                TextProBinder.text = text;
+            }
+            else
+#endif
+            if (TextBinder != null)
+            {
+                TextBinder.text = text;
             }
         }
 

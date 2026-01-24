@@ -1,6 +1,9 @@
 using GameProto;
 using UnityEngine;
 using UnityEditor;
+#if TextMeshPro
+using TMPro;
+#endif
 
 namespace GameLogic
 {
@@ -68,7 +71,16 @@ namespace GameLogic
 
             string previewText = EditorConfigLoader.GetTextContent(textID, lang);
 
-            // 更新 Text 组件显示
+#if TextMeshPro
+            // 更新 TextMeshPro 组件显示
+            if (binder.TextProBinder != null)
+            {
+                binder.TextProBinder.text = previewText;
+                EditorUtility.SetDirty(binder.TextProBinder);
+            }
+            else
+#endif
+            // 更新 Unity Text 组件显示
             if (binder.TextBinder != null)
             {
                 binder.TextBinder.text = previewText;

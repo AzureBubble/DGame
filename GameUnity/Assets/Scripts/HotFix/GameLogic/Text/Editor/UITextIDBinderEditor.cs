@@ -1,7 +1,4 @@
-using System;
-using System.IO;
 using GameProto;
-using Luban;
 using UnityEngine;
 using UnityEditor;
 
@@ -11,53 +8,15 @@ namespace GameLogic
     [CanEditMultipleObjects]
     public class UITextIDBinderEditor : Editor
     {
-        /// <summary>
-        /// 文本配置表文件路径（相对于项目根目录）
-        /// </summary>
-        private const string ConfigBytesPath = "Assets/BundleAssets/Configs/Bytes";
-
         private SerializedProperty m_textIDProp;
         private SerializedProperty m_previewLanguageProp;
         private SerializedProperty m_previewTextProp;
-
-        private static Tables s_editorTables;
 
         private void OnEnable()
         {
             m_textIDProp = serializedObject.FindProperty("m_textID");
             m_previewLanguageProp = serializedObject.FindProperty("m_previewLanguage");
             m_previewTextProp = serializedObject.FindProperty("m_previewText");
-
-            // 确保编辑器配置已加载
-            LoadEditorTables();
-        }
-
-        private static void LoadEditorTables()
-        {
-            if (s_editorTables != null)
-            {
-                return;
-            }
-
-            try
-            {
-                // 从本地加载 .bytes 文件
-                s_editorTables = new Tables(file =>
-                {
-                    string filePath = $"{ConfigBytesPath}/{file}.bytes";
-                    if (!File.Exists(filePath))
-                    {
-                        Debug.LogWarning($"[UITextIDBinder] Config file not found: {filePath}");
-                        return new ByteBuf(Array.Empty<byte>());
-                    }
-                    byte[] bytes = File.ReadAllBytes(filePath);
-                    return new ByteBuf(bytes);
-                });
-            }
-            catch (System.Exception e)
-            {
-                Debug.LogError($"[UITextIDBinder] Failed to load editor tables: {e.Message}");
-            }
         }
 
         public override void OnInspectorGUI()
@@ -88,7 +47,7 @@ namespace GameLogic
             // 添加刷新按钮
             if (GUILayout.Button("刷新预览"))
             {
-                LoadEditorTables();
+                EditorConfigLoader.ReloadTables();
                 UpdatePreview(binder);
                 EditorUtility.SetDirty(target);
             }
@@ -104,49 +63,10 @@ namespace GameLogic
 
         private void UpdatePreview(UITextIDBinder binder)
         {
-            LoadEditorTables();
-
             int textID = binder.TextID;
             LocalizationType lang = binder.PreviewLanguage;
 
-            // 清空预览
-            string previewText = string.Empty;
-
-            if (textID == 0)
-            {
-                previewText = "[TextID 为 0]";
-            }
-            else if (s_editorTables == null)
-            {
-                previewText = "[配置表未加载]";
-            }
-            else
-            {
-                try
-                {
-                    TextConfig textConfig = s_editorTables.TbTextConfig.Get(textID);
-                    if (textConfig != null)
-                    {
-                        int langIndex = (int)lang;
-                        if (langIndex >= 0 && langIndex < textConfig.Content.Length)
-                        {
-                            previewText = textConfig.Content[langIndex];
-                        }
-                        else
-                        {
-                            previewText = $"[语言索引 {langIndex} 超出范围]";
-                        }
-                    }
-                    else
-                    {
-                        previewText = $"[未找到 TextID: {textID}]";
-                    }
-                }
-                catch (System.Exception e)
-                {
-                    previewText = $"[加载失败: {e.Message}]";
-                }
-            }
+            string previewText = EditorConfigLoader.GetTextContent(textID, lang);
 
             // 更新 Text 组件显示
             if (binder.TextBinder != null)
@@ -157,17 +77,6 @@ namespace GameLogic
 
             // 更新预览字段
             m_previewTextProp.stringValue = previewText;
-        }
-
-        /// <summary>
-        /// 当场景加载或组件状态变化时自动刷新
-        /// </summary>
-        private void OnSceneGUI()
-        {
-            if (s_editorTables == null)
-            {
-                LoadEditorTables();
-            }
         }
     }
 }

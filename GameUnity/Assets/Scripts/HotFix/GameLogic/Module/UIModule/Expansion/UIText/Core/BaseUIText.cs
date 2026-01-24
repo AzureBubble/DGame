@@ -15,14 +15,12 @@ namespace GameLogic
         [SerializeField] private UITextOutlineExtend m_uiTextOutlineExtend = new UITextOutlineExtend();
         [SerializeField] private UITextGradientColorExtend m_uiTextGradientColorExtend = new UITextGradientColorExtend();
         [SerializeField] private UITextCircleExtend m_uiTextCircleExtend = new UITextCircleExtend();
-        // [SerializeField] private UITextLocalizationExtend m_uiTextLocalizationExtend = new UITextLocalizationExtend();
 
         [SerializeField] private bool m_isUseBestFitFont;
 
         public UITextOutlineExtend UITextOutlineExtend => m_uiTextOutlineExtend;
         public UITextGradientColorExtend UITextGradientColorExtend => m_uiTextGradientColorExtend;
         public UITextShadowExtend UITextShadowExtend => m_uiTextShadowExtend;
-        // public UITextLocalizationExtend UITextLocalizationExtend => m_uiTextLocalizationExtend;
         public UITextSpacingExtend UITextSpacingExtend => m_uiTextSpacingExtend;
 
         /// <summary>
@@ -37,7 +35,6 @@ namespace GameLogic
             UITextOutlineExtend?.Initialize(this);
             UITextShadowExtend?.Initialize(this);
             UITextGradientColorExtend?.Initialize(this);
-            // m_uiTextLocalizationExtend?.Initialize(this);
         }
 
         protected override void OnPopulateMesh(VertexHelper toFill)
@@ -202,36 +199,6 @@ namespace GameLogic
             m_uiTextGradientColorExtend.SetGradientColor(Color.white, Color.white, leftColor, rightColor, 0, horizontalOffset, splitTextGradient);
         }
 
-        // public string GetParameterValue(int ParamName)
-        //     => UITextLocalizationExtend?.GetParameterValue(ParamName);
-        //
-        // public string GetParameterValue(string ParamName)
-        //     => UITextLocalizationExtend?.GetParameterValue(ParamName);
-
-        // public void SetUITextLocalizationActive(bool active)
-        // {
-        //     UITextLocalizationExtend.UseI2Localization = active;
-        // }
-
-        // public void SetParameterValue(int ParamName, string ParamValue, bool localize = true)
-        //     => UITextLocalizationExtend?.SetParameterValue(ParamName, ParamValue, localize);
-        //
-        // public void SetParameterValue(int ParamName, TextDefine ParamValue, bool localize = true)
-        //     => UITextLocalizationExtend?.SetParameterValue(ParamName, ParamValue, localize);
-        //
-        // public void SetParameterValue(string ParamName, TextDefine ParamValue, bool localize = true)
-        //     => UITextLocalizationExtend?.SetParameterValue(ParamName, ParamValue, localize);
-        //
-        // public void SetParameterValue(string ParamName, string ParamValue, bool localize = true)
-        //     => UITextLocalizationExtend?.SetParameterValue(ParamName, ParamValue, localize);
-        //
-        // public void SetParameterValue(List<int> ParamNames, List<string> ParamValues, bool localize = true)
-        //     => UITextLocalizationExtend?.SetParameterValue(ParamNames, ParamValues, localize);
-        //
-        // public void SetTerm(TextDefine textDefine)
-            // => UITextLocalizationExtend?.SetTerm(textDefine);
-
-
 #if UNITY_EDITOR
         protected override void OnValidate()
         {
@@ -239,7 +206,6 @@ namespace GameLogic
             UITextGradientColorExtend?.EditorInitialize(this);
             UITextOutlineExtend?.EditorInitialize(this);
             UITextOutlineExtend?.OnValidate();
-            // m_uiTextLocalizationExtend?.EditorInitialize(this);
             this.SetAllDirty();
         }
 #endif

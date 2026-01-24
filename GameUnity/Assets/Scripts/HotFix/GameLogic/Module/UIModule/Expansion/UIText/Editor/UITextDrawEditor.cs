@@ -328,40 +328,6 @@ namespace GameLogic
         }
 
         #endregion
-
-        #region 多语言
-
-        // public static void DrawTextLocalizationGUI(string title, ref bool isPanelOpen, SerializedProperty useI2Localization,
-        //     SerializedProperty hasParams, SerializedProperty textDefine, UITextLocalizationExtend uiTextLocalizationExtend,
-        //     SerializedObject serializedObject)
-        // {
-        //     UnityEditorUtil.LayoutFrameBox(() =>
-        //     {
-        //         EditorGUI.BeginChangeCheck();
-        //         EditorGUILayout.PropertyField(useI2Localization, new GUIContent("开启多语言"));
-        //
-        //         if (useI2Localization.boolValue)
-        //         {
-        //             EditorGUI.indentLevel++;
-        //             EditorGUILayout.PropertyField(textDefine, new GUIContent("BindID"));
-        //             EditorGUILayout.PropertyField(hasParams, new GUIContent("开启动态参数"));
-        //             EditorGUI.indentLevel--;
-        //         }
-        //
-        //         bool isEditorModeNotPlaying = !Application.isPlaying && Application.isEditor;
-        //         if (EditorGUI.EndChangeCheck() && isEditorModeNotPlaying && uiTextLocalizationExtend != null)
-        //         {
-        //             uiTextLocalizationExtend.UseI2Localization = useI2Localization.boolValue;
-        //             uiTextLocalizationExtend.HasParams = hasParams.boolValue;
-        //             // if(useI2Localization.boolValue)
-        //                 // uiTextLocalizationExtend.SetTerm((TextDefine)textDefine.enumValueIndex);
-        //             // UnityEditor.EditorUtility.SetDirty(serializedObject?.targetObject);
-        //         }
-        //         serializedObject?.ApplyModifiedProperties();
-        //     }, title, ref isPanelOpen, true);
-        // }
-
-        #endregion
     }
 }
 

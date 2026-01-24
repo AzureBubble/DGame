@@ -11,51 +11,49 @@ namespace DGame
 
         public override void OnDestroy()
         {
-            Object.Destroy(m_localizationManager.gameObject);
+
         }
 
-        public Language CurrentLanguage { get => m_localizationManager.CurrentLanguage; set => m_localizationManager.CurrentLanguage = value; }
-        public Language SystemLanguage => m_localizationManager.SystemLanguage;
-        private LocalizationManager m_localizationManager;
-
-        public void Register(LocalizationManager localizationManager)
+        public Language CurrentLanguage { get; set; }
+        public Language SystemLanguage { get; }
+        public void Register()
         {
-            m_localizationManager = localizationManager;
+            throw new System.NotImplementedException();
         }
 
-        public async UniTask LoadLanguageTotalAsset(string assetName)
+        public UniTask LoadLanguageTotalAsset(string assetName)
         {
-            await m_localizationManager.LoadLanguageTotalAsset(assetName);
+            throw new System.NotImplementedException();
         }
 
-        public async UniTask LoadLanguageTotalAsset()
+        public UniTask LoadLanguageTotalAsset()
         {
-            await m_localizationManager.LoadLanguageTotalAsset();
+            throw new System.NotImplementedException();
         }
 
-        public async UniTask LoadLanguage(string language, bool setCurrent = false, bool fromInit = false)
+        public UniTask LoadLanguage(string language, bool setCurrent = false, bool fromInit = false)
         {
-            await m_localizationManager.LoadLanguage(language, setCurrent, fromInit);
+            throw new System.NotImplementedException();
         }
 
         public bool CheckContainsLanguage(string language)
         {
-            return m_localizationManager.CheckContainsLanguage(language);
+            throw new System.NotImplementedException();
         }
 
         public bool SetLanguage(Language language, bool load = false)
         {
-            return m_localizationManager.SetLanguage(language, load);
+            throw new System.NotImplementedException();
         }
 
         public bool SetLanguage(string language, bool load = false)
         {
-            return m_localizationManager.SetLanguage(language, load);
+            throw new System.NotImplementedException();
         }
 
         public bool SetLanguage(int languageID)
         {
-            return m_localizationManager.SetLanguage(languageID);
+            throw new System.NotImplementedException();
         }
     }
 }

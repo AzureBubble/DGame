@@ -21,7 +21,7 @@ namespace DGame
         /// 注册管理器
         /// </summary>
         /// <param name="localizationManager"></param>
-        void Register(LocalizationManager localizationManager);
+        void Register();
 
         /// <summary>
         /// 加载语言总表

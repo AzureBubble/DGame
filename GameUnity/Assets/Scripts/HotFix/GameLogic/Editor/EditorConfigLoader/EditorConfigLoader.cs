@@ -36,7 +36,10 @@ namespace GameLogic
         /// <param name="configPath">配置文件路径，默认使用 DefaultConfigPath</param>
         public static void LoadTables(string configPath = null)
         {
-            configPath ??= DefaultConfigPath;
+            if (string.IsNullOrEmpty(configPath))
+            {
+                configPath = DefaultConfigPath;
+            }
 
             if (!Directory.Exists(configPath))
             {

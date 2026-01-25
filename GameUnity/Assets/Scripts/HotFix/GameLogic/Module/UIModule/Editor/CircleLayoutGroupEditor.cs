@@ -138,7 +138,7 @@ namespace GameLogic
         private void DrawSectorSettings()
         {
             showSectorSettings =
-                EditorGUILayout.Foldout(showSectorSettings, "🎯 扇形设置", true, EditorStyles.foldoutHeader);
+                EditorGUILayout.Foldout(showSectorSettings, "扇形设置", true, EditorStyles.foldoutHeader);
             if (!showSectorSettings) return;
 
             EditorGUILayout.BeginVertical("HelpBox");
@@ -199,7 +199,7 @@ namespace GameLogic
         private void DrawAdvancedSettings()
         {
             showAdvancedSettings =
-                EditorGUILayout.Foldout(showAdvancedSettings, "⚡ 高级设置", true, EditorStyles.foldoutHeader);
+                EditorGUILayout.Foldout(showAdvancedSettings, "高级设置", true, EditorStyles.foldoutHeader);
             if (!showAdvancedSettings) return;
 
             EditorGUILayout.BeginVertical("HelpBox");

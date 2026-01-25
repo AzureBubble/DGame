@@ -121,7 +121,20 @@ namespace GameLogic
             var textConfig = TextConfigMgr.Instance.GetTextConfig(m_textID);
             if (textConfig == null)
             {
-                m_previewText = $"TextID:{m_textID} Not Found";
+                var textIDStr = TextID.ToString();
+                m_previewText = $"TextID:{textIDStr} Not Found";
+
+#if TextMeshPro
+                if (TextProBinder != null)
+                {
+                    TextProBinder.text = textIDStr;
+                }
+                else
+#endif
+                if (TextBinder != null)
+                {
+                    TextBinder.text = textIDStr;
+                }
                 return UITextIDBinderResultType.NoTextID;
             }
 

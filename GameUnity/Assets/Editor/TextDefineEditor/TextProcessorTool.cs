@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using GameLogic;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UI;
 
 #if TextMeshPro
 using TMPro;
@@ -36,8 +37,6 @@ namespace DGame
         /// </summary>
         private static readonly Regex m_chineseRegex = new(@"[\u4e00-\u9fa5]", RegexOptions.Compiled);
 
-        private static GRCodeExtractOptions m_codeExtractOptionsData;
-
         private static StringBuilder m_sb = new StringBuilder();
 
         #endregion
@@ -46,7 +45,6 @@ namespace DGame
 
         public static void ExtractGRFromCode(GRCodeExtractOptions options)
         {
-            m_codeExtractOptionsData = options;
             var strMap = new Dictionary<string, TextEntry>();
             var writeList = new List<TextEntry>();
             var paramList = new List<int>();
@@ -219,6 +217,214 @@ namespace DGame
             }
         }
 
+        #endregion
+
+        #region 预制体提取
+
+        private static readonly List<string> m_excludePrefabNames = new List<string>()
+        {
+            "GMPanel", "SwitchTabItem", "LogUI", "TipsUI", "RedDotItem"
+        };
+
+        public static List<TextEntry> PrefabWriteList = new List<TextEntry>();
+        public static List<PrefabTextEntry> PrefabTextEntries = new List<PrefabTextEntry>();
+        private static PrefabExtractOptions m_prefabExtractOptions;
+
+        public static void ExtractFromPrefabs(PrefabExtractOptions options)
+        {
+            m_prefabExtractOptions = options;
+            PrefabTextEntries.Clear();
+            PrefabWriteList.Clear();
+            var prefabPaths = Directory.GetFiles(options.ScriptFolderPath, "*.prefab", SearchOption.AllDirectories);
+            int listCount = prefabPaths.Length;
+            AssetDatabase.StartAssetEditing();
+
+            try
+            {
+                for (int i = 0; i < listCount; i++)
+                {
+                    GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPaths[i]);
+                    EditorUtility.DisplayProgressBar("扫描UI预制体", $"正在处理: {Path.GetFileName(prefabPaths[i])}", (float)i / listCount);
+                    if (prefab == null)
+                    {
+                        continue;
+                    }
+                    var prefabName = prefab.name;
+                    if (m_excludePrefabNames.Contains(prefabName))
+                    {
+                        continue;
+                    }
+                    PrefabTextEntry prefabTextEntry = null;
+                    TextEntry textEntry = null;
+                    try
+                    {
+                        var textComponents = prefab.GetComponentsInChildren<Text>();
+                        foreach (var textComponent in textComponents)
+                        {
+                            // 获取源预制体资产
+                            var source = PrefabUtility.GetCorrespondingObjectFromSource(textComponent.gameObject);
+                            if (source != null)
+                            {
+                                var textParent = textComponent.transform.parent;
+                                if (textParent != null)
+                                {
+                                    // 做筛选
+                                }
+
+                                var sourceParent = source.transform.parent;
+
+                                if (sourceParent == null)
+                                {
+                                    continue;
+                                }
+                            }
+
+                            var textComponentName = textComponent.name;
+
+                            if ((!options.Include_m_Prefix_Node &&
+                                 (textComponentName.StartsWith("m_") || textComponentName.StartsWith("_")))
+                                || textComponentName == "Placeholder")
+                            {
+                                continue;
+                            }
+
+                            string result = Regex.Replace(textComponent.text, @"\s+", "");
+
+                            if (string.IsNullOrEmpty(result))
+                            {
+                                continue;
+                            }
+
+                            textEntry = new TextEntry(result, options.StartId++, 0);
+                            PrefabWriteList.Add(textEntry);
+
+                            if (textComponent.GetComponent<UITextIDBinder>() == null)
+                            {
+                                if (prefabTextEntry == null)
+                                {
+                                    prefabTextEntry = new PrefabTextEntry()
+                                    {
+                                        prefab = prefab,
+                                        PrefabName = prefabName,
+                                        PrefabPath = prefabPaths[i],
+                                    };
+                                    PrefabTextEntries.Add(prefabTextEntry);
+                                }
+                                prefabTextEntry.NoBinderTextObjects.Add(textComponent.gameObject);
+                                prefabTextEntry.NoBinderTextContents.Add(result);
+                                prefabTextEntry.BinderTextIDs.Add(textEntry.TextDefineId);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.LogWarning($"处理文件 {prefabPaths[i]} 时出错: {ex.Message}");
+                    }
+                }
+            }
+            finally
+            {
+                EditorUtility.ClearProgressBar();
+                AssetDatabase.StopAssetEditing();
+            }
+        }
+
+        public static void ConfirmExtractFromPrefabs()
+        {
+            if (m_prefabExtractOptions == null)
+            {
+                Debug.LogError("m_prefabExtractOptions 参数无效，请检查或重新扫描。");
+                return;
+            }
+            string textDefine = File.ReadAllText(m_prefabExtractOptions.TextDefinePath);
+            bool connect = false;
+            int startIndex = textDefine.IndexOf("// PrefabAutoBuildStart", StringComparison.Ordinal);
+            int endIndex = textDefine.IndexOf("\t\t// PrefabAutoBuildEnd", StringComparison.Ordinal);
+
+            if (startIndex > 0 && endIndex >= startIndex)
+            {
+                var source = textDefine.Substring(startIndex, endIndex - startIndex);
+                string[] allText = source.Split(new[] { "\r\n" }, StringSplitOptions.None);
+                // 如果前一个ID已经定义了，就插在前一个id后面
+                if (EditorConfigLoader.TryGetTextDefineStr(m_prefabExtractOptions.StartId - 1, out var defineText))
+                {
+                    foreach (var textItem in allText)
+                    {
+                        if (textItem.Contains(defineText))
+                        {
+                            var oldIndex = endIndex;
+                            var textIndex = textDefine.IndexOf(textItem, StringComparison.Ordinal);
+                            endIndex = textIndex + textItem.Length + "\r\n".Length;
+                            endIndex = endIndex > oldIndex ? endIndex : oldIndex;
+                            connect = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // 注册到TextDefine
+            string space = "\t\t";
+
+            if (endIndex >= 0)
+            {
+                m_sb.Clear();
+
+                // 不是连接上一行的情况 空一行
+                if (!connect)
+                {
+                    m_sb.Append("\n");
+                }
+                // 块标签
+                if (!connect && !string.IsNullOrEmpty(m_prefabExtractOptions.Tag))
+                {
+                    m_sb.Append($"{space}// {m_prefabExtractOptions.Tag}\n");
+                }
+
+                int cnt = 0;
+                foreach (var textEntry in PrefabWriteList)
+                {
+                    var ret = $"{space}{textEntry.TextDefineIdName}{(cnt == 0 ? $" = {textEntry.TextDefineId}" : "")},   // {textEntry.Content}\r\n";
+                    m_sb.Append(ret);
+                    cnt++;
+                }
+                textDefine = textDefine.Insert(endIndex, m_sb.ToString());
+
+                using (var stream = new FileStream(m_prefabExtractOptions.TextDefinePath, FileMode.Create))
+                {
+                    var bytes = Encoding.UTF8.GetBytes(textDefine);
+                    stream.Write(bytes, 0, bytes.Length);
+                }
+            }
+
+            // 写表
+            m_sb.Clear();
+            var valueList = PrefabWriteList;
+            valueList.Sort((a, b) => a.TextDefineId - b.TextDefineId);
+            for (int i = 0; i < valueList.Count; i++)
+            {
+                var value = valueList[i];
+
+                if (value == null)
+                {
+                    continue;
+                }
+
+                m_sb.Append(
+                    $"\t{value.TextDefineId}\t{(value.ParamCount > 0 ? value.ParamCount.ToString() : string.Empty)}\t{value.Content}\t{(string.IsNullOrEmpty(m_prefabExtractOptions.Tag) ? string.Empty : m_prefabExtractOptions.Tag)}\r\n");
+            }
+            var excelContent = Encoding.UTF8.GetBytes(m_sb.ToString());
+            using (var stream = new FileStream(m_prefabExtractOptions.OutputPath, FileMode.Create))
+            {
+                stream.Write(excelContent, 0, excelContent.Length);
+                System.Diagnostics.Process.Start("notepad.exe", m_prefabExtractOptions.OutputPath);
+            }
+        }
+
+        #endregion
+
+        #region 工具方法
+
         public static int GetLastTextDefineID(string textDefinePath)
         {
             int id = 0;
@@ -256,315 +462,41 @@ namespace DGame
             return id;
         }
 
-        #endregion
-
-        #region 预制体提取
-
-        public static PrefabExtractResult ExtractFromPrefabs(PrefabExtractOptions options)
+        public static int GetLastPrefabTextDefineID(string textDefinePath)
         {
-            var result = new PrefabExtractResult();
-            var extractedTexts = new Dictionary<string, PrefabTextEntry>();
+            int id = 0;
+            string textDefine = File.ReadAllText(textDefinePath);
+            int startIndex = textDefine.IndexOf("// PrefabAutoBuildStart", StringComparison.Ordinal);
+            int endIndex = textDefine.IndexOf("// PrefabAutoBuildEnd", StringComparison.Ordinal);
 
-            // 查找所有预制体
-            var prefabGuids = AssetDatabase.FindAssets("t:Prefab", new[] { options.PrefabFolderPath });
-            var prefabPaths = prefabGuids.Select(AssetDatabase.GUIDToAssetPath).ToArray();
-
-            AssetDatabase.StartAssetEditing();
-
-            try
+            if (startIndex > 0 && endIndex >= startIndex)
             {
-                for (int i = 0; i < prefabPaths.Length; i++)
+                var source = textDefine.Substring(startIndex, endIndex - startIndex);
+                string[] allText = source.Split(new[] { "\r\n" }, StringSplitOptions.None);
+                if (allText.Length > 0)
                 {
-                    var prefabPath = prefabPaths[i];
-                    EditorUtility.DisplayProgressBar("提取预制体文本", $"正在处理: {Path.GetFileNameWithoutExtension(prefabPath)}", (float)i / prefabPaths.Length);
+                    var matchText = "LabelID";
 
-                    try
+                    for (int i = allText.Length - 1; i >= 0; i--)
                     {
-                        ExtractFromPrefab(prefabPath, extractedTexts, options, result);
-                    }
-                    catch (Exception ex)
-                    {
-                        Debug.LogWarning($"处理预制体 {prefabPath} 时出错: {ex.Message}");
-                        result.ErrorCount++;
-                    }
+                        var text = allText[i];
 
-                    result.ProcessedPrefabs++;
-                }
-            }
-            finally
-            {
-                EditorUtility.ClearProgressBar();
-                AssetDatabase.StopAssetEditing();
-            }
+                        if (text.Contains(matchText))
+                        {
+                            var index1 = text.IndexOf(matchText, StringComparison.Ordinal) + matchText.Length;
+                            var index2 = text.IndexOf(",", StringComparison.Ordinal);
 
-            // 导出配置
-            result.OutputPath = ExportPrefabTextConfig(extractedTexts, options.OutputDirectory);
-            result.NewTextCount = extractedTexts.Count;
-
-            return result;
-        }
-
-        private static void ExtractFromPrefab(string prefabPath, Dictionary<string, PrefabTextEntry> extractedTexts,
-            PrefabExtractOptions options, PrefabExtractResult result)
-        {
-            // 加载预制体
-            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-            if (prefab == null) return;
-
-            var prefabName = Path.GetFileNameWithoutExtension(prefabPath);
-            var needSave = false;
-            var currentId = options.StartId;
-
-            // 处理所有 Text 组件
-            var textComponents = prefab.GetComponentsInChildren<UnityEngine.UI.Text>(true);
-            foreach (var text in textComponents)
-            {
-                if (ExtractFromTextComponent(text, prefabName, extractedTexts, options, ref currentId))
-                {
-                    needSave = true;
-                    result.BinderCount++;
-                }
-            }
-
-            // 处理 TextMeshPro 组件
-            if (options.IncludeTextMeshPro)
-            {
-#if TextMeshPro
-                var tmpComponents = prefab.GetComponentsInChildren<TextMeshProUGUI>(true);
-                foreach (var tmp in tmpComponents)
-                {
-                    if (ExtractFromTextComponent(tmp, prefabName, extractedTexts, options, ref currentId))
-                    {
-                        needSave = true;
-                        result.BinderCount++;
-                    }
-                }
-#endif
-            }
-
-            if (needSave)
-            {
-                EditorUtility.SetDirty(prefab);
-            }
-        }
-
-        private static bool ExtractFromTextComponent(Component textComponent, string prefabName,
-            Dictionary<string, PrefabTextEntry> extractedTexts, PrefabExtractOptions options, ref int currentId)
-        {
-            string textContent = null;
-            Type binderType = null;
-
-            // 获取文本内容
-            if (textComponent is UnityEngine.UI.Text uiText)
-            {
-                textContent = uiText.text;
-                binderType = typeof(UITextIDBinder);
-            }
-#if TextMeshPro
-            else if (textComponent is TextMeshProUGUI tmp)
-            {
-                textContent = tmp.text;
-                binderType = typeof(UITextIDBinder);
-            }
-#endif
-
-            if (string.IsNullOrEmpty(textContent)) return false;
-            if (!m_chineseRegex.IsMatch(textContent)) return false;
-
-            // 检查是否已有 Binder
-            var existingBinder = textComponent.GetComponent(binderType);
-            if (existingBinder != null && !options.OverwriteExisting)
-            {
-                return false;
-            }
-
-            // 获取或创建条目
-            if (!extractedTexts.TryGetValue(textContent, out var entry))
-            {
-                entry = new PrefabTextEntry
-                {
-                    Content = textContent,
-                    Id = currentId++,
-                    GameObjectName = textComponent.gameObject.name,
-                    PrefabName = prefabName
-                };
-                extractedTexts[textContent] = entry;
-            }
-            else
-            {
-                entry.GameObjectName = textComponent.gameObject.name;
-                entry.PrefabName = prefabName;
-            }
-
-            // 创建或更新 Binder
-            if (existingBinder == null)
-            {
-                existingBinder = textComponent.gameObject.AddComponent(binderType);
-            }
-
-            // 设置 TextID
-            var textIDField = binderType.GetField("TextID");
-            if (textIDField != null)
-            {
-                var oldValue = (int)textIDField.GetValue(existingBinder);
-                if (oldValue != entry.Id)
-                {
-                    textIDField.SetValue(existingBinder, entry.Id);
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        private static string ExportPrefabTextConfig(Dictionary<string, PrefabTextEntry> texts, string outputDirectory)
-        {
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
-
-            var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
-            var outputPath = Path.Combine(outputDirectory, $"PrefabTextConfig_{timestamp}.txt");
-
-            var sb = new StringBuilder();
-            sb.AppendLine("ID\t内容\t\t\t预制体\t游戏对象");
-
-            foreach (var text in texts.Values.OrderBy(t => t.Id))
-            {
-                var content = text.Content.Replace("\t", "    ").Replace("\n", "\\n").Replace("\r", "");
-                sb.AppendLine($"{text.Id}\t{content}\t{text.PrefabName}\t{text.GameObjectName}");
-            }
-
-            File.WriteAllText(outputPath, sb.ToString(), Encoding.UTF8);
-            AssetDatabase.Refresh();
-
-            return outputPath;
-        }
-
-        public static PrefabExtractResult ExportPrefabDebugInfo(string prefabPath, bool includeTextMeshPro)
-        {
-            var result = new PrefabExtractResult();
-
-            var options = new PrefabExtractOptions
-            {
-                PrefabFolderPath = prefabPath,
-                IncludeTextMeshPro = includeTextMeshPro
-            };
-
-            var prefabGuids = AssetDatabase.FindAssets("t:Prefab", new[] { prefabPath });
-            var allTexts = new List<PrefabTextEntry>();
-
-            foreach (var guid in prefabGuids)
-            {
-                var path = AssetDatabase.GUIDToAssetPath(guid);
-                var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-                if (prefab == null) continue;
-
-                // 收集文本组件信息
-                var textComponents = prefab.GetComponentsInChildren<UnityEngine.UI.Text>(true);
-                foreach (var text in textComponents)
-                {
-                    CollectTextInfo(text, prefab.name, allTexts);
-                }
-
-                if (includeTextMeshPro)
-                {
-#if TextMeshPro
-                    var tmpComponents = prefab.GetComponentsInChildren<TextMeshProUGUI>(true);
-                    foreach (var tmp in tmpComponents)
-                    {
-                        CollectTextInfo(tmp, prefab.name, allTexts);
-                    }
-#endif
-                }
-            }
-
-            result.OutputPath = ExportDebugInfo(allTexts, options.OutputDirectory);
-            return result;
-        }
-
-        private static void CollectTextInfo(Component textComponent, string prefabName, List<PrefabTextEntry> allTexts)
-        {
-            string textContent = null;
-            string componentName = null;
-
-            if (textComponent is UnityEngine.UI.Text uiText)
-            {
-                textContent = uiText.text;
-                componentName = "Text";
-            }
-#if TextMeshPro
-            else if (textComponent is TextMeshProUGUI tmp)
-            {
-                textContent = tmp.text;
-                componentName = "TMP";
-            }
-#endif
-
-            if (string.IsNullOrEmpty(textContent)) return;
-
-            allTexts.Add(new PrefabTextEntry
-            {
-                Content = textContent,
-                GameObjectName = textComponent.gameObject.name,
-                PrefabName = prefabName,
-                ComponentName = componentName,
-                Id = allTexts.Count
-            });
-        }
-
-        private static string ExportDebugInfo(List<PrefabTextEntry> texts, string outputDirectory)
-        {
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
-
-            var outputPath = Path.Combine(outputDirectory, $"PrefabDebug_{DateTime.Now:yyyyMMdd_HHmmss}.txt");
-
-            var sb = new StringBuilder();
-            sb.AppendLine("索引\t内容\t\t\t预制体\t游戏对象\t组件类型");
-
-            foreach (var text in texts)
-            {
-                var content = text.Content.Replace("\t", "    ").Replace("\n", "\\n").Replace("\r", "");
-                var hasChinese = m_chineseRegex.IsMatch(text.Content) ? "[中文]" : "";
-                sb.AppendLine($"{text.Id}\t{content}\t{text.PrefabName}\t{text.GameObjectName}\t{text.ComponentName}{hasChinese}");
-            }
-
-            File.WriteAllText(outputPath, sb.ToString(), Encoding.UTF8);
-            AssetDatabase.Refresh();
-
-            return outputPath;
-        }
-
-        #endregion
-
-        #region 现有配置加载
-
-        public static Dictionary<int, string> LoadExistingTextConfigs()
-        {
-            var result = new Dictionary<int, string>();
-
-            // 尝试从 TextDefine.cs 读取
-            var textDefinePath = "Assets/Scripts/HotFix/GameLogic/Text/TextDefine.cs";
-            if (File.Exists(textDefinePath))
-            {
-                var content = File.ReadAllText(textDefinePath);
-                // 简单解析，实际可能需要更复杂的逻辑
-                var lines = content.Split('\n');
-                var id = 0;
-                foreach (var line in lines)
-                {
-                    if (line.Trim().StartsWith("//") && line.Contains("ID:"))
-                    {
-                        result[id++] = line.Trim();
+                            if (index2 > index1)
+                            {
+                                var label = text.Substring(index1, index2 - index1);
+                                int.TryParse(label, out id);
+                            }
+                            break;
+                        }
                     }
                 }
             }
-
-            return result;
+            return id;
         }
 
         #endregion
@@ -626,11 +558,12 @@ namespace DGame
     /// </summary>
     public class PrefabTextEntry
     {
-        public string Content { get; set; }
-        public int Id { get; set; }
+        public GameObject prefab { get; set; }
         public string PrefabName { get; set; }
-        public string GameObjectName { get; set; }
-        public string ComponentName { get; set; }
+        public string PrefabPath { get; set; }
+        public List<GameObject> NoBinderTextObjects { get; set; } = new List<GameObject>();
+        public List<string> NoBinderTextContents { get; set; } = new List<string>();
+        public List<int> BinderTextIDs { get; set; } = new List<int>();
     }
 
     /// <summary>
@@ -651,34 +584,13 @@ namespace DGame
     /// </summary>
     public class PrefabExtractOptions
     {
-        public string PrefabFolderPath { get; set; }
+        public string ScriptFolderPath { get; set; }
         public int StartId { get; set; }
+        public string Tag { get; set; }
+        public bool UseExistingText { get; set; }
+        public bool Include_m_Prefix_Node { get; set; }
         public bool IncludeTextMeshPro { get; set; }
-        public bool OverwriteExisting { get; set; }
-        public string OutputDirectory { get; set; }
-    }
-
-    /// <summary>
-    /// 代码提取结果
-    /// </summary>
-    public class CodeExtractResult
-    {
-        public int ProcessedFiles { get; set; }
-        public int NewTextCount { get; set; }
-        public int ReusedTextCount { get; set; }
-        public int ErrorCount { get; set; }
-        public string OutputPath { get; set; }
-    }
-
-    /// <summary>
-    /// 预制体提取结果
-    /// </summary>
-    public class PrefabExtractResult
-    {
-        public int ProcessedPrefabs { get; set; }
-        public int NewTextCount { get; set; }
-        public int BinderCount { get; set; }
-        public int ErrorCount { get; set; }
+        public string TextDefinePath { get; set; }
         public string OutputPath { get; set; }
     }
 

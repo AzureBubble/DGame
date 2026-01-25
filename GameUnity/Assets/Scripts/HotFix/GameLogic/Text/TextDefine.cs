@@ -5,7 +5,7 @@ namespace GameLogic
 	/// </summary>
 	public enum TextDefine
 	{
-		#region 自动生成
+		#region G.R自动生成
 
 		// 此代码块的文本ID为自动生成 请不要手动修改
 		// AutoBuildStart
@@ -13,5 +13,12 @@ namespace GameLogic
 
 		#endregion
 
+		#region Prefab自动生成
+
+		// 此代码块的文本ID为自动生成 请不要手动修改
+		// PrefabAutoBuildStart
+		// PrefabAutoBuildEnd
+
+		#endregion
 	}
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using GameProto;
 using Luban;
@@ -112,6 +113,32 @@ namespace GameLogic
             }
 
             return config.Content[langIndex];
+        }
+
+        public static bool TryGetTextDefineStr(string content, out string str)
+        {
+            for (int i = 0; i < Tables.TbTextConfig.DataList.Count; i++)
+            {
+                var cfg = Tables.TbTextConfig.DataList[i];
+                // 一般都是中文开发，所以直接默认判断第0个索引
+                if (cfg.Content[0] == content)
+                {
+                    return TryGetTextDefineStr(cfg.ID, out str);
+                }
+            }
+            str = string.Empty;
+            return false;
+        }
+
+        public static bool TryGetTextDefineStr(int id, out string str)
+        {
+            if (Enum.IsDefined(typeof(TextDefine), (TextDefine)id))
+            {
+                str = ((TextDefine)id).ToString();
+                return true;
+            }
+            str = string.Empty;
+            return false;
         }
     }
 }

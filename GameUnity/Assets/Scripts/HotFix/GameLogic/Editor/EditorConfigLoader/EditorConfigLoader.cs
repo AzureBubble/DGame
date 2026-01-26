@@ -84,7 +84,7 @@ namespace GameLogic
         /// </summary>
         public static TextConfig GetTextConfig(int textID)
         {
-            return Tables?.TbTextConfig?.Get(textID);
+            return Tables?.TbTextConfig?.GetOrDefault(textID);
         }
 
         /// <summary>
@@ -103,7 +103,7 @@ namespace GameLogic
             TextConfig config = GetTextConfig(textID);
             if (config == null)
             {
-                return $"[TextID:{textID} Not Found]";
+                return $"[没有配置的文本ID: {textID}]";
             }
 
             int langIndex = (int)language;

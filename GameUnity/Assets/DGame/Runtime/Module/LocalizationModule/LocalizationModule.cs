@@ -18,42 +18,41 @@ namespace DGame
         public Language SystemLanguage { get; }
         public void Register()
         {
-            throw new System.NotImplementedException();
         }
 
         public UniTask LoadLanguageTotalAsset(string assetName)
         {
-            throw new System.NotImplementedException();
+            return UniTask.CompletedTask;
         }
 
         public UniTask LoadLanguageTotalAsset()
         {
-            throw new System.NotImplementedException();
+            return UniTask.CompletedTask;
         }
 
         public UniTask LoadLanguage(string language, bool setCurrent = false, bool fromInit = false)
         {
-            throw new System.NotImplementedException();
+            return UniTask.CompletedTask;
         }
 
         public bool CheckContainsLanguage(string language)
         {
-            throw new System.NotImplementedException();
+            return false;
         }
 
         public bool SetLanguage(Language language, bool load = false)
         {
-            throw new System.NotImplementedException();
+            return false;
         }
 
         public bool SetLanguage(string language, bool load = false)
         {
-            throw new System.NotImplementedException();
+            return false;
         }
 
         public bool SetLanguage(int languageID)
         {
-            throw new System.NotImplementedException();
+            return false;
         }
     }
 }

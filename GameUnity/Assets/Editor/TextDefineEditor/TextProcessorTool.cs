@@ -229,6 +229,8 @@ namespace DGame
         public static List<TextEntry> PrefabWriteList = new List<TextEntry>();
         public static List<PrefabTextEntry> PrefabTextEntries = new List<PrefabTextEntry>();
         private static PrefabExtractOptions m_prefabExtractOptions;
+        // 跟踪跳过的text对象
+        public static HashSet<GameObject> SkippedTextObjects = new HashSet<GameObject>();
 
         public static void ExtractFromPrefabs(PrefabExtractOptions options)
         {
@@ -261,6 +263,10 @@ namespace DGame
                         var textComponents = prefab.GetComponentsInChildren<Text>();
                         foreach (var textComponent in textComponents)
                         {
+                            if(SkippedTextObjects.Contains(textComponent.gameObject))
+                            {
+                                continue;
+                            }
                             // 获取源预制体资产
                             var source = PrefabUtility.GetCorrespondingObjectFromSource(textComponent.gameObject);
                             if (source != null)
@@ -315,6 +321,78 @@ namespace DGame
                                 prefabTextEntry.BinderTextIDs.Add(textEntry.TextDefineId);
                             }
                         }
+#if TextMeshPro
+
+                        if (options.IncludeTextMeshPro)
+                        {
+                            var textProComponents = prefab.GetComponentsInChildren<TextMeshProUGUI>();
+
+                            foreach (var textPro in textProComponents)
+                            {
+                                if(SkippedTextObjects.Contains(textPro.gameObject))
+                                {
+                                    continue;
+                                }
+                                // 获取源预制体资产
+                                var source = PrefabUtility.GetCorrespondingObjectFromSource(textPro.gameObject);
+
+                                if (source != null)
+                                {
+                                    var textParent = textPro.transform.parent;
+
+                                    if (textParent != null)
+                                    {
+                                        // 做筛选
+                                    }
+
+                                    var sourceParent = source.transform.parent;
+
+                                    if (sourceParent == null)
+                                    {
+                                        continue;
+                                    }
+                                }
+
+                                var textComponentName = textPro.name;
+
+                                if ((!options.Include_m_Prefix_Node &&
+                                     (textComponentName.StartsWith("m_") || textComponentName.StartsWith("_")))
+                                    || textComponentName == "Placeholder")
+                                {
+                                    continue;
+                                }
+
+                                string result = Regex.Replace(textPro.text, @"\s+", "");
+
+                                if (string.IsNullOrEmpty(result))
+                                {
+                                    continue;
+                                }
+
+                                textEntry = new TextEntry(result, options.StartId++, 0);
+                                PrefabWriteList.Add(textEntry);
+
+                                if (textPro.GetComponent<UITextIDBinder>() == null)
+                                {
+                                    if (prefabTextEntry == null)
+                                    {
+                                        prefabTextEntry = new PrefabTextEntry()
+                                        {
+                                            prefab = prefab,
+                                            PrefabName = prefabName,
+                                            PrefabPath = prefabPaths[i],
+                                        };
+                                        PrefabTextEntries.Add(prefabTextEntry);
+                                    }
+
+                                    prefabTextEntry.NoBinderTextObjects.Add(textPro.gameObject);
+                                    prefabTextEntry.NoBinderTextContents.Add(result);
+                                    prefabTextEntry.BinderTextIDs.Add(textEntry.TextDefineId);
+                                }
+                            }
+                        }
+
+#endif
                     }
                     catch (Exception ex)
                     {

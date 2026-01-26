@@ -337,7 +337,6 @@ MonoBehaviour:
     m_effectDistance: {x: 1, y: -1}
   m_uiTextOutlineExtend:
     m_isUseTextOutline: 0
-    m_isOpenShaderOutline: 0
     m_outLineWidth: 1
     m_outLineColor: {r: 1, g: 1, b: 1, a: 1}
     m_camera: {fileID: 0}

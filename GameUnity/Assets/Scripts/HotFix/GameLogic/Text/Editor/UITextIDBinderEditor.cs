@@ -14,9 +14,11 @@ namespace GameLogic
         private SerializedProperty m_textIDProp;
         private SerializedProperty m_previewLanguageProp;
         private SerializedProperty m_previewTextProp;
+        private UITextIDBinder m_binder;
 
         private void OnEnable()
         {
+            m_binder = target as UITextIDBinder;
             m_textIDProp = serializedObject.FindProperty("m_textID");
             m_previewLanguageProp = serializedObject.FindProperty("m_previewLanguage");
             m_previewTextProp = serializedObject.FindProperty("m_previewText");
@@ -26,11 +28,10 @@ namespace GameLogic
         {
             serializedObject.Update();
 
-            UITextIDBinder binder = (UITextIDBinder)target;
-
             EditorGUI.BeginChangeCheck();
 
             // 绘制默认字段
+            // m_binder.m_textID = EditorGUILayout.IntField("文本配置ID", m_binder.m_textID);
             EditorGUILayout.PropertyField(m_textIDProp, new GUIContent("文本配置ID"));
             EditorGUILayout.PropertyField(m_previewLanguageProp, new GUIContent("预览语言"));
 
@@ -38,7 +39,6 @@ namespace GameLogic
             if (EditorGUI.EndChangeCheck())
             {
                 serializedObject.ApplyModifiedProperties();
-                UpdatePreview(binder);
                 EditorUtility.SetDirty(target);
             }
 
@@ -51,44 +51,23 @@ namespace GameLogic
             if (GUILayout.Button("刷新预览"))
             {
                 EditorConfigLoader.ReloadTables();
-                UpdatePreview(binder);
                 EditorUtility.SetDirty(target);
             }
 
             // 显示警告信息
-            if (binder.TextID == 0)
+            if (m_binder.TextID == 0)
             {
                 EditorGUILayout.HelpBox("TextID 为 0，请设置有效的文本ID", MessageType.Warning);
             }
 
             serializedObject.ApplyModifiedProperties();
-        }
 
-        private void UpdatePreview(UITextIDBinder binder)
-        {
-            int textID = binder.TextID;
-            LocalizationType lang = binder.PreviewLanguage;
+            m_binder.UpdateTextContent();
 
-            string previewText = EditorConfigLoader.GetTextContent(textID, lang);
-
-#if TextMeshPro
-            // 更新 TextMeshPro 组件显示
-            if (binder.TextProBinder != null)
+            if (m_binder.TextID <= 0)
             {
-                binder.TextProBinder.text = previewText;
-                EditorUtility.SetDirty(binder.TextProBinder);
+                m_binder.TextID = 0;
             }
-            else
-#endif
-            // 更新 Unity Text 组件显示
-            if (binder.TextBinder != null)
-            {
-                binder.TextBinder.text = previewText;
-                EditorUtility.SetDirty(binder.TextBinder);
-            }
-
-            // 更新预览字段
-            m_previewTextProp.stringValue = previewText;
         }
     }
 }

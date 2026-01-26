@@ -52,12 +52,6 @@ namespace DGame
         private Vector2 m_scrollPosition;
         private Vector2 m_prefabResultScrollPosition;
 
-        // 跟踪跳过的text对象
-        private HashSet<GameObject> m_skippedTextObjects = new HashSet<GameObject>();
-
-        // 缓存数据
-        private static Dictionary<int, string> m_existingTextConfigs = new();
-
         [MenuItem(m_menuPath)]
         public static void ShowWindow()
         {
@@ -249,7 +243,7 @@ namespace DGame
 
                 // 选项
                 m_includeTextMeshPro = EditorGUILayout.ToggleLeft("包含 TextMeshPro 组件", m_includeTextMeshPro);
-                m_useExistingBinders = EditorGUILayout.ToggleLeft("使用现有的文本配置（不重复创建）", m_useExistingBinders);
+                // m_useExistingBinders = EditorGUILayout.ToggleLeft("使用现有的文本配置（不重复创建）", m_useExistingBinders);
                 m_Include_m_Prefix_Node = EditorGUILayout.ToggleLeft("是否包含(m_/_)开头的节点", m_Include_m_Prefix_Node);
 
                 // 统计信息
@@ -259,27 +253,7 @@ namespace DGame
 
                 if (GUILayout.Button("扫描预制体文本", GUILayout.Height(35)))
                 {
-                    m_skippedTextObjects.Clear();
-                    if (m_prefabStartId != 0)
-                    {
-                        if (!Directory.Exists(m_outputPath))
-                        {
-                            Directory.CreateDirectory(m_outputPath);
-                        }
-                        var outPath = Path.Combine(m_outputPath, $"PrefabText_{DateTime.Now:yyyyMMdd_HHmmss}.txt");
-                        var options = new PrefabExtractOptions()
-                        {
-                            ScriptFolderPath = m_prefabFolderPath,
-                            StartId = m_prefabStartId,
-                            Tag = m_tagPrefix,
-                            UseExistingText = m_useExistingBinders,
-                            TextDefinePath = m_textDefinePath,
-                            Include_m_Prefix_Node = m_Include_m_Prefix_Node,
-                            IncludeTextMeshPro = m_includeTextMeshPro,
-                            OutputPath = outPath
-                        };
-                        TextProcessorTool.ExtractFromPrefabs(options);
-                    }
+                    StartScanPrefabs();
                 }
 
                 EditorGUILayout.Space(5);
@@ -296,6 +270,37 @@ namespace DGame
             EditorGUILayout.EndVertical();
 
             DrawUsageTips("提示：提取后的文本会自动添加 UITextIDBinder 组件，并生成配置文件。");
+        }
+
+        public static void StartScanPrefabs()
+        {
+            TextProcessorTool.SkippedTextObjects.Clear();
+            var window = GetWindow<TextDefineEditorWindow>(m_title);
+            window.ScanPrefabs();
+        }
+
+        private void ScanPrefabs()
+        {
+            if (m_prefabStartId != 0)
+            {
+                if (!Directory.Exists(m_outputPath))
+                {
+                    Directory.CreateDirectory(m_outputPath);
+                }
+                var outPath = Path.Combine(m_outputPath, $"PrefabText_{DateTime.Now:yyyyMMdd_HHmmss}.txt");
+                var options = new PrefabExtractOptions()
+                {
+                    ScriptFolderPath = m_prefabFolderPath,
+                    StartId = m_prefabStartId,
+                    Tag = m_tagPrefix,
+                    UseExistingText = m_useExistingBinders,
+                    TextDefinePath = m_textDefinePath,
+                    Include_m_Prefix_Node = m_Include_m_Prefix_Node,
+                    IncludeTextMeshPro = m_includeTextMeshPro,
+                    OutputPath = outPath
+                };
+                TextProcessorTool.ExtractFromPrefabs(options);
+            }
         }
 
         #endregion
@@ -364,11 +369,10 @@ namespace DGame
             {
                 // 绘制表头
                 DrawPrefabResultHeader();
-
-                // 绘制每个预制体的文本组件
-                foreach (var prefabEntry in TextProcessorTool.PrefabTextEntries)
+                // 绘制每个预制体的文本组件（使用for循环避免迭代时修改集合）
+                for (int i = 0; i < TextProcessorTool.PrefabTextEntries.Count; i++)
                 {
-                    DrawPrefabEntry(prefabEntry);
+                    DrawPrefabEntry(TextProcessorTool.PrefabTextEntries[i]);
                 }
             }
             EditorGUILayout.EndScrollView();
@@ -401,16 +405,16 @@ namespace DGame
                     continue;
 
                 // 检查是否已跳过
-                if (m_skippedTextObjects.Contains(textObj))
+                if (TextProcessorTool.SkippedTextObjects.Contains(textObj))
                     continue;
 
                 EditorGUILayout.BeginVertical(EditorStyles.helpBox);
 
                 EditorGUILayout.BeginHorizontal();
                 {
-                    // 左边：预制体名 -> text组件名
-                    string displayText = $"{prefabEntry.PrefabName} -> {textObj.name}";
-                    EditorGUILayout.LabelField(displayText, GUILayout.Width(300));
+                    // 左边
+                    string displayText = $"{prefabEntry.PrefabName} -> {textObj.name} -> {prefabEntry.NoBinderTextContents[i]} -> {prefabEntry.BinderTextIDs[i]}";
+                    EditorGUILayout.LabelField(displayText, GUILayout.Width(500));
 
                     GUILayout.FlexibleSpace();
 
@@ -437,26 +441,16 @@ namespace DGame
                     }
 
                     // 保存预制体按钮
-                    if (GUILayout.Button("保存预制体", EditorStyles.miniButtonMid, GUILayout.Width(80)))
-                    {
-                        SavePrefabWithBinder(prefabEntry, textObj, i);
-                    }
+                    // if (GUILayout.Button("保存预制体", EditorStyles.miniButtonMid, GUILayout.Width(80)))
+                    // {
+                    //     SavePrefabWithBinder(prefabEntry, textObj, i);
+                    // }
 
                     // 跳过按钮
-                    if (GUILayout.Button("跳过", EditorStyles.miniButtonRight, GUILayout.Width(40)))
+                    if (GUILayout.Button("跳过", EditorStyles.miniButtonRight, GUILayout.Width(60)))
                     {
-                        m_skippedTextObjects.Add(textObj);
-
-                        for (int j = 0; j < TextProcessorTool.PrefabWriteList.Count; j++)
-                        {
-                            var tempData = TextProcessorTool.PrefabWriteList[j];
-
-                            if (tempData.TextDefineId == prefabEntry.BinderTextIDs[i])
-                            {
-                                TextProcessorTool.PrefabWriteList.RemoveAt(j);
-                                break;
-                            }
-                        }
+                        TextProcessorTool.SkippedTextObjects.Add(textObj);
+                        ScanPrefabs();
                     }
                 }
                 EditorGUILayout.EndHorizontal();
@@ -514,17 +508,18 @@ namespace DGame
             AssetDatabase.StartAssetEditing();
             try
             {
-                foreach (var prefabEntry in TextProcessorTool.PrefabTextEntries)
+                for (int i = 0; i < TextProcessorTool.PrefabTextEntries.Count; i++)
                 {
+                    var prefabEntry = TextProcessorTool.PrefabTextEntries[i];
                     if (prefabEntry?.prefab == null || prefabEntry.NoBinderTextObjects == null)
                         continue;
 
-                    for (int i = 0; i < prefabEntry.NoBinderTextObjects.Count; i++)
+                    for (int j = 0; j < prefabEntry.NoBinderTextObjects.Count; j++)
                     {
-                        var textObj = prefabEntry.NoBinderTextObjects[i];
+                        var textObj = prefabEntry.NoBinderTextObjects[j];
 
                         // 跳过已标记跳过的对象
-                        if (textObj == null || m_skippedTextObjects.Contains(textObj))
+                        if (textObj == null || TextProcessorTool.SkippedTextObjects.Contains(textObj))
                         {
                             skipCount++;
                             continue;
@@ -536,7 +531,7 @@ namespace DGame
                         {
                             binder = textObj.AddComponent<UITextIDBinder>();
                         }
-                        binder.TextID = prefabEntry.BinderTextIDs[i];
+                        binder.TextID = prefabEntry.BinderTextIDs[j];
 
                         EditorUtility.SetDirty(prefabEntry.prefab);
                         successCount++;
@@ -554,7 +549,7 @@ namespace DGame
 
             // 清空数据
             TextProcessorTool.PrefabTextEntries.Clear();
-            m_skippedTextObjects.Clear();
+            TextProcessorTool.SkippedTextObjects.Clear();
         }
 
         private Transform FindChild(Transform lhs, Transform rhs, Transform rhsChild)

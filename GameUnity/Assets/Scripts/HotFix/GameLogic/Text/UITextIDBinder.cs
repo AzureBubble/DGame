@@ -1,3 +1,4 @@
+using System;
 using GameProto;
 using UnityEngine;
 using UnityEngine.UI;
@@ -34,17 +35,14 @@ namespace GameLogic
     [DisallowMultipleComponent]
     public class UITextIDBinder : MonoBehaviour
     {
-        [SerializeField]
-        [Header("文本配置ID")]
-        private int m_textID;
+        public int m_textID;
 
-        [SerializeField]
         [Header("预览语言(仅编辑器)")]
-        private LocalizationType m_previewLanguage = LocalizationType.CN;
+        public LocalizationType m_previewLanguage = LocalizationType.CN;
 
         [SerializeField]
         [Header("预览文本(仅编辑器,只读)")]
-        private string m_previewText;
+        public string m_previewText;
 
         /// <summary>
         /// 文本配置ID
@@ -98,7 +96,25 @@ namespace GameLogic
 #if UNITY_EDITOR
             if (!Application.isPlaying)
             {
-                return m_textID == 0 ? UITextIDBinderResultType.TextIDZero : UITextIDBinderResultType.Success;
+                string previewText = EditorConfigLoader.GetTextContent(m_textID, PreviewLanguage);
+
+#if TextMeshPro
+                // 更新 TextMeshPro 组件显示
+                if (TextProBinder != null)
+                {
+                    TextProBinder.text = previewText;
+                }
+                else
+#endif
+                    // 更新 Unity Text 组件显示
+                if (TextBinder != null)
+                {
+                    TextBinder.text = previewText;
+                }
+
+                // 更新预览字段（编辑模式下不直接修改序列化字段，避免触发Inspector刷新）
+                m_previewText = previewText;
+                return UITextIDBinderResultType.Success;
             }
 #endif
 
@@ -122,7 +138,7 @@ namespace GameLogic
             if (textConfig == null)
             {
                 var textIDStr = TextID.ToString();
-                m_previewText = $"TextID:{textIDStr} Not Found";
+                m_previewText = $"LabelID{textIDStr}";
 
 #if TextMeshPro
                 if (TextProBinder != null)

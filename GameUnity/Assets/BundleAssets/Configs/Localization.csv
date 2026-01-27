@@ -1,4 +1,0 @@
-﻿Key,Type,Desc,Chinese (Simplified),Chinese (Traditional),English,Japanese
-QuitGame,Text,,退出游戏1,退出遊戲1,Exit Game,ゲームを終了する
-StartGame,Text,,开始游戏1,開始遊戲2,Start Game,ゲームを開始
-Title,Text,,标题{0},標題{0},Title {0},タイトル {0}

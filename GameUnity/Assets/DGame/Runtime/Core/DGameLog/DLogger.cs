@@ -11,6 +11,7 @@ namespace DGame
     /// </summary>
     public static class DLogger
     {
+        public static bool EnableLog = true;
 
         #region Debug
 

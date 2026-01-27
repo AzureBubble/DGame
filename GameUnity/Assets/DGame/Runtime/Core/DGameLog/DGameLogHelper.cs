@@ -41,6 +41,10 @@ namespace DGame
         /// <exception cref="ArgumentOutOfRangeException">框架异常类</exception>
         public void Log(DGameLogLevel level, object msg)
         {
+            if (!DLogger.EnableLog)
+            {
+                return;
+            }
             switch (level)
             {
                 case DGameLogLevel.Debug:

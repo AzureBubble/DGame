@@ -11,6 +11,8 @@ namespace GameLogic
     {
         private readonly Dictionary<string, HandleGM> m_cmdDict = new Dictionary<string, HandleGM>();
 
+        private readonly List<SaveGm> m_commendCfgList = new List<SaveGm>();
+
         /// <summary>
         /// 缓存输入过的命令
         /// </summary>
@@ -88,11 +90,40 @@ namespace GameLogic
             m_commendList.Insert(0, commend);
         }
 
+        public bool GetCommendCfgByIndex(int index, out SaveGm commend)
+        {
+            var inRange = false;
+            commend = null;
+
+            if (index >= 0 && index < m_commendCfgList.Count)
+            {
+                inRange = true;
+                commend = m_commendCfgList[index];
+            }
+
+            if (index >= m_commendCfgList.Count && m_commendCfgList.Count > 0)
+            {
+                commend = m_commendCfgList[0];
+                inRange = false;
+            }
+
+            return inRange;
+        }
+
+        public void AddCommendCfg(SaveGm commendCfg)
+        {
+            m_commendCfgList.Insert(0, commendCfg);
+        }
+
         public void OnUpdate()
         {
+            if (!DGame.Utility.PlatformUtil.IsPcOrEditorPlatform())
+            {
+                return;
+            }
             if (Input.GetKeyDown(KeyCode.F1))
             {
-                // UIModule.Instance.ShowWindowAsync<GMWindow>();
+                UIModule.Instance.ShowWindowAsync<GMPanel>();
             }
         }
     }

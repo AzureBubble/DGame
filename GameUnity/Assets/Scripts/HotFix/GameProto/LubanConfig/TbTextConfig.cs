@@ -34,10 +34,22 @@ public partial class TbTextConfig
         }
     }
 
-    public System.Collections.Generic.Dictionary<int, TextConfig> DataMap => _dataMap;
-    public System.Collections.Generic.List<TextConfig> DataList => _dataList;
+    #region 静态访问
 
-    public TextConfig GetOrDefault(int key) => _dataMap.TryGetValue(key, out var v) ? v : default;
+    private static TbTextConfig m_instance;
+    public static TbTextConfig Instance => m_instance == null ? m_instance = ConfigSystem.Instance.Tables.TbTextConfig : m_instance;
+    public static bool ContainsKey(int key) => Instance._dataMap.ContainsKey(key);
+    public static bool TryGetValue(int key, out TextConfig v) => Instance._dataMap.TryGetValue(key, out v);
+    public static TextConfig GetOrDefault(int key) => Instance._dataMap.TryGetValue(key, out var v) ? v : null;
+    public static System.Collections.Generic.Dictionary<int, TextConfig> DataMap => Instance._dataMap;
+    public static System.Collections.Generic.List<TextConfig> DataList => Instance._dataList;
+
+    #endregion
+
+    public System.Collections.Generic.Dictionary<int, TextConfig> dataMap => _dataMap;
+    public System.Collections.Generic.List<TextConfig> dataList => _dataList;
+
+    public TextConfig GetOrDefaultNoStatic(int key) => _dataMap.TryGetValue(key, out var v) ? v : default;
     public TextConfig Get(int key) => _dataMap[key];
     public TextConfig this[int key] => _dataMap[key];
 

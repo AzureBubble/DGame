@@ -14,6 +14,8 @@ namespace GameProto
 {
 public sealed partial class TextConfig : Luban.BeanBase
 {
+    public TextConfig() { }
+    
     public TextConfig(ByteBuf _buf) 
     {
         ID = _buf.ReadInt();
@@ -29,16 +31,16 @@ public sealed partial class TextConfig : Luban.BeanBase
     /// <summary>
     /// 文本ID
     /// </summary>
-    public readonly int ID;
+    public int ID;
     /// <summary>
     /// 参数数量
     /// </summary>
-    public readonly int ArgNum;
+    public int ArgNum;
     /// <summary>
     /// 内容是 string 数组类型，数组索引对应 LocalizationType 枚举
     /// </summary>
-    public readonly string[] Content;
-   
+    public string[] Content;
+
     public const int __ID__ = -912442641;
     public override int GetTypeId() => __ID__;
 
@@ -46,6 +48,18 @@ public sealed partial class TextConfig : Luban.BeanBase
     {
     }
 
+
+    public void CopyTo(ref TextConfig other)
+    {
+        if (other == null)
+        {
+            other = new TextConfig();
+        }
+        other.ID = ID;
+        other.ArgNum = ArgNum;
+        other.Content = Content;
+    }
+    
     public override string ToString()
     {
         return "{ "

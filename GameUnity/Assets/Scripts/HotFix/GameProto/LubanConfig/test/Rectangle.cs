@@ -17,6 +17,8 @@ namespace GameProto.test
 /// </summary>
 public sealed partial class Rectangle : Shape
 {
+    public Rectangle() { }
+    
     public Rectangle(ByteBuf _buf)  : base(_buf) 
     {
         Width = _buf.ReadFloat();
@@ -31,12 +33,12 @@ public sealed partial class Rectangle : Shape
     /// <summary>
     /// 宽度
     /// </summary>
-    public readonly float Width;
+    public float Width;
     /// <summary>
     /// 高度
     /// </summary>
-    public readonly float Height;
-   
+    public float Height;
+
     public const int __ID__ = -31893773;
     public override int GetTypeId() => __ID__;
 
@@ -45,6 +47,17 @@ public sealed partial class Rectangle : Shape
         base.ResolveRef(tables);
     }
 
+
+    public void CopyTo(ref Rectangle other)
+    {
+        if (other == null)
+        {
+            other = new Rectangle();
+        }
+        other.Width = Width;
+        other.Height = Height;
+    }
+    
     public override string ToString()
     {
         return "{ "

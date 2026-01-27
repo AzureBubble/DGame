@@ -14,6 +14,7 @@ namespace GameProto
 {
 public partial struct vector2int
 {
+    
     public vector2int(ByteBuf _buf) 
     {
         X = _buf.ReadInt();
@@ -25,14 +26,21 @@ public partial struct vector2int
         return new vector2int(_buf);
     }
 
-    public readonly int X;
-    public readonly int Y;
-   
+    public int X;
+    public int Y;
+
 
     public  void ResolveRef(Tables tables)
     {
     }
 
+
+    public void CopyTo(ref vector2int other)
+    {
+        other.X = X;
+        other.Y = Y;
+    }
+    
     public override string ToString()
     {
         return "{ "

@@ -34,10 +34,22 @@ public partial class TbModelConfig
         }
     }
 
-    public System.Collections.Generic.Dictionary<int, ModelConfig> DataMap => _dataMap;
-    public System.Collections.Generic.List<ModelConfig> DataList => _dataList;
+    #region 静态访问
 
-    public ModelConfig GetOrDefault(int key) => _dataMap.TryGetValue(key, out var v) ? v : default;
+    private static TbModelConfig m_instance;
+    public static TbModelConfig Instance => m_instance == null ? m_instance = ConfigSystem.Instance.Tables.TbModelConfig : m_instance;
+    public static bool ContainsKey(int key) => Instance._dataMap.ContainsKey(key);
+    public static bool TryGetValue(int key, out ModelConfig v) => Instance._dataMap.TryGetValue(key, out v);
+    public static ModelConfig GetOrDefault(int key) => Instance._dataMap.TryGetValue(key, out var v) ? v : null;
+    public static System.Collections.Generic.Dictionary<int, ModelConfig> DataMap => Instance._dataMap;
+    public static System.Collections.Generic.List<ModelConfig> DataList => Instance._dataList;
+
+    #endregion
+
+    public System.Collections.Generic.Dictionary<int, ModelConfig> dataMap => _dataMap;
+    public System.Collections.Generic.List<ModelConfig> dataList => _dataList;
+
+    public ModelConfig GetOrDefaultNoStatic(int key) => _dataMap.TryGetValue(key, out var v) ? v : default;
     public ModelConfig Get(int key) => _dataMap[key];
     public ModelConfig this[int key] => _dataMap[key];
 

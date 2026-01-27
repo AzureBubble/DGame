@@ -14,6 +14,8 @@ namespace GameProto
 {
 public sealed partial class ItemConfig : Luban.BeanBase
 {
+    public ItemConfig() { }
+    
     public ItemConfig(ByteBuf _buf) 
     {
         ItemID = _buf.ReadInt();
@@ -35,40 +37,40 @@ public sealed partial class ItemConfig : Luban.BeanBase
     /// <summary>
     /// 道具ID
     /// </summary>
-    public readonly int ItemID;
+    public int ItemID;
     /// <summary>
     /// 道具名字
     /// </summary>
-    public readonly string ItemName;
+    public string ItemName;
     /// <summary>
     /// 道具品质
     /// </summary>
-    public readonly ColorQuality Quality;
+    public ColorQuality Quality;
     /// <summary>
     /// 图标资源名_男
     /// </summary>
-    public readonly string IconNameMan;
+    public string IconNameMan;
     /// <summary>
     /// 图标资源名_女
     /// </summary>
-    public readonly string IconNameWoman;
+    public string IconNameWoman;
     /// <summary>
     /// 道具描述
     /// </summary>
-    public readonly string Desc;
+    public string Desc;
     /// <summary>
     /// 价格
     /// </summary>
-    public readonly int Price;
+    public int Price;
     /// <summary>
     /// 过期时间
     /// </summary>
-    public readonly long? ExpireTime;
+    public long? ExpireTime;
     /// <summary>
     /// 能否批量使用
     /// </summary>
-    public readonly bool BatchUseable;
-   
+    public bool BatchUseable;
+
     public const int __ID__ = -764023723;
     public override int GetTypeId() => __ID__;
 
@@ -76,6 +78,24 @@ public sealed partial class ItemConfig : Luban.BeanBase
     {
     }
 
+
+    public void CopyTo(ref ItemConfig other)
+    {
+        if (other == null)
+        {
+            other = new ItemConfig();
+        }
+        other.ItemID = ItemID;
+        other.ItemName = ItemName;
+        other.Quality = Quality;
+        other.IconNameMan = IconNameMan;
+        other.IconNameWoman = IconNameWoman;
+        other.Desc = Desc;
+        other.Price = Price;
+        other.ExpireTime = ExpireTime;
+        other.BatchUseable = BatchUseable;
+    }
+    
     public override string ToString()
     {
         return "{ "

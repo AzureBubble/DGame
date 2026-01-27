@@ -17,6 +17,8 @@ namespace GameProto.test
 /// </summary>
 public sealed partial class Circle : Shape
 {
+    public Circle() { }
+    
     public Circle(ByteBuf _buf)  : base(_buf) 
     {
         Radius = _buf.ReadFloat();
@@ -30,8 +32,8 @@ public sealed partial class Circle : Shape
     /// <summary>
     /// 半径
     /// </summary>
-    public readonly float Radius;
-   
+    public float Radius;
+
     public const int __ID__ = 2131829196;
     public override int GetTypeId() => __ID__;
 
@@ -40,6 +42,16 @@ public sealed partial class Circle : Shape
         base.ResolveRef(tables);
     }
 
+
+    public void CopyTo(ref Circle other)
+    {
+        if (other == null)
+        {
+            other = new Circle();
+        }
+        other.Radius = Radius;
+    }
+    
     public override string ToString()
     {
         return "{ "

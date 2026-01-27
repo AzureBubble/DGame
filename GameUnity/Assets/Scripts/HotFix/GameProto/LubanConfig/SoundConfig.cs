@@ -14,6 +14,8 @@ namespace GameProto
 {
 public sealed partial class SoundConfig : Luban.BeanBase
 {
+    public SoundConfig() { }
+    
     public SoundConfig(ByteBuf _buf) 
     {
         ID = _buf.ReadInt();
@@ -28,12 +30,12 @@ public sealed partial class SoundConfig : Luban.BeanBase
     /// <summary>
     /// 音效ID
     /// </summary>
-    public readonly int ID;
+    public int ID;
     /// <summary>
     /// 音效可寻址地址
     /// </summary>
-    public readonly string Location;
-   
+    public string Location;
+
     public const int __ID__ = -1164338927;
     public override int GetTypeId() => __ID__;
 
@@ -41,6 +43,17 @@ public sealed partial class SoundConfig : Luban.BeanBase
     {
     }
 
+
+    public void CopyTo(ref SoundConfig other)
+    {
+        if (other == null)
+        {
+            other = new SoundConfig();
+        }
+        other.ID = ID;
+        other.Location = Location;
+    }
+    
     public override string ToString()
     {
         return "{ "

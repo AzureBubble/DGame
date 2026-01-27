@@ -14,6 +14,7 @@ namespace GameProto
 {
 public partial struct vector3int
 {
+    
     public vector3int(ByteBuf _buf) 
     {
         X = _buf.ReadInt();
@@ -26,15 +27,23 @@ public partial struct vector3int
         return new vector3int(_buf);
     }
 
-    public readonly int X;
-    public readonly int Y;
-    public readonly int Z;
-   
+    public int X;
+    public int Y;
+    public int Z;
+
 
     public  void ResolveRef(Tables tables)
     {
     }
 
+
+    public void CopyTo(ref vector3int other)
+    {
+        other.X = X;
+        other.Y = Y;
+        other.Z = Z;
+    }
+    
     public override string ToString()
     {
         return "{ "

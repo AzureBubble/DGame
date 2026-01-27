@@ -14,6 +14,8 @@ namespace GameProto
 {
 public sealed partial class GmConfig : Luban.BeanBase
 {
+    public GmConfig() { }
+    
     public GmConfig(ByteBuf _buf) 
     {
         GmID = _buf.ReadInt();
@@ -35,40 +37,40 @@ public sealed partial class GmConfig : Luban.BeanBase
     /// <summary>
     /// GMID
     /// </summary>
-    public readonly int GmID;
+    public int GmID;
     /// <summary>
     /// Gm类型（1:客户端，2:服务器）
     /// </summary>
-    public readonly int GmType;
+    public int GmType;
     /// <summary>
     /// 描述（按钮名）
     /// </summary>
-    public readonly string GmDesc;
+    public string GmDesc;
     /// <summary>
     /// GM命令
     /// </summary>
-    public readonly string GmOrder;
+    public string GmOrder;
     /// <summary>
     /// 命令ID
     /// </summary>
-    public readonly int OrderID;
+    public int OrderID;
     /// <summary>
     /// 数量
     /// </summary>
-    public readonly int Num;
+    public int Num;
     /// <summary>
     /// 是否直接执行
     /// </summary>
-    public readonly int ExecuteDirectly;
+    public int ExecuteDirectly;
     /// <summary>
     /// 是否执行后关闭
     /// </summary>
-    public readonly int ExecuteClose;
+    public int ExecuteClose;
     /// <summary>
     /// 关联配置
     /// </summary>
-    public readonly int AssConfig;
-   
+    public int AssConfig;
+
     public const int __ID__ = -836822040;
     public override int GetTypeId() => __ID__;
 
@@ -76,6 +78,24 @@ public sealed partial class GmConfig : Luban.BeanBase
     {
     }
 
+
+    public void CopyTo(ref GmConfig other)
+    {
+        if (other == null)
+        {
+            other = new GmConfig();
+        }
+        other.GmID = GmID;
+        other.GmType = GmType;
+        other.GmDesc = GmDesc;
+        other.GmOrder = GmOrder;
+        other.OrderID = OrderID;
+        other.Num = Num;
+        other.ExecuteDirectly = ExecuteDirectly;
+        other.ExecuteClose = ExecuteClose;
+        other.AssConfig = AssConfig;
+    }
+    
     public override string ToString()
     {
         return "{ "

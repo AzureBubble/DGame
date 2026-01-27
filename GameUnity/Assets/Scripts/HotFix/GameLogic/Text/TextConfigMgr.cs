@@ -22,7 +22,7 @@ namespace GameLogic
             }
         }
 
-        public TextConfig GetTextConfig(int id) => ConfigSystem.Instance.Tables.TbTextConfig.GetOrDefault(id);
+        public TextConfig GetTextConfig(int id) => TbTextConfig.GetOrDefault(id);
 
         public TextConfig GetTextConfig(TextDefine id) => GetTextConfig((int)id);
 

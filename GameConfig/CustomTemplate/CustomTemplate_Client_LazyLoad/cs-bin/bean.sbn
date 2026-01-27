@@ -69,9 +69,7 @@ public {{class_modifier __bean}} partial class {{__name}} : {{if parent_def_type
 {{~end~}}
 {
     {{~if !__bean.is_value_type~}}
-    public {{__name}}()
-    {
-    }
+    public {{__name}}() { }
     {{~end~}}
     
     public {{__name}}(ByteBuf _buf) {{if parent_def_type}} : base(_buf) {{end}}

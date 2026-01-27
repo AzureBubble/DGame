@@ -14,6 +14,8 @@ namespace GameProto
 {
 public sealed partial class ModelConfig : Luban.BeanBase
 {
+    public ModelConfig() { }
+    
     public ModelConfig(ByteBuf _buf) 
     {
         ModelID = _buf.ReadInt();
@@ -29,16 +31,16 @@ public sealed partial class ModelConfig : Luban.BeanBase
     /// <summary>
     /// 模型ID
     /// </summary>
-    public readonly int ModelID;
+    public int ModelID;
     /// <summary>
     /// UISpine可寻址地址
     /// </summary>
-    public readonly string UISpineLocation;
+    public string UISpineLocation;
     /// <summary>
     /// Model可寻址地址
     /// </summary>
-    public readonly string ModelLocation;
-   
+    public string ModelLocation;
+
     public const int __ID__ = 1694060459;
     public override int GetTypeId() => __ID__;
 
@@ -46,6 +48,18 @@ public sealed partial class ModelConfig : Luban.BeanBase
     {
     }
 
+
+    public void CopyTo(ref ModelConfig other)
+    {
+        if (other == null)
+        {
+            other = new ModelConfig();
+        }
+        other.ModelID = ModelID;
+        other.UISpineLocation = UISpineLocation;
+        other.ModelLocation = ModelLocation;
+    }
+    
     public override string ToString()
     {
         return "{ "

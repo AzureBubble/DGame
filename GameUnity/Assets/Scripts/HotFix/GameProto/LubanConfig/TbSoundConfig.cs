@@ -34,10 +34,22 @@ public partial class TbSoundConfig
         }
     }
 
-    public System.Collections.Generic.Dictionary<int, SoundConfig> DataMap => _dataMap;
-    public System.Collections.Generic.List<SoundConfig> DataList => _dataList;
+    #region 静态访问
 
-    public SoundConfig GetOrDefault(int key) => _dataMap.TryGetValue(key, out var v) ? v : default;
+    private static TbSoundConfig m_instance;
+    public static TbSoundConfig Instance => m_instance == null ? m_instance = ConfigSystem.Instance.Tables.TbSoundConfig : m_instance;
+    public static bool ContainsKey(int key) => Instance._dataMap.ContainsKey(key);
+    public static bool TryGetValue(int key, out SoundConfig v) => Instance._dataMap.TryGetValue(key, out v);
+    public static SoundConfig GetOrDefault(int key) => Instance._dataMap.TryGetValue(key, out var v) ? v : null;
+    public static System.Collections.Generic.Dictionary<int, SoundConfig> DataMap => Instance._dataMap;
+    public static System.Collections.Generic.List<SoundConfig> DataList => Instance._dataList;
+
+    #endregion
+
+    public System.Collections.Generic.Dictionary<int, SoundConfig> dataMap => _dataMap;
+    public System.Collections.Generic.List<SoundConfig> dataList => _dataList;
+
+    public SoundConfig GetOrDefaultNoStatic(int key) => _dataMap.TryGetValue(key, out var v) ? v : default;
     public SoundConfig Get(int key) => _dataMap[key];
     public SoundConfig this[int key] => _dataMap[key];
 

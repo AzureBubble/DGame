@@ -17,6 +17,8 @@ namespace GameProto.test
 /// </summary>
 public sealed partial class TestExcelBean1 : Luban.BeanBase
 {
+    public TestExcelBean1() { }
+    
     public TestExcelBean1(ByteBuf _buf) 
     {
         X1 = _buf.ReadInt();
@@ -33,20 +35,20 @@ public sealed partial class TestExcelBean1 : Luban.BeanBase
     /// <summary>
     /// 最高品质
     /// </summary>
-    public readonly int X1;
+    public int X1;
     /// <summary>
     /// 黑色的
     /// </summary>
-    public readonly string X2;
+    public string X2;
     /// <summary>
     /// 蓝色的
     /// </summary>
-    public readonly int X3;
+    public int X3;
     /// <summary>
     /// 最差品质
     /// </summary>
-    public readonly float X4;
-   
+    public float X4;
+
     public const int __ID__ = -1738345160;
     public override int GetTypeId() => __ID__;
 
@@ -54,6 +56,19 @@ public sealed partial class TestExcelBean1 : Luban.BeanBase
     {
     }
 
+
+    public void CopyTo(ref TestExcelBean1 other)
+    {
+        if (other == null)
+        {
+            other = new TestExcelBean1();
+        }
+        other.X1 = X1;
+        other.X2 = X2;
+        other.X3 = X3;
+        other.X4 = X4;
+    }
+    
     public override string ToString()
     {
         return "{ "

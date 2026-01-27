@@ -84,7 +84,7 @@ namespace GameLogic
         /// </summary>
         public static TextConfig GetTextConfig(int textID)
         {
-            return Tables?.TbTextConfig?.GetOrDefault(textID);
+            return TbTextConfig.GetOrDefault(textID);
         }
 
         /// <summary>
@@ -117,9 +117,9 @@ namespace GameLogic
 
         public static bool TryGetTextDefineStr(string content, out string str)
         {
-            for (int i = 0; i < Tables.TbTextConfig.DataList.Count; i++)
+            for (int i = 0; i < TbTextConfig.DataList.Count; i++)
             {
-                var cfg = Tables.TbTextConfig.DataList[i];
+                var cfg = TbTextConfig.DataList[i];
                 // 一般都是中文开发，所以直接默认判断第0个索引
                 if (cfg.Content[0] == content)
                 {

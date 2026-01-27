@@ -34,10 +34,22 @@ public partial class TbItemConfig
         }
     }
 
-    public System.Collections.Generic.Dictionary<int, ItemConfig> DataMap => _dataMap;
-    public System.Collections.Generic.List<ItemConfig> DataList => _dataList;
+    #region 静态访问
 
-    public ItemConfig GetOrDefault(int key) => _dataMap.TryGetValue(key, out var v) ? v : default;
+    private static TbItemConfig m_instance;
+    public static TbItemConfig Instance => m_instance == null ? m_instance = ConfigSystem.Instance.Tables.TbItemConfig : m_instance;
+    public static bool ContainsKey(int key) => Instance._dataMap.ContainsKey(key);
+    public static bool TryGetValue(int key, out ItemConfig v) => Instance._dataMap.TryGetValue(key, out v);
+    public static ItemConfig GetOrDefault(int key) => Instance._dataMap.TryGetValue(key, out var v) ? v : null;
+    public static System.Collections.Generic.Dictionary<int, ItemConfig> DataMap => Instance._dataMap;
+    public static System.Collections.Generic.List<ItemConfig> DataList => Instance._dataList;
+
+    #endregion
+
+    public System.Collections.Generic.Dictionary<int, ItemConfig> dataMap => _dataMap;
+    public System.Collections.Generic.List<ItemConfig> dataList => _dataList;
+
+    public ItemConfig GetOrDefaultNoStatic(int key) => _dataMap.TryGetValue(key, out var v) ? v : default;
     public ItemConfig Get(int key) => _dataMap[key];
     public ItemConfig this[int key] => _dataMap[key];
 

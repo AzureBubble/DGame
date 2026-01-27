@@ -75,7 +75,7 @@ namespace GameLogic
 
 		#region 字段
 
-		private int m_gmCommendIndex = 0;
+		// private int m_gmCommendIndex = 0;
 		private int m_gmCfgCommendIndex = 0;
 
 		private List<GmConfig> m_gmConfigs;
@@ -321,7 +321,7 @@ namespace GameLogic
 		{
 			m_dropDownSelect.ClearOptions();
 			m_dropDownSelect.gameObject.SetActive(false);
-			m_gmCommendIndex = 0;
+			// m_gmCommendIndex = 0;
 
 			m_inputGm.text = "";
 			m_inputGmExecute.text = "";

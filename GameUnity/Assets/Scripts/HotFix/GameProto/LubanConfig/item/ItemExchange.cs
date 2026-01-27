@@ -14,6 +14,8 @@ namespace GameProto.item
 {
 public sealed partial class ItemExchange : Luban.BeanBase
 {
+    public ItemExchange() { }
+    
     public ItemExchange(ByteBuf _buf) 
     {
         Id = _buf.ReadInt();
@@ -28,12 +30,12 @@ public sealed partial class ItemExchange : Luban.BeanBase
     /// <summary>
     /// 道具id
     /// </summary>
-    public readonly int Id;
+    public int Id;
     /// <summary>
     /// 道具数量
     /// </summary>
-    public readonly int Num;
-   
+    public int Num;
+
     public const int __ID__ = 1814660465;
     public override int GetTypeId() => __ID__;
 
@@ -41,6 +43,17 @@ public sealed partial class ItemExchange : Luban.BeanBase
     {
     }
 
+
+    public void CopyTo(ref ItemExchange other)
+    {
+        if (other == null)
+        {
+            other = new ItemExchange();
+        }
+        other.Id = Id;
+        other.Num = Num;
+    }
+    
     public override string ToString()
     {
         return "{ "

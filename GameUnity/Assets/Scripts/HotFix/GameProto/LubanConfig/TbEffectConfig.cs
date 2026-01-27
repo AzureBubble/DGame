@@ -34,10 +34,22 @@ public partial class TbEffectConfig
         }
     }
 
-    public System.Collections.Generic.Dictionary<int, EffectConfig> DataMap => _dataMap;
-    public System.Collections.Generic.List<EffectConfig> DataList => _dataList;
+    #region 静态访问
 
-    public EffectConfig GetOrDefault(int key) => _dataMap.TryGetValue(key, out var v) ? v : default;
+    private static TbEffectConfig m_instance;
+    public static TbEffectConfig Instance => m_instance == null ? m_instance = ConfigSystem.Instance.Tables.TbEffectConfig : m_instance;
+    public static bool ContainsKey(int key) => Instance._dataMap.ContainsKey(key);
+    public static bool TryGetValue(int key, out EffectConfig v) => Instance._dataMap.TryGetValue(key, out v);
+    public static EffectConfig GetOrDefault(int key) => Instance._dataMap.TryGetValue(key, out var v) ? v : null;
+    public static System.Collections.Generic.Dictionary<int, EffectConfig> DataMap => Instance._dataMap;
+    public static System.Collections.Generic.List<EffectConfig> DataList => Instance._dataList;
+
+    #endregion
+
+    public System.Collections.Generic.Dictionary<int, EffectConfig> dataMap => _dataMap;
+    public System.Collections.Generic.List<EffectConfig> dataList => _dataList;
+
+    public EffectConfig GetOrDefaultNoStatic(int key) => _dataMap.TryGetValue(key, out var v) ? v : default;
     public EffectConfig Get(int key) => _dataMap[key];
     public EffectConfig this[int key] => _dataMap[key];
 

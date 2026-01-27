@@ -14,6 +14,8 @@ namespace GameProto.test
 {
 public abstract partial class Shape : Luban.BeanBase
 {
+    public Shape() { }
+    
     public Shape(ByteBuf _buf) 
     {
     }
@@ -28,12 +30,13 @@ public abstract partial class Shape : Luban.BeanBase
         }
     }
 
-   
+
 
     public virtual void ResolveRef(Tables tables)
     {
     }
 
+    
     public override string ToString()
     {
         return "{ "

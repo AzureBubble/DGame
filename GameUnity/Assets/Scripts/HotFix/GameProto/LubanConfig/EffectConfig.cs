@@ -14,6 +14,8 @@ namespace GameProto
 {
 public sealed partial class EffectConfig : Luban.BeanBase
 {
+    public EffectConfig() { }
+    
     public EffectConfig(ByteBuf _buf) 
     {
         ID = _buf.ReadInt();
@@ -31,24 +33,24 @@ public sealed partial class EffectConfig : Luban.BeanBase
     /// <summary>
     /// 特效ID
     /// </summary>
-    public readonly int ID;
+    public int ID;
     /// <summary>
     /// 特效可寻址地址
     /// </summary>
-    public readonly string Location;
+    public string Location;
     /// <summary>
     /// 持续时间
     /// </summary>
-    public readonly float Duration;
+    public float Duration;
     /// <summary>
     /// 缩放比例
     /// </summary>
-    public readonly float Scale;
+    public float Scale;
     /// <summary>
     /// 延迟销毁时间
     /// </summary>
-    public readonly float DelayDestroy;
-   
+    public float DelayDestroy;
+
     public const int __ID__ = -682668973;
     public override int GetTypeId() => __ID__;
 
@@ -56,6 +58,20 @@ public sealed partial class EffectConfig : Luban.BeanBase
     {
     }
 
+
+    public void CopyTo(ref EffectConfig other)
+    {
+        if (other == null)
+        {
+            other = new EffectConfig();
+        }
+        other.ID = ID;
+        other.Location = Location;
+        other.Duration = Duration;
+        other.Scale = Scale;
+        other.DelayDestroy = DelayDestroy;
+    }
+    
     public override string ToString()
     {
         return "{ "

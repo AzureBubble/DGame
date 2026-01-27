@@ -34,10 +34,22 @@ public partial class TbGmConfig
         }
     }
 
-    public System.Collections.Generic.Dictionary<int, GmConfig> DataMap => _dataMap;
-    public System.Collections.Generic.List<GmConfig> DataList => _dataList;
+    #region 静态访问
 
-    public GmConfig GetOrDefault(int key) => _dataMap.TryGetValue(key, out var v) ? v : default;
+    private static TbGmConfig m_instance;
+    public static TbGmConfig Instance => m_instance == null ? m_instance = ConfigSystem.Instance.Tables.TbGmConfig : m_instance;
+    public static bool ContainsKey(int key) => Instance._dataMap.ContainsKey(key);
+    public static bool TryGetValue(int key, out GmConfig v) => Instance._dataMap.TryGetValue(key, out v);
+    public static GmConfig GetOrDefault(int key) => Instance._dataMap.TryGetValue(key, out var v) ? v : null;
+    public static System.Collections.Generic.Dictionary<int, GmConfig> DataMap => Instance._dataMap;
+    public static System.Collections.Generic.List<GmConfig> DataList => Instance._dataList;
+
+    #endregion
+
+    public System.Collections.Generic.Dictionary<int, GmConfig> dataMap => _dataMap;
+    public System.Collections.Generic.List<GmConfig> dataList => _dataList;
+
+    public GmConfig GetOrDefaultNoStatic(int key) => _dataMap.TryGetValue(key, out var v) ? v : default;
     public GmConfig Get(int key) => _dataMap[key];
     public GmConfig this[int key] => _dataMap[key];
 

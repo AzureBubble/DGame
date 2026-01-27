@@ -224,8 +224,8 @@ namespace GameLogic
 						m_dropDownSelect.ClearOptions();
 						var optionsList = new List<Dropdown.OptionData>();
 
-						switch ((ConfigType)cfg.AssConfig)
-						{
+						// switch ((ConfigType)cfg.AssConfig)
+						// {
 							// case ConfigType.Currency:
 							// 	for (int i = 0; i <= (int)CurrencyCode.RandomHeroSkin; i++)
 							// 	{
@@ -236,7 +236,7 @@ namespace GameLogic
 							// 	}
 							//
 							// 	break;
-						}
+						// }
 
 						m_dropDownSelect.AddOptions(optionsList);
 						OnDropdownSelect(0);

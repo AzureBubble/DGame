@@ -8,71 +8,9 @@ namespace GameLogic
 
     }
 
-    public class GmCacheConfig
+    public class CacheGm
     {
-        /// <summary>
-        /// GMID
-        /// </summary>
-        public int GmID;
-
-        /// <summary>
-        /// Gm类型（1:客户端，2:服务器）
-        /// </summary>
-        public int GmType;
-
-        /// <summary>
-        /// 描述（按钮名）
-        /// </summary>
-        public string GmDesc;
-
-        /// <summary>
-        /// GM命令
-        /// </summary>
-        public string GmOrder;
-
-        /// <summary>
-        /// 命令ID
-        /// </summary>
-        public int OrderID;
-
-        /// <summary>
-        /// 数量
-        /// </summary>
-        public int Num;
-        /// <summary>
-        /// 是否直接执行
-        /// </summary>
-        public int ExecuteDirectly;
-
-        /// <summary>
-        /// 是否执行后关闭
-        /// </summary>
-        public int ExecuteClose;
-
-        /// <summary>
-        /// 关联配置
-        /// </summary>
-        public int AssConfig;
-
-        public GmCacheConfig() { }
-
-        public GmCacheConfig(GmConfig gmConfig)
-        {
-            GmID = gmConfig.GmID;
-            GmType = gmConfig.GmType;
-            GmDesc = gmConfig.GmDesc;
-            GmOrder = gmConfig.GmOrder;
-            OrderID = gmConfig.OrderID;
-            Num = gmConfig.Num;
-            ExecuteDirectly = gmConfig.ExecuteDirectly;
-            ExecuteClose = gmConfig.ExecuteClose;
-            AssConfig = gmConfig.AssConfig;
-        }
-    }
-
-    public class SaveGm
-    {
-        public GmCacheConfig saveCfg = new GmCacheConfig();
+        public GmConfig CacheCfg = new GmConfig();
         public int BatchNum;
     }
 

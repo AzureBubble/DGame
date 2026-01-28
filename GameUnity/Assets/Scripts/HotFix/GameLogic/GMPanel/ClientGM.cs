@@ -11,7 +11,7 @@ namespace GameLogic
     {
         private readonly Dictionary<string, HandleGM> m_cmdDict = new Dictionary<string, HandleGM>();
 
-        private readonly List<SaveGm> m_commendCfgList = new List<SaveGm>();
+        private readonly List<CacheGm> m_commendCfgList = new List<CacheGm>();
 
         /// <summary>
         /// 缓存输入过的命令
@@ -90,7 +90,7 @@ namespace GameLogic
             m_commendList.Insert(0, commend);
         }
 
-        public bool GetCommendCfgByIndex(int index, out SaveGm commend)
+        public bool GetCommendCfgByIndex(int index, out CacheGm commend)
         {
             var inRange = false;
             commend = null;
@@ -110,7 +110,7 @@ namespace GameLogic
             return inRange;
         }
 
-        public void AddCommendCfg(SaveGm commendCfg)
+        public void AddCommendCfg(CacheGm commendCfg)
         {
             m_commendCfgList.Insert(0, commendCfg);
         }

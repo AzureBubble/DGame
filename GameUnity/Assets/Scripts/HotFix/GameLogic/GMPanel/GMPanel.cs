@@ -207,12 +207,12 @@ namespace GameLogic
 				m_inputGmExecute.text = "1";
 
 				//直接执行
-				if (cfg.ExecuteDirectly == 1)
+				if (cfg.ExecuteDirectly)
 				{
-					var saveGm = new SaveGm();
-					saveGm.saveCfg.GmOrder = m_inputGm.text;
-					saveGm.saveCfg.GmType = cfg.GmType;
-					saveGm.saveCfg.ExecuteClose = cfg.ExecuteClose;
+					var saveGm = new CacheGm();
+					saveGm.CacheCfg.GmOrder = m_inputGm.text;
+					saveGm.CacheCfg.GmType = cfg.GmType;
+					saveGm.CacheCfg.ExecuteClose = cfg.ExecuteClose;
 					saveGm.BatchNum = int.Parse(m_inputGmExecute.text);
 					OnExecuteCfgGM(0, saveGm);
 				}
@@ -251,25 +251,25 @@ namespace GameLogic
 			}
 		}
 
-		private void OnExecuteCfgGM(int executeNum, SaveGm saveGm, bool forceClose = true)
+		private void OnExecuteCfgGM(int executeNum, CacheGm cacheGm, bool forceClose = true)
 		{
 			var curOrderStr = m_inputGm.text;
 
 			if (!string.IsNullOrEmpty(m_inputGmID.text))
 			{
 				int.TryParse(m_inputGmID.text, out var inputFieldID);
-				saveGm.saveCfg.OrderID = inputFieldID;
+				cacheGm.CacheCfg.OrderID = inputFieldID;
 				curOrderStr += " " + inputFieldID;
 			}
 
 			if (!string.IsNullOrEmpty(m_inputGmNum.text))
 			{
 				uint.TryParse(m_inputGmNum.text, out var inputNum);
-				saveGm.saveCfg.Num = (int)inputNum;
+				cacheGm.CacheCfg.Num = (int)inputNum;
 				curOrderStr += " " + inputNum;
 			}
 
-			if (saveGm.saveCfg.GmType == 1)
+			if (cacheGm.CacheCfg.GmType == 1)
 			{
 				//客户端的GM
 				ClientGM.Instance.HandleClientGm(curOrderStr);
@@ -284,11 +284,11 @@ namespace GameLogic
 			if (executeNum == 0)
 			{
 				// 提取GM命令并且存储
-				ClientGM.Instance.AddCommendCfg(saveGm);
+				ClientGM.Instance.AddCommendCfg(cacheGm);
 
 				ClearGmPanel();
 
-				if (saveGm.saveCfg.ExecuteClose == 1 && forceClose)
+				if (cacheGm.CacheCfg.ExecuteClose && forceClose)
 				{
 					Close();
 				}
@@ -354,14 +354,14 @@ namespace GameLogic
 
 			if (cfg != null)
 			{
-				m_inputGm.text = cfg.saveCfg.GmOrder;
-				if (cfg.saveCfg.OrderID > 0)
+				m_inputGm.text = cfg.CacheCfg.GmOrder;
+				if (cfg.CacheCfg.OrderID > 0)
 				{
-					m_inputGmID.text = cfg.saveCfg.OrderID.ToString();
+					m_inputGmID.text = cfg.CacheCfg.OrderID.ToString();
 				}
-				if (cfg.saveCfg.Num > 0)
+				if (cfg.CacheCfg.Num > 0)
 				{
-					m_inputGmNum.text = cfg.saveCfg.Num.ToString();
+					m_inputGmNum.text = cfg.CacheCfg.Num.ToString();
 				}
 				m_inputGmExecute.text = cfg.BatchNum.ToString();
 			}
@@ -395,10 +395,10 @@ namespace GameLogic
 					return;
 				}
 
-				var saveGm = new SaveGm();
-				saveGm.saveCfg.GmOrder = m_inputGm.text;
-				saveGm.saveCfg.GmType = cfg.GmType;
-				saveGm.saveCfg.ExecuteClose = cfg.ExecuteClose;
+				var saveGm = new CacheGm();
+				saveGm.CacheCfg.GmOrder = m_inputGm.text;
+				saveGm.CacheCfg.GmType = cfg.GmType;
+				saveGm.CacheCfg.ExecuteClose = cfg.ExecuteClose;
 				saveGm.BatchNum = executeNum;
 				if (executeNum > 0 && executeNum <= 10)
 				{

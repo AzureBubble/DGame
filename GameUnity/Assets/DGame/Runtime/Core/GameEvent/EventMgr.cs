@@ -14,15 +14,18 @@ namespace DGame
             }
         }
 
-        private Dictionary<string, EventEntryData> m_eventEntryMap = new Dictionary<string, EventEntryData>();
+        // private Dictionary<string, EventEntryData> m_eventEntryMap = new Dictionary<string, EventEntryData>();
+        private Dictionary<System.Type, EventEntryData> m_eventEntryMap = new Dictionary<System.Type, EventEntryData>();
 
         public EventDispatcher Dispatcher { get; private set; } = new EventDispatcher();
 
         public T GetInterface<T>()
         {
-            string interfaceName = typeof(T).FullName;
 
-            if (!string.IsNullOrEmpty(interfaceName) && m_eventEntryMap.TryGetValue(interfaceName, out var eventData))
+            // string interfaceName = typeof(T).FullName;
+            // if (!string.IsNullOrEmpty(interfaceName) && m_eventEntryMap.TryGetValue(interfaceName, out var eventData))
+
+            if (m_eventEntryMap.TryGetValue(typeof(T), out var eventData))
             {
                 return (T)eventData.InterfaceWrap;
             }
@@ -37,8 +40,9 @@ namespace DGame
                 DLogger.Fatal("Wrap接口类型无效");
                 return;
             }
-            string interfaceName = typeof(T).FullName;
-            RegWrapInterface(interfaceName, interfaceWrap);
+            // string interfaceName = typeof(T).FullName;
+            // RegWrapInterface(interfaceName, interfaceWrap);
+            m_eventEntryMap[typeof(T)] = new EventEntryData(interfaceWrap);
         }
 
         public void RegWrapInterface(string interfaceName, object interfaceWrap)
@@ -51,7 +55,7 @@ namespace DGame
             if (!string.IsNullOrEmpty(interfaceName))
             {
                 var entry = new EventEntryData(interfaceWrap);
-                m_eventEntryMap[interfaceName] = entry;
+                // m_eventEntryMap[interfaceName] = entry;
             }
         }
 

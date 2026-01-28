@@ -1,3 +1,5 @@
+#if UNITY_EDITOR
+
 using UnityEngine;
 using UnityEditor;
 #if TextMeshPro
@@ -70,3 +72,5 @@ namespace GameLogic
         }
     }
 }
+
+#endif

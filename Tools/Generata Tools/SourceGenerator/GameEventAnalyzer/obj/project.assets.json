@@ -3573,23 +3573,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Jun\\.nuget\\packages\\": {},
-    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
+    "C:\\Users\\QZJ\\.nuget\\packages\\": {},
+    "D:\\Code IDE\\Microsoft\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\UnityProjects\\DGame\\Tools\\Generata Tools\\SourceGenerator\\GameEventAnalyzer\\GameEventAnalyzer.csproj",
+      "projectUniqueName": "D:\\Unity\\GitHub Project\\DGame\\Tools\\Generata Tools\\SourceGenerator\\GameEventAnalyzer\\GameEventAnalyzer.csproj",
       "projectName": "GameEventAnalyzer",
-      "projectPath": "D:\\UnityProjects\\DGame\\Tools\\Generata Tools\\SourceGenerator\\GameEventAnalyzer\\GameEventAnalyzer.csproj",
-      "packagesPath": "C:\\Users\\Jun\\.nuget\\packages\\",
-      "outputPath": "D:\\UnityProjects\\DGame\\Tools\\Generata Tools\\SourceGenerator\\GameEventAnalyzer\\obj\\",
+      "projectPath": "D:\\Unity\\GitHub Project\\DGame\\Tools\\Generata Tools\\SourceGenerator\\GameEventAnalyzer\\GameEventAnalyzer.csproj",
+      "packagesPath": "C:\\Users\\QZJ\\.nuget\\packages\\",
+      "outputPath": "D:\\Unity\\GitHub Project\\DGame\\Tools\\Generata Tools\\SourceGenerator\\GameEventAnalyzer\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
-        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        "D:\\Code IDE\\Microsoft\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\Jun\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\QZJ\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],

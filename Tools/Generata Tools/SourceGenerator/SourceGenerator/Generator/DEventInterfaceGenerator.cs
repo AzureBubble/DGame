@@ -159,7 +159,8 @@ public class DEventInterfaceGenerator : ISourceGenerator
                 {
                     sb.AppendLine("\t\t{");
                     sb.AppendLine("\t\t\tm_dispatcher = dispatcher;");
-                    sb.AppendLine($"\t\t\tGameEvent.EventMgr.RegWrapInterface(\"{fullName}\", this);");
+                    // sb.AppendLine($"\t\t\tGameEvent.EventMgr.RegWrapInterface(\"{fullName}\", this);");
+                    sb.AppendLine($"\t\t\tGameEvent.EventMgr.RegWrapInterface<{fullName}>(this);");
                     sb.AppendLine("\t\t}");
                 }
                 sb.AppendLine();

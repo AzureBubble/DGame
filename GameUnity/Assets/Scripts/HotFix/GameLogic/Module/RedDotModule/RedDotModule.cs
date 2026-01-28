@@ -53,7 +53,7 @@ namespace GameLogic
             m_pathToIdMap.Add(ROOT_PATH, ROOT_ID);
             IsInitialized = true;
 
-            DLogger.Info("[RedDotModule] Initialized");
+            // DLogger.Info("[RedDotModule] Initialized");
         }
 
         public void Reset()
@@ -65,7 +65,7 @@ namespace GameLogic
             m_nodeDict.Add(ROOT_ID, Root);
             m_pathToIdMap.Add(ROOT_PATH, ROOT_ID);
 
-            DLogger.Info("[RedDotModule] Reset");
+            // DLogger.Info("[RedDotModule] Reset");
         }
 
         protected override void OnDestroy()

@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.UI;
 using DGame;
 
@@ -6,6 +8,78 @@ namespace GameLogic
 {
 	public partial class MainWindow
 	{
+		protected override void BindMemberProperty()
+		{
+			var optionsList = new List<Dropdown.OptionData>();
+
+			for (int i = 0; i < (int)Language.MAX; i++)
+			{
+				Dropdown.OptionData optionData = new Dropdown.OptionData();
+				optionData.text = GetLanguageStr((Language)i);
+				optionsList.Add(optionData);
+			}
+
+			OnDropdownSelect((int)GameModule.LocalizationModule.CurrentLanguage);
+			m_dropDownLanguage.AddOptions(optionsList);
+			m_dropDownLanguage.onValueChanged.AddListener(OnDropdownSelect);
+		}
+
+		public string GetLanguageStr(Language lang)
+		{
+			var langStr = "英文";
+			switch (lang)
+			{
+				case Language.CN:
+					langStr = "中文";
+					break;
+
+				case Language.EN:
+					langStr = "英文";
+					break;
+
+				case Language.GAT:
+					langStr = "繁体";
+					break;
+
+				case Language.KR:
+					langStr = "韩文";
+					break;
+
+				case Language.JP:
+					langStr = "日文";
+					break;
+
+				case Language.VN:
+					langStr = "越南语";
+					break;
+
+				case Language.INDO:
+					langStr = "印尼";
+					break;
+			}
+
+			return langStr;
+		}
+
+		protected override void RegisterEvent()
+		{
+			AddUIEvent<int>(ILocalization_Event.OnLanguageChanged, _ =>
+			{
+				RefreshUI();
+			});
+		}
+
+		void OnDropdownSelect(int val)
+		{
+			GameModule.LocalizationModule.SetLanguage((Language)val);
+			// string[] inputDrop = m_dropDownLanguage.captionText.text.Split(' ');
+		}
+
+		public void RefreshUI()
+		{
+			m_textTitle.text = G.R(TextDefine.Start_Game);
+		}
+
 		#region 事件
 
 		private partial void OnClickStartGameBtn()

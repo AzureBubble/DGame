@@ -45,6 +45,8 @@ namespace GameLogic
         [Header("预览文本(仅编辑器,只读)")]
         public string m_previewText;
 
+        private int m_curSelectLanguage = 0;
+
         /// <summary>
         /// 文本配置ID
         /// </summary>
@@ -104,6 +106,7 @@ namespace GameLogic
 
         private void OnLanguageChanged(int language)
         {
+            m_curSelectLanguage = language;
             UpdateTextContent();
         }
 
@@ -170,7 +173,7 @@ namespace GameLogic
                 return UITextIDBinderResultType.NoTextID;
             }
 
-            int langIndex = (int)m_previewLanguage;
+            int langIndex = m_curSelectLanguage;
             if (langIndex < 0 || langIndex >= textConfig.Content.Length)
             {
                 langIndex = 0;

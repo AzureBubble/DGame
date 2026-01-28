@@ -84,7 +84,7 @@ namespace GameLogic
         /// </summary>
         public static TextConfig GetTextConfig(int textID)
         {
-            return TbTextConfig.GetOrDefault(textID);
+            return Tables.TbTextConfig.GetOrDefaultNoStatic(textID);
         }
 
         /// <summary>

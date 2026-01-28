@@ -1,4 +1,5 @@
 using System;
+using DGame;
 using GameProto;
 using UnityEngine;
 using UnityEngine.UI;
@@ -38,7 +39,7 @@ namespace GameLogic
         public int m_textID;
 
         [Header("预览语言(仅编辑器)")]
-        public LocalizationType m_previewLanguage = LocalizationType.CN;
+        public LocalAreaType m_previewLanguage = LocalAreaType.CN;
 
         [SerializeField]
         [Header("预览文本(仅编辑器,只读)")]
@@ -63,7 +64,7 @@ namespace GameLogic
         /// <summary>
         /// 预览语言
         /// </summary>
-        public LocalizationType PreviewLanguage
+        public LocalAreaType PreviewLanguage
         {
             get => m_previewLanguage;
             set
@@ -87,6 +88,21 @@ namespace GameLogic
 #endif
 
         private void Awake()
+        {
+            UpdateTextContent();
+        }
+
+        private void OnEnable()
+        {
+            GameEvent.AddEventListener<int>(ILocalization_Event.OnLanguageChanged, OnLanguageChanged);
+        }
+
+        private void OnDisable()
+        {
+            GameEvent.RemoveEventListener<int>(ILocalization_Event.OnLanguageChanged, OnLanguageChanged);
+        }
+
+        private void OnLanguageChanged(int language)
         {
             UpdateTextContent();
         }

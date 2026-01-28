@@ -98,7 +98,7 @@ namespace GameLogic
         /// <summary>
         /// 获取文本内容
         /// </summary>
-        public static string GetTextContent(int textID, LocalizationType language = LocalizationType.CN)
+        public static string GetTextContent(int textID, LocalAreaType language = LocalAreaType.CN)
         {
             TextConfig config = GetTextConfig(textID);
             if (config == null)

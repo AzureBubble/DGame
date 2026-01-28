@@ -34,15 +34,7 @@ namespace Procedure
             // 正在载入...{0}%
             LauncherMgr.ShowUI<LoadUpdateUI>(Utility.StringUtil.Format(UpdateUIDefine.Instance.Preload_Loading_Tips, 0));
             // GameEvent.Send("UILoadUpdate.RefreshVersion");
-            InitLanguage();
             PreloadResources();
-        }
-
-        public void InitLanguage()
-        {
-            // 加载语言总表
-            ILocalizationModule localizationModule = ModuleSystem.GetModule<ILocalizationModule>();
-            localizationModule.LoadLanguageTotalAsset().Forget();
         }
 
         private void PreloadResources()

@@ -75,6 +75,13 @@ namespace GameLogic
         /// </summary>
         public static IInputModule InputModule => m_inputModule == null ? GetModule<IInputModule>() : m_inputModule;
 
+        private static ILocalizationModule m_localizationModule;
+
+        /// <summary>
+        /// 多语言模块
+        /// </summary>
+        public static ILocalizationModule LocalizationModule => m_localizationModule == null ? GetModule<ILocalizationModule>() : m_localizationModule;
+
         #endregion
 
         /// <summary>
@@ -100,6 +107,7 @@ namespace GameLogic
             m_resourceModule = null;
             m_fsmModule = null;
             m_inputModule = null;
+            m_localizationModule = null;
         }
     }
 }

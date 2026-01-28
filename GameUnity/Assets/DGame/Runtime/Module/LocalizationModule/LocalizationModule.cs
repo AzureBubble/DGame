@@ -1,10 +1,14 @@
-﻿using Cysharp.Threading.Tasks;
-using UnityEngine;
-
-namespace DGame
+﻿namespace DGame
 {
     public class LocalizationModule : Module, ILocalizationModule
     {
+        private ILocalizationHelper m_localizationHelper;
+
+        public void SetLocalizationHelper(ILocalizationHelper localizationHelper)
+        {
+            m_localizationHelper = localizationHelper;
+        }
+
         public override void OnCreate()
         {
         }
@@ -14,44 +18,43 @@ namespace DGame
 
         }
 
-        public Language CurrentLanguage { get; set; }
-        public Language SystemLanguage { get; }
-        public void Register()
-        {
-        }
+        public Language CurrentLanguage => m_localizationHelper != null ? m_localizationHelper.CurrentLanguage : Language.CN;
 
-        public UniTask LoadLanguageTotalAsset(string assetName)
-        {
-            return UniTask.CompletedTask;
-        }
+        public Language SystemLanguage => m_localizationHelper.SystemLanguage;
 
-        public UniTask LoadLanguageTotalAsset()
+        public bool ContainsLanguage(Language language)
         {
-            return UniTask.CompletedTask;
-        }
-
-        public UniTask LoadLanguage(string language, bool setCurrent = false, bool fromInit = false)
-        {
-            return UniTask.CompletedTask;
-        }
-
-        public bool CheckContainsLanguage(string language)
-        {
+            if (m_localizationHelper != null)
+            {
+                return m_localizationHelper.ContainsLanguage(language);
+            }
             return false;
         }
 
-        public bool SetLanguage(Language language, bool load = false)
+        public bool ContainsLanguage(int language)
         {
+            if (m_localizationHelper != null)
+            {
+                return m_localizationHelper.ContainsLanguage(language);
+            }
             return false;
         }
 
-        public bool SetLanguage(string language, bool load = false)
+        public bool SetLanguage(Language language)
         {
+            if (m_localizationHelper != null)
+            {
+                return m_localizationHelper.SetLanguage(language);
+            }
             return false;
         }
 
-        public bool SetLanguage(int languageID)
+        public bool SetLanguage(int language)
         {
+            if (m_localizationHelper != null)
+            {
+                return m_localizationHelper.SetLanguage(language);
+            }
             return false;
         }
     }

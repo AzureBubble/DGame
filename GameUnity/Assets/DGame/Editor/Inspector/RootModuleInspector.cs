@@ -80,8 +80,7 @@ namespace DGame
                 EditorGUILayout.Space(3);
 
                 string helperStatus = "编辑器模式下运行的语言类型: " + LocalizationUtil.GetLanguage(rootModule.EditorLanguage);
-                EditorGUILayout.HelpBox(helperStatus,
-                    rootModule.EditorLanguage != Language.Unspecified ? MessageType.Info : MessageType.Warning);
+                EditorGUILayout.HelpBox(helperStatus, MessageType.Info);
             }
             EditorGUILayout.EndVertical();
         }

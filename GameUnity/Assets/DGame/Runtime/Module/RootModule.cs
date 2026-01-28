@@ -24,7 +24,7 @@ namespace DGame
         private float m_gameSpeedBeforePause = 1f;
 
         [SerializeField]
-        private Language editorLanguage = Language.Unspecified;
+        private Language editorLanguage = Language.CN;
 
         /// <summary>
         /// 获取或设置编辑器语言（仅编辑器内有效）。

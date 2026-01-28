@@ -1,4 +1,3 @@
-using GameProto;
 using UnityEngine;
 using UnityEditor;
 #if TextMeshPro

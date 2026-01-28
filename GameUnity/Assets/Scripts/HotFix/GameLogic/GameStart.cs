@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using GameLogic;
 using DGame;
+using YooAsset;
 
 #if ENABLE_OBFUZ
 using Obfuz;
@@ -31,7 +32,62 @@ public partial class GameStart
         DLogger.Warning("======= 看到此条日志代表你成功运行了热更新代码 =======");
         DLogger.Warning("======= Entrance GameStart =======");
         DLogger.Warning("======= 开始游戏 =======");
+        InitLanguageSettings();
         StartGame();
+    }
+
+    private static void InitLanguageSettings()
+    {
+        ILocalizationModule localizationModule = GameModule.LocalizationModule;
+        DGameLocalizationHelper localizationHelper = new DGameLocalizationHelper();
+        localizationModule.SetLocalizationHelper(localizationHelper);
+
+        if (GameModule.ResourceModule.PlayMode == EPlayMode.EditorSimulateMode
+            && RootModule.Instance.EditorLanguage == DGame.Language.CN)
+        {
+            // 编辑器资源模式直接使用 Inspector 上设置的语言
+            return;
+        }
+
+        DGame.Language language = localizationModule.CurrentLanguage;
+        if (DGame.Utility.PlayerPrefsUtil.HasSetting(Constant.Settings.LANGUAGE))
+        {
+            try
+            {
+                string languageString = DGame.Utility.PlayerPrefsUtil.GetString(Constant.Settings.LANGUAGE);
+                // language = (DGame.Language)System.Enum.Parse(typeof(DGame.Language), languageString);
+                System.Enum.TryParse(languageString, out language);
+                CheckLanguageIsSupport(ref language);
+            }
+            catch(System.Exception exception)
+            {
+                DLogger.Error("Init language error, reason {0}", exception.ToString());
+            }
+        }
+        else
+        {
+            language = localizationModule.SystemLanguage;
+            CheckLanguageIsSupport(ref language);
+        }
+
+        localizationModule.SetLanguage(language);
+        DGame.Utility.PlayerPrefsUtil.SetString(Constant.Settings.LANGUAGE, language.ToString());
+        DGame.Utility.PlayerPrefsUtil.Save();
+        DLogger.Info("Init language settings complete, current language is '{0}'.", language.ToString());
+    }
+
+    private static bool CheckLanguageIsSupport(ref Language language)
+    {
+        if (language != DGame.Language.EN && language != DGame.Language.CN && language != DGame.Language.GAT
+            && language != DGame.Language.JP && language != DGame.Language.KR && language != DGame.Language.VN
+            && language != DGame.Language.INDO)
+        {
+            // 若是暂不支持的语言，则使用英语
+            language = DGame.Language.EN;
+            return false;
+        }
+
+        return true;
     }
 
     private static void StartGame()

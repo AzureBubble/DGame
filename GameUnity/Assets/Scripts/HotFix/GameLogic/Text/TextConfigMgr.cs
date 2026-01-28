@@ -5,22 +5,7 @@ namespace GameLogic
 {
     public class TextConfigMgr : Singleton<TextConfigMgr>
     {
-        private LocalizationType m_curLocalizationType;
-
-        private int m_curLanguage => (int)m_curLocalizationType;
-
-        public LocalizationType CurLocalizationType
-        {
-            get => m_curLocalizationType;
-            set
-            {
-                if (m_curLocalizationType == value)
-                {
-                    return;
-                }
-                m_curLocalizationType = value;
-            }
-        }
+        private int m_curLanguage => (int)GameModule.LocalizationModule.CurrentLanguage;
 
         public TextConfig GetTextConfig(int id) => TbTextConfig.GetOrDefault(id);
 

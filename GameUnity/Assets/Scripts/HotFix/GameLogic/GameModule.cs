@@ -16,11 +16,11 @@ namespace GameLogic
         /// </summary>
         public static RootModule RootModule
         {
-            get => m_rootModule == null
+            get => m_rootModule == null ? m_rootModule =
 #if UNITY_6000_3_OR_NEWER
-                ? Object.FindFirstObjectByType<RootModule>()
+                Object.FindFirstObjectByType<RootModule>()
 #else
-                ? Object.FindObjectOfType<RootModule>()
+                Object.FindObjectOfType<RootModule>()
 #endif
                 : m_rootModule;
             private set => m_rootModule = value;
@@ -31,56 +31,64 @@ namespace GameLogic
         /// <summary>
         /// 有限状态机模块
         /// </summary>
-        public static IFsmModule FsmModule =>m_fsmModule == null ? GetModule<IFsmModule>() : m_fsmModule;
+        public static IFsmModule FsmModule => m_fsmModule == null
+            ? m_fsmModule = GetModule<IFsmModule>() : m_fsmModule;
 
         private static IAnimModule m_animModule;
 
         /// <summary>
         /// 动画机模块
         /// </summary>
-        public static IAnimModule AnimModule => m_animModule == null ? GetModule<IAnimModule>() : m_animModule;
+        public static IAnimModule AnimModule => m_animModule == null
+            ? m_animModule = GetModule<IAnimModule>() : m_animModule;
 
         private static IResourceModule m_resourceModule;
 
         /// <summary>
         /// 资源管理模块
         /// </summary>
-        public static IResourceModule ResourceModule => m_resourceModule == null ? GetModule<IResourceModule>() : m_resourceModule;
+        public static IResourceModule ResourceModule => m_resourceModule == null
+            ? m_resourceModule = GetModule<IResourceModule>() : m_resourceModule;
 
         private static IAudioModule m_audioModule;
 
         /// <summary>
         /// 音频模块
         /// </summary>
-        public static IAudioModule AudioModule => m_audioModule == null ? GetModule<IAudioModule>() : m_audioModule;
+        public static IAudioModule AudioModule => m_audioModule == null
+            ? m_audioModule = GetModule<IAudioModule>() : m_audioModule;
 
         private static ISceneModule m_sceneModule;
 
         /// <summary>
         /// 场景管理模块
         /// </summary>
-        public static ISceneModule SceneModule => m_sceneModule == null ? GetModule<ISceneModule>() : m_sceneModule;
+        public static ISceneModule SceneModule => m_sceneModule == null
+            ? m_sceneModule = GetModule<ISceneModule>() : m_sceneModule;
 
         private static IGameTimerModule m_gameTimerModule;
 
         /// <summary>
         /// 计时器模块
         /// </summary>
-        public static IGameTimerModule GameTimerModule => m_gameTimerModule == null ? GetModule<IGameTimerModule>() : m_gameTimerModule;
+        public static IGameTimerModule GameTimerModule => m_gameTimerModule == null
+            ? m_gameTimerModule = GetModule<IGameTimerModule>() : m_gameTimerModule;
 
         private static IInputModule m_inputModule;
 
         /// <summary>
         /// 输入模块
         /// </summary>
-        public static IInputModule InputModule => m_inputModule == null ? GetModule<IInputModule>() : m_inputModule;
+        public static IInputModule InputModule => m_inputModule == null
+            ? m_inputModule = GetModule<IInputModule>() : m_inputModule;
 
         private static ILocalizationModule m_localizationModule;
 
         /// <summary>
         /// 多语言模块
         /// </summary>
-        public static ILocalizationModule LocalizationModule => m_localizationModule == null ? GetModule<ILocalizationModule>() : m_localizationModule;
+        public static ILocalizationModule LocalizationModule => m_localizationModule == null
+            ? m_localizationModule = GetModule<ILocalizationModule>() : m_localizationModule;
 
         #endregion
 

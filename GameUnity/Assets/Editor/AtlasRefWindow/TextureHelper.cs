@@ -9,12 +9,6 @@ namespace DGame
     public class TextureHelper
     {
         public const string ReplacePrefix = "Assets/BundleAssets/UIRaw/";
-        public const string UIRawPath = "Assets/BundleAssets/UIRaw/Atlas";
-        public const string MonsterPath = "Assets/ActorModel/Monster";
-        public const string HomePath = "Assets/ActorModel/Home";
-        public const string UIBkgPath = "Assets/BundleAssets/UIRaw/Atlas/Background";
-        public const string SceneBkgPath = "Assets/SceneRaw/Battleground/AllBkg";
-        public const string UIChapterIconPath = "Assets/Resources/UIRaw/MapIcon";
 
         private static bool IsOnePicOneAtlasPath(string fullName)
         {
@@ -23,12 +17,6 @@ namespace DGame
             {
                 return true;
             }
-            // if (fullName.StartsWith(UIBkgPath, System.StringComparison.OrdinalIgnoreCase) ||
-            //     fullName.StartsWith(SceneBkgPath, System.StringComparison.OrdinalIgnoreCase) ||
-            //     fullName.StartsWith(UIChapterIconPath, System.StringComparison.OrdinalIgnoreCase))
-            // {
-            //     return true;
-            // }
 
             return false;
         }

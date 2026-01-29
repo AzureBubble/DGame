@@ -47,9 +47,7 @@ namespace GameLogic
 
         // 点击音效
         private SerializedProperty m_isUseClickSound;
-        private SerializedProperty m_isUseResourceSound;
         private SerializedProperty m_clickSoundID;
-        private SerializedProperty m_clickSoundClip;
 
         protected override void OnEnable()
         {
@@ -100,9 +98,7 @@ namespace GameLogic
             // 点击音效
             {
                 m_isUseClickSound = serializedObject.FindProperty("m_uiButtonClickSound.m_isUseClickSound");
-                m_isUseResourceSound = serializedObject.FindProperty("m_uiButtonClickSound.m_isUseResourceSound");
                 m_clickSoundID = serializedObject.FindProperty("m_uiButtonClickSound.m_clickSoundID");
-                m_clickSoundClip = serializedObject.FindProperty("m_uiButtonClickSound.m_clickSoundClip");
             }
         }
 
@@ -128,7 +124,7 @@ namespace GameLogic
             UIButtonDrawEditor.DrawDoubleClickGUI("按钮双击模式", ref m_doubleClickPanelOpen, m_isUseDoubleClick,
                 m_clickInterval, m_onDoubleClickEvent);
             UIButtonDrawEditor.DrawClickSoundGUI("点击音效模式", ref m_clickSoundPanelOpen, m_isUseClickSound,
-                m_isUseResourceSound, m_clickSoundID, m_clickSoundClip);
+                m_clickSoundID);
 
             if (GUI.changed)
             {

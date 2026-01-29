@@ -24,8 +24,8 @@ public sealed partial class GmConfig : Luban.BeanBase
         GmOrder = _buf.ReadString();
         OrderID = _buf.ReadInt();
         Num = _buf.ReadInt();
-        ExecuteDirectly = _buf.ReadInt();
-        ExecuteClose = _buf.ReadInt();
+        ExecuteDirectly = _buf.ReadBool();
+        ExecuteClose = _buf.ReadBool();
         AssConfig = _buf.ReadInt();
     }
 
@@ -61,11 +61,11 @@ public sealed partial class GmConfig : Luban.BeanBase
     /// <summary>
     /// 是否直接执行
     /// </summary>
-    public int ExecuteDirectly;
+    public bool ExecuteDirectly;
     /// <summary>
     /// 是否执行后关闭
     /// </summary>
-    public int ExecuteClose;
+    public bool ExecuteClose;
     /// <summary>
     /// 关联配置
     /// </summary>

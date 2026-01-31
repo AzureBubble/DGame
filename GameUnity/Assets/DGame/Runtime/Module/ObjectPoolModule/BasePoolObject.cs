@@ -96,17 +96,13 @@ namespace DGame
         /// 从对象池中取出
         /// </summary>
         protected internal virtual void OnSpawn()
-        {
-
-        }
+        { }
 
         /// <summary>
         /// 回收到对象池
         /// </summary>
         protected internal virtual void OnRecycle()
-        {
-
-        }
+        { }
 
         /// <summary>
         /// 从对象池中释放都对象（回收到内存池）

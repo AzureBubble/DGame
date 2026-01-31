@@ -86,6 +86,8 @@ namespace DGame
                     DLogger.Error($"创建对象池失败，加载资源失败: {Location}");
                     return;
                 }
+                go.SetActive(false);
+                go.name = Location;
                 m_goPool.Enqueue(go);
                 // 每 N 个实例等待一帧，避免卡顿
                 if ((i + 1) % m_maxProcessPerFrame == 0)
@@ -110,6 +112,8 @@ namespace DGame
                     DLogger.Error($"创建对象池失败: {Location}");
                     return;
                 }
+                go.SetActive(false);
+                go.name = Location;
                 m_goPool.Enqueue(go);
             }
         }
@@ -136,16 +140,20 @@ namespace DGame
             }
             else
             {
-                if (m_allowMultiSpawn && m_spawnedPool.Count > 0)
+                if (Count >= m_maxCapacity)
                 {
-                    go = m_spawnedPool.First.Value;
-                    m_spawnedPool.RemoveFirst();
-                    DLogger.Warning($"强制复用正在使用的对象: {go.name}");
+                    if (m_allowMultiSpawn && m_spawnedPool.Count > 0)
+                    {
+                        go = m_spawnedPool.First.Value;
+                        m_spawnedPool.RemoveFirst();
+                        DLogger.Warning($"强制复用正在使用的对象: {go.name}");
+                    }
                 }
             }
             if(go == null)
             {
                 go = await m_resourceModule.LoadGameObjectAsync(Location, m_parent.transform, ct);
+                go.name = Location;
             }
             if (go != null)
             {
@@ -154,6 +162,7 @@ namespace DGame
                 go.SetActive(true);
                 m_spawnedPool.AddLast(go);
             }
+
             return go;
         }
 
@@ -179,16 +188,20 @@ namespace DGame
             }
             else
             {
-                if (m_allowMultiSpawn && m_spawnedPool.Count > 0)
+                if (Count >= m_maxCapacity)
                 {
-                    go = m_spawnedPool.First.Value;
-                    m_spawnedPool.RemoveFirst();
-                    DLogger.Warning($"强制复用正在使用的对象: {go.name}");
+                    if (m_allowMultiSpawn && m_spawnedPool.Count > 0)
+                    {
+                        go = m_spawnedPool.First.Value;
+                        m_spawnedPool.RemoveFirst();
+                        DLogger.Warning($"强制复用正在使用的对象: {go.name}");
+                    }
                 }
             }
             if(go == null)
             {
                 go = m_resourceModule.LoadGameObject(Location, m_parent.transform);
+                go.name = Location;
             }
             if (go != null)
             {

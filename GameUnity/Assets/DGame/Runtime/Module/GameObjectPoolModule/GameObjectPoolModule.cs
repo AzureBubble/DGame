@@ -146,6 +146,30 @@ namespace DGame
             Quaternion rotation, bool forceClone = false)
             => SpawnInternal(location, parent, position, rotation, forceClone);
 
+        public void Recycle(GameObject gameObject)
+        {
+            if (TryGetGameObjectPool(gameObject.name, out var pool))
+            {
+                pool.Recycle(gameObject);
+            }
+            else
+            {
+                DLogger.Warning($"没有找到该对象的对象池: {gameObject.name}");
+            }
+        }
+
+        public void Remove(GameObject gameObject)
+        {
+            if (TryGetGameObjectPool(gameObject.name, out var pool))
+            {
+                pool.Remove(gameObject);
+            }
+            else
+            {
+                DLogger.Warning($"没有找到该对象的对象池: {gameObject.name}");
+            }
+        }
+
         private GameObject SpawnInternal(string location, Transform parent,
             Vector3 position, Quaternion rotation, bool forceClone)
         {

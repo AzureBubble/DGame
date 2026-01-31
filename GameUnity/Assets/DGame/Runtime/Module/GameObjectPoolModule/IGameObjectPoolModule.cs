@@ -87,6 +87,18 @@ namespace DGame
         GameObject SpawnSync(string location, Transform parent, Vector3 position,
             Quaternion rotation, bool forceClone = false);
 
+        /// <summary>
+        /// 回收对象
+        /// </summary>
+        /// <param name="gameObject"></param>
+        void Recycle(GameObject gameObject);
+
+        /// <summary>
+        /// 丢弃对象
+        /// </summary>
+        /// <param name="gameObject"></param>
+        void Remove(GameObject gameObject);
+
         GameObjectPool GetGameObjectPool(string location);
 
         bool TryGetGameObjectPool(string location, out GameObjectPool pool);

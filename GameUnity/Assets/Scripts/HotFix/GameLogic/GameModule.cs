@@ -90,6 +90,14 @@ namespace GameLogic
         public static ILocalizationModule LocalizationModule => m_localizationModule == null
             ? m_localizationModule = GetModule<ILocalizationModule>() : m_localizationModule;
 
+        private static IGameObjectPoolModule m_gameObjectPool;
+
+        /// <summary>
+        /// 游戏对象 对象池模块
+        /// </summary>
+        public static IGameObjectPoolModule GameObjectPool => m_gameObjectPool == null
+            ? m_gameObjectPool = GetModule<IGameObjectPoolModule>() : m_gameObjectPool;
+
         #endregion
 
         /// <summary>
@@ -116,6 +124,7 @@ namespace GameLogic
             m_fsmModule = null;
             m_inputModule = null;
             m_localizationModule = null;
+            m_gameObjectPool = null;
         }
     }
 }

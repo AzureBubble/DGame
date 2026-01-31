@@ -12,9 +12,8 @@
             saveData?.Save();
         }
 
-        public static void SetSystemSettingVal(this SystemSaveData saveData, SystemSaveData.SaveType saveType, int value)
-        {
-            saveData.SettingParams[(int)saveType] = value;
-        }
+        public static void SetSystemSettingVal(this SystemSaveData saveData, SystemSaveData.SaveType saveType,
+            int value)
+            => saveData.SettingParams[(int)saveType] = value;
     }
 }

@@ -15,5 +15,7 @@ namespace DGame
         public T ToObject<T>(string json) => JsonUtility.FromJson<T>(json);
 
         public object ToObject(string json, Type objectType) => JsonUtility.FromJson(json, objectType);
+
+        public void FromJsonOverwrite(string json, object obj) => JsonUtility.FromJsonOverwrite(json, obj);
     }
 }

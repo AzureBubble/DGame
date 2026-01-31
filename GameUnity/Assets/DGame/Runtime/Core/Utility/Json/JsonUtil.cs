@@ -96,6 +96,34 @@ namespace DGame
                     throw new DGameException(StringUtil.Format("不能转换成object，错误：'{0}'", e), e);
                 }
             }
+
+            /// <summary>
+            /// 将 Json 字符串反序列化成对象 并填充到obj里
+            /// </summary>
+            /// <param name="json">Json字符串</param>
+            /// <param name="obj">对象</param>
+            /// <returns></returns>
+            public static void FromJsonOverwrite(string json, object obj)
+            {
+                if (m_jsonHelper == null)
+                {
+                    throw new DGameException("JsonHelper 辅助器无效");
+                }
+
+                try
+                {
+                    m_jsonHelper.FromJsonOverwrite(json, obj);
+                }
+                catch (Exception e)
+                {
+                    if (e is DGameException)
+                    {
+                        throw;
+                    }
+
+                    throw new DGameException(StringUtil.Format("不能转换成object，错误：'{0}'", e), e);
+                }
+            }
         }
     }
 }

@@ -1,15 +1,13 @@
-﻿using UnityEngine;
-using UnityEngine.EventSystems;
+﻿using GameProto;
+using UnityEngine;
 
 namespace GameLogic
 {
     [System.Serializable]
     public class UIButtonClickSoundExtend
     {
-        [SerializeField] private bool m_isUseClickSound;
-        [SerializeField] private bool m_isUseResourceSound;
-        [SerializeField] private int m_clickSoundID;
-        [SerializeField] private AudioClip m_clickSoundClip;
+        [SerializeField] private bool m_isUseClickSound = true;
+        [SerializeField] private int m_clickSoundID = 1000002;
 
         public void OnPointerClick()
         {
@@ -23,20 +21,20 @@ namespace GameLogic
                 return;
             }
 
-            // 使用音频管理类加载点击音效
-            if (m_isUseResourceSound)
+            if(TbSoundConfig.TryGetValue((int)SysSoundID.BTN_CLICK, out var soundCfg))
             {
-                Debug.Log("按钮点击音效：" + m_clickSoundClip?.name);
-            }
-            else
-            {
-                Debug.Log("按钮点击音效：" + m_clickSoundID);
+                GameModule.AudioModule.Play(DGame.AudioType.UISound, soundCfg.Location, isInPool: true);
             }
         }
 
         public void OnPointerUp()
         {
 
+        }
+
+        public void SetClickSoundID(int soundID)
+        {
+            m_clickSoundID = soundID;
         }
     }
 }

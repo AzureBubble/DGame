@@ -41,6 +41,11 @@ namespace DGame
         public static float FrameCount { get; private set; }
 
         /// <summary>
+        /// 程序启动以来的真实时间
+        /// </summary>
+        public static float RealtimeSinceStartup => UnityEngine.Time.realtimeSinceStartup;
+
+        /// <summary>
         /// 采样一帧的时间
         /// </summary>
         public static void StartFrame()

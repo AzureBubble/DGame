@@ -171,6 +171,10 @@ namespace GameLogic
             m_uiButtonDoubleClick?.AddDoubleClickListener(callback, interval);
         }
 
+        public void SetClickSoundID(int soundID)
+        {
+            m_uiButtonClickSound?.SetClickSoundID(soundID);
+        }
 
 #if UNITY_EDITOR
 

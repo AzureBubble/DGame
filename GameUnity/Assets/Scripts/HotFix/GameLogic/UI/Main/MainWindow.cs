@@ -10,6 +10,8 @@ namespace GameLogic
 	{
 		protected override void BindMemberProperty()
 		{
+			DLogger.Warning(TimeUtil.CalcDiffDay(1769745600, 1769839200));
+
 			var optionsList = new List<Dropdown.OptionData>();
 
 			for (int i = 0; i < (int)Language.MAX; i++)
@@ -77,7 +79,7 @@ namespace GameLogic
 
 		public void RefreshUI()
 		{
-			m_textTitle.text = G.R(TextDefine.Start_Game);
+			m_textTitle.text = G.R(TextDefine.ID_LABEL_START_GAME);
 		}
 
 		#region 事件

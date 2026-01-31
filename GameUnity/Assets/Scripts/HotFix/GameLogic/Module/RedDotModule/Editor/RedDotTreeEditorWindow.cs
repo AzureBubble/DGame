@@ -633,7 +633,8 @@ namespace GameLogic
 
             // 描述
             EditorGUILayout.LabelField("Description", EditorStyles.boldLabel);
-            m_selectedNode.description = EditorGUILayout.TextArea(m_selectedNode.description, GUILayout.Height(40));
+            var textAreaStyle = new GUIStyle(EditorStyles.textArea) { wordWrap = true };
+            m_selectedNode.description = EditorGUILayout.TextArea(m_selectedNode.description, textAreaStyle, GUILayout.Height(40));
 
             EditorGUILayout.Space(5);
 

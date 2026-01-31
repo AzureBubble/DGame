@@ -7,3 +7,12 @@ GameConfig/Tools/LubanTools/
 
 *.vs
 *.idea
+
+
+#Generata Tools
+/Tools/Generata Tools/SourceGenerator/*.idea
+/Tools/Generata Tools/SourceGenerator/GameEventAnalyzer/bin
+Tools/Generata Tools/SourceGenerator/GameEventAnalyzer/obj
+Tools/Generata Tools/SourceGenerator/SourceGenerator/bin
+Tools/Generata Tools/SourceGenerator/SourceGenerator/obj
+

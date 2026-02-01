@@ -26,7 +26,7 @@ namespace GameLogic
             => DGame.Utility.PlayerPrefsUtil.SetString(m_saveKey,
                 JsonConvert.SerializeObject(this, Formatting.None));
 
-        public static T Get<T>() where T : BaseClientSaveData, new()
+        protected static T Get<T>() where T : BaseClientSaveData, new()
             => ClientSaveDataMgr.Instance.GetSaveData<T>();
     }
 }

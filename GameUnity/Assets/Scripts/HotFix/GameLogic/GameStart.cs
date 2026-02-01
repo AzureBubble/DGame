@@ -54,9 +54,11 @@ public partial class GameStart
         {
             try
             {
-                string languageString = DGame.Utility.PlayerPrefsUtil.GetString(Constant.Settings.LANGUAGE);
+                int languageIndex = DGame.Utility.PlayerPrefsUtil.GetInt(Constant.Settings.LANGUAGE);
+                language = (Language)languageIndex;
+                // string languageString = DGame.Utility.PlayerPrefsUtil.GetString(Constant.Settings.LANGUAGE);
                 // language = (DGame.Language)System.Enum.Parse(typeof(DGame.Language), languageString);
-                System.Enum.TryParse(languageString, out language);
+                // System.Enum.TryParse(languageString, out language);
                 CheckLanguageIsSupport(ref language);
             }
             catch(System.Exception exception)
@@ -71,16 +73,15 @@ public partial class GameStart
         }
 
         localizationModule.SetLanguage(language);
-        DGame.Utility.PlayerPrefsUtil.SetString(Constant.Settings.LANGUAGE, language.ToString());
-        DGame.Utility.PlayerPrefsUtil.Save();
+        DGame.Utility.PlayerPrefsUtil.SetInt(Constant.Settings.LANGUAGE, (int)language);
+        // DGame.Utility.PlayerPrefsUtil.SetString(Constant.Settings.LANGUAGE, language.ToString());
+        // DGame.Utility.PlayerPrefsUtil.Save();
         DLogger.Info("Init language settings complete, current language is '{0}'.", language.ToString());
     }
 
     private static bool CheckLanguageIsSupport(ref Language language)
     {
-        if (language != DGame.Language.EN && language != DGame.Language.CN && language != DGame.Language.GAT
-            && language != DGame.Language.JP && language != DGame.Language.KR && language != DGame.Language.VN
-            && language != DGame.Language.INDO)
+        if (language >= DGame.Language.MAX)
         {
             // 若是暂不支持的语言，则使用英语
             language = DGame.Language.EN;

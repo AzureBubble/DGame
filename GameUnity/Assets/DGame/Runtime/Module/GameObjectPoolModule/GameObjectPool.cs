@@ -23,6 +23,11 @@ namespace DGame
         private int m_maxProcessPerFrame = 50;
 
         /// <summary>
+        /// 自动销毁时间
+        /// </summary>
+        public float AutoDestroyTime { get => m_autoDestroyTime; set => m_autoDestroyTime = value; }
+
+        /// <summary>
         /// 资源定位地址
         /// </summary>
         public string Location { get; private set; }
@@ -45,12 +50,17 @@ namespace DGame
         /// <summary>
         /// 持久化对象池
         /// </summary>
-        public bool DontDestroy { get; private set; }
+        public bool DontDestroy { get; set; }
 
         /// <summary>
         /// 手动标记销毁
         /// </summary>
         public bool ManualDestroy { get; set; }
+
+        /// <summary>
+        /// 对象池最大容量
+        /// </summary>
+        public int MaxCapacity { get => m_maxCapacity; set => m_maxCapacity = value; }
 
         /// <summary>
         /// 对象池是否被销毁

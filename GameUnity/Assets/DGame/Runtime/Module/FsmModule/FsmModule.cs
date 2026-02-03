@@ -202,6 +202,99 @@ namespace DGame
             return fam;
         }
 
+         /// <summary>
+        /// 创建带动画的有限状态机
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="owner"></param>
+        /// <param name="states"></param>
+        /// <param name="animator"></param>
+        /// <returns></returns>
+        /// <exception cref="DGameException"></exception>
+        public IFsm<T> CreateFsm<T>(string name, T owner, Animator animator, params IFsmState<T>[] states) where T : class
+        {
+            TypeNamePair pair = new TypeNamePair(typeof(T), name);
+
+            if (ContainsFsm<T>(name))
+            {
+                throw new DGameException(Utility.StringUtil.Format("状态机 {0} 已经存在", pair));
+            }
+            var fam = Fsm<T>.Create(name, owner, animator, states);
+            m_fsmMap.TryAdd(pair, fam);
+            return fam;
+        }
+
+        /// <summary>
+        /// 创建带动画的有限状态机
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="owner"></param>
+        /// <param name="animator"></param>
+        /// <param name="states"></param>
+        /// <returns></returns>
+        /// <exception cref="DGameException"></exception>
+        public IFsm<T> CreateFsm<T>(string name, T owner, Animator animator, List<IFsmState<T>> states) where T : class
+        {
+            TypeNamePair pair = new TypeNamePair(typeof(T), name);
+
+            if (ContainsFsm<T>(name))
+            {
+                throw new DGameException(Utility.StringUtil.Format("状态机 {0} 已经存在", pair));
+            }
+            var fam = Fsm<T>.Create(name, owner, animator, states);
+            m_fsmMap.TryAdd(pair, fam);
+            return fam;
+        }
+
+        /// <summary>
+        /// 创建带动画的有限状态机
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="owner"></param>
+        /// <param name="states"></param>
+        /// <param name="animator"></param>
+        /// <param name="animations"></param>
+        /// <returns></returns>
+        /// <exception cref="DGameException"></exception>
+        public IFsm<T> CreateFsm<T>(string name, T owner, Animator animator,
+            IFsmState<T>[] states, AnimationWrapper[] animations) where T : class
+        {
+            TypeNamePair pair = new TypeNamePair(typeof(T), name);
+
+            if (ContainsFsm<T>(name))
+            {
+                throw new DGameException(Utility.StringUtil.Format("状态机 {0} 已经存在", pair));
+            }
+            var fam = Fsm<T>.Create(name, owner, animator, states, animations);
+            m_fsmMap.TryAdd(pair, fam);
+            return fam;
+        }
+
+        /// <summary>
+        /// 创建带动画的有限状态机
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="owner"></param>
+        /// <param name="animator"></param>
+        /// <param name="states"></param>
+        /// <param name="animations"></param>
+        /// <returns></returns>
+        /// <exception cref="DGameException"></exception>
+        public IFsm<T> CreateFsm<T>(string name, T owner, Animator animator, List<IFsmState<T>> states,
+            List<AnimationWrapper> animations) where T : class
+        {
+            TypeNamePair pair = new TypeNamePair(typeof(T), name);
+
+            if (ContainsFsm<T>(name))
+            {
+                throw new DGameException(Utility.StringUtil.Format("状态机 {0} 已经存在", pair));
+            }
+            var fam = Fsm<T>.Create(name, owner, animator, states, animations);
+            m_fsmMap.TryAdd(pair, fam);
+            return fam;
+        }
+
+
         #endregion
 
         #region Destroy FSM

@@ -41,8 +41,8 @@ namespace DGame
                 var animMixer = m_animMixers[i];
                 animMixer?.Destroy();
             }
-            m_animClips.Clear();
-            m_animMixers.Clear();
+            m_animClips?.Clear();
+            m_animMixers?.Clear();
             m_graph.Destroy();
             m_isDestroyed = true;
         }
@@ -207,8 +207,9 @@ namespace DGame
         /// <param name="name">动画名</param>
         /// <param name="clip">资源</param>
         /// <param name="layer">层级</param>
+        /// <param name="fadeDuration">过渡时间</param>
         /// <returns></returns>
-        public bool AddAnimationClip(string name, AnimationClip clip, int layer = 0)
+        public bool AddAnimationClip(string name, AnimationClip clip, int layer = 0, float fadeDuration = 0f)
         {
             if (string.IsNullOrEmpty(name))
             {
@@ -231,7 +232,7 @@ namespace DGame
                 return false;
             }
 
-            AnimClip animClip = new AnimClip(m_graph, clip, name, layer);
+            AnimClip animClip = new AnimClip(m_graph, clip, name, layer, fadeDuration);
             m_animClips.Add(animClip);
             return true;
         }

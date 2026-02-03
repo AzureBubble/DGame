@@ -1,6 +1,4 @@
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace DGame
@@ -109,6 +107,23 @@ namespace DGame
             return animPlayable;
         }
 
+        public IAnimPlayable CreateAnimPlayable(Animator animator, List<AnimationClip> animations)
+        {
+            List<AnimationWrapper> warps = new List<AnimationWrapper>(animations.Count);
+
+            for (int i = 0; i < animations.Count; i++)
+            {
+                warps.Add(new AnimationWrapper()
+                {
+                    Clip = animations[i],
+                    WrapMode = animations[i].wrapMode,
+                    Layer = 0
+                });
+            }
+
+            return CreateAnimPlayable(animator, warps);
+        }
+
         public IAnimPlayable CreateAnimPlayable(Animator animator, List<AnimationWrapper> animations)
         {
             var animPlayable = AnimPlayable.Create(animator);
@@ -119,7 +134,7 @@ namespace DGame
             for (int i = 0; i < animations.Count; i++)
             {
                 var animation = animations[i];
-                animPlayable.AddAnimationClip(animation.Clip.name, animation.Clip, animation.Layer);
+                animPlayable.AddAnimationClip(animation.Clip.name, animation.Clip, animation.Layer, animation.FadeDuration);
             }
             return animPlayable;
         }
@@ -134,7 +149,7 @@ namespace DGame
             for (int i = 0; i < animations.Length; i++)
             {
                 var animation = animations[i];
-                animPlayable.AddAnimationClip(animation.Clip.name, animation.Clip, animation.Layer);
+                animPlayable.AddAnimationClip(animation.Clip.name, animation.Clip, animation.Layer, animation.FadeDuration);
             }
             return animPlayable;
         }

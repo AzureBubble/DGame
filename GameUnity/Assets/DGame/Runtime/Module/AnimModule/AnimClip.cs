@@ -11,6 +11,9 @@ namespace DGame
         public int AnimHashCode => Animator.StringToHash(Name);
         private readonly AnimationClip m_clip;
         private readonly AnimationClipPlayable m_clipPlayable;
+        private readonly float m_fadeDuration;
+
+        public float FadeDuration => m_fadeDuration;
 
         /// <summary>
         /// 动画层级
@@ -73,12 +76,12 @@ namespace DGame
         /// </summary>
         public AnimInfo Info { get; private set; }
 
-        public AnimClip(PlayableGraph graph, AnimationClip clip, string name, int layer) : base(graph)
+        public AnimClip(PlayableGraph graph, AnimationClip clip, string name, int layer, float fadeDuration = 0f) : base(graph)
         {
             m_clip = clip;
             Name = name;
             Layer = layer;
-
+            m_fadeDuration = fadeDuration;
             m_clipPlayable = AnimationClipPlayable.Create(graph, clip);
             m_clipPlayable.SetApplyFootIK(false);
             m_clipPlayable.SetApplyPlayableIK(false);

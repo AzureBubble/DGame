@@ -123,6 +123,55 @@ namespace DGame
         IFsm<T> CreateFsm<T>(string name, T owner, List<IFsmState<T>> states) where T : class;
 
         /// <summary>
+        /// 创建带动画的有限状态机
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="owner"></param>
+        /// <param name="states"></param>
+        /// <param name="animator"></param>
+        /// <returns></returns>
+        /// <exception cref="DGameException"></exception>
+        IFsm<T> CreateFsm<T>(string name, T owner, Animator animator, params IFsmState<T>[] states) where T : class;
+
+        /// <summary>
+        /// 创建带动画的有限状态机
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="owner"></param>
+        /// <param name="animator"></param>
+        /// <param name="states"></param>
+        /// <returns></returns>
+        /// <exception cref="DGameException"></exception>
+        IFsm<T> CreateFsm<T>(string name, T owner, Animator animator, List<IFsmState<T>> states) where T : class;
+
+        /// <summary>
+        /// 创建带动画的有限状态机
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="owner"></param>
+        /// <param name="states"></param>
+        /// <param name="animator"></param>
+        /// <param name="animations"></param>
+        /// <returns></returns>
+        /// <exception cref="DGameException"></exception>
+        IFsm<T> CreateFsm<T>(string name, T owner, Animator animator, IFsmState<T>[] states,
+            AnimationWrapper[] animations) where T : class;
+
+        /// <summary>
+        /// 创建带动画的有限状态机
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="owner"></param>
+        /// <param name="animator"></param>
+        /// <param name="states"></param>
+        /// <param name="animations"></param>
+        /// <returns></returns>
+        /// <exception cref="DGameException"></exception>
+        IFsm<T> CreateFsm<T>(string name, T owner, Animator animator, List<IFsmState<T>> states,
+            List<AnimationWrapper> animations) where T : class;
+
+
+        /// <summary>
         /// 销毁有限状态机
         /// </summary>
         /// <typeparam name="T">持有者类型</typeparam>

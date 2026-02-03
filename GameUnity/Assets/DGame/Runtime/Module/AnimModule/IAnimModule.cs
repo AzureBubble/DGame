@@ -49,6 +49,14 @@ namespace DGame
         /// <param name="animator">动画控制器</param>
         /// <param name="animations">动画片段列表</param>
         /// <returns></returns>
+        IAnimPlayable CreateAnimPlayable(Animator animator, List<AnimationClip> animations);
+
+        /// <summary>
+        /// 创建动画图
+        /// </summary>
+        /// <param name="animator">动画控制器</param>
+        /// <param name="animations">动画片段列表</param>
+        /// <returns></returns>
         IAnimPlayable CreateAnimPlayable(Animator animator, List<AnimationWrapper> animations);
 
         /// <summary>

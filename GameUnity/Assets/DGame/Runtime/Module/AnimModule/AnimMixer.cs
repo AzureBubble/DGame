@@ -107,7 +107,7 @@ namespace DGame
                     m_animClips[index] = animClip;
                 }
             }
-
+            fadeDuration = fadeDuration <= 0 ? animClip.FadeDuration : fadeDuration;
             for (int i = 0; i < m_animClips.Count; i++)
             {
                 var clip = m_animClips[i];

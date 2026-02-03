@@ -523,7 +523,7 @@ namespace DGame
             for (int i = 0; i < animations.Length; i++)
             {
                 var animation = animations[i];
-                m_animPlayable.AddAnimationClip(animation.Clip.name, animation.Clip, animation.Layer, animation.FadeDuration);
+                m_animPlayable.AddAnimationClip(animation.Clip.name, animation.Clip, animation.WrapMode, animation.Layer, animation.FadeDuration);
             }
         }
 
@@ -543,7 +543,7 @@ namespace DGame
             for (int i = 0; i < animations.Count; i++)
             {
                 var animation = animations[i];
-                m_animPlayable.AddAnimationClip(animation.Clip.name, animation.Clip, animation.Layer, animation.FadeDuration);
+                m_animPlayable.AddAnimationClip(animation.Clip.name, animation.Clip, animation.WrapMode, animation.Layer, animation.FadeDuration);
             }
         }
 
@@ -561,7 +561,7 @@ namespace DGame
                 return;
             }
 
-            m_animPlayable.AddAnimationClip(animation.Clip.name, animation.Clip, animation.Layer, animation.FadeDuration);
+            m_animPlayable.AddAnimationClip(animation.Clip.name, animation.Clip, animation.WrapMode, animation.Layer, animation.FadeDuration);
         }
 
         #region 黑板共享数据

@@ -69,10 +69,11 @@ namespace DGame
         /// </summary>
         /// <param name="animName">动画名</param>
         /// <param name="clip">动画片段</param>
+        /// <param name="wrapMode">动画模式</param>
         /// <param name="layer">动画层级</param>
         /// <param name="fadeDuration">过渡时间</param>
         /// <returns></returns>
-        bool AddAnimationClip(string animName, AnimationClip clip, int layer = 0, float fadeDuration = 0f);
+        bool AddAnimationClip(string animName, AnimationClip clip, WrapMode wrapMode, int layer = 0, float fadeDuration = 0f);
 
         /// <summary>
         /// 删除一个动画片段

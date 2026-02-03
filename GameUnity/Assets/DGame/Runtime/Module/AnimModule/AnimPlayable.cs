@@ -209,7 +209,7 @@ namespace DGame
         /// <param name="layer">层级</param>
         /// <param name="fadeDuration">过渡时间</param>
         /// <returns></returns>
-        public bool AddAnimationClip(string name, AnimationClip clip, int layer = 0, float fadeDuration = 0f)
+        public bool AddAnimationClip(string name, AnimationClip clip, WrapMode wrapMode, int layer = 0, float fadeDuration = 0f)
         {
             if (string.IsNullOrEmpty(name))
             {
@@ -232,7 +232,7 @@ namespace DGame
                 return false;
             }
 
-            AnimClip animClip = new AnimClip(m_graph, clip, name, layer, fadeDuration);
+            AnimClip animClip = new AnimClip(m_graph, clip, name, wrapMode, layer, fadeDuration);
             m_animClips.Add(animClip);
             return true;
         }

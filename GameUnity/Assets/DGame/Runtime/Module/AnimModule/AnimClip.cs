@@ -59,24 +59,14 @@ namespace DGame
         /// <summary>
         /// 动画模式
         /// </summary>
-        public WrapMode WrapMode
-        {
-            get => m_clip == null ? WrapMode.Default : m_clip.wrapMode;
-            set
-            {
-                if (m_clip != null)
-                {
-                    m_clip.wrapMode = value;
-                }
-            }
-        }
+        public WrapMode WrapMode { get; }
 
         /// <summary>
         /// 动画信息
         /// </summary>
         public AnimInfo Info { get; private set; }
 
-        public AnimClip(PlayableGraph graph, AnimationClip clip, string name, int layer, float fadeDuration = 0f) : base(graph)
+        public AnimClip(PlayableGraph graph, AnimationClip clip, string name, WrapMode wrapMode, int layer, float fadeDuration = 0f) : base(graph)
         {
             m_clip = clip;
             Name = name;
@@ -86,8 +76,8 @@ namespace DGame
             m_clipPlayable.SetApplyFootIK(false);
             m_clipPlayable.SetApplyPlayableIK(false);
             SetSourcePlayable(m_clipPlayable);
-
-            if (clip.wrapMode == WrapMode.Once)
+            WrapMode = wrapMode;
+            if (WrapMode == WrapMode.Once)
             {
                 m_clipPlayable.SetDuration(clip.length);
             }
@@ -97,7 +87,7 @@ namespace DGame
 
         public override void Play()
         {
-            if (m_clip.wrapMode == WrapMode.Once || m_clip.wrapMode == WrapMode.ClampForever)
+            if (WrapMode == WrapMode.Once || WrapMode == WrapMode.ClampForever)
             {
                 Time = 0;
             }

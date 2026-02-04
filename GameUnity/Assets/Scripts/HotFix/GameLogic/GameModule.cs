@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace GameLogic
 {
-    public class GameModule
+    public sealed class GameModule
     {
         #region 模块
 

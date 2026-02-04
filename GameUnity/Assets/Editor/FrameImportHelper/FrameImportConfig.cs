@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using GameLogic;
 using UnityEngine;
 
 namespace DGame
@@ -9,6 +10,9 @@ namespace DGame
         [Header("目录设置")] [Tooltip("序列帧导入根目录")]
         [SerializeField] public string importFrameRootDir = "Assets/BundleAssets/Actor/FrameSprite";
         [SerializeField] public string frameConfigGenerateDir = "Assets/BundleAssets/Prefabs/FrameConfigs";
+        [SerializeField] public int spriteMaxSize = 400;
+        [SerializeField] public int spriteMaxCapacity = 12;
+
         public string ImportFrameRootDir { get  => importFrameRootDir; set => importFrameRootDir = value; }
         public string FrameConfigGenerateDir { get  => frameConfigGenerateDir; set => frameConfigGenerateDir = value; }
 

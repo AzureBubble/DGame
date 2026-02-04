@@ -1,14 +1,15 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
+using GameLogic;
+using Object = UnityEngine.Object;
 
 namespace DGame
 {
-    public class FrameImportHelper
+    public sealed class FrameImportHelper
     {
         [MenuItem("Assets/GenerateTools/序列帧/导入序列帧资源")]
         public static void ImportFrame()
@@ -33,6 +34,126 @@ namespace DGame
         public static void ResetPivot()
         {
             UnityEditorUtil.DoActionWithSelectedTargets(OnResetFrameSpritePivot);
+        }
+
+        [MenuItem("Assets/GenerateTools/序列帧/生成序列帧配置")]
+        public static void StartGenerateFrameConfig()
+        {
+            UnityEditorUtil.DoActionWithSelectedTargets(GenerateFrameConfig);
+        }
+
+        [MenuItem("Assets/GenerateTools/序列帧/生成所有序列帧配置")]
+        public static void StartGenerateAllFrameConfig()
+        {
+            UnityEditorUtil.DoActionWithSelectedTargets(GenerateAllFrameConfig);
+        }
+
+        private static void GenerateAllFrameConfig(string dirPath)
+        {
+            var dirs = Directory.GetDirectories(dirPath);
+            foreach (var t in dirs)
+            {
+                var animDir = GetAssetPath(t);
+                GenerateFrameConfig(animDir);
+            }
+        }
+
+        private static void GenerateFrameConfig(string dirPath)
+        {
+            Debug.Log($"开始生成序列帧配置文件...  {dirPath}");
+            var idxNum = dirPath.LastIndexOf('/');
+            var prefabName = dirPath.Substring(idxNum + 1);
+
+            if (!Directory.Exists(FrameImportConfig.Instance.FrameConfigGenerateDir))
+            {
+                Directory.CreateDirectory(FrameImportConfig.Instance.FrameConfigGenerateDir);
+            }
+
+            var configPath = $"{FrameImportConfig.Instance.FrameConfigGenerateDir}/{prefabName}";
+            var configGo = AssetDatabase.LoadAssetAtPath<GameObject>(configPath);
+            if (configGo == null)
+            {
+                configGo = new GameObject(prefabName);
+                configGo.AddComponent<FrameSpritePool>();
+                PrefabUtility.SaveAsPrefabAsset(configGo, $"{configPath}.prefab");
+            }
+            var pool = configGo.GetComponent<FrameSpritePool>();
+            if (pool == null)
+            {
+                pool = configGo.AddComponent<FrameSpritePool>();
+            }
+            var animDirs = Directory.GetDirectories(dirPath);
+            if (animDirs.Length <= 0)
+            {
+                Debug.LogWarning($"序列帧资源 {prefabName} 为空，生成序列帧配置文件结束.");
+                return;
+            }
+
+            foreach (var animDir in animDirs)
+            {
+                var fullAnimDir = GetAssetPath(animDir);
+                AddFrameSpriteToConfigPrefab(fullAnimDir, pool);
+            }
+            pool.SortAllSprites();
+            PrefabUtility.SaveAsPrefabAsset(configGo, $"{configPath}.prefab");
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            Object.DestroyImmediate(configGo);
+            Debug.LogFormat("生成序列帧配置结束！");
+        }
+
+        private static void AddFrameSpriteToConfigPrefab(string dirPath, FrameSpritePool pool)
+        {
+            var idxNum = dirPath.LastIndexOf('/');
+            var animName = dirPath.Substring(idxNum + 1);
+            var files = Directory.GetFiles(dirPath, FrameImportConfig.GetFrameSpriteExtensionName(), SearchOption.TopDirectoryOnly);
+            foreach (var file in files)
+            {
+                var spriteFileName = Path.GetFileNameWithoutExtension(file);
+                var spritePath = file.Substring(file.IndexOf("Assets", StringComparison.Ordinal));
+                var sprite = AssetDatabase.LoadAssetAtPath<Sprite>(spritePath);
+
+                if (sprite == null)
+                {
+                    Debug.LogError($"加载Sprite失败: {spritePath}");
+                    continue;
+                }
+
+                if (sprite.texture.width > FrameImportConfig.Instance.spriteMaxSize ||
+                    sprite.texture.height > FrameImportConfig.Instance.spriteMaxSize)
+                {
+                    Debug.LogWarning($"序列帧资源{sprite.name} 大小不匹配: 宽 x 高 = {sprite.texture.width} x {sprite.texture.height}");
+                }
+
+                Enum.TryParse<FrameAnimName>(animName, out var animNameEnum);
+                foreach (var name in FrameImportConfig.Instance.FrameAnimNames)
+                {
+                    if (name != animNameEnum)
+                    {
+                        continue;
+                    }
+                    pool.AddSprite(animNameEnum, sprite);
+                }
+
+                if (pool.GetSprites(animNameEnum) != null && pool.GetSprites(animNameEnum).Count > FrameImportConfig.Instance.spriteMaxCapacity)
+                {
+                    Debug.LogWarning($"序列帧资源{spriteFileName} 容量不匹配: {pool.GetSprites(animNameEnum).Count}");
+                }
+            }
+        }
+
+        private static string GetAssetPath(string filePath)
+        {
+            filePath = filePath.Replace('\\', '/');
+
+            string dataPath = Application.dataPath.Replace('\\', '/');
+
+            if (filePath.StartsWith(dataPath, StringComparison.Ordinal))
+            {
+                return "Assets" + filePath.Substring(dataPath.Length);
+            }
+
+            return filePath;
         }
 
         private static void OnResetFrameSpritePivot(string dirPath)

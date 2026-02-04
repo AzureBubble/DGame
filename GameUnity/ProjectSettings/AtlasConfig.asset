@@ -16,7 +16,7 @@ MonoBehaviour:
   sourceAtlasRootDir:
   - Assets/BundleAssets/UIRaw/Atlas
   rootChildAtlasDir:
-  - Assets/BundleAssets/FrameSprite
+  - Assets/BundleAssets/Actor/FrameSprite
   singleAtlasDir:
   - Assets/BundleAssets/UIRaw/Atlas/Background
   excludeFolder:

@@ -15,7 +15,7 @@ namespace DGame
         [Tooltip("需要生成图集的UI根目录")]
         public string[] sourceAtlasRootDir = new string[] { "Assets/BundleAssets/UIRaw/Atlas" };
         [Tooltip("以当前目录的子级生成子级图集")]
-        public string[] rootChildAtlasDir = new string[] { "Assets/BundleAssets/FrameSprite" };
+        public string[] rootChildAtlasDir = new string[] { "Assets/BundleAssets/Actor/FrameSprite" };
         [Tooltip("每张图都单独生成图集")]
         public string[] singleAtlasDir = new string[] { "Assets/BundleAssets/UIRaw/Atlas/Background" };
         [Tooltip("不需要生成图集的UI目录")]

@@ -1,4 +1,5 @@
-﻿using UnityEditor;
+﻿using GameLogic;
+using UnityEditor;
 using UnityEngine;
 
 namespace DGame
@@ -42,6 +43,8 @@ namespace DGame
                 (FrameSpriteExtensionName)EditorGUILayout.EnumPopup(
                     new GUIContent("资源后缀", EditorGUIUtility.IconContent("Sprite Icon").image, "选择精灵图片的扩展名格式"),
                     config.frameSpriteExtensionName);
+            config.spriteMaxSize = EditorGUILayout.IntField("单个精灵最大尺寸", config.spriteMaxSize);
+            config.spriteMaxCapacity = EditorGUILayout.IntField("精灵动画最大数量", config.spriteMaxCapacity);
         }
 
         private void DrawFrameAnimNames(FrameImportConfig config)

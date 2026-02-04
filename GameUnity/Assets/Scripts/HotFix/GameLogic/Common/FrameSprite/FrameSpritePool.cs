@@ -205,6 +205,7 @@ namespace GameLogic
         public void SortAllSprites()
         {
             SortSprite(Idle);
+            SortSprite(Walk);
             SortSprite(Run);
             SortSprite(Skill);
             SortSprite(Skill1);

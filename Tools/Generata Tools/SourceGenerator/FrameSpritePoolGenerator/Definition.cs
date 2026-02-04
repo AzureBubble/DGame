@@ -1,6 +1,6 @@
 ﻿namespace FrameSpritePoolGenerator;
 
-public class Definition
+public sealed class Definition
 {
     public const string NameSpace = "GameLogic";//"DGame";
     public static readonly string[] UsingNameSpace = ["UnityEngine", "System", "System.Collections.Generic"];

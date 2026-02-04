@@ -23,8 +23,6 @@ public class FrameSpritePoolGenerator : ISourceGenerator
 
     private void GenerateFrameSpritePoolExecute(GeneratorExecutionContext context, IEnumerable<SyntaxTree> syntaxTrees)
     {
-        List<string> classNameList = new List<string>();
-
         foreach (var tree in syntaxTrees)
         {
             // 获取语法树的根节点

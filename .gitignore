@@ -15,4 +15,6 @@ GameConfig/Tools/LubanTools/
 Tools/Generata Tools/SourceGenerator/GameEventAnalyzer/obj
 Tools/Generata Tools/SourceGenerator/SourceGenerator/bin
 Tools/Generata Tools/SourceGenerator/SourceGenerator/obj
+Tools/Generata Tools/SourceGenerator/FrameSpritePoolGenerator/bin
+Tools/Generata Tools/SourceGenerator/FrameSpritePoolGenerator/obj
 

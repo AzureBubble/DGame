@@ -7,9 +7,10 @@ namespace DGame
     public class FrameImportConfig : EditorScriptableSingleton<FrameImportConfig>
     {
         [Header("目录设置")] [Tooltip("序列帧导入根目录")]
-        [SerializeField] public string importFrameRootDir = "Assets/BundleAssets/FrameSprite";
-        [SerializeField] public string frameConfigGenerateDir = "Assets/BundleAssets/Configs/FrameConfig";
+        [SerializeField] public string importFrameRootDir = "Assets/BundleAssets/Actor/FrameSprite";
+        [SerializeField] public string frameConfigGenerateDir = "Assets/BundleAssets/Prefabs/FrameConfigs";
         public string ImportFrameRootDir { get  => importFrameRootDir; set => importFrameRootDir = value; }
+        public string FrameConfigGenerateDir { get  => frameConfigGenerateDir; set => frameConfigGenerateDir = value; }
 
         [SerializeField] private List<FrameAnimName> frameAnimNames = new List<FrameAnimName>()
         {

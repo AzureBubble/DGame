@@ -16,14 +16,13 @@ namespace GameLogic
             var textConfig = GetTextConfig(id);
             if (textConfig == null)
             {
-                return $"TextID: {id}";
+                return $"TextID[{id}]";
             }
             string content = textConfig.Content[m_curLanguage];
 
             if ((textConfig.ArgNum > 0 && args == null) || textConfig.ArgNum != args.Length)
             {
-                DLogger.Error("invalid string arg num, strId[{0}] config num[{1}] input num[{2}]", id, textConfig.ArgNum,
-                    args != null ? args.Length : -1);
+                DLogger.Error($"Invalid string arg num, TextId[{id}] config num[{textConfig.ArgNum}] input num[{(args != null ? args.Length : -1)}]");
                 return content;
             }
 

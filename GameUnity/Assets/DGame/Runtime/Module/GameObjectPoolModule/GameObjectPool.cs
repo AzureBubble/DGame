@@ -73,7 +73,7 @@ namespace DGame
         {
             GameObjectPool pool = MemoryPool.Spawn<GameObjectPool>();
             pool.IsDestroyed = false;
-            pool.m_parent = new GameObject($"{location}_Pool");
+            pool.m_parent = new GameObject($"{location}_Object_Pool");
             pool.m_parent.transform.SetParent(poolRoot, false);
             pool.Location = location;
             pool.m_initCapacity = initCapacity;

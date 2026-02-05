@@ -602,15 +602,6 @@ namespace GameLogic
 
         private UIWindow GetWindow(uint windowID) => m_uiMap.GetValueOrDefault(windowID);
 
-#if UNITY_EDITOR && ENABLE_DGAME_LOG
-
-        /// <summary>
-        /// 仅调试用
-        /// </summary>
-        public UIWindow GetWindowByName(string windowName) => GetWindow(windowName);
-
-#endif
-
         public async UniTask<T> GetWindowAsyncAwait<T>(CancellationToken cancellationToken = default) where T : UIWindow
         {
             string windowName = typeof(T).FullName;

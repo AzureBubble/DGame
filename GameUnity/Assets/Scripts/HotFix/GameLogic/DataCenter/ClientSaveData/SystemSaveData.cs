@@ -8,7 +8,7 @@
             Max,
         }
 
-        public int[] SettingParams { get; } = new int[(int)SaveType.Max];
+        public int[] SettingParams { get; private set; } = new int[(int)SaveType.Max];
 
         public SystemSaveData()
         {

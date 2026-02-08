@@ -1,92 +1,70 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using DGame;
+using Fantasy;
+using Fantasy.Async;
+using Fantasy.Helper;
 
 namespace GameLogic
 {
 	public partial class MainWindow
 	{
+		private static readonly List<string> AuthenticationList = new List<string>()
+		{
+			"127.0.0.1:20001", "127.0.0.1:20002", "127.0.0.1:20003"
+		};
+
+		public string Select(string userName)
+		{
+			var userNameHashCode = HashCodeHelper.MurmurHash3(userName);
+			var authenticationListIndex = userNameHashCode % AuthenticationList.Count;
+			// 按照现在的情况下，这个模出的值只会是0 - 3
+			return AuthenticationList[(int)authenticationListIndex];
+		}
+
+
+		private Scene m_scene;
+
 		protected override void BindMemberProperty()
 		{
-			var optionsList = new List<Dropdown.OptionData>();
-
-			for (int i = 0; i < (int)Language.MAX; i++)
-			{
-				Dropdown.OptionData optionData = new Dropdown.OptionData();
-				optionData.text = GetLanguageStr((Language)i);
-				optionsList.Add(optionData);
-			}
-
-			OnDropdownSelect((int)GameModule.LocalizationModule.CurrentLanguage);
-			m_dropDownLanguage.AddOptions(optionsList);
-			m_dropDownLanguage.onValueChanged.AddListener(OnDropdownSelect);
-		}
-
-		public string GetLanguageStr(Language lang)
-		{
-			var langStr = "英文";
-			switch (lang)
-			{
-				case Language.CN:
-					langStr = "中文";
-					break;
-
-				case Language.EN:
-					langStr = "英文";
-					break;
-
-				case Language.GAT:
-					langStr = "繁体";
-					break;
-
-				case Language.KR:
-					langStr = "韩文";
-					break;
-
-				case Language.JP:
-					langStr = "日文";
-					break;
-
-				case Language.VN:
-					langStr = "越南语";
-					break;
-
-				case Language.INDO:
-					langStr = "印尼";
-					break;
-			}
-
-			return langStr;
-		}
-
-		protected override void RegisterEvent()
-		{
-			AddUIEvent<int>(ILocalization_Event.OnLanguageChanged, _ =>
-			{
-				RefreshUI();
-			});
-		}
-
-		void OnDropdownSelect(int val)
-		{
-			GameModule.LocalizationModule.SetLanguage((Language)val);
-			// string[] inputDrop = m_dropDownLanguage.captionText.text.Split(' ');
-		}
-
-		public void RefreshUI()
-		{
-			m_textTitle.text = G.R(TextDefine.ID_LABEL_START_GAME);
+			m_scene = GameClient.Instance.CurScene;
 		}
 
 		#region 事件
 
-		private partial void OnClickStartGameBtn()
+		private partial void OnClickRegisterBtn()
+		{
+			RegisterAction().Coroutine();
+		}
+
+		private async FTask RegisterAction()
+		{
+			// 根据用户名来选择目标的鉴权服务器
+			// var authenticationAddress = Select(m_inputUserName.text);
+			// 根据鉴权服务器地址来创建一个新的网络会话
+			GameClient.Instance.Connect("127.0.0.1:20001");
+			// 发送一个注册的请求消息到目标服务器
+			var response = (A2C_RegisterResponse)await m_scene.Session.Call(new C2A_RegisterRequest()
+			{
+				UserName = m_inputUserName.text,
+				Password = m_inputPassword.text
+			});
+
+			if (response.ErrorCode != 0)
+			{
+				Log.Error($"Error: {response.ErrorCode}");
+				return;
+			}
+
+			Log.Debug("Registered Successfully");
+		}
+
+		private partial void OnClickLoginBtn()
 		{
 		}
 
-		private partial void OnClickQuitGameBtn()
+		private partial void OnClickGetBtn()
 		{
 		}
 

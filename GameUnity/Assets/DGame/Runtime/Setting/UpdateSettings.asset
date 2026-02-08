@@ -16,6 +16,8 @@ MonoBehaviour:
   HotUpdateAssemblies:
   - GameProto.dll
   - GameLogic.dll
+  - NetworkHandlers.dll
+  - GameEntities.dll
   AOTMetaAssemblies:
   - mscorlib.dll
   - System.dll
@@ -24,6 +26,7 @@ MonoBehaviour:
   - UniTask.dll
   - YooAsset.dll
   - UnityEngine.CoreModule.dll
+  - Fantasy.Network.Session
   LogicMainDllName: GameLogic.dll
   AssemblyTextAssetExtension: .bytes
   AssemblyTextAssetPath: BundleAssets/DLL

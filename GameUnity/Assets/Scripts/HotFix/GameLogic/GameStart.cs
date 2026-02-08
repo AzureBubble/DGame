@@ -91,8 +91,9 @@ public partial class GameStart
         return true;
     }
 
-    private static void StartGame()
+    private static async void StartGame()
     {
+        await GameClient.Instance.InitAsync();
         UIModule.Instance.ShowWindow<MainWindow>();
     }
 

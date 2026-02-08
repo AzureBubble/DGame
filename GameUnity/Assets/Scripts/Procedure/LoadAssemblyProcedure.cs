@@ -5,6 +5,7 @@ using System.Reflection;
 using AOT;
 using Cysharp.Threading.Tasks;
 using DGame;
+using Fantasy.Helper;
 using UnityEngine;
 using YooAsset;
 
@@ -138,6 +139,11 @@ namespace Procedure
                     m_mainLogicAssembly = assembly;
                 }
 
+                // ⚠️ 重要: 手动加载程序集必须手动触发 Fantasy 注册
+                // RuntimeInitializeOnLoadMethod 只在 Unity 启动时自动执行一次
+                // 手动加载的 DLL 不会触发 RuntimeInitializeOnLoadMethod
+                // 调用 Assembly.EnsureLoaded() 来触发该程序集中的 Fantasy 框架注册
+                assembly.EnsureLoaded();
                 m_hotfixAssemblyList.Add(assembly);
                 DLogger.Log($"热更DLL加载成功: [{assembly.GetName().Name}]");
             }

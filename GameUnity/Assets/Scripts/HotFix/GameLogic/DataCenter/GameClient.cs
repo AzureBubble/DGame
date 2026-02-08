@@ -1,5 +1,8 @@
 ﻿using System;
 using DGame;
+using Fantasy;
+using Fantasy.Async;
+using Fantasy.Network;
 
 namespace GameLogic
 {
@@ -36,10 +39,20 @@ namespace GameLogic
 
     public sealed class GameClient : Singleton<GameClient>
     {
+        private readonly NetworkProtocolType ProtocolType = NetworkProtocolType.KCP;
         public GameClientStatus Status { get; set; } = GameClientStatus.StatusInit;
 
         private string m_lastAddress = string.Empty;
         private float m_lastLogDisconnectErrTime = 0f;
+
+        public Scene CurScene { get; private set; }
+
+        public async FTask InitAsync()
+        {
+            await Fantasy.Platform.Unity.Entry.Initialize();
+            CurScene = await Fantasy.Platform.Unity.Entry.CreateScene();
+            DLogger.Info("Fantasy 初始化完成!");
+        }
 
         public void Connect(string address, bool reconnect = false)
         {
@@ -56,6 +69,10 @@ namespace GameLogic
 
             m_lastAddress = address;
             Status = reconnect ? GameClientStatus.StatusReconnect : GameClientStatus.StatusInit;
+            if (CurScene.Session == null || CurScene.Session.IsDisposed)
+            {
+                CurScene.Connect(address, ProtocolType, OnConnectComplete, OnConnectFail, OnConnectDisconnect, false);
+            }
         }
 
         private void OnConnectComplete()

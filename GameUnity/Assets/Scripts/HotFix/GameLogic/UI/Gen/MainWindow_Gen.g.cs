@@ -16,29 +16,36 @@ namespace GameLogic
 		#region 脚本工具生成的代码
 
 		private UIBindComponent m_bindComponent;
-		private Text m_textTitle;
-		private Button m_btnStartGame;
-		private Button m_btnQuitGame;
-		private Dropdown m_dropDownLanguage;
+		private Text m_textMsg;
+		private Button m_btnRegister;
+		private Button m_btnLogin;
+		private Button m_btnGet;
+		private InputField m_inputUserName;
+		private InputField m_inputPassword;
 
 		protected override void ScriptGenerator()
 		{
 			m_bindComponent = gameObject.GetComponent<UIBindComponent>();
-			m_textTitle = m_bindComponent.GetComponent<Text>(0);
-			m_btnStartGame = m_bindComponent.GetComponent<Button>(1);
-			m_btnQuitGame = m_bindComponent.GetComponent<Button>(2);
-			m_dropDownLanguage = m_bindComponent.GetComponent<Dropdown>(3);
-			m_btnStartGame.onClick.AddListener(OnClickStartGameBtn);
-			m_btnQuitGame.onClick.AddListener(OnClickQuitGameBtn);
+			m_textMsg = m_bindComponent.GetComponent<Text>(0);
+			m_btnRegister = m_bindComponent.GetComponent<Button>(1);
+			m_btnLogin = m_bindComponent.GetComponent<Button>(2);
+			m_btnGet = m_bindComponent.GetComponent<Button>(3);
+			m_inputUserName = m_bindComponent.GetComponent<InputField>(4);
+			m_inputPassword = m_bindComponent.GetComponent<InputField>(5);
+			m_btnRegister.onClick.AddListener(OnClickRegisterBtn);
+			m_btnLogin.onClick.AddListener(OnClickLoginBtn);
+			m_btnGet.onClick.AddListener(OnClickGetBtn);
 		}
 
 		#endregion
 
 		#region 事件
 
-		private partial void OnClickStartGameBtn();
+		private partial void OnClickRegisterBtn();
 
-		private partial void OnClickQuitGameBtn();
+		private partial void OnClickLoginBtn();
+
+		private partial void OnClickGetBtn();
 
 		#endregion
 	}

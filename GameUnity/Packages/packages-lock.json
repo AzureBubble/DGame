@@ -22,7 +22,7 @@
       "hash": "c9214b2cf9869cf93e060442ec12b9fa828d98d5"
     },
     "com.tuyoogame.yooasset": {
-      "version": "2.3.17",
+      "version": "2.3.18",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -84,11 +84,11 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.ide.visualstudio": {
-      "version": "2.0.18",
+      "version": "2.0.27",
       "depth": 0,
       "source": "registry",
       "dependencies": {
-        "com.unity.test-framework": "1.1.9"
+        "com.unity.test-framework": "1.1.33"
       },
       "url": "https://packages.unity.com"
     },
@@ -188,7 +188,7 @@
       }
     },
     "com.unity.visualscripting": {
-      "version": "1.9.0",
+      "version": "1.9.9",
       "depth": 0,
       "source": "registry",
       "dependencies": {

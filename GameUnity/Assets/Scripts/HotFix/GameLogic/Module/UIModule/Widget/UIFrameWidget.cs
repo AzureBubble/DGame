@@ -25,7 +25,7 @@ namespace GameLogic
         protected override void BindMemberProperty()
         {
             m_btnSprite.interactable = false;
-            m_animatorAgent = FrameAnimatorAgent.Create();
+            m_animatorAgent = UIFrameAnimatorAgent.Create();
         }
 
         protected override void OnDestroy()
@@ -37,7 +37,7 @@ namespace GameLogic
 
         #region 字段
 
-        private FrameAnimatorAgent m_animatorAgent;
+        private UIFrameAnimatorAgent m_animatorAgent;
         private Action<UIWidget> m_clickAction;
         private string m_location;
 
@@ -55,6 +55,7 @@ namespace GameLogic
 
             m_clickAction = clickAction;
             m_btnSprite.interactable = clickAction != null;
+            m_animatorAgent.Init(m_location).Forget();
         }
 
         public void BindClickEvent(Action<UIWidget> clickAction)

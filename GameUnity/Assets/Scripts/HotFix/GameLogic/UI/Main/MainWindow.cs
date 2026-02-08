@@ -10,8 +10,6 @@ namespace GameLogic
 	{
 		protected override void BindMemberProperty()
 		{
-			DLogger.Warning(TimeUtil.CalcDiffDay(1769745600, 1769839200));
-
 			var optionsList = new List<Dropdown.OptionData>();
 
 			for (int i = 0; i < (int)Language.MAX; i++)

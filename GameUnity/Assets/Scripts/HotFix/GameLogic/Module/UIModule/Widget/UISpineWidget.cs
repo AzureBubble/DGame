@@ -15,6 +15,7 @@ namespace GameLogic
         private Transform m_tfUISpineRoot;
         private GameObject m_goSpineModel;
         private Transform m_tfEffRoot;
+
         protected override void ScriptGenerator()
         {
             m_tfUISpineRoot = FindChild("m_tfUISpineRoot");

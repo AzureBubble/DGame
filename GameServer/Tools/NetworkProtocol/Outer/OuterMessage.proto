@@ -13,6 +13,16 @@ package Fantasy.Network.Message;
 // 通过添加 // using 导出时添加自定义命名空间
 // 例如: // using System.Runtime // using System.Reflection
 
+// 注册账号协议
+message C2A_RegisterRequest // IRequest,A2C_RegisterResponse
+{
+	string UserName = 1;
+	string Password = 2;
+}
+// 注册账号协议返回
+message A2C_RegisterResponse // IResponse
+{
+}
 
 message C2G_TestMessage // IMessage
 {

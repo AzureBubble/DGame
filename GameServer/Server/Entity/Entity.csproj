@@ -12,4 +12,8 @@
     <PackageReference Include="Fantasy-Net" Version="*" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Gate\" />
+  </ItemGroup>
+
 </Project>

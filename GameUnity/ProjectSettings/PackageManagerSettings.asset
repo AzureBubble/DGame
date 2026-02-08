@@ -31,6 +31,7 @@ MonoBehaviour:
     m_Url: https://package.openupm.com
     m_Scopes:
     - com.tuyoogame.yooasset
+    - com.fantasy.unity
     m_IsDefault: 0
     m_Capabilities: 0
     m_ConfigSource: 4
@@ -39,6 +40,6 @@ MonoBehaviour:
   m_RegistryInfoDraft:
     m_Modified: 0
     m_ErrorMessage: 
-    m_UserModificationsInstanceId: -842
-    m_OriginalInstanceId: -844
+    m_UserModificationsInstanceId: -826
+    m_OriginalInstanceId: -830
   m_LoadAssets: 0

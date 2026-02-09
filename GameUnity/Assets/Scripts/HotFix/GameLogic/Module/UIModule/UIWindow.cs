@@ -17,19 +17,23 @@ namespace GameLogic
         private SetUISafeFitHelper m_setUISafeFitHelper;
         private System.Action<UIWindow> m_prepareCallback;
         private Canvas m_canvas;
-        public Canvas Canvas => m_canvas;
         private Canvas[] m_childCanvas;
         private GraphicRaycaster m_graphicRaycaster;
-        public GraphicRaycaster GraphicRaycaster => m_graphicRaycaster;
         private GraphicRaycaster[] m_childGraphicRaycasters;
         private bool m_isChildCanvasDirty;
-        public override UIType Type => UIType.Window;
         private const float NORMAL_TWEEN_POP_TIME = 0.3f;
         private const float NORMAL_MODEL_ALPHA = 0.85f;
         private float m_curModelAlpha;
         private float m_manualAlpha;
         private Image m_modelSprite;
         private UIButton m_modelCloseBtn;
+        private bool m_isCreated;
+
+        public Canvas Canvas => m_canvas;
+
+        public GraphicRaycaster GraphicRaycaster => m_graphicRaycaster;
+
+        public override UIType Type => UIType.Window;
 
         public uint WindowID { get; set; }
 
@@ -165,6 +169,11 @@ namespace GameLogic
                 // 关闭CanvasGroup上的射线检测
                 m_canvasGroup.blocksRaycasts = value;
                 Interactable = value;
+
+                if (m_isCreated)
+                {
+                    return;
+                }
 
                 if (m_isSortingOrderDirty)
                 {
@@ -361,10 +370,12 @@ namespace GameLogic
 
         internal void InternalCreate()
         {
-            if (IsDestroyed)
+            if (IsDestroyed || m_isCreated)
             {
                 return;
             }
+
+            m_isCreated = true;
             ScriptGenerator();
             BindMemberProperty();
             RegisterEvent();
@@ -529,6 +540,7 @@ namespace GameLogic
 
         protected internal void Destroy()
         {
+            m_isCreated = false;
             OnEscCloseLastOneWindowCallback = null;
             if (IsDestroyed)
             {

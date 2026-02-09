@@ -2,10 +2,23 @@
 <obfuz>
   <!-- GameProto 程序集规则 -->
   <assembly name="GameProto">
+    <!-- 跳过 Fantasy 框架生成代码的混淆 (非常重要!) -->
+    <type name="Fantasy.Generated.*" obfuscateName="false" applyToMembers="all" />
+    <type name="*AssemblyInitializer" obfuscateName="false" applyToMembers="all" />
+    <type name="*$*" obfuscateName="false" applyToMembers="all" />
+
     <!-- 跳过 SimpleJSON 相关类型的混淆 -->
     <!-- <type name="*JSONNodeType*" obfuscateName="false" applyToMembers="all" />
     <type name="*JSONNode*" obfuscateName="false" applyToMembers="all" /> -->
     <!-- 跳过 GameProto 命名空间下所有枚举及其成员的混淆 -->
     <!-- <type name="GameProto.*" classType="enum" obfuscateName="false" applyToMembers="all" /> -->
+  </assembly>
+
+  <!-- GameLogic 程序集规则 -->
+  <assembly name="GameLogic">
+    <!-- 跳过 Fantasy 框架生成代码的混淆 -->
+    <type name="Fantasy.Generated.*" obfuscateName="false" applyToMembers="all" />
+    <type name="*AssemblyInitializer" obfuscateName="false" applyToMembers="all" />
+    <type name="*$*" obfuscateName="false" applyToMembers="all" />
   </assembly>
 </obfuz>

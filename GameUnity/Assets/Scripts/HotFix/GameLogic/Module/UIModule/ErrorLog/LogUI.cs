@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using DGame;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace GameLogic
@@ -15,17 +17,12 @@ namespace GameLogic
 		{
 			m_btnClose = FindChildComponent<Button>("m_btnClose");
 			m_textError = FindChildComponent<Text>("m_textError");
-			m_btnClose.onClick.AddListener(UniTask.UnityAction(OnClickCloseBtn));
+			m_btnClose.onClick.AddListener(OnClickCloseBtn);
 		}
 
 		#endregion
 
 		#region Override
-
-		protected override void OnCreate()
-		{
-			RefreshUI();
-		}
 
 		protected override ModelType GetModelType() => ModelType.NoneType;
 
@@ -36,26 +33,31 @@ namespace GameLogic
 		#region 字段
 
 		private readonly Stack<string> m_errorTextStack = new Stack<string>();
+		private bool m_isInit = false;
 
 		#endregion
 
 		#region 函数
 
-		public void RefreshUI()
+		public void Init(string errorText)
 		{
-			m_errorTextStack.Push(UserData.ToString());
-			m_textError.text = UserData.ToString();
+			m_errorTextStack.Push(errorText);
+
+			if (!m_isInit)
+			{
+				m_textError.text = m_errorTextStack.Pop();
+				m_isInit = true;
+			}
 		}
 
 		#endregion
 
 		#region 事件
 
-		private async UniTaskVoid OnClickCloseBtn()
+		private void OnClickCloseBtn()
 		{
 			if (m_errorTextStack.Count <= 0)
 			{
-				await UniTask.Yield();
 				Close();
 				return;
 			}

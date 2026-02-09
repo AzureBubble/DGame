@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+
+<obfuz>
+    <whitelist>
+        <assembly name="GameLogic" obfuscate="0"/>
+    </whitelist>
+
+    <global obfuscationLevel="None">
+
+    </global>
+
+<!--    <assembly name="GameLogic">-->
+<!--        <type name="GameApp" obfuscationLevel="Advanced"/>-->
+<!--    </assembly>-->
+</obfuz>

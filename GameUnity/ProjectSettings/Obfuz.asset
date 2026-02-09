@@ -22,10 +22,7 @@ MonoBehaviour:
     assembliesToObfuscate:
     - GameProto
     - GameLogic
-    nonObfuscatedButReferencingObfuscatedAssemblies:
-    - DGame.Runtime
-    - Assembly-CSharp
-    - Launcher
+    nonObfuscatedButReferencingObfuscatedAssemblies: []
     additionalAssemblySearchPaths: []
     obfuscateObfuzRuntime: 0
   obfuscationPassSettings:
@@ -50,8 +47,7 @@ MonoBehaviour:
     keepUnknownSymbolInSymbolMappingFile: 1
     symbolMappingFile: Assets/Obfuz/SymbolObfus/symbol-mapping.xml
     debugSymbolMappingFile: Assets/Obfuz/SymbolObfus/symbol-mapping-debug.xml
-    ruleFiles:
-    - Assets/Obfuz/SkipObfusRules.xml
+    ruleFiles: []
     customRenamePolicyTypes: []
   constEncryptSettings:
     encryptionLevel: 1
@@ -68,7 +64,8 @@ MonoBehaviour:
     obfuscationLevel: 1
     maxProxyMethodCountPerDispatchMethod: 100
     obfuscateCallToMethodInMscorlib: 0
-    ruleFiles: []
+    ruleFiles:
+    - Assets/Obfuz/ObfuzeRules.xml
   exprObfusSettings:
     ruleFiles: []
   controlFlowObfusSettings:

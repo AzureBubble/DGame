@@ -28,7 +28,7 @@ namespace GameLogic
 
 		protected override void BindMemberProperty()
 		{
-			m_scene = GameClient.Instance.CurScene;
+			m_scene = GameClient.Instance.Scene;
 		}
 
 		#region 事件

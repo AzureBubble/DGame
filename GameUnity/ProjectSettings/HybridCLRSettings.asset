@@ -20,8 +20,6 @@ MonoBehaviour:
   hotUpdateAssemblies:
   - GameProto
   - GameLogic
-  - NetworkHandlers
-  - GameEntities
   preserveHotUpdateAssemblies: []
   hotUpdateDllCompileOutputRootDir: HybridCLRData/HotUpdateDlls
   externalHotUpdateAssembliyDirs: []

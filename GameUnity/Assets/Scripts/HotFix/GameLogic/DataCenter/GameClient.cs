@@ -15,22 +15,27 @@ namespace GameLogic
         /// 初始化
         /// </summary>
         StatusInit,
+
         /// <summary>
         /// 连接成功服务器
         /// </summary>
         StatusConnected,
+
         /// <summary>
         /// 重新连接
         /// </summary>
         StatusReconnect,
+
         /// <summary>
         /// 断开连接
         /// </summary>
         StatusClose,
+
         /// <summary>
         /// 登录中
         /// </summary>
         StatusLogin,
+
         /// <summary>
         /// AccountLogin成功，进入服务器了
         /// </summary>
@@ -45,12 +50,12 @@ namespace GameLogic
         private string m_lastAddress = string.Empty;
         private float m_lastLogDisconnectErrTime = 0f;
 
-        public Scene CurScene { get; private set; }
+        public Scene Scene { get; private set; }
 
         public async FTask InitAsync()
         {
             await Fantasy.Platform.Unity.Entry.Initialize();
-            CurScene = await Fantasy.Platform.Unity.Entry.CreateScene();
+            Scene = await Fantasy.Platform.Unity.Entry.CreateScene();
             DLogger.Info("Fantasy 初始化完成!");
         }
 
@@ -69,9 +74,9 @@ namespace GameLogic
 
             m_lastAddress = address;
             Status = reconnect ? GameClientStatus.StatusReconnect : GameClientStatus.StatusInit;
-            if (CurScene.Session == null || CurScene.Session.IsDisposed)
+            if (Scene.Session == null || Scene.Session.IsDisposed)
             {
-                CurScene.Connect(address, ProtocolType, OnConnectComplete, OnConnectFail, OnConnectDisconnect, false);
+                Scene.Connect(address, ProtocolType, OnConnectComplete, OnConnectFail, OnConnectDisconnect, false);
             }
         }
 
@@ -112,7 +117,7 @@ namespace GameLogic
 
         protected override void OnDestroy()
         {
-            CurScene?.Dispose();
+            Scene?.Dispose();
         }
 
         public void RegisterMsgHandler(uint protocolCode, Action xtc)

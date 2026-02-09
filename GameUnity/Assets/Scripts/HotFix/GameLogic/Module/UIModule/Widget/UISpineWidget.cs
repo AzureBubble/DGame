@@ -5,6 +5,7 @@ using DGame;
 using UnityEngine;
 using UnityEngine.UI;
 using Spine.Unity;
+using Spine;
 
 namespace GameLogic
 {
@@ -56,6 +57,7 @@ namespace GameLogic
         private Action m_clickAction;
         private SkeletonGraphic m_skeletonGraphic;
         private Spine.AnimationState m_curAnimState;
+        private Skin m_view;
 
         #endregion
 
@@ -140,6 +142,30 @@ namespace GameLogic
             }
 
             return 0;
+        }
+
+        public void SwitchSkin(string skinName)
+        {
+            if(m_skeletonGraphic == null || string.IsNullOrEmpty(skinName))
+            {
+                return;
+            }
+            if(m_view == null)
+            {
+                m_view = new Skin("View");
+            }
+            m_view.Clear();
+            var skin = m_skeletonGraphic.Skeleton.Data.FindSkin(skinName);
+            if (skin != null)
+            {
+                m_view.AddSkin(skin);
+                m_skeletonGraphic.Skeleton.SetSkin(m_view);
+                m_skeletonGraphic.Skeleton.SetSlotsToSetupPose();
+            }
+            else
+            {
+                DLogger.Error($"未找到皮肤: {skinName}");
+            }
         }
 
         public void SetSpineColor(Color color)

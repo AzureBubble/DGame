@@ -279,11 +279,6 @@ namespace DGame
 
         private void OnApplicationQuit()
         {
-#if UNITY_EDITOR
-
-            ModuleSystem.Destroy();
-
-#endif
             Application.lowMemory -= OnLowMemory;
             StopAllCoroutines();
         }

@@ -198,7 +198,7 @@ namespace DGame
             {
                 if (go != null)
                 {
-                    GameObject.DestroyImmediate(go);
+                    UnityEngine.Object.DestroyImmediate(go);
                 }
             }
         }

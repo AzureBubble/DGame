@@ -33,7 +33,7 @@ namespace DGame
             m_monoBehaviour?.Destroy();
             if (m_monoDriver != null)
             {
-                GameObject.Destroy(m_monoDriver);
+                UnityEngine.Object.Destroy(m_monoDriver);
             }
             m_monoDriver = null;
         }

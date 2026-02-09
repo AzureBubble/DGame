@@ -549,9 +549,9 @@ namespace GameLogic
 
         private void DestroyPreviewTextures()
         {
-            if (m_verticalPreview != null) GameObject.DestroyImmediate(m_verticalPreview);
-            if (m_horizontalPreview != null) GameObject.DestroyImmediate(m_horizontalPreview);
-            if (m_combinedPreview != null) GameObject.DestroyImmediate(m_combinedPreview);
+            if (m_verticalPreview != null) UnityEngine.Object.DestroyImmediate(m_verticalPreview);
+            if (m_horizontalPreview != null) UnityEngine.Object.DestroyImmediate(m_horizontalPreview);
+            if (m_combinedPreview != null) UnityEngine.Object.DestroyImmediate(m_combinedPreview);
         }
 
         private void UpdatePreviewTextures()

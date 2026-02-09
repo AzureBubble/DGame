@@ -110,6 +110,11 @@ namespace GameLogic
             return canSend;
         }
 
+        protected override void OnDestroy()
+        {
+            CurScene?.Dispose();
+        }
+
         public void RegisterMsgHandler(uint protocolCode, Action xtc)
         {
         }

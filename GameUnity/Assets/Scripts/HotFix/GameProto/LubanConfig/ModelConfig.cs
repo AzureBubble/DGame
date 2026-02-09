@@ -21,6 +21,18 @@ public sealed partial class ModelConfig : Luban.BeanBase
         ModelID = _buf.ReadInt();
         UISpineLocation = _buf.ReadString();
         ModelLocation = _buf.ReadString();
+        FrameCfgLocation = _buf.ReadString();
+        DeathFrameSpeed = _buf.ReadFloat();
+        ModelScale = _buf.ReadFloat();
+        UIScale = _buf.ReadFloat();
+        ShowType = _buf.ReadByte();
+        ShowShadow = _buf.ReadByte();
+        ShadowWidth = _buf.ReadFloat();
+        ShadowHeight = _buf.ReadFloat();
+        ShadowScaleX = _buf.ReadFloat();
+        ShadowScaleY = _buf.ReadFloat();
+        ShadowOffsetX = _buf.ReadFloat();
+        ShadowOffsetY = _buf.ReadFloat();
     }
 
     public static ModelConfig DeserializeModelConfig(ByteBuf _buf)
@@ -40,6 +52,54 @@ public sealed partial class ModelConfig : Luban.BeanBase
     /// Model可寻址地址
     /// </summary>
     public string ModelLocation;
+    /// <summary>
+    /// 帧动画配置文件
+    /// </summary>
+    public string FrameCfgLocation;
+    /// <summary>
+    /// 死亡动画速度
+    /// </summary>
+    public float DeathFrameSpeed;
+    /// <summary>
+    /// 模型缩放
+    /// </summary>
+    public float ModelScale;
+    /// <summary>
+    /// UI模型缩放
+    /// </summary>
+    public float UIScale;
+    /// <summary>
+    /// 显示类型
+    /// </summary>
+    public byte ShowType;
+    /// <summary>
+    /// 显示阴影
+    /// </summary>
+    public byte ShowShadow;
+    /// <summary>
+    /// 阴影宽度
+    /// </summary>
+    public float ShadowWidth;
+    /// <summary>
+    /// 阴影高度
+    /// </summary>
+    public float ShadowHeight;
+    /// <summary>
+    /// 阴影缩放X
+    /// </summary>
+    public float ShadowScaleX;
+    /// <summary>
+    /// 阴影缩放Y
+    /// </summary>
+    public float ShadowScaleY;
+    /// <summary>
+    /// 阴影偏移X
+    /// </summary>
+    public float ShadowOffsetX;
+    /// <summary>
+    /// 阴影偏移Y
+    /// </summary>
+    public float ShadowOffsetY;
 
     public const int __ID__ = 1694060459;
     public override int GetTypeId() => __ID__;
@@ -58,6 +118,18 @@ public sealed partial class ModelConfig : Luban.BeanBase
         other.ModelID = ModelID;
         other.UISpineLocation = UISpineLocation;
         other.ModelLocation = ModelLocation;
+        other.FrameCfgLocation = FrameCfgLocation;
+        other.DeathFrameSpeed = DeathFrameSpeed;
+        other.ModelScale = ModelScale;
+        other.UIScale = UIScale;
+        other.ShowType = ShowType;
+        other.ShowShadow = ShowShadow;
+        other.ShadowWidth = ShadowWidth;
+        other.ShadowHeight = ShadowHeight;
+        other.ShadowScaleX = ShadowScaleX;
+        other.ShadowScaleY = ShadowScaleY;
+        other.ShadowOffsetX = ShadowOffsetX;
+        other.ShadowOffsetY = ShadowOffsetY;
     }
     
     public override string ToString()
@@ -66,6 +138,18 @@ public sealed partial class ModelConfig : Luban.BeanBase
         + "ModelID:" + ModelID + ","
         + "UISpineLocation:" + UISpineLocation + ","
         + "ModelLocation:" + ModelLocation + ","
+        + "FrameCfgLocation:" + FrameCfgLocation + ","
+        + "DeathFrameSpeed:" + DeathFrameSpeed + ","
+        + "ModelScale:" + ModelScale + ","
+        + "UIScale:" + UIScale + ","
+        + "ShowType:" + ShowType + ","
+        + "ShowShadow:" + ShowShadow + ","
+        + "ShadowWidth:" + ShadowWidth + ","
+        + "ShadowHeight:" + ShadowHeight + ","
+        + "ShadowScaleX:" + ShadowScaleX + ","
+        + "ShadowScaleY:" + ShadowScaleY + ","
+        + "ShadowOffsetX:" + ShadowOffsetX + ","
+        + "ShadowOffsetY:" + ShadowOffsetY + ","
         + "}";
     }
 }

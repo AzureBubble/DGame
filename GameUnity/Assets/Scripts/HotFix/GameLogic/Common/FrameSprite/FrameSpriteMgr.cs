@@ -12,11 +12,10 @@ namespace GameLogic
         /// 获取FrameSpritePool资源
         /// </summary>
         /// <param name="location">资源定位地址</param>
-        /// <param name="pool"></param>
         /// <returns></returns>
-        public async UniTask<bool> GetFrameSpritePool(string location, FrameSpritePool pool)
+        public async UniTask<FrameSpritePool> GetFrameSpritePool(string location)
         {
-            if (!m_frameSpritePools.TryGetValue(location, out pool))
+            if (!m_frameSpritePools.TryGetValue(location, out var pool))
             {
                 var goCfg = await GameModule.ResourceModule.LoadAssetAsync<GameObject>(location);
                 if (goCfg != null)
@@ -25,7 +24,7 @@ namespace GameLogic
                     m_frameSpritePools[location] = pool;
                 }
             }
-            return pool != null;
+            return pool;
         }
 
         /// <summary>

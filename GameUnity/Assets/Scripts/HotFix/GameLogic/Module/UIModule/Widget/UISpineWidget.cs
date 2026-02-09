@@ -1,10 +1,12 @@
 #if SPINE_UNITY && SPINE_CSHARP
 
 using System;
+using System.Collections.Generic;
 using DGame;
 using UnityEngine;
 using UnityEngine.UI;
 using Spine.Unity;
+using Spine;
 
 namespace GameLogic
 {
@@ -56,6 +58,8 @@ namespace GameLogic
         private Action m_clickAction;
         private SkeletonGraphic m_skeletonGraphic;
         private Spine.AnimationState m_curAnimState;
+        private Skin m_view;
+        private List<string> m_currentSkinNames = new List<string>();
 
         #endregion
 
@@ -140,6 +144,82 @@ namespace GameLogic
             }
 
             return 0;
+        }
+
+        /// <summary>
+        /// 直接换皮
+        /// </summary>
+        /// <param name="skinName"></param>
+        public void SwitchSkin(string skinName)
+        {
+            if(m_skeletonGraphic == null || string.IsNullOrEmpty(skinName))
+            {
+                return;
+            }
+            var skin = m_skeletonGraphic.Skeleton.Data.FindSkin(skinName);
+            if (skin != null)
+            {
+                m_skeletonGraphic.Skeleton.SetSkin(skin);
+                m_skeletonGraphic.Skeleton.SetSlotsToSetupPose();
+            }
+            else
+            {
+                DLogger.Error($"未找到皮肤: {skinName}");
+            }
+        }
+
+        /// <summary>
+        /// 组合皮
+        /// </summary>
+        /// <param name="skinNames"></param>
+        public void SwitchSkin(List<string> skinNames)
+        {
+            if(m_skeletonGraphic == null || skinNames == null || skinNames.Count <= 0)
+            {
+                return;
+            }
+            if (IsSameSkinList(skinNames))
+            {
+                return;
+            }
+            if(m_view == null)
+            {
+                m_view = new Skin("View");
+            }
+            m_view.Clear();
+            m_currentSkinNames.Clear();
+
+            for (int i = 0; i < skinNames.Count; i++)
+            {
+                var skinName = skinNames[i];
+                if (string.IsNullOrEmpty(skinName))
+                {
+                    continue;
+                }
+                var skin = m_skeletonGraphic.Skeleton.Data.FindSkin(skinName);
+                if (skin != null)
+                {
+                    m_view.AddSkin(skin);
+                    m_currentSkinNames.Add(skinName);
+                }
+                else
+                {
+                    DLogger.Error($"未找到皮肤: {skinName}");
+                }
+            }
+            m_skeletonGraphic.Skeleton.SetSkin(m_view);
+            m_skeletonGraphic.Skeleton.SetSlotsToSetupPose();
+        }
+
+        private bool IsSameSkinList(List<string> skinNames)
+        {
+            if (m_currentSkinNames.Count != skinNames.Count)
+            {
+                return false;
+            }
+            var currentSet = new HashSet<string>(m_currentSkinNames);
+            var targetSet = new HashSet<string>(skinNames);
+            return currentSet.SetEquals(targetSet);
         }
 
         public void SetSpineColor(Color color)

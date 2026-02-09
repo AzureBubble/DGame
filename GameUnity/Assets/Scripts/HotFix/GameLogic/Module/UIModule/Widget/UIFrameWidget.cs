@@ -1,4 +1,5 @@
 ﻿using System;
+using GameProto;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -39,29 +40,38 @@ namespace GameLogic
 
         private UIFrameAnimatorAgent m_animatorAgent;
         private Action<UIWidget> m_clickAction;
-        private string m_location;
+        private int m_modelID;
+        private ModelConfig m_modelCfg;
 
         #endregion
 
         #region 函数
 
-        public void Init(string location, Action<UIWidget> clickAction = null)
+        public async void Init(int modelID, Action<UIWidget> clickAction = null)
         {
-            if (string.IsNullOrEmpty(m_location))
+            if (modelID <= 0)
             {
                 return;
             }
-            m_location = location;
+            m_modelID = modelID;
 
             m_clickAction = clickAction;
             m_btnSprite.interactable = clickAction != null;
-            m_animatorAgent.Init(m_location).Forget();
+            m_modelCfg = TbModelConfig.GetOrDefault(modelID);
+            await m_animatorAgent.Init(m_modelCfg);
+            m_animatorAgent?.BindDisplayRender(m_btnSprite.image);
+            m_animatorAgent?.StartAnim();
         }
 
         public void BindClickEvent(Action<UIWidget> clickAction)
         {
             m_clickAction = clickAction;
             m_btnSprite.interactable = clickAction != null;
+        }
+
+        public void SwitchAnim(UIFrameAnimState state)
+        {
+            m_animatorAgent?.SwitchAnim(state);
         }
 
         #endregion

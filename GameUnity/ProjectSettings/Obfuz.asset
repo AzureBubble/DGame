@@ -26,6 +26,7 @@ MonoBehaviour:
     - DGame.Runtime
     - Assembly-CSharp
     - Launcher
+    - Fantasy.Unity
     additionalAssemblySearchPaths: []
     obfuscateObfuzRuntime: 0
   obfuscationPassSettings:

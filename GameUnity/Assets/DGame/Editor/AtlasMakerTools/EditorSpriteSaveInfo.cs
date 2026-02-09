@@ -228,7 +228,7 @@ namespace DGame
                 AssetDatabase.ImportAsset(outputPath, ImportAssetOptions.ForceUpdate);
                 EditorApplication.delayCall += () =>
                 {
-#if UNITY_2022_1_OR_NEW
+#if UNITY_2022_1_OR_NEWER
                     SpriteAtlasImporter sai = (SpriteAtlasImporter)AssetImporter.GetAtPath(outputPath);
                     if (sai != null)
                     {
@@ -309,7 +309,7 @@ namespace DGame
             atlas.SetPackingSettings(PackingSettings);
         }
 
-#if UNITY_2022_1_OR_NEW
+#if UNITY_2022_1_OR_NEWER
         private static void ConfigureAtlasV2Settings(SpriteAtlasImporter atlasImporter)
         {
             void SetPlatform(string platform, TextureImporterFormat format)

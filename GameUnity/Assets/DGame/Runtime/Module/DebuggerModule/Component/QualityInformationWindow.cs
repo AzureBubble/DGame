@@ -48,7 +48,7 @@ namespace DGame
 #if UNITY_6000_0_OR_NEWER
                     DrawItem("Master Texture Limit", QualitySettings.globalTextureMipmapLimit.ToString(), "全局纹理Mipmap限制");
 #else
-                    DrawItem("Master Texture Limit", QualitySettings.masterTextureLimit.ToString(), "全局纹理Mipmap限制");
+                    DrawItem("Master Texture Limit", QualitySettings.globalTextureMipmapLimit.ToString(), "全局纹理Mipmap限制");
 #endif
                     DrawItem("Anisotropic Filtering", QualitySettings.anisotropicFiltering.ToString(), "各向异性过滤");
                     DrawItem("Anti Aliasing", QualitySettings.antiAliasing.ToString(), "抗锯齿级别");

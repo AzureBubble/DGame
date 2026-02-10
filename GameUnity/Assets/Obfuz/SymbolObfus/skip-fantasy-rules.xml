@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Obfuz 符号混淆规则文件
+  跳过所有 Fantasy.* 命名空间下的类型和成员的混淆
+
+  配置说明:
+  - obName="0" 表示不混淆
+  - applyToMembers="*" 表示规则应用于所有成员
+  - name="Fantasy.*" 使用通配符匹配 Fantasy 命名空间下所有类型
+-->
+<obfuz>
+  <!-- GameProto 程序集规则 -->
+  <assembly name="GameProto">
+    <!-- 跳过所有 Fantasy.* 命名空间下的类型混淆 -->
+    <type name="Fantasy.*" obName="0" applyToMembers="*"/>
+
+    <!-- 跳过 Fantasy.Generated.* 生成的代码 -->
+    <type name="Fantasy.Generated.*" obName="0" applyToMembers="*"/>
+
+    <!-- 跳过 Fantasy 协议相关类型 -->
+    <type name="Fantasy.Network.*" obName="0" applyToMembers="*"/>
+    <type name="Fantasy.Async.*" obName="0" applyToMembers="*"/>
+    <type name="Fantasy.Helper.*" obName="0" applyToMembers="*"/>
+    <type name="Fantasy.Data.*" obName="0" applyToMembers="*"/>
+    <type name="Fantasy.Event.*" obName="0" applyToMembers="*"/>
+    <type name="Fantasy.Serializer.*" obName="0" applyToMembers="*"/>
+
+    <!-- 跳过程序集初始化器 -->
+    <type name="*AssemblyInitializer" obName="0" applyToMembers="*"/>
+  </assembly>
+
+  <!-- GameLogic 程序集规则 -->
+  <assembly name="GameLogic">
+    <!-- 跳过所有 Fantasy.* 命名空间下的类型混淆 -->
+    <type name="Fantasy.*" obName="0" applyToMembers="*"/>
+
+    <!-- 跳过 Fantasy.Generated.* 生成的代码 -->
+    <type name="Fantasy.Generated.*" obName="0" applyToMembers="*"/>
+
+    <!-- 跳过 Fantasy 协议相关类型 -->
+    <type name="Fantasy.Network.*" obName="0" applyToMembers="*"/>
+    <type name="Fantasy.Async.*" obName="0" applyToMembers="*"/>
+    <type name="Fantasy.Helper.*" obName="0" applyToMembers="*"/>
+    <type name="Fantasy.Data.*" obName="0" applyToMembers="*"/>
+    <type name="Fantasy.Event.*" obName="0" applyToMembers="*"/>
+    <type name="Fantasy.Serializer.*" obName="0" applyToMembers="*"/>
+
+    <!-- 跳过程序集初始化器 -->
+    <type name="*AssemblyInitializer" obName="0" applyToMembers="*"/>
+  </assembly>
+</obfuz>

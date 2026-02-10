@@ -12,6 +12,9 @@ public sealed class AuthenticationSessionComponentDestroySystem : DestroySystem<
         {
             self.Scene.TimerComponent.Net.Remove(ref self.TimerId);
         }
+
+        self.NextTime = 0;
+        self.Interval = 0;
     }
 }
 

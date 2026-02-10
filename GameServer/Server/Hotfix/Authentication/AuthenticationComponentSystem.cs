@@ -1,9 +1,22 @@
 ﻿using Fantasy;
 using Fantasy.Async;
 using Fantasy.Entitas;
+using Fantasy.Entitas.Interface;
 using Fantasy.Helper;
 
 namespace System;
+
+public sealed class AuthenticationComponentDestroySystem : DestroySystem<AuthenticationComponent>
+{
+    protected override void Destroy(AuthenticationComponent self)
+    {
+        foreach (var account in self.CacheAccountList.Values.ToArray())
+        {
+            account.Dispose();
+        }
+        self.CacheAccountList.Clear();
+    }
+}
 
 internal static class AuthenticationComponentSystem
 {

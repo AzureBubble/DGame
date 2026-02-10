@@ -815,6 +815,7 @@ namespace GameLogic
         private void OnWindowPrepare(UIWindow window)
         {
             window.InternalCreate();
+            window.InternalRefresh();
             OnSortWindowSortingOrder(window.WindowLayer);
             OnSetWindowVisible();
         }

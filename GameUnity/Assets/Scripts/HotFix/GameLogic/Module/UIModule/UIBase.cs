@@ -74,7 +74,7 @@ namespace GameLogic
         /// <summary>
         /// UI子组件列表
         /// </summary>
-        internal readonly List<UIWidget> ChildList =  new List<UIWidget>();
+        internal readonly List<UIWidget> ChildList = new List<UIWidget>();
 
         /// <summary>
         /// 存在Update更新的UI子组件列表
@@ -94,22 +94,37 @@ namespace GameLogic
         /// <summary>
         /// 代码自动生成绑定
         /// </summary>
-        protected virtual void ScriptGenerator(){}
+        protected virtual void ScriptGenerator()
+        {
+        }
 
         /// <summary>
         /// 绑定UI成员元素
         /// </summary>
-        protected virtual void BindMemberProperty(){}
+        protected virtual void BindMemberProperty()
+        {
+        }
 
         /// <summary>
         /// 注册事件
         /// </summary>
-        protected virtual void RegisterEvent(){}
+        protected virtual void RegisterEvent()
+        {
+        }
 
         /// <summary>
         /// 窗口创建
         /// </summary>
-        protected virtual void OnCreate(){}
+        protected virtual void OnCreate()
+        {
+        }
+
+        /// <summary>
+        /// 窗口刷新。
+        /// </summary>
+        protected virtual void OnRefresh()
+        {
+        }
 
         /// <summary>
         /// 是否需要Update
@@ -124,7 +139,9 @@ namespace GameLogic
         /// <summary>
         /// 窗口销毁
         /// </summary>
-        protected virtual void OnDestroy() { }
+        protected virtual void OnDestroy()
+        {
+        }
 
         /// <summary>
         /// 当触发窗口的层级排序。
@@ -132,6 +149,7 @@ namespace GameLogic
         protected void _OnSortingOrderChange()
         {
             m_isSortingOrderDirty = false;
+
             if (ChildList != null)
             {
                 for (int i = 0; i < ChildList.Count; i++)
@@ -146,18 +164,24 @@ namespace GameLogic
         /// <summary>
         /// 触发窗口的层级排序
         /// </summary>
-        protected virtual void OnSortingOrderChange() { }
+        protected virtual void OnSortingOrderChange()
+        {
+        }
 
         /// <summary>
         /// 当因为全屏遮挡触发或者窗口可见性触发窗口的显隐
         /// </summary>
-        protected virtual void OnVisible() { }
+        protected virtual void OnVisible()
+        {
+        }
 
         /// <summary>
         /// 界面不可见的时候调用
         /// 当被上层全屏界面覆盖后，也会触发一次隐藏
         /// </summary>
-        protected virtual void OnHidden() { }
+        protected virtual void OnHidden()
+        {
+        }
 
         internal void AddChild(UIWidget child)
         {
@@ -210,7 +234,8 @@ namespace GameLogic
 
         private GameEventDriver m_eventDriver;
 
-        protected GameEventDriver EventDriver => m_eventDriver == null ? m_eventDriver = MemoryPool.Spawn<GameEventDriver>() : m_eventDriver;
+        protected GameEventDriver EventDriver =>
+            m_eventDriver == null ? m_eventDriver = MemoryPool.Spawn<GameEventDriver>() : m_eventDriver;
 
         public void AddUIEvent(int eventID, Action handler)
             => EventDriver.AddUIEvent(eventID, handler);
@@ -302,7 +327,9 @@ namespace GameLogic
             {
                 return null;
             }
+
             var widget = new T();
+
             if (widget.Create(this, goRoot, visible))
             {
                 return widget;
@@ -319,20 +346,24 @@ namespace GameLogic
         /// <param name="visible">是否可见</param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public T CreateWidgetByPath<T>(Transform parentTrans, string assetLocation, bool visible = true) where T : UIWidget, new()
+        public T CreateWidgetByPath<T>(Transform parentTrans, string assetLocation, bool visible = true)
+            where T : UIWidget, new()
         {
             GameObject goInst = UIModule.ResourceLoader.LoadGameObject(assetLocation, parentTrans);
             return CreateWidget<T>(goInst, visible);
         }
 
-        public async UniTask<T> CreateWidgetByPathAsync<T>(Transform parentTrans, string assetLocation, bool visible = true)
+        public async UniTask<T> CreateWidgetByPathAsync<T>(Transform parentTrans, string assetLocation,
+            bool visible = true)
             where T : UIWidget, new()
         {
             if (gameObject == null)
             {
                 return null;
             }
-            GameObject goInst = await UIModule.ResourceLoader.LoadGameObjectAsync(assetLocation, parentTrans, gameObject.GetCancellationTokenOnDestroy());
+
+            GameObject goInst = await UIModule.ResourceLoader.LoadGameObjectAsync(assetLocation, parentTrans,
+                gameObject.GetCancellationTokenOnDestroy());
             return CreateWidget<T>(goInst, visible);
         }
 
@@ -346,6 +377,7 @@ namespace GameLogic
             {
                 return null;
             }
+
             return widget;
         }
 
@@ -357,7 +389,8 @@ namespace GameLogic
             where T : UIWidget, new()
             => await CreateWidgetByPathAsync<T>(parentTrans, typeof(T).Name, visible);
 
-        public void AdjustItemNum<T>(List<T> itemList, int count, Transform parentTrans, GameObject prefab = null, string assetLocation = "") where T : UIWidget, new()
+        public void AdjustItemNum<T>(List<T> itemList, int count, Transform parentTrans, GameObject prefab = null,
+            string assetLocation = "") where T : UIWidget, new()
         {
             if (itemList == null)
             {
@@ -371,11 +404,13 @@ namespace GameLogic
 
                 for (int i = 0; i < needNCnt; i++)
                 {
-                    T tempItem = prefab != null ? CreateWidgetByPrefab<T>(prefab, parentTrans) : CreateWidgetByType<T>(parentTrans);
+                    T tempItem = prefab != null
+                        ? CreateWidgetByPrefab<T>(prefab, parentTrans)
+                        : CreateWidgetByType<T>(parentTrans);
                     itemList.Add(tempItem);
                 }
             }
-            else if(itemList.Count > count)
+            else if (itemList.Count > count)
             {
                 RemoveUnUseItem(itemList, count);
             }
@@ -388,13 +423,15 @@ namespace GameLogic
                 assetLocation).Forget();
 
         public async UniTask AsyncAwaitAdjustItemNum<T>(List<T> itemList, int count, Transform parentTrans,
-            GameObject prefab = null, string assetLocation = "", int maxNumPerFrame = 5, Action<T, int> updateAction = null)
+            GameObject prefab = null, string assetLocation = "", int maxNumPerFrame = 5,
+            Action<T, int> updateAction = null)
             where T : UIWidget, new()
             => await AsyncAdjustItemNumInternal(itemList, count, parentTrans, maxNumPerFrame, updateAction, prefab,
                 assetLocation);
 
         private async UniTask AsyncAdjustItemNumInternal<T>(List<T> itemList, int count, Transform parentTrans,
-            int maxCntPerFrame, Action<T, int> updateAction, GameObject prefab, string assetLocation) where T : UIWidget, new()
+            int maxCntPerFrame, Action<T, int> updateAction, GameObject prefab, string assetLocation)
+            where T : UIWidget, new()
         {
             if (itemList == null)
             {
@@ -422,6 +459,7 @@ namespace GameLogic
                     {
                         tempT = await CreateWidgetByPathAsync<T>(parentTrans, assetLocation);
                     }
+
                     itemList.Add(tempT);
                 }
 
@@ -431,6 +469,7 @@ namespace GameLogic
                 {
                     updateAction(tempT, index);
                 }
+
                 createCnt++;
 
                 if (createCnt >= maxCntPerFrame)

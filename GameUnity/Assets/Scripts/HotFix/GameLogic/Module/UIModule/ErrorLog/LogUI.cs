@@ -39,9 +39,9 @@ namespace GameLogic
 
 		#region 函数
 
-		public void Init(string errorText)
+		protected override void OnRefresh()
 		{
-			m_errorTextStack.Push(errorText);
+			m_errorTextStack.Push(UserData.ToString());
 
 			if (!m_isInit)
 			{
@@ -56,14 +56,19 @@ namespace GameLogic
 
 		private void OnClickCloseBtn()
 		{
+			PopErrorLog().Forget();
+		}
+
+		private async UniTaskVoid PopErrorLog()
+		{
 			if (m_errorTextStack.Count <= 0)
 			{
+				await UniTask.Yield();
 				Close();
 				return;
 			}
 
-			string error = m_errorTextStack.Pop();
-			m_textError.text = error;
+			m_textError.text = m_errorTextStack.Pop();
 		}
 
 		#endregion

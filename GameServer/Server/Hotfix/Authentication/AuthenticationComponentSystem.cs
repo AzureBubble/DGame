@@ -49,7 +49,7 @@ internal static class AuthenticationComponentSystem
             // 4、写入实体到数据库中
             await worldDatabase.Save(account);
             // 5、把账号缓存到字典中
-            cmpt.CacheAccountList.TryAdd(account.Id, account);
+            cmpt.CacheAccountList.TryAdd(userName, account);
             // 代表注册成功
             Log.Info($"[Register] source: [{source}]注册一个账号 用户名: [{userName}] 账户ID: [{account.Id}]");
 
@@ -75,7 +75,6 @@ internal static class AuthenticationComponentSystem
             // 2、数据库查询账号是否存在
             var worldDatabase = scene.World.Database;
             await worldDatabase.Remove<Account>(accountID);
-            cmpt.CacheAccountList.Remove(accountID);
             Log.Info($"[Remove] source: [{source}]移除账号成功accountID: {accountID}");
             return 0;
         }

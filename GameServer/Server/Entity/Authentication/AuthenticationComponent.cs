@@ -2,5 +2,5 @@
 
 public sealed class AuthenticationComponent : Entitas.Entity
 {
-    public readonly Dictionary<long, Account> CacheAccountList = new Dictionary<long, Account>();
+    public readonly Dictionary<string, Account> CacheAccountList = new Dictionary<string, Account>();
 }

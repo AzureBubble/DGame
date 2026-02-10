@@ -24,8 +24,7 @@ internal static class AuthenticationComponentSystem
         var scene = self.Scene;
 
         // 利用协程锁 解决异步原子性问题
-        using (var @lock =
-               await scene.CoroutineLockComponent.Wait((int)LockType.Authentication_RegisterLock, userNameHashCode))
+        using (var @lock = await scene.CoroutineLockComponent.Wait((int)LockType.Authentication_RegisterLock, userNameHashCode))
         {
             // 利用缓存来减少频繁请求数据或缓存的压力
             if (self.CacheAccountList.TryGetValue(userName, out var account))

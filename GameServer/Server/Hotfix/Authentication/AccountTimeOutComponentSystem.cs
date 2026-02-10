@@ -19,7 +19,7 @@ public static class AccountTimeOutComponentSystem
     public static void TimeOut(this AccountTimeOutComponent self, int timeout)
     {
         var scene = self.Scene;
-        var account = (Account)scene.Parent;
+        var account = (Account)self.Parent;
         var accountRuntimeId = account.RuntimeId;
         // 创建一个任务计时器 用在timeout时间后执行 并且要清除掉当前鉴权服务器的缓存
         self.TimeId = scene.TimerComponent.Net.OnceTimer(timeout, () =>

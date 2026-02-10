@@ -17,6 +17,15 @@ public static class AuthenticationHelper
         => await scene.GetComponent<AuthenticationComponent>().Register(username, password, source);
 
     /// <summary>
+    /// 移除鉴权服务器账号缓存
+    /// </summary>
+    /// <param name="scene"></param>
+    /// <param name="userName">账户名</param>
+    /// <param name="isDispose">是否销毁</param>
+    public static void RemoveCache(Scene scene, string userName, bool isDispose)
+        => scene.GetComponent<AuthenticationComponent>().RemoveCache(userName, isDispose);
+
+    /// <summary>
     /// 移除账号
     /// </summary>
     /// <param name="scene"></param>

@@ -197,6 +197,7 @@ namespace GameLogic
             BindMemberProperty();
             RegisterEvent();
             OnCreate();
+            OnRefresh();
             IsPrepared = true;
             if (visible)
             {

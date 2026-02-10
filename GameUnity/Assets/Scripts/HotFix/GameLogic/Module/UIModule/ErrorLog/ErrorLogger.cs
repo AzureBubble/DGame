@@ -13,13 +13,12 @@ namespace GameLogic
             Application.logMessageReceived += LogHandler;
         }
 
-        private async void LogHandler(string condition, string stacktrace, LogType type)
+        private void LogHandler(string condition, string stacktrace, LogType type)
         {
             if (type == LogType.Exception || type == LogType.Error || type == LogType.Assert)
             {
                 string des = $"客户端报错, \n#内容#：---{condition} \n#位置#：---{stacktrace}";
-                var logUI = await m_uiModule.ShowWindowAsyncAwait<LogUI>();
-                logUI?.Init(des);
+                m_uiModule.ShowWindowAsync<LogUI>(des);
             }
         }
 

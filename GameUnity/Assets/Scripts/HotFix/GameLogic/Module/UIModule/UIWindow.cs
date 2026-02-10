@@ -368,6 +368,11 @@ namespace GameLogic
             }
         }
 
+        internal void InternalRefresh()
+        {
+            OnRefresh();
+        }
+
         internal void InternalCreate()
         {
             if (IsDestroyed || m_isCreated)
@@ -579,13 +584,13 @@ namespace GameLogic
                 return;
             }
 
+            IsLoadDone = true;
             if (IsDestroyed)
             {
                 Object.Destroy(windowGo);
                 return;
             }
 
-            IsLoadDone = true;
             windowGo.name = GetType().Name;
             gameObject = windowGo;
             m_transform = gameObject?.transform;

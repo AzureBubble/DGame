@@ -16,7 +16,7 @@ using Obfuz;
 /// 热更DLL入口
 /// </summary>
 #if ENABLE_OBFUZ
-// [ObfuzIgnore(ObfuzScope.TypeName | ObfuzScope.MethodName)]
+[ObfuzIgnore(ObfuzScope.TypeName | ObfuzScope.MethodName)]
 #endif
 public partial class GameStart
 {

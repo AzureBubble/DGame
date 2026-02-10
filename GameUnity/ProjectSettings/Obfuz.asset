@@ -22,9 +22,13 @@ MonoBehaviour:
     assembliesToObfuscate:
     - GameProto
     - GameLogic
-    nonObfuscatedButReferencingObfuscatedAssemblies: []
+    nonObfuscatedButReferencingObfuscatedAssemblies:
+    - DGame.Runtime
+    - Assembly-CSharp
+    - Launcher
+    - Fantasy.Unity
     additionalAssemblySearchPaths: []
-    obfuscateObfuzRuntime: 0
+    obfuscateObfuzRuntime: 1
   obfuscationPassSettings:
     enabledPasses: -1
     ruleFiles: []
@@ -64,8 +68,7 @@ MonoBehaviour:
     obfuscationLevel: 1
     maxProxyMethodCountPerDispatchMethod: 100
     obfuscateCallToMethodInMscorlib: 0
-    ruleFiles:
-    - Assets/Obfuz/ObfuzeRules.xml
+    ruleFiles: []
   exprObfusSettings:
     ruleFiles: []
   controlFlowObfusSettings:

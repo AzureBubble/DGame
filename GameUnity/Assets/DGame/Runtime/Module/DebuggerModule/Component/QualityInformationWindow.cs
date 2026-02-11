@@ -45,7 +45,7 @@ namespace DGame
                     DrawItem("Desired Color Space", QualitySettings.desiredColorSpace.ToString(), "期望的颜色空间（Gamma/Linear）");
                     DrawItem("Max Queued Frames", QualitySettings.maxQueuedFrames.ToString(), "最大排队帧数");
                     DrawItem("Pixel Light Count", QualitySettings.pixelLightCount.ToString(), "像素光数量");
-#if UNITY_6000_0_OR_NEWER
+#if UNITY_2022_1_OR_NEWER
                     DrawItem("Master Texture Limit", QualitySettings.globalTextureMipmapLimit.ToString(), "全局纹理Mipmap限制");
 #else
                     DrawItem("Master Texture Limit", QualitySettings.masterTextureLimit.ToString(), "全局纹理Mipmap限制");

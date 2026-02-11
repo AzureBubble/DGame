@@ -685,12 +685,18 @@ namespace AssetUsageDetectorNamespace
 			rect.width = width - ( parameters.searchResult != null ? 140f : 40f );
 			if( GUI.Button( rect, Title, Utilities.BoxGUIStyle ) && Type == GroupType.Scene )
 			{
+				var loadedSceneCount =
+#if UNITY_2022_1_OR_NEWER
+					SceneManager.loadedSceneCount;
+#else
+					EditorSceneManager.loadedSceneCount;
+#endif
 				if( Event.current.button != 1 )
 				{
 					// If the container (scene, usually) is left clicked, highlight it on Project view
 					AssetDatabase.LoadAssetAtPath<SceneAsset>( Title ).SelectInEditor();
 				}
-				else if( !EditorApplication.isPlaying && EditorSceneManager.loadedSceneCount > 1 )
+				else if( !EditorApplication.isPlaying && loadedSceneCount > 1 )
 				{
 					// Show context menu when SearchResultGroup's header is right clicked
 					Scene scene = EditorSceneManager.GetSceneByPath( Title );
@@ -880,7 +886,13 @@ namespace AssetUsageDetectorNamespace
 
 		private readonly List<Link> links;
 
-		public Object UnityObject { get { return instanceId.HasValue ? EditorUtility.InstanceIDToObject( instanceId.Value ) : null; } }
+		public Object UnityObject { get { return instanceId.HasValue ?
+#if UNITY_6000_0_OR_NEWER
+				EditorUtility.EntityIdToObject( instanceId.Value )
+#else
+				EditorUtility.InstanceIDToObject( instanceId.Value )
+#endif
+				: null; } }
 
 		public int NumberOfOutgoingLinks { get { return links.Count; } }
 		public Link this[int index] { get { return links[index]; } }
@@ -1066,7 +1078,13 @@ namespace AssetUsageDetectorNamespace
 			{
 				if( instanceId.HasValue ) // nodeObject is Unity object
 				{
-					if( !startPathsWithSceneObjects || !AssetDatabase.Contains( instanceId.Value ) )
+					bool isContains =
+#if UNITY_6000_0_OR_NEWER
+						AssetDatabase.Contains((EntityId)instanceId.Value);
+#else
+						AssetDatabase.Contains(instanceId.Value);
+#endif
+					if( !startPathsWithSceneObjects || !isContains )
 						latestObjectIndexInPath = currentIndex;
 				}
 
@@ -1250,7 +1268,12 @@ namespace AssetUsageDetectorNamespace
 			if( GUI.Button( rect, label, Utilities.BoxGUIStyle ) && instanceId.HasValue )
 			{
 				// If a reference is clicked, highlight it (either on Hierarchy view or Project view)
-				EditorUtility.InstanceIDToObject( instanceId.Value ).SelectInEditor();
+#if UNITY_6000_0_OR_NEWER
+						EditorUtility.EntityIdToObject( instanceId.Value )
+#else
+						EditorUtility.InstanceIDToObject( instanceId.Value )
+#endif
+						.SelectInEditor();
 			}
 
 			for( int i = 0; i < links.Length; i++ )

@@ -58,7 +58,13 @@ namespace GameLogic
         [UnityEditor.Callbacks.OnOpenAsset(1)]
         public static bool OnOpenAsset(int instanceID, int line)
         {
-            var asset = EditorUtility.InstanceIDToObject(instanceID) as RedDotTreeConfig;
+            var asset =
+#if UNITY_6000_0_OR_NEWER
+                EditorUtility.EntityIdToObject(instanceID) as RedDotTreeConfig;
+#else
+                EditorUtility.InstanceIDToObject(instanceID) as RedDotTreeConfig;
+#endif
+
             if (asset == null)
                 return false;
 

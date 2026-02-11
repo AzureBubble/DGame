@@ -21,15 +21,6 @@
       "dependencies": {},
       "hash": "c9214b2cf9869cf93e060442ec12b9fa828d98d5"
     },
-    "com.fantasy.unity": {
-      "version": "2025.2.1422",
-      "depth": 0,
-      "source": "registry",
-      "dependencies": {
-        "com.unity.nuget.newtonsoft-json": "3.2.1"
-      },
-      "url": "https://package.openupm.com"
-    },
     "com.tuyoogame.yooasset": {
       "version": "2.3.18",
       "depth": 0,

@@ -1,8 +1,10 @@
 ﻿using System;
+using System.IO;
 using DGame;
 using Fantasy;
 using Fantasy.Async;
 using Fantasy.Network;
+using Fantasy.Network.Interface;
 
 namespace GameLogic
 {
@@ -35,6 +37,11 @@ namespace GameLogic
         /// 登录中
         /// </summary>
         StatusLogin,
+
+        /// <summary>
+        /// 注册
+        /// </summary>
+        StatusRegister,
 
         /// <summary>
         /// AccountLogin成功，进入服务器了
@@ -98,9 +105,22 @@ namespace GameLogic
             DLogger.Info("[GameClient] Disconnected to server");
         }
 
-        public bool IsStatusCanSendMsg(int protocolCode)
+        public bool IsStatusCanSendMsg(uint protocolCode)
         {
-            bool canSend = Status == GameClientStatus.StatusLogin || Status == GameClientStatus.StatusEnter;
+            bool canSend = false;
+
+            if (Status == GameClientStatus.StatusLogin)
+            {
+                canSend = protocolCode == OuterOpcode.A2C_LoginResponse;
+            }
+            if (Status == GameClientStatus.StatusRegister)
+            {
+                canSend = protocolCode == OuterOpcode.C2A_RegisterRequest;
+            }
+            if (Status == GameClientStatus.StatusEnter)
+            {
+                canSend = true;
+            }
 
             if (!canSend)
             {
@@ -115,17 +135,57 @@ namespace GameLogic
             return canSend;
         }
 
+        public void Send<T>(T message, uint rpcID = 0, long routeID = 0) where T : IMessage
+        {
+            if (Scene.Session == null)
+            {
+                Log.Error("Send Message Failed Because Session Is Null");
+                return;
+            }
+
+            if (IsStatusCanSendMsg(rpcID))
+            {
+                Scene.Session.Send(message, rpcID, routeID);
+            }
+        }
+
+        public async FTask<IResponse> Call<T>(T request, long routeId = 0) where T : IRequest
+        {
+            if (Scene == null || Scene.Session == null || Scene.Session.IsDisposed)
+            {
+                return null;
+            }
+
+            if (IsStatusCanSendMsg(request.OpCode()))
+            {
+                var requestCallback = await Scene.Session.Call(request, routeId);
+                return requestCallback;
+            }
+
+            return null;
+        }
+
         protected override void OnDestroy()
         {
             Scene?.Dispose();
         }
 
-        public void RegisterMsgHandler(uint protocolCode, Action xtc)
+        public void RegisterMsgHandler(uint protocolCode, Action<IResponse> ctx)
         {
+            if (Scene == null || Scene.Session == null || Scene.Session.IsDisposed)
+            {
+                return;
+            }
+            Scene.GetComponent<MessageDispatcherComponent>()?.RegisterMsgHandler(protocolCode, ctx);
         }
 
-        public void UnRegisterMsgHandler(uint protocolCode, Action xtc)
+        public void UnRegisterMsgHandler(uint protocolCode, Action<IResponse> ctx)
         {
+            if (Scene == null || Scene.Session == null || Scene.Session.IsDisposed)
+            {
+                return;
+            }
+            Scene.GetComponent<MessageDispatcherComponent>()?.UnRegisterMsgHandler(protocolCode, ctx);
         }
     }
 }

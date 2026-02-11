@@ -12,7 +12,7 @@ public sealed class C2A_RegisterRequestHandler : MessageRPC<C2A_RegisterRequest,
         if (!session.CheckInterval(2000))
         {
             // 返回这个 3 代表操作过于频繁
-            response.ErrorCode = 3;
+            response.ErrorCode = 1003;
             return;
         }
         // var authenticationSessionComponent = session.GetComponent<AuthenticationSessionComponent>();

@@ -20,6 +20,29 @@ public sealed class AuthenticationComponentDestroySystem : DestroySystem<Authent
 
 internal static class AuthenticationComponentSystem
 {
+    internal static async FTask<uint> Login(this AuthenticationComponent self, string userName, string password)
+    {
+        // 1、检查传递的参数是否完整以及合法
+        if (string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(password))
+        {
+            // 代表账号参数不完整或不合法
+            return 1001;
+        }
+        var scene = self.Scene;
+        var worldDatabase = scene.World.Database;
+        var account = await worldDatabase.First<Account>(d => d.Username == userName && d.Password == password);
+
+        if (account == null)
+        {
+            // 用户名或者密码错误
+            return 1004;
+        }
+        account.LoginTime = TimeHelper.Now;
+        await worldDatabase.Save(account);
+        return 0;
+    }
+
+
     /// <summary>
     /// 鉴权注册接口
     /// </summary>
@@ -30,7 +53,7 @@ internal static class AuthenticationComponentSystem
         if (string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(password))
         {
             // 代表注册账号参数不完整或不合法
-            return 1;
+            return 1001;
         }
 
         var userNameHashCode = userName.GetHashCode();
@@ -44,7 +67,7 @@ internal static class AuthenticationComponentSystem
             {
                 Log.Info($"[Register] 缓存中的数据");
                 // 代表用户已经存在
-                return 2;
+                return 1002;
             }
 
             Log.Info($"[Register] 数据库中的数据");
@@ -55,7 +78,7 @@ internal static class AuthenticationComponentSystem
             if (isExist)
             {
                 // 代表用户已经存在
-                return 2;
+                return 1002;
             }
 
             // 3、执行到这里 表示数据库或缓存没有该账号的注册信息 需要创建一个

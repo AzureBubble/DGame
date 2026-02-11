@@ -125,7 +125,7 @@ namespace GameLogic
             if (!canSend)
             {
                 float nowTime = GameTime.UnscaledTime;
-                if (m_lastLogDisconnectErrTime + 5f > nowTime)
+                if (m_lastLogDisconnectErrTime + 5f < nowTime)
                 {
                     DLogger.Error($"[GameClient] GameClient disconnect, send msg failed, protocolCode[{protocolCode}]");
                     m_lastLogDisconnectErrTime = nowTime;

@@ -170,22 +170,22 @@ namespace GameLogic
             Scene?.Dispose();
         }
 
-        public void RegisterMsgHandler(uint protocolCode, Action<IResponse> ctx)
+        public void RegisterMsgHandler(uint protocolCode, Action<IMessage> ctx)
         {
             if (Scene == null || Scene.Session == null || Scene.Session.IsDisposed)
             {
                 return;
             }
-            Scene.GetComponent<MessageDispatcherComponent>()?.RegisterMsgHandler(protocolCode, ctx);
+            Scene.MessageDispatcherComponent?.RegisterMsgHandler(protocolCode, ctx);
         }
 
-        public void UnRegisterMsgHandler(uint protocolCode, Action<IResponse> ctx)
+        public void UnRegisterMsgHandler(uint protocolCode, Action<IMessage> ctx)
         {
             if (Scene == null || Scene.Session == null || Scene.Session.IsDisposed)
             {
                 return;
             }
-            Scene.GetComponent<MessageDispatcherComponent>()?.UnRegisterMsgHandler(protocolCode, ctx);
+            Scene.MessageDispatcherComponent?.UnRegisterMsgHandler(protocolCode, ctx);
         }
     }
 }

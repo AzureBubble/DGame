@@ -38,20 +38,23 @@ namespace Fantasy.Network.Interface
         private readonly UInt32MergerFrozenDictionary<Func<Session, Entity, uint, object, FTask>> _routeMessageHandlerMerger = new();
 #endif
 #if FANTASY_UNITY
+        /*
+         * 方便客户端通过GameClient和协议号直接监听服务器数据的下发
+         */
 
-        public readonly Dictionary<uint, List<Action<IResponse>>> MsgHandles = new Dictionary<uint, List<Action<IResponse>>>();
+        public readonly Dictionary<uint, List<Action<IMessage>>> MsgHandles = new Dictionary<uint, List<Action<IMessage>>>();
 
-        public void RegisterMsgHandler(uint protocolCode, Action<IResponse> ctx)
+        public void RegisterMsgHandler(uint protocolCode, Action<IMessage> ctx)
         {
             if (!MsgHandles.ContainsKey(protocolCode))
             {
-                MsgHandles[protocolCode] = new List<Action<IResponse>>();
+                MsgHandles[protocolCode] = new List<Action<IMessage>>();
             }
 
             MsgHandles[protocolCode].Add(ctx);
         }
 
-        public void UnRegisterMsgHandler(uint protocolCode, Action<IResponse> ctx)
+        public void UnRegisterMsgHandler(uint protocolCode, Action<IMessage> ctx)
         {
             if (MsgHandles.TryGetValue(protocolCode, out var handle))
             {
@@ -166,14 +169,16 @@ namespace Fantasy.Network.Interface
         internal void MessageHandler(Session session, Type type, object message, uint rpcId, uint protocolCode)
         {
 #if FANTASY_UNITY
-            // 先触发通过 RegisterMsgHandler 注册的回调
+            // 先触发通过 GameClient RegisterMsgHandler 注册的回调
+            // 方便客户端通过 GameClient 和协议号直接监听服务器数据的下发
             if (MsgHandles.TryGetValue(protocolCode, out var handlers))
             {
-                foreach (var handler in handlers)
+                for (int i = handlers.Count - 1; i >= 0; i--)
                 {
+                    var handler = handlers[i];
                     try
                     {
-                        handler.Invoke((IResponse)message);
+                        handler.Invoke((IMessage)message);
                     }
                     catch (Exception e)
                     {

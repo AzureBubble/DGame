@@ -5,6 +5,7 @@ using DGame;
 using Fantasy;
 using Fantasy.Async;
 using Fantasy.Helper;
+using Fantasy.Network.Interface;
 
 namespace GameLogic
 {
@@ -31,38 +32,23 @@ namespace GameLogic
 			m_scene = GameClient.Instance.Scene;
 		}
 
+		protected override void RegisterEvent()
+		{
+		}
+
 		#region 事件
 
 		private partial void OnClickRegisterBtn()
 		{
-			RegisterAction().Coroutine();
-		}
-
-		private async FTask RegisterAction()
-		{
 			// 根据用户名来选择目标的鉴权服务器
 			// var authenticationAddress = Select(m_inputUserName.text);
 			// 根据鉴权服务器地址来创建一个新的网络会话
-			GameClient.Instance.Connect("127.0.0.1:20001");
-			GameClient.Instance.Status = GameClientStatus.StatusRegister;
-			// 发送一个注册的请求消息到目标服务器
-			var response = (A2C_RegisterResponse)await GameClient.Instance.Call(new C2A_RegisterRequest()
-			{
-				UserName = m_inputUserName.text,
-				Password = m_inputPassword.text
-			});
-
-			if (response.ErrorCode != 0)
-			{
-				Log.Error($"Error: {response.ErrorCode}");
-				return;
-			}
-
-			Log.Debug("Registered Successfully");
+			DataCenterSys.Instance.Register("127.0.0.1:20001", m_inputUserName.text, m_inputPassword.text).Coroutine();
 		}
 
 		private partial void OnClickLoginBtn()
 		{
+			DataCenterSys.Instance.Login("127.0.0.1:20001", m_inputUserName.text, m_inputPassword.text).Coroutine();
 		}
 
 		private partial void OnClickGetBtn()

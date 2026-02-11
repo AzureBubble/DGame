@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using UnityEngine;
 
 #if UNITY_EDITOR
 using System.IO;
@@ -205,7 +206,12 @@ namespace DGame
                 return false;
             }
             // 获取资源路径
-            string assetPath = AssetDatabase.GetAssetPath(instanceID);
+            string assetPath =
+#if UNITY_6000_0_OR_NEWER
+                AssetDatabase.GetAssetPath((EntityId)instanceID);
+#else
+                AssetDatabase.GetAssetPath(instanceID);
+#endif
 
             // 判断资源类型
             if (!assetPath.EndsWith(".cs"))

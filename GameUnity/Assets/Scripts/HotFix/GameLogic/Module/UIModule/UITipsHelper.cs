@@ -4,6 +4,12 @@ namespace GameLogic
 {
     public partial class UIModule
     {
+        public void ShowTipsUI(uint result)
+        {
+            string text = TextConfigMgr.Instance.GetText(result);
+            ShowTipsUI(text);
+        }
+
         public void ShowTipsUI(string msg)
         {
             if (!string.IsNullOrEmpty(msg))

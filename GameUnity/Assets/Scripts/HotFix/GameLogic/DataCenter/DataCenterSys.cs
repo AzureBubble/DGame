@@ -1,4 +1,7 @@
 ﻿using System.Collections.Generic;
+using DGame;
+using Fantasy;
+using Fantasy.Async;
 
 namespace GameLogic
 {
@@ -20,6 +23,50 @@ namespace GameLogic
         {
 
         }
+
+        #region 网络操作
+
+        public async FTask Register(string address, string userName, string password)
+        {
+            GameClient.Instance.Connect(address);
+            GameClient.Instance.Status = GameClientStatus.StatusRegister;
+            var response = (A2C_RegisterResponse)await GameClient.Instance.Call(new C2A_RegisterRequest()
+            {
+                UserName = userName,
+                Password = password
+            });
+            if (response.ErrorCode != 0)
+            {
+                UIModule.Instance.ShowTipsUI(response.ErrorCode);
+                DLogger.Warning($"Error: {response.ErrorCode}");
+                return;
+            }
+            DLogger.Info("Registered Successfully");
+            GameEvent.Get<ILoginUI>().OnRegister();
+        }
+
+        public async FTask Login(string address, string userName, string password)
+        {
+            GameClient.Instance.Connect(address);
+            GameClient.Instance.Status = GameClientStatus.StatusLogin;
+            var response = (A2C_LoginResponse)await GameClient.Instance.Call(new C2A_LoginRequest()
+            {
+                UserName = userName,
+                Password = password,
+                LoginType = 1
+            });
+
+            if (response.ErrorCode != 0)
+            {
+                UIModule.Instance.ShowTipsUI(response.ErrorCode);
+                DLogger.Warning($"Error: {response.ErrorCode}");
+                return;
+            }
+            DLogger.Info("Login Successfully");
+            GameEvent.Get<ILoginUI>().OnLogin();
+        }
+
+        #endregion
 
         #region Module相关
 

@@ -689,7 +689,7 @@ namespace AssetUsageDetectorNamespace
 #if UNITY_2022_1_OR_NEWER
 					SceneManager.loadedSceneCount;
 #else
-					EditorSceneManager.loadedSceneCount
+					EditorSceneManager.loadedSceneCount;
 #endif
 				if( Event.current.button != 1 )
 				{
@@ -1082,7 +1082,7 @@ namespace AssetUsageDetectorNamespace
 #if UNITY_6000_0_OR_NEWER
 						AssetDatabase.Contains((EntityId)instanceId.Value);
 #else
-						AssetDatabase.Contains( instanceId.Value )
+						AssetDatabase.Contains(instanceId.Value);
 #endif
 					if( !startPathsWithSceneObjects || !isContains )
 						latestObjectIndexInPath = currentIndex;

@@ -137,7 +137,7 @@ namespace GameLogic
 
         public void Send<T>(T message, uint rpcID = 0, long routeID = 0) where T : IMessage
         {
-            if (Scene.Session == null)
+            if (!CheckSceneIsValid())
             {
                 Log.Error("Send Message Failed Because Session Is Null");
                 return;
@@ -151,7 +151,7 @@ namespace GameLogic
 
         public async FTask<IResponse> Call<T>(T request, long routeId = 0) where T : IRequest
         {
-            if (Scene == null || Scene.Session == null || Scene.Session.IsDisposed)
+            if (!CheckSceneIsValid())
             {
                 return null;
             }
@@ -165,6 +165,16 @@ namespace GameLogic
             return null;
         }
 
+        private bool CheckSceneIsValid()
+        {
+            if (Scene == null || Scene.Session == null || Scene.Session.IsDisposed)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
         protected override void OnDestroy()
         {
             Scene?.Dispose();
@@ -172,7 +182,7 @@ namespace GameLogic
 
         public void RegisterMsgHandler(uint protocolCode, Action<IMessage> ctx)
         {
-            if (Scene == null || Scene.Session == null || Scene.Session.IsDisposed)
+            if (!CheckSceneIsValid())
             {
                 return;
             }
@@ -181,7 +191,7 @@ namespace GameLogic
 
         public void UnRegisterMsgHandler(uint protocolCode, Action<IMessage> ctx)
         {
-            if (Scene == null || Scene.Session == null || Scene.Session.IsDisposed)
+            if (!CheckSceneIsValid())
             {
                 return;
             }

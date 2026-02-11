@@ -112,17 +112,30 @@ namespace DGame
             /// <param name="angle">盒子的角度</param>
             /// <param name="size">长宽高的一半</param>
             /// <param name="results"></param>
-            /// <param name="layerMask">层级筛选</param>
             /// <param name="callBack">回调函数 </param>
-            public static bool TryOverlapBox2DNonAlloc<T>(Vector2 center, Vector2 size, float angle, Collider2D[] results, int layerMask, UnityAction<T> callBack = null) where T : class
+            /// <param name="filter2D">筛选条件</param>
+#if UNITY_6000_0_OR_NEWER
+
+            public static bool TryOverlapBox2DNonAlloc<T>(Vector2 center, Vector2 size, float angle, ContactFilter2D filter2D, Collider2D[] results, UnityAction<T> callBack = null) where T : class
             {
-                var count = Physics2D.OverlapBoxNonAlloc(center, size, angle, results, layerMask);
+                var count = Physics2D.OverlapBox(center, size, angle, filter2D, results);
                 if (count <= 0)
                 {
                     return false;
                 }
                 return InternalTryOverlap2DNonAlloc(count, results, callBack);
             }
+#else
+            public static bool TryOverlapBox2DNonAlloc<T>(Vector2 center, Vector2 size, float angle, Collider2D[] results, int filter2D, UnityAction<T> callBack = null) where T : class
+            {
+                var count = Physics2D.OverlapBoxNonAlloc(center, size, angle, results, filter2D);
+                if (count <= 0)
+                {
+                    return false;
+                }
+                return InternalTryOverlap2DNonAlloc(count, results, callBack);
+            }
+#endif
 
             /// <summary>
             /// 进行球体范围检测
@@ -131,17 +144,29 @@ namespace DGame
             /// <param name="center">球体的中心点</param>
             /// <param name="radius">球体的半径</param>
             /// <param name="results"></param>
-            /// <param name="layerMask">层级筛选</param>
+            /// <param name="filter2D">筛选条件</param>
             /// <param name="callBack">回调函数</param>
-            public static bool TryOverlapCircle2DNonAlloc<T>(Vector2 center, float radius, Collider2D[] results, int layerMask, UnityAction<T> callBack = null) where T : class
+#if UNITY_6000_0_OR_NEWER
+            public static bool TryOverlapCircle2DNonAlloc<T>(Vector2 center, float radius, ContactFilter2D filter2D, Collider2D[] results, UnityAction<T> callBack = null) where T : class
             {
-                var count = Physics2D.OverlapCircleNonAlloc(center, radius, results, layerMask);
+                var count = Physics2D.OverlapCircle(center, radius, filter2D, results);
                 if (count <= 0)
                 {
                     return false;
                 }
                 return InternalTryOverlap2DNonAlloc(count, results, callBack);
             }
+#else
+            public static bool TryOverlapCircle2DNonAlloc<T>(Vector2 center, float radius, Collider2D[] results, int filter2D, UnityAction<T> callBack = null) where T : class
+            {
+                var count = Physics2D.OverlapCircleNonAlloc(center, radius, results, filter2D);
+                if (count <= 0)
+                {
+                    return false;
+                }
+                return InternalTryOverlap2DNonAlloc(count, results, callBack);
+            }
+#endif
 
             /// <summary>
             /// 进行区域范围检测
@@ -150,12 +175,23 @@ namespace DGame
             /// <param name="point0">左上角的点</param>
             /// <param name="point1">右下角的点</param>
             /// <param name="results"></param>
-            /// <param name="layerMask">层级筛选</param>
+            /// <param name="filter2D">筛选条件</param>
             /// <param name="callBack"></param>
             /// <returns></returns>
-            public static bool TryOverlapArea2DNonAlloc<T>(Vector2 point0, Vector2 point1, Collider2D[] results, int layerMask, UnityAction<T> callBack = null) where T : class
+#if UNITY_6000_0_OR_NEWER
+            public static bool TryOverlapCircle2DNonAlloc<T>(Vector2 point0, Vector2 point1, ContactFilter2D filter2D, Collider2D[] results, UnityAction<T> callBack = null) where T : class
             {
-                var count = Physics2D.OverlapAreaNonAlloc(point0, point1, results, layerMask);
+                var count = Physics2D.OverlapArea(point0, point1, filter2D, results);
+                if (count <= 0)
+                {
+                    return false;
+                }
+                return InternalTryOverlap2DNonAlloc(count, results, callBack);
+            }
+#else
+            public static bool TryOverlapArea2DNonAlloc<T>(Vector2 point0, Vector2 point1, Collider2D[] results, int filter2D, UnityAction<T> callBack = null) where T : class
+            {
+                var count = Physics2D.OverlapAreaNonAlloc(point0, point1, results, filter2D);
                 if (count <= 0)
                 {
                     return false;
@@ -163,6 +199,7 @@ namespace DGame
 
                 return InternalTryOverlap2DNonAlloc(count, results, callBack);
             }
+#endif
 
             /// <summary>
             /// 进行点检测
@@ -170,18 +207,30 @@ namespace DGame
             /// <typeparam name="T"></typeparam>
             /// <param name="point0">点</param>
             /// <param name="results"></param>
-            /// <param name="layerMask">层级筛选</param>
+            /// <param name="filter2D">筛选条件</param>
             /// <param name="callBack"></param>
             /// <returns></returns>
-            public static bool TryOverlapPoint2DNonAlloc<T>(Vector2 point0, Collider2D[] results, int layerMask, UnityAction<T> callBack = null) where T : class
+#if UNITY_6000_0_OR_NEWER
+            public static bool TryOverlapCircle2DNonAlloc<T>(Vector2 point0, ContactFilter2D filter2D, Collider2D[] results, UnityAction<T> callBack = null) where T : class
             {
-                var count = Physics2D.OverlapPointNonAlloc(point0, results, layerMask);
+                var count = Physics2D.OverlapPoint(point0, filter2D, results);
                 if (count <= 0)
                 {
                     return false;
                 }
                 return InternalTryOverlap2DNonAlloc(count, results, callBack);
             }
+#else
+            public static bool TryOverlapPoint2DNonAlloc<T>(Vector2 point0, Collider2D[] results, int filter2D, UnityAction<T> callBack = null) where T : class
+            {
+                var count = Physics2D.OverlapPointNonAlloc(point0, results, filter2D);
+                if (count <= 0)
+                {
+                    return false;
+                }
+                return InternalTryOverlap2DNonAlloc(count, results, callBack);
+            }
+#endif
 
             private static bool InternalTryOverlap2DNonAlloc<T>(int count, Collider2D[] results, UnityAction<T> callBack)
                 where T : class

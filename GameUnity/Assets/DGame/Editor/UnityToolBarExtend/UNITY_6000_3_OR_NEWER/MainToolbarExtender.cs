@@ -343,7 +343,12 @@ namespace DGame
                 // 将索引转换为 EPlayMode 枚举
                 EPlayMode newPlayMode = IndexToPlayMode(resourcesModeIndex);
                 // 查找场景中所有的 ResourceModuleDriver
-                ResourceModuleDriver driver = Object.FindObjectOfType<ResourceModuleDriver>();
+                ResourceModuleDriver driver =
+#if UNITY_6000_0_OR_NEWER
+                    Object.FindFirstObjectByType<ResourceModuleDriver>();
+#else
+				    Object.FindObjectOfType<ResourceModuleDriver>();
+#endif
                 GameObject go = null;
                 if (driver.gameObject.scene.IsValid())
                 {

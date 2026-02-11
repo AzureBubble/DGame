@@ -22,6 +22,20 @@ namespace Fantasy
 			return (A2C_RegisterResponse)await session.Call(C2A_RegisterRequest_request);
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static async FTask<A2C_LoginResponse> C2A_LoginRequest(this Session session, C2A_LoginRequest C2A_LoginRequest_request)
+		{
+			return (A2C_LoginResponse)await session.Call(C2A_LoginRequest_request);
+		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static async FTask<A2C_LoginResponse> C2A_LoginRequest(this Session session, string userName, string password, uint loginType)
+		{
+			using var C2A_LoginRequest_request = Fantasy.C2A_LoginRequest.Create();
+			C2A_LoginRequest_request.UserName = userName;
+			C2A_LoginRequest_request.Password = password;
+			C2A_LoginRequest_request.LoginType = loginType;
+			return (A2C_LoginResponse)await session.Call(C2A_LoginRequest_request);
+		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static void C2G_TestMessage(this Session session, C2G_TestMessage C2G_TestMessage_message)
 		{
 			session.Send(C2G_TestMessage_message);

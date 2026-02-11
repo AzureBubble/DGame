@@ -24,6 +24,19 @@ message A2C_RegisterResponse // IResponse
 {
 }
 
+// 登录协议
+message C2A_LoginRequest // IRequest,A2C_LoginResponse
+{
+	string UserName = 1;
+	string Password = 2;
+	uint32 LoginType = 3;
+}
+// 登录协议返回
+message A2C_LoginResponse // IResponse
+{
+	string Token = 1;
+}
+
 message C2G_TestMessage // IMessage
 {
 	string Tag = 1;

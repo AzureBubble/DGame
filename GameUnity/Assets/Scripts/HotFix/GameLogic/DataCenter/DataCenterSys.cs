@@ -63,8 +63,12 @@ namespace GameLogic
                 return;
             }
             DLogger.Info($"Login Successfully Token: {response.Token}");
-            JwtParseHelper.Parse(response.Token);
-            GameEvent.Get<ILoginUI>().OnLogin();
+
+            if (JwtParseHelper.Parse(response.Token, out var payload))
+            {
+                DLogger.Info($"Login Success: UID: {payload.uid} address: {payload.address} port: {payload.port}");
+                GameEvent.Get<ILoginUI>().OnLogin();
+            }
         }
 
         #endregion

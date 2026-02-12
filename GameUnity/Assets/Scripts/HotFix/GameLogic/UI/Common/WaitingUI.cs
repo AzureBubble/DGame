@@ -51,11 +51,6 @@ namespace GameLogic
             {
                 Close();
             }
-
-            if (Input.GetKeyDown(KeyCode.S))
-            {
-                GameEvent.Get<ICommonUI>().FinishWaiting();
-            }
         }
 
         protected override void OnDestroy()

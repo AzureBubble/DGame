@@ -32,14 +32,6 @@ namespace GameLogic
 		{
 		}
 
-		protected override void OnUpdate()
-		{
-			if (Input.GetKeyDown(KeyCode.A))
-			{
-				GameEvent.Get<ICommonUI>().ShowWaitingUI(WaitingUISeq.LOGINWORLD_SEQID, "test", null);
-			}
-		}
-
 		#region 事件
 
 		private partial void OnClickRegisterBtn()

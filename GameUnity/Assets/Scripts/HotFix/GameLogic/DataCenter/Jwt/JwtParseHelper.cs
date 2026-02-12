@@ -6,7 +6,8 @@ namespace GameLogic
     public static class JwtParseHelper
     {
         /// <summary>
-        /// 解析登录Token JWT 性能更好 内存分配一次 可读性差
+        /// 解析登录Token JWT
+        /// <remarks>性能更好 内存分配一次 可读性差</remarks>
         /// </summary>
         /// <param name="token"></param>
         /// <param name="payloadEntry"></param>
@@ -85,58 +86,64 @@ namespace GameLogic
             }
         }
 
-        // 性能稍差 内存分配三次 但代码可读性更高 客户端仅在登录的时候调用一次 性能无影响
-        // public static bool Parse(string token, out Payload payloadEntry)
-        // {
-        //     payloadEntry = null;
-        //     try
-        //     {
-        //         // JWT通常是由三部分组成 Header Payload Signature
-        //         var tokens = token.Split('.');
-        //
-        //         if (tokens.Length != 3)
-        //         {
-        //             DLogger.Error($"[ParseJwt] Invalid Jwt Token: {token}");
-        //             return false;
-        //         }
-        //
-        //         // JWT 的Payload不是标准的 Base64 格式 因为C#的Convert要求是要一个标准的 Base64 格式
-        //         // JWT 的Payload是 Base64URL 的格式 里面的 "-" 替代成了 "+"  "_" 替换成了 "/" 需要把这些还原成 Base64 格式
-        //         var basePayload = tokens[1].Replace('-', '+').Replace('_', '/');
-        //         // 因为 Base64 的编码长度需要是4的倍数 如果不是 需要把这个长度用=来填充 使其长度符合要求
-        //         // switch (basePayload.Length % 4)
-        //         // {
-        //         //     // case 0:
-        //         //     //     // 如果余数是 0 表示长度已经是4的倍数 不用处理
-        //         //     //     break;
-        //         //     //
-        //         //     // case 1:
-        //         //     //     // 如果余数是 1 表示格式不正确 不是服务器发放的 Token 也不需要处理
-        //         //     //     break;
-        //         //
-        //         //     case 2:
-        //         //         basePayload += "==";
-        //         //         break;
-        //         //
-        //         //     case 3:
-        //         //         basePayload += "=";
-        //         //         break;
-        //         // }
-        //         // PadRight一行搞定
-        //         basePayload = basePayload.PadRight((basePayload.Length + 3) / 4 * 4, '=');
-        //
-        //         // 将修复后的字符串解码成数组
-        //         var basePayloadBytes = Convert.FromBase64String(basePayload);
-        //         var payload = System.Text.Encoding.UTF8.GetString(basePayloadBytes);
-        //         payloadEntry = DGame.Utility.JsonUtil.ToObject<Payload>(payload);
-        //         DLogger.Info($"[ParseJwt] JWT parse success payload: {payload}");
-        //         return true;
-        //     }
-        //     catch (Exception e)
-        //     {
-        //         DLogger.Error($"[ParseJwt] JWT parse fail error: {e}");
-        //         return false;
-        //     }
-        // }
+        /// <summary>
+        /// 解析登录Token JWT
+        /// <remarks>性能稍差 内存分配三次 但代码可读性更高 客户端仅在登录的时候调用一次 性能无影响</remarks>
+        /// </summary>
+        /// <param name="token"></param>
+        /// <param name="payloadEntry"></param>
+        /// <returns></returns>
+        public static bool ParseSimple(string token, out Payload payloadEntry)
+        {
+            payloadEntry = null;
+            try
+            {
+                // JWT通常是由三部分组成 Header Payload Signature
+                var tokens = token.Split('.');
+
+                if (tokens.Length != 3)
+                {
+                    DLogger.Error($"[ParseJwt] Invalid Jwt Token: {token}");
+                    return false;
+                }
+
+                // JWT 的Payload不是标准的 Base64 格式 因为C#的Convert要求是要一个标准的 Base64 格式
+                // JWT 的Payload是 Base64URL 的格式 里面的 "-" 替代成了 "+"  "_" 替换成了 "/" 需要把这些还原成 Base64 格式
+                var basePayload = tokens[1].Replace('-', '+').Replace('_', '/');
+                // 因为 Base64 的编码长度需要是4的倍数 如果不是 需要把这个长度用=来填充 使其长度符合要求
+                // switch (basePayload.Length % 4)
+                // {
+                //     // case 0:
+                //     //     // 如果余数是 0 表示长度已经是4的倍数 不用处理
+                //     //     break;
+                //     //
+                //     // case 1:
+                //     //     // 如果余数是 1 表示格式不正确 不是服务器发放的 Token 也不需要处理
+                //     //     break;
+                //
+                //     case 2:
+                //         basePayload += "==";
+                //         break;
+                //
+                //     case 3:
+                //         basePayload += "=";
+                //         break;
+                // }
+                // PadRight一行搞定
+                basePayload = basePayload.PadRight((basePayload.Length + 3) / 4 * 4, '=');
+
+                // 将修复后的字符串解码成数组
+                var basePayloadBytes = Convert.FromBase64String(basePayload);
+                var payload = System.Text.Encoding.UTF8.GetString(basePayloadBytes);
+                payloadEntry = DGame.Utility.JsonUtil.ToObject<Payload>(payload);
+                DLogger.Info($"[ParseJwt] JWT parse success payload: {payload}");
+                return true;
+            }
+            catch (Exception e)
+            {
+                DLogger.Error($"[ParseJwt] JWT parse fail error: {e}");
+                return false;
+            }
+        }
     }
 }

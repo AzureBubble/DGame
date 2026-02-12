@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using DGame;
+using YooAsset;
 
 namespace GameLogic
 {
@@ -8,13 +11,16 @@ namespace GameLogic
         StatusInit,
         StatusReconnectAuto,
         StatusReconnectConfirm,
+        StatusCheckingClientVersion,
         StatusWaitExit
     }
 
     public class ClientConnectWatcher
     {
-        private readonly int AUTO_RECONNECT_MAX_COUNT = 3;
-        private readonly float GAME_CLIENT_MSG_TIME_OUT = 3f;
+        // 自动重连次数
+        private readonly int AUTO_RECONNECT_MAX_COUNT = 2;
+        // 客户端消息响应超时时间
+        private readonly float GAME_CLIENT_MSG_TIME_OUT = 5f;
 
         private GameClient m_client;
         private ClientConnectWatcherStatus m_status = ClientConnectWatcherStatus.StatusInit;
@@ -22,6 +28,7 @@ namespace GameLogic
         private int m_reconnectCount;
         private int m_disconnectReason;
         private bool m_enabled;
+        private CancellationTokenSource m_versionCheckCts;  // 用于取消检测版本的异步操作
 
         public bool Enabled
         {
@@ -74,8 +81,16 @@ namespace GameLogic
             Reset();
         }
 
+        private void CancelVersionCheck()
+        {
+            m_versionCheckCts?.Cancel();
+            m_versionCheckCts?.Dispose();
+            m_versionCheckCts = null;
+        }
+
         public void Reset()
         {
+            CancelVersionCheck();
             Status = ClientConnectWatcherStatus.StatusInit;
             m_reconnectCount = 0;
         }
@@ -104,7 +119,15 @@ namespace GameLogic
                 case ClientConnectWatcherStatus.StatusWaitExit:
                     UpdateOnWaitExitAutoStatus();
                     break;
+
+                case ClientConnectWatcherStatus.StatusCheckingClientVersion:
+                    UpdateOnCheckingClientVersionStatus();
+                    break;
             }
+        }
+
+        private void UpdateOnCheckingClientVersionStatus()
+        {
         }
 
         public void Reconnect()
@@ -141,19 +164,17 @@ namespace GameLogic
 
         private void UpdateOnInitStatus()
         {
-            if (m_reconnectCount <= AUTO_RECONNECT_MAX_COUNT)
+            if (m_reconnectCount < AUTO_RECONNECT_MAX_COUNT)
             {
                 // 自动重连
                 if (m_reconnectCount == 0)
                 {
                     m_disconnectReason = m_client.LastNetErrorCode;
                 }
-                Status = ClientConnectWatcherStatus.StatusReconnectAuto;
+                Status = ClientConnectWatcherStatus.StatusCheckingClientVersion;
                 m_reconnectCount++;
                 // 检查客户端版本
-                CheckClientVersion();
-                // 重连
-                m_client.Reconnect();
+                CheckClientVersion().Forget();
             }
             else
             {
@@ -166,9 +187,49 @@ namespace GameLogic
         /// <summary>
         /// 检查客户端版本
         /// </summary>
-        public static void CheckClientVersion()
+        public async UniTaskVoid CheckClientVersion()
         {
+            m_versionCheckCts = new CancellationTokenSource();
 
+            try
+            {
+                var operation = GameModule.ResourceModule.RequestPackageVersionAsync();
+                await operation.ToUniTask();
+
+                if (operation.Status != EOperationStatus.Succeed)
+                {
+                    DLogger.Error("check package version fail: {0}", operation.Error);
+                }
+                else if (operation.PackageVersion != GameModule.ResourceModule.PackageVersion)
+                {
+                    DLogger.Log("check package new version: {0} -> {1}",
+                        GameModule.ResourceModule.PackageVersion, operation.PackageVersion);
+
+                    // TODO: 提示版本更新
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                DLogger.Log("cancel check package version");
+                return;
+            }
+            catch (Exception e)
+            {
+                DLogger.Error("check package version fail: {0}", e.Message);
+            }
+            finally
+            {
+                m_versionCheckCts?.Dispose();
+                m_versionCheckCts = null;
+            }
+
+            // 只有状态还在 CheckingVersion 时才继续（防止竞态）
+            // 版本检测完成，执行重连
+            if (m_status == ClientConnectWatcherStatus.StatusCheckingClientVersion)
+            {
+                Status = ClientConnectWatcherStatus.StatusReconnectAuto;
+                m_client.Reconnect();
+            }
         }
     }
 }

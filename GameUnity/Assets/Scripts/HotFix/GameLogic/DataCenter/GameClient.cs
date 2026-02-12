@@ -120,6 +120,11 @@ namespace GameLogic
             Connect(m_lastAddress, m_lastPort, true);
         }
 
+        public void CheckClientVersion()
+        {
+            m_clientConnectWatcher?.CheckClientVersion();
+        }
+
         /// <summary>
         /// 设置是否监控网络重连
         /// 登录成功后 开启监控 可以自动重连或者提示玩家重连

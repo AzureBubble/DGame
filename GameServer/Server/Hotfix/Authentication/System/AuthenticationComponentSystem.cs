@@ -22,6 +22,7 @@ internal static class AuthenticationComponentSystem
 {
     internal static async FTask<uint> Login(this AuthenticationComponent self, string userName, string password)
     {
+        Log.Debug("登录请求");
         // 1、检查传递的参数是否完整以及合法
         if (string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(password))
         {
@@ -30,16 +31,60 @@ internal static class AuthenticationComponentSystem
         }
         var scene = self.Scene;
         var worldDatabase = scene.World.Database;
-        var account = await worldDatabase.First<Account>(d => d.Username == userName && d.Password == password);
+        var userNameHashCode = userName.GetHashCode();
 
-        if (account == null)
+        // 利用协程锁 解决异步原子性问题
+        using (var @lock =
+               await scene.CoroutineLockComponent.Wait((int)LockType.Authentication_LoginLock, userNameHashCode))
         {
-            // 用户名或者密码错误
-            return 1004;
+            // 如果用户频繁发送登录亲贵 导致服务器会频繁请求数据库或缓存
+            // 针对这个问题可以利用缓存解决这个问题
+            // 1、创建一个新的字典容器在 AuthenticationComponent 中存储登录信息
+            // 2、key = userName + password  Value =
+            // 3、为了防止缓存暴涨 需要一个定期清理的过程 Value要是一个实体
+            // 4、因为这个实体下面可以挂载组件 作用是定时清理这个缓存
+
+            // 问题:
+            // 1、如果用户的密码改了怎么办？
+            // 因为缓存中有定时清除 所以遇到改密码的情况下 最多等待这个缓存清除了 然后就可以登录了
+            // 2、如果不这样做 还有其他办法？
+            // 通过防火墙的策略来限制用户请求 比如100ms请求一次
+
+            // TODO: 在AccountCacheInfo 下创建一个组件 功能是定时清理这个缓存
+
+            var cacheKey = userName + password;
+            if (self.CacheLoginAccountList.TryGetValue(cacheKey, out var cacheInfo))
+            {
+                Log.Debug("[缓存] 从登录缓存数据中获取登录数据");
+                return (uint)(cacheInfo.GetComponent<Account>() == null ? 1004 : 0);
+            }
+
+            uint result = 0;
+            cacheInfo = Entity.Create<AccountCacheInfo>(scene, true, true);
+            var account = await worldDatabase.First<Account>(d => d.Username == userName && d.Password == password);
+
+            if (account == null)
+            {
+                Log.Debug("[数据库] 用户名或者密码错误");
+                // 用户名或者密码错误
+                result = 1004;
+            }
+            else
+            {
+                Log.Debug("[数据库] 登录成功");
+                // 更新登录时间 保存到数据库
+                account.LoginTime = TimeHelper.Now;
+                await worldDatabase.Save(account);
+                account.Deserialize(scene);
+                cacheInfo.AddComponent(account);
+            }
+
+            // 添加TimeOut组件用来定时清除账号缓存
+            cacheInfo.AddComponent<AccountCacheInfoTimeOutComponent>().TimeOut(cacheKey, 5000);
+            // 缓存登录账号数据
+            self.CacheLoginAccountList.TryAdd(cacheKey, cacheInfo);
+            return result;
         }
-        account.LoginTime = TimeHelper.Now;
-        await worldDatabase.Save(account);
-        return 0;
     }
 
 
@@ -118,6 +163,27 @@ internal static class AuthenticationComponentSystem
         if (isDispose)
         {
             account.Dispose();
+        }
+    }
+
+    /// <summary>
+    /// 删除登录账号缓存
+    /// </summary>
+    /// <param name="self"></param>
+    /// <param name="key">缓存Key</param>
+    /// <param name="isDispose">是否销毁</param>
+    internal static void RemoveLoginCache(this AuthenticationComponent self, string key, bool isDispose)
+    {
+        if (!self.CacheLoginAccountList.Remove(key, out var cacheInfo))
+        {
+            return;
+        }
+
+        Log.Info($"[RemoveLoginCache] Remove Login cache source: key: [{key}] 账号缓存字典数量: {self.CacheLoginAccountList.Count}");
+
+        if (isDispose)
+        {
+            cacheInfo.Dispose();
         }
     }
 

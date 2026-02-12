@@ -9,7 +9,7 @@ public sealed class C2A_LoginRequestHandler : MessageRPC<C2A_LoginRequest, A2C_L
 {
     protected override async FTask Run(Session session, C2A_LoginRequest request, A2C_LoginResponse response, Action reply)
     {
-        response.ErrorCode = await AuthenticationHelper.Login(session.Scene, request.UserName, request.Password);
         Log.Debug("登录协议");
+        response.ErrorCode = await AuthenticationHelper.Login(session.Scene, request.UserName, request.Password);
     }
 }

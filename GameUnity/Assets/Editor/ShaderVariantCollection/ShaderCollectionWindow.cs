@@ -11,6 +11,8 @@ using UnityEngine.Rendering;
 using static UnityEngine.ShaderVariantCollection;
 using UnityEditor.Experimental.GraphView;
 
+#pragma warning disable CS0618 // 禁用过时警告
+
 namespace DGame
 {
     public class ShaderCollectionWindow : EditorWindow
@@ -606,3 +608,5 @@ namespace DGame
         }
     }
 }
+
+#pragma warning disable CS0618 // 禁用过时警告

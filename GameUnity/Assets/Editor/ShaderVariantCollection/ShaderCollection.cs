@@ -5,6 +5,8 @@ using UnityEditor;
 using System.IO;
 using System.Linq;
 
+#pragma warning disable CS0618 // 禁用过时警告
+
 namespace DGame
 {
     public class ShaderCollection
@@ -256,3 +258,5 @@ namespace DGame
         // }
     }
 }
+
+#pragma warning disable CS0618 // 禁用过时警告

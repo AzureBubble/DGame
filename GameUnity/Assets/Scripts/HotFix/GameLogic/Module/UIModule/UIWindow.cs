@@ -638,12 +638,12 @@ namespace GameLogic
             m_isChildCanvasDirty = true;
         }
 
-        protected virtual void Hide()
+        public virtual void Hide()
         {
             UIModule.Instance.HideWindow(this);
         }
 
-        protected virtual void Close()
+        public virtual void Close()
         {
             UIModule.Instance.CloseWindow(this);
         }

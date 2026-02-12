@@ -94,7 +94,7 @@ public partial class GameStart
     private static async void StartGame()
     {
         await GameClient.Instance.InitAsync();
-        UIModule.Instance.ShowWindow<MainWindow>();
+        UIModule.Instance.ShowWindowAsync<MainWindow>();
     }
 
     private static void OnDestroy()

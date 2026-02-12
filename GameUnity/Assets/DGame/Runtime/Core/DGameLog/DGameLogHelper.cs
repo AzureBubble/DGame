@@ -3,9 +3,9 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
-using UnityEngine;
 
 #if UNITY_EDITOR
+
 using System.IO;
 using UnityEditor;
 using UnityEditor.Callbacks;
@@ -100,7 +100,7 @@ namespace DGame
                     // ReSharper disable once PossibleNullReferenceException
                     string declaringTypeName = frame.GetMethod().DeclaringType.FullName;
                     string methodName = frame.GetMethod().Name;
-                    formatSb.Append($"[{declaringTypeName}::{methodName}]\n");
+                    formatSb.AppendFormat("[{0}::{1}\n", declaringTypeName, methodName);
                 }
             }
 
@@ -138,54 +138,46 @@ namespace DGame
         private static StringBuilder GetFormatStringBuilder(ELogLevel level, string logStr, bool showColor)
         {
             m_stringBuilder.Clear();
-
-            string timestamp = DateTime.Now.ToString("HH:mm:ss-fff");
-            string formatted;
-
             switch (level)
             {
-                case ELogLevel.Info:
-                    formatted = showColor
-                        ? $"<color=#CFCFCF><b>[{timestamp}] [INFO] ► </b></color> - <color=#CFCFCF>{logStr}</color>"
-                        : $"<color=#CFCFCF><b>[{timestamp}] [INFO] ► </b></color> - {logStr}";
-                    break;
-
                 case ELogLevel.Debug:
-                    formatted = showColor
-                        ? $"<color=#CFCFCF><b>[{timestamp}] [DEBUG] ► </b></color> - <color=#00FF18>{logStr}</color>"
-                        : $"<color=#00FF18><b>[{timestamp}] [DEBUG] ► </b></color> - {logStr}";
+                    m_stringBuilder.AppendFormat(
+                        showColor
+                            ? "<color=#CFCFCF><b>[Debug] ► </b></color> - <color=#00FF18>{0}</color>"
+                            : "<color=#00FF18><b>[Debug] ► </b></color> - {0}", logStr);
                     break;
-
+                case ELogLevel.Info:
+                    m_stringBuilder.AppendFormat(
+                        showColor
+                            ? "<color=#CFCFCF><b>[INFO] ► </b></color> - <color=#CFCFCF>{0}</color>"
+                            : "<color=#CFCFCF><b>[INFO] ► </b></color> - {0}", logStr);
+                    break;
                 case ELogLevel.Assert:
-                    formatted = showColor
-                        ? $"<color=#FF00BD><b>[{timestamp}] [ASSERT] ► </b></color> - <color=green>{logStr}</color>"
-                        : $"<color=#FF00BD><b>[{timestamp}] [ASSERT] ► </b></color> - {logStr}";
+                    m_stringBuilder.AppendFormat(
+                        showColor
+                            ? "<color=#FF00BD><b>[ASSERT] ► </b></color> - <color=green>{0}</color>"
+                            : "<color=#FF00BD><b>[ASSERT] ► </b></color> - {0}", logStr);
                     break;
-
                 case ELogLevel.Warning:
-                    formatted = showColor
-                        ? $"<color=#FF9400><b>[{timestamp}] [WARNING] ► </b></color> - <color=yellow>{logStr}</color>"
-                        : $"<color=#FF9400><b>[{timestamp}] [WARNING] ► </b></color> - {logStr}";
+                    m_stringBuilder.AppendFormat(
+                        showColor
+                            ? "<color=#FF9400><b>[WARNING] ► </b></color> - <color=yellow>{0}</color>"
+                            : "<color=#FF9400><b>[WARNING] ► </b></color> - {0}", logStr);
                     break;
-
                 case ELogLevel.Error:
-                    formatted = showColor
-                        ? $"<color=red><b>[{timestamp}] [ERROR] ► </b></color> - <color=red>{logStr}</color>"
-                        : $"<color=red><b>[{timestamp}] [ERROR] ► </b></color> - {logStr}";
+                    m_stringBuilder.AppendFormat(
+                        showColor
+                            ? "<color=red><b>[ERROR] ► </b></color> - <color=red>{0}</color>"
+                            : "<color=red><b>[ERROR] ► </b></color>- {0}", logStr);
                     break;
-
                 case ELogLevel.Exception:
-                    formatted = showColor
-                        ? $"<color=red><b>[{timestamp}] [EXCEPTION] ► </b></color> - <color=red>{logStr}</color>"
-                        : $"<color=red><b>[{timestamp}] [EXCEPTION] ► </b></color> - {logStr}";
-                    break;
-
-                default:
-                    formatted = logStr;
+                    m_stringBuilder.AppendFormat(
+                        showColor
+                            ? "<color=red><b>[EXCEPTION] ► </b></color> - <color=red>{0}</color>"
+                            : "<color=red><b>[EXCEPTION] ► </b></color> - {0}", logStr);
                     break;
             }
 
-            m_stringBuilder.Append(formatted);
             return m_stringBuilder;
         }
     }
@@ -231,7 +223,7 @@ namespace DGame
                                    assetPath.Contains("DGameLogHelper.cs") ||
                                    assetPath.Contains("DGameLog.cs") ||
                                    assetPath.Contains("AssetsLogger.cs") ||
-                                   assetPath.Contains("Debugger.cs");
+                                   assetPath.Contains("DLogger.cs");
 
             var stackTrace = GetStackTrace();
             if (!string.IsNullOrEmpty(stackTrace) && (stackTrace.Contains("[DEBUG]") ||
@@ -263,7 +255,7 @@ namespace DGame
                         !pathLine.Contains("DGameLogHelper.cs") &&
                         !pathLine.Contains("DGameLog.cs") &&
                         !pathLine.Contains("AssetsLogger.cs") &&
-                        !pathLine.Contains("Debugger.cs"))
+                        !pathLine.Contains("DLogger.cs"))
                     {
                         var splitIndex = pathLine.LastIndexOf(":", StringComparison.Ordinal);
                         // 脚本路径
@@ -297,8 +289,7 @@ namespace DGame
             var consoleWindowType = typeof(EditorWindow).Assembly.GetType("UnityEditor.ConsoleWindow");
             // 获取窗口实例
             var fieldInfo = consoleWindowType.GetField("ms_ConsoleWindow",
-                BindingFlags.Static |
-                BindingFlags.NonPublic);
+                BindingFlags.Static | BindingFlags.NonPublic);
             if (fieldInfo != null)
             {
                 var consoleInstance = fieldInfo.GetValue(null);
@@ -307,8 +298,7 @@ namespace DGame
                     {
                         // 获取m_ActiveText成员
                         fieldInfo = consoleWindowType.GetField("m_ActiveText",
-                            BindingFlags.Instance |
-                            BindingFlags.NonPublic);
+                            BindingFlags.Instance | BindingFlags.NonPublic);
                         // 获取m_ActiveText的值
                         if (fieldInfo != null)
                         {

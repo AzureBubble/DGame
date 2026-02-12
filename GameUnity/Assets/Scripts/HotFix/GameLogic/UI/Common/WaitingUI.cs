@@ -74,8 +74,11 @@ namespace GameLogic
 
         public void Init(uint waitFuncID, string tips, System.Action callback)
         {
+            if (!string.IsNullOrEmpty(tips))
+            {
+                m_textTips.text = tips;
+            }
             m_waitFuncID = waitFuncID;
-            m_textTips.text = tips;
             callback?.Invoke();
         }
 

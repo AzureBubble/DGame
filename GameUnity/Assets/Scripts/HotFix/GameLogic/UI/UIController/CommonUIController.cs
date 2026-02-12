@@ -1,4 +1,5 @@
-﻿using Cysharp.Threading.Tasks;
+﻿using System;
+using Cysharp.Threading.Tasks;
 using DGame;
 
 namespace GameLogic
@@ -8,7 +9,23 @@ namespace GameLogic
         public void RegUIMessage()
         {
             GameEvent.AddEventListener<uint, string, System.Action>(ICommonUI_Event.ShowWaitingUI, OnShowWaitingUI);
+            GameEvent.AddEventListener<uint>(ICommonUI_Event.FinishWaiting, OnFinishWaiting);
         }
+
+        #region FinishWaitingUI
+
+        private void OnFinishWaiting(uint waitFuncID)
+        {
+            UIModule.Instance.GetWindowAsync<WaitingUI>(ui =>
+            {
+                if (ui != null && ui.FinishWaiting(waitFuncID))
+                {
+                    ui.Close();
+                }
+            });
+        }
+
+        #endregion
 
         #region ShowWaitingUI
 

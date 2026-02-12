@@ -93,11 +93,11 @@ namespace GameLogic
 
             if (reconnect)
             {
-                GameEvent.Get<ICommonUI>().ShowWaitingUI(WaitingUISeq.LOGINWORLD_SEQID, G.R("正在重连"), null);
+                GameEvent.Get<ICommonUI>().ShowWaitingUI(WaitingUISeq.LOGINWORLD_SEQID, G.R("正在重连"));
             }
             else
             {
-                GameEvent.Get<ICommonUI>().ShowWaitingUI(WaitingUISeq.LOGINWORLD_SEQID, string.Empty, null);
+                GameEvent.Get<ICommonUI>().ShowWaitingUI(WaitingUISeq.LOGINWORLD_SEQID, string.Empty);
             }
 
             m_lastAddress = address;

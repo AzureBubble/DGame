@@ -24,16 +24,20 @@ namespace GameLogic
 			return AuthenticationList[(int)authenticationListIndex];
 		}
 
-
-		private Scene m_scene;
-
 		protected override void BindMemberProperty()
 		{
-			m_scene = GameClient.Instance.Scene;
 		}
 
 		protected override void RegisterEvent()
 		{
+		}
+
+		protected override void OnUpdate()
+		{
+			if (Input.GetKeyDown(KeyCode.A))
+			{
+				GameEvent.Get<ICommonUI>().ShowWaitingUI(WaitingUISeq.LOGINWORLD_SEQID, "test", null);
+			}
 		}
 
 		#region 事件

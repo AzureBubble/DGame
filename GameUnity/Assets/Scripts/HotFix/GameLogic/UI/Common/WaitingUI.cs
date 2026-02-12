@@ -26,7 +26,7 @@ namespace GameLogic
 
         #region Override
 
-        public override bool FullScreen => true;
+        protected override bool NeedTweenPop => false;
 
         protected override ModelType GetModelType() => ModelType.TransparentType;
 
@@ -34,6 +34,7 @@ namespace GameLogic
 
         protected override void OnCreate()
         {
+            m_lastShowTime = GameTime.UnscaledTime;
             StartRotateAnimation();
         }
 
@@ -49,6 +50,11 @@ namespace GameLogic
             if (timer > MAX_WAITING_UI_SHOW_TIME && m_waitFuncID != WaitingUISeq.RELAY_BATTLE)
             {
                 Close();
+            }
+
+            if (Input.GetKeyDown(KeyCode.S))
+            {
+                GameEvent.Get<ICommonUI>().FinishWaiting();
             }
         }
 
@@ -90,11 +96,10 @@ namespace GameLogic
 
         private void StartRotateAnimation()
         {
-            // 无限循环旋转，每360度循环一次
-            m_tfImage.DORotate(new Vector3(0, 0, -360), 360f / 60f)  // 假设60fps，每帧-1度
+            m_tfImage.DOLocalRotate(new Vector3(0, 0, -360), 3f, RotateMode.LocalAxisAdd)
                 .SetEase(Ease.Linear)
-                .SetOptions()  // 设置为360度循环模式
-                .SetLoops(-1, LoopType.Restart);  // 无限循环
+                .SetLoops(-1, LoopType.Incremental)
+                .SetUpdate(true);
         }
 
         #endregion

@@ -18,5 +18,14 @@ namespace GameLogic
                 ShowWindowAsync<TipsUI>(msg);
             }
         }
+
+        public void ShowErrorTipsUI(string msg)
+        {
+            if (!string.IsNullOrEmpty(msg))
+            {
+                DLogger.Error(msg);
+                ShowWindowAsync<TipsUI>(msg);
+            }
+        }
     }
 }

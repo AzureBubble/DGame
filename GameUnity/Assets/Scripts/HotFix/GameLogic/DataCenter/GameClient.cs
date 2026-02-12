@@ -132,23 +132,32 @@ namespace GameLogic
         /// <param name="needWatch"></param>
         public void SetWatchReconnect(bool needWatch)
         {
-
+            if (m_clientConnectWatcher == null)
+            {
+                return;
+            }
+            m_clientConnectWatcher.Enabled = needWatch;
         }
 
         private void OnConnectComplete()
         {
+            GameEvent.Get<ICommonUI>().FinishWaiting(WaitingUISeq.LOGINWORLD_SEQID);
             Status = GameClientStatus.StatusConnected;
             DLogger.Info("[GameClient] Connected to server success");
         }
 
         private void OnConnectFail()
         {
+            UIModule.Instance.ShowTipsUI(G.R("进入服务器失败，请重试"));
+            GameEvent.Get<ICommonUI>().FinishWaiting(WaitingUISeq.LOGINWORLD_SEQID);
             Status = GameClientStatus.StatusClose;
             DLogger.Info("[GameClient] Connected to server fail");
         }
 
         private void OnConnectDisconnect()
         {
+            UIModule.Instance.ShowTipsUI(G.R("连接已断开"));
+            GameEvent.Get<ICommonUI>().FinishWaiting();
             Status = GameClientStatus.StatusClose;
             DLogger.Info("[GameClient] Disconnected to server");
         }
@@ -225,6 +234,7 @@ namespace GameLogic
 
         protected override void OnDestroy()
         {
+            m_clientConnectWatcher = null;
             Scene?.Dispose();
         }
 

@@ -13,5 +13,6 @@ public sealed class C2A_LoginRequestHandler : MessageRPC<C2A_LoginRequest, A2C_L
         var result = await AuthenticationHelper.Login(scene, request.UserName, request.Password);
         response.ErrorCode = result.errorCode;
         response.Token = AuthenticationJwtHelper.GetToken(scene, result.accountId, "127.0.0.1", 8080);
+        Log.Debug($"Login 当前的服务器是: {scene.SceneConfigId}");
     }
 }

@@ -13,13 +13,13 @@ public class OnSceneCreate_Init : AsyncEventSystem<OnCreateScene>
         {
             case SceneType.Authentication:
                 // 用于鉴权服务器注册和登录相关逻辑的组件
-                scene.AddComponent<AuthenticationComponent>();
+                scene.AddComponent<AuthenticationComponent>().UpdatePosition();
                 // 用于颁发 Token 证书相关的逻辑
                 scene.AddComponent<AuthenticationJwtComponent>();
-                Log.Debug("鉴权服务器启动成功");
                 break;
 
             case SceneType.Gate:
+                Log.Debug("Gate服务器启动成功");
                 break;
         }
 

@@ -3,6 +3,8 @@ using Fantasy.Async;
 using Fantasy.Entitas;
 using Fantasy.Entitas.Interface;
 using Fantasy.Helper;
+using Fantasy.Platform.Net;
+
 #pragma warning disable CS8602 // 解引用可能出现空引用。
 #pragma warning disable CS8600 // 将 null 字面量或可能为 null 的值转换为非 null 类型。
 
@@ -22,6 +24,20 @@ public sealed class AuthenticationComponentDestroySystem : DestroySystem<Authent
 
 internal static class AuthenticationComponentSystem
 {
+    public static void UpdatePosition(this AuthenticationComponent self)
+    {
+        // 1、通过远程接口或者本地文件来拿到鉴权组
+        // 2、通过配置文件
+        var authenticationCfgList = SceneConfigData.Instance.GetSceneBySceneType(SceneType.Authentication);
+        // 拿到当前 Scene 的配置文件
+        var sceneCfg = SceneConfigData.Instance.Get(self.Scene.SceneConfigId);
+        // 获取到当前Scene在鉴权组的位置
+        self.Position = authenticationCfgList.IndexOf(sceneCfg);
+        // 获取鉴权组的总数
+        self.AuthenticationCount = authenticationCfgList.Count;
+        Log.Info($"鉴权服务器启动成功! Position: {self.Position} AuthenticationCount: {self.AuthenticationCount}");
+    }
+
     internal static async FTask<(uint errorCode, long accountId)> Login(this AuthenticationComponent self, string userName, string password)
     {
         Log.Debug("登录请求");
@@ -31,6 +47,15 @@ internal static class AuthenticationComponentSystem
             // 代表账号参数不完整或不合法
             return (1001, 0);
         }
+
+        // 检查账号是否应该在当前鉴权服务器中处理
+        var position = HashCodeHelper.MurmurHash3(userName) % self.AuthenticationCount;
+        if (self.Position != position)
+        {
+            // 连接非法服务器地址
+            return (1005, 0);
+        }
+
         var scene = self.Scene;
         var worldDatabase = scene.World.Database;
         var userNameHashCode = userName.GetHashCode();
@@ -113,6 +138,14 @@ internal static class AuthenticationComponentSystem
         {
             // 代表注册账号参数不完整或不合法
             return 1001;
+        }
+
+        // 检查账号是否应该在当前鉴权服务器中处理
+        var position = HashCodeHelper.MurmurHash3(userName) % self.AuthenticationCount;
+        if (self.Position != position)
+        {
+            // 连接非法服务器地址
+            return 1005;
         }
 
         var userNameHashCode = userName.GetHashCode();

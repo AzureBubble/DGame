@@ -34,5 +34,6 @@ public sealed class C2A_RegisterRequestHandler : MessageRPC<C2A_RegisterRequest,
         // }
         session.SetTimeOut(3000);
         response.ErrorCode = await AuthenticationHelper.Register(session.Scene, request.UserName, request.Password, "用户注册");
+        Log.Debug($"Register 当前的服务器是: {session.Scene.SceneConfigId}");
     }
 }

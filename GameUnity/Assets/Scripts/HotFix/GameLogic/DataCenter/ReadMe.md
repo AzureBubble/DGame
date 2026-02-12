@@ -85,6 +85,56 @@ public MessageDispatcherComponent MessageDispatcherComponent { get; internal set
 
 ---
 
+### 3. Log.cs - 确认条件宏定义与 DLogger 保持一致
+
+**文件位置**: `Fantasy.Unity/Runtime/Core/Log/Log.cs`
+
+**检查内容**: 确认 `Debug`、`Info`、`Warning`、`Error` 方法的 `[Conditional]` 属性与 `DGame.DLogger` 保持一致（`Trace` 和 `TraceInfo` 除外）
+
+#### 各日志级别应包含的 Conditional 属性：
+
+**Debug 方法**:
+```csharp
+[Conditional("ENABLE_DGAME_LOG")]
+[Conditional("ENABLE_DGAME_DEBUG_LOG")]
+[Conditional("ENABLE_DGAME_DEBUG_AND_ABOVE_LOG")]
+public static void Debug(string msg) { ... }
+```
+
+**Info 方法**:
+```csharp
+[Conditional("ENABLE_DGAME_LOG")]
+[Conditional("ENABLE_DGAME_INFO_LOG")]
+[Conditional("ENABLE_DGAME_DEBUG_AND_ABOVE_LOG")]
+[Conditional("ENABLE_DGAME_INFO_AND_ABOVE_LOG")]
+public static void Info(string msg) { ... }
+```
+
+**Warning 方法**:
+```csharp
+[Conditional("ENABLE_DGAME_LOG")]
+[Conditional("ENABLE_DGAME_WARNING_LOG")]
+[Conditional("ENABLE_DGAME_DEBUG_AND_ABOVE_LOG")]
+[Conditional("ENABLE_DGAME_INFO_AND_ABOVE_LOG")]
+[Conditional("ENABLE_DGAME_WARNING_AND_ABOVE_LOG")]
+public static void Warning(string msg) { ... }
+```
+
+**Error 方法**:
+```csharp
+[Conditional("ENABLE_DGAME_LOG")]
+[Conditional("ENABLE_DGAME_ERROR_LOG")]
+[Conditional("ENABLE_DGAME_DEBUG_AND_ABOVE_LOG")]
+[Conditional("ENABLE_DGAME_INFO_AND_ABOVE_LOG")]
+[Conditional("ENABLE_DGAME_WARNING_AND_ABOVE_LOG")]
+[Conditional("ENABLE_DGAME_ERROR_AND_ABOVE_LOG")]
+public static void Error(string msg) { ... }
+```
+
+> **参考文件**: `DGame/Runtime/Core/DGameLog/DLogger.cs`
+
+---
+
 ## 使用示例
 
 ### 客户端监听服务器消息
@@ -111,4 +161,5 @@ GameClient.Instance.UnRegisterMsgHandler.UnRegisterMsgHandler(protocolCode, hand
 - [ ] Scene.cs 中 `MessageDispatcherComponent` 已改为 `public`
 - [ ] MessageDispatcherComponent.cs 中已添加 `#if FANTASY_UNITY` 代码块
 - [ ] `MessageHandler()` 方法中已添加客户端回调触发逻辑
+- [ ] **Fantasy.Log 中 `Debug`、`Info`、`Warning`、`Error` 方法已添加条件宏定义**（`Trace` 和 `TraceInfo` 除外），防止打包输出相关的Debug代码
 - [ ] 编译无错误

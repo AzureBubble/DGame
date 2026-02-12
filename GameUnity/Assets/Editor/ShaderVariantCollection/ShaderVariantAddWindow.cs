@@ -10,6 +10,8 @@ using System.Linq;
 using System;
 using static UnityEngine.ShaderVariantCollection;
 
+#pragma warning disable CS0618 // 禁用过时警告
+
 public class ShaderVariantAddWindow : EditorWindow
 {
 
@@ -299,3 +301,5 @@ public class ShaderVariantAddWindow : EditorWindow
 
     }
 }
+
+#pragma warning disable CS0618 // 禁用过时警告

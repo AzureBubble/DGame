@@ -49,15 +49,26 @@ namespace GameLogic
         StatusEnter,
     }
 
-    public sealed class GameClient : Singleton<GameClient>
+    public sealed class GameClient : Singleton<GameClient>, IUpdate
     {
         private readonly NetworkProtocolType ProtocolType = NetworkProtocolType.KCP;
         public GameClientStatus Status { get; set; } = GameClientStatus.StatusInit;
 
         private string m_lastAddress = string.Empty;
+        private int m_lastPort = 0;
         private float m_lastLogDisconnectErrTime = 0f;
+        private ClientConnectWatcher m_clientConnectWatcher;
 
         public Scene Scene { get; private set; }
+
+        public bool IsStatusEnter => Status == GameClientStatus.StatusEnter;
+
+        public int LastNetErrorCode { get; private set; }
+
+        protected override void OnInit()
+        {
+            m_clientConnectWatcher = new ClientConnectWatcher(this);
+        }
 
         public async FTask InitAsync()
         {
@@ -66,7 +77,7 @@ namespace GameLogic
             DLogger.Info("Fantasy 初始化完成!");
         }
 
-        public void Connect(string address, bool reconnect = false)
+        public void Connect(string address, int port, bool reconnect = false)
         {
             if (Status == GameClientStatus.StatusConnected || Status == GameClientStatus.StatusLogin ||
                 Status == GameClientStatus.StatusEnter)
@@ -74,17 +85,49 @@ namespace GameLogic
                 return;
             }
 
+            // 关闭重连监控
+            if (!reconnect)
+            {
+                SetWatchReconnect(false);
+            }
+
             if (reconnect)
             {
-
+                GameEvent.Get<ICommonUI>().ShowWaitingUI(WaitingUISeq.LOGINWORLD_SEQID, G.R("正在重连"), null);
+            }
+            else
+            {
+                GameEvent.Get<ICommonUI>().ShowWaitingUI(WaitingUISeq.LOGINWORLD_SEQID, string.Empty, null);
             }
 
             m_lastAddress = address;
+            m_lastPort = port;
             Status = reconnect ? GameClientStatus.StatusReconnect : GameClientStatus.StatusInit;
             if (Scene.Session == null || Scene.Session.IsDisposed)
             {
-                Scene.Connect(address, ProtocolType, OnConnectComplete, OnConnectFail, OnConnectDisconnect, false);
+                Scene.Connect($"{address}:{port}", ProtocolType, OnConnectComplete, OnConnectFail, OnConnectDisconnect, false);
             }
+        }
+
+        public void Reconnect()
+        {
+            if (string.IsNullOrEmpty(m_lastAddress) || m_lastPort <= 0)
+            {
+                UIModule.Instance.ShowTipsUI("Invalid reconnect param");
+                return;
+            }
+            m_clientConnectWatcher?.Reconnect();
+            Connect(m_lastAddress, m_lastPort, true);
+        }
+
+        /// <summary>
+        /// 设置是否监控网络重连
+        /// 登录成功后 开启监控 可以自动重连或者提示玩家重连
+        /// </summary>
+        /// <param name="needWatch"></param>
+        public void SetWatchReconnect(bool needWatch)
+        {
+
         }
 
         private void OnConnectComplete()
@@ -196,6 +239,11 @@ namespace GameLogic
                 return;
             }
             Scene.MessageDispatcherComponent?.UnRegisterMsgHandler(protocolCode, ctx);
+        }
+
+        public void OnUpdate()
+        {
+            m_clientConnectWatcher?.Update();
         }
     }
 }

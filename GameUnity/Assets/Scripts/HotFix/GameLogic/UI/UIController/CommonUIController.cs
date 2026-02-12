@@ -7,20 +7,20 @@ namespace GameLogic
     {
         public void RegUIMessage()
         {
-            GameEvent.AddEventListener<uint, uint, System.Action>(ICommonUI_Event.ShowWaitingUI, OnShowWaitingUI);
+            GameEvent.AddEventListener<uint, string, System.Action>(ICommonUI_Event.ShowWaitingUI, OnShowWaitingUI);
         }
 
         #region ShowWaitingUI
 
-        private void OnShowWaitingUI(uint waitFuncID, uint textID, System.Action callback)
+        private void OnShowWaitingUI(uint waitFuncID, string tips, System.Action callback)
         {
-            OnShowWaitingUIAsync(waitFuncID, textID, callback).Forget();
+            OnShowWaitingUIAsync(waitFuncID, tips, callback).Forget();
         }
 
-        private async UniTaskVoid OnShowWaitingUIAsync(uint waitFuncID, uint textID, System.Action callback)
+        private async UniTaskVoid OnShowWaitingUIAsync(uint waitFuncID, string tips, System.Action callback)
         {
             var ui = await UIModule.Instance.ShowWindowAsyncAwait<WaitingUI>();
-            ui?.Init(waitFuncID, textID, callback);
+            ui?.Init(waitFuncID, tips, callback);
         }
 
         #endregion

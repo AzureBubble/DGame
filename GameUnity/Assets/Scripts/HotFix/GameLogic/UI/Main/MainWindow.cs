@@ -43,12 +43,12 @@ namespace GameLogic
 			// 根据用户名来选择目标的鉴权服务器
 			// var authenticationAddress = Select(m_inputUserName.text);
 			// 根据鉴权服务器地址来创建一个新的网络会话
-			DataCenterSys.Instance.Register("127.0.0.1:20001", m_inputUserName.text, m_inputPassword.text).Coroutine();
+			DataCenterSys.Instance.Register("127.0.0.1", 20001, m_inputUserName.text, m_inputPassword.text).Coroutine();
 		}
 
 		private partial void OnClickLoginBtn()
 		{
-			DataCenterSys.Instance.Login("127.0.0.1:20001", m_inputUserName.text, m_inputPassword.text).Coroutine();
+			DataCenterSys.Instance.Login("127.0.0.1", 20001, m_inputUserName.text, m_inputPassword.text).Coroutine();
 		}
 
 		private partial void OnClickGetBtn()

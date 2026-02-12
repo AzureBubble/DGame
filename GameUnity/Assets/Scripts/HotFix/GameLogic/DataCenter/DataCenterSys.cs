@@ -26,9 +26,9 @@ namespace GameLogic
 
         #region 网络操作
 
-        public async FTask Register(string address, string userName, string password)
+        public async FTask Register(string address, int port, string userName, string password)
         {
-            GameClient.Instance.Connect(address);
+            GameClient.Instance.Connect(address, port);
             GameClient.Instance.Status = GameClientStatus.StatusRegister;
             var response = (A2C_RegisterResponse)await GameClient.Instance.Call(new C2A_RegisterRequest()
             {
@@ -45,9 +45,9 @@ namespace GameLogic
             GameEvent.Get<ILoginUI>().OnRegister();
         }
 
-        public async FTask Login(string address, string userName, string password)
+        public async FTask Login(string address, int port, string userName, string password)
         {
-            GameClient.Instance.Connect(address);
+            GameClient.Instance.Connect(address, port);
             GameClient.Instance.Status = GameClientStatus.StatusLogin;
             var response = (A2C_LoginResponse)await GameClient.Instance.Call(new C2A_LoginRequest()
             {

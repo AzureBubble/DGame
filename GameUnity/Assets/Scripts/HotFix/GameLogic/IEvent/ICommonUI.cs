@@ -5,6 +5,6 @@ namespace GameLogic
     [EventInterface(EEventGroup.GroupUI)]
     public interface ICommonUI
     {
-        void ShowWaitingUI(uint waitFuncID, uint textID, System.Action callback);
+        void ShowWaitingUI(uint waitFuncID, string tips, System.Action callback);
     }
 }

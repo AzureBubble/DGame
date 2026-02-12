@@ -62,7 +62,8 @@ namespace GameLogic
                 DLogger.Warning($"Error: {response.ErrorCode}");
                 return;
             }
-            DLogger.Info("Login Successfully");
+            DLogger.Info($"Login Successfully Token: {response.Token}");
+            JwtParseHelper.Parse(response.Token);
             GameEvent.Get<ILoginUI>().OnLogin();
         }
 

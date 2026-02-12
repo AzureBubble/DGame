@@ -9,7 +9,9 @@ public sealed class C2A_LoginRequestHandler : MessageRPC<C2A_LoginRequest, A2C_L
 {
     protected override async FTask Run(Session session, C2A_LoginRequest request, A2C_LoginResponse response, Action reply)
     {
-        Log.Debug("登录协议");
-        response.ErrorCode = await AuthenticationHelper.Login(session.Scene, request.UserName, request.Password);
+        var scene = session.Scene;
+        var result = await AuthenticationHelper.Login(scene, request.UserName, request.Password);
+        response.ErrorCode = result.errorCode;
+        response.Token = AuthenticationJwtHelper.GetToken(scene, result.accountId, "127.0.0.1", 8080);
     }
 }

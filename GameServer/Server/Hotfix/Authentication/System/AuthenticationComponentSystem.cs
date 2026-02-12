@@ -3,6 +3,8 @@ using Fantasy.Async;
 using Fantasy.Entitas;
 using Fantasy.Entitas.Interface;
 using Fantasy.Helper;
+#pragma warning disable CS8602 // 解引用可能出现空引用。
+#pragma warning disable CS8600 // 将 null 字面量或可能为 null 的值转换为非 null 类型。
 
 namespace System;
 
@@ -20,14 +22,14 @@ public sealed class AuthenticationComponentDestroySystem : DestroySystem<Authent
 
 internal static class AuthenticationComponentSystem
 {
-    internal static async FTask<uint> Login(this AuthenticationComponent self, string userName, string password)
+    internal static async FTask<(uint errorCode, long accountId)> Login(this AuthenticationComponent self, string userName, string password)
     {
         Log.Debug("登录请求");
         // 1、检查传递的参数是否完整以及合法
         if (string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(password))
         {
             // 代表账号参数不完整或不合法
-            return 1001;
+            return (1001, 0);
         }
         var scene = self.Scene;
         var worldDatabase = scene.World.Database;
@@ -49,19 +51,25 @@ internal static class AuthenticationComponentSystem
             // 因为缓存中有定时清除 所以遇到改密码的情况下 最多等待这个缓存清除了 然后就可以登录了
             // 2、如果不这样做 还有其他办法？
             // 通过防火墙的策略来限制用户请求 比如100ms请求一次
-
-            // TODO: 在AccountCacheInfo 下创建一个组件 功能是定时清理这个缓存
-
+            Account account = null;
             var cacheKey = userName + password;
             if (self.CacheLoginAccountList.TryGetValue(cacheKey, out var cacheInfo))
             {
                 Log.Debug("[缓存] 从登录缓存数据中获取登录数据");
-                return (uint)(cacheInfo.GetComponent<Account>() == null ? 1004 : 0);
+                account = cacheInfo.GetComponent<Account>();
+                if (account == null)
+                {
+                    return (1004, 0);
+                }
+                else
+                {
+                    return (0, account.Id);
+                }
             }
 
             uint result = 0;
             cacheInfo = Entity.Create<AccountCacheInfo>(scene, true, true);
-            var account = await worldDatabase.First<Account>(d => d.Username == userName && d.Password == password);
+            account = await worldDatabase.First<Account>(d => d.Username == userName && d.Password == password);
 
             if (account == null)
             {
@@ -83,7 +91,13 @@ internal static class AuthenticationComponentSystem
             cacheInfo.AddComponent<AccountCacheInfoTimeOutComponent>().TimeOut(cacheKey, 5000);
             // 缓存登录账号数据
             self.CacheLoginAccountList.TryAdd(cacheKey, cacheInfo);
-            return result;
+
+            if (result != 0)
+            {
+                return (result, 0);
+            }
+
+            return (result, account.Id);
         }
     }
 

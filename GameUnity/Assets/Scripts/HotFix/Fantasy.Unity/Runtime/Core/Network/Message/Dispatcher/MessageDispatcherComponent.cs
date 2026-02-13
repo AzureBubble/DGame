@@ -39,7 +39,8 @@ namespace Fantasy.Network.Interface
 #endif
 #if FANTASY_UNITY
         /*
-         * 方便客户端通过GameClient和协议号直接监听服务器数据的下发
+         * 方便客户端通过 GameClient RegisterMsgHandler 注册的回调
+         * 客户端可以通过 GameClient 和协议号直接监听服务器数据的下发
          */
 
         public readonly Dictionary<uint, List<Action<IMessage>>> MsgHandles = new Dictionary<uint, List<Action<IMessage>>>();

@@ -67,7 +67,21 @@ namespace GameLogic
             if (JwtParseHelper.Parse(response.Token, out var payload))
             {
                 DLogger.Info($"Login Success: UID: {payload.uid} address: {payload.address} port: {payload.port}");
+                // 根据Token返回的Address登录到Gate服务器
+                GameClient.Instance.Connect(payload.address, payload.port);
                 GameEvent.Get<ILoginUI>().OnLogin();
+                // 发送登录请求到Gate服务器
+                var loginResponse = (G2C_LoginResponse)await GameClient.Instance.Call(new C2G_LoginRequest()
+                {
+                    Token = response.Token
+                });
+
+                if (loginResponse.ErrorCode != 0)
+                {
+                    DLogger.Error($"登录到Gate服务器发生错误: Error: {loginResponse.ErrorCode}");
+                    return;
+                }
+                DLogger.Info($"Login Gate Successfully.");
             }
         }
 

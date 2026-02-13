@@ -1,10 +1,30 @@
 ﻿using Fantasy;
 using Fantasy.Async;
+using Fantasy.Platform.Net;
 
 namespace System;
 
 public static class AuthenticationHelper
 {
+    /// <summary>
+    /// 通过账户ID 计算Gate的外网地址
+    /// </summary>
+    /// <param name="accountId">账户ID</param>
+    /// <returns>外网Ip和端口号</returns>
+    public static (string outerIp, int outerPort) GetOuterIp(long accountId)
+    {
+        // 通过配置表等方式获取Gate服务器组的信息
+        var gateCfgList = SceneConfigData.Instance.GetSceneBySceneType(SceneType.Gate);
+        // 通过当前账号的ID拿到要分配的Gate服务器
+        var gatePosition = accountId % gateCfgList.Count;
+        // 通过计算出来的位置下标 拿到Gate服务器的配置
+        var gateCfg = gateCfgList[(int)gatePosition];
+        // 通过Gate的SceneConfig文件拿到外网ip地址和端口号
+        var processConfig = ProcessConfigData.Instance.Get(gateCfg.ProcessConfigId);
+        var machineConfig = MachineConfigData.Instance.Get(processConfig.MachineId);
+        return (machineConfig.OuterIP, gateCfg.OuterPort);
+    }
+
     /// <summary>
     /// 登录账号
     /// </summary>

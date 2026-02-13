@@ -2,6 +2,7 @@
 using Fantasy.Async;
 using Fantasy.Network;
 using Fantasy.Network.Interface;
+using Fantasy.Platform.Net;
 
 namespace System;
 
@@ -11,8 +12,14 @@ public sealed class C2A_LoginRequestHandler : MessageRPC<C2A_LoginRequest, A2C_L
     {
         var scene = session.Scene;
         var result = await AuthenticationHelper.Login(scene, request.UserName, request.Password);
+
+        if (result.errorCode == 0)
+        {
+            var ipResult = AuthenticationHelper.GetOuterIp(result.accountId);
+            // 颁发一个Token令牌给客户端
+            response.Token = AuthenticationJwtHelper.GetToken(scene, result.accountId, ipResult.outerIp, ipResult.outerPort);
+        }
         response.ErrorCode = result.errorCode;
-        response.Token = AuthenticationJwtHelper.GetToken(scene, result.accountId, "127.0.0.1", 8080);
         Log.Debug($"Login 当前的服务器是: {scene.SceneConfigId}");
     }
 }

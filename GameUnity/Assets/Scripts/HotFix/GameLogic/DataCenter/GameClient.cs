@@ -182,7 +182,12 @@ namespace GameLogic
 
             if (Status == GameClientStatus.StatusLogin)
             {
-                canSend = protocolCode == OuterOpcode.C2A_LoginRequest;
+                canSend = protocolCode == OuterOpcode.C2A_LoginRequest
+                    || protocolCode == OuterOpcode.C2G_LoginRequest;
+            }
+            if (Status == GameClientStatus.StatusConnected)
+            {
+                canSend = protocolCode == OuterOpcode.C2G_LoginRequest;
             }
             if (Status == GameClientStatus.StatusRegister)
             {

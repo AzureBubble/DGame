@@ -205,6 +205,90 @@ namespace Fantasy
     }
     [Serializable]
     [ProtoContract]
+    public partial class C2G_LoginRequest : AMessage, IRequest
+    {
+        public static C2G_LoginRequest Create(bool autoReturn = true)
+        {
+            var c2G_LoginRequest = MessageObjectPool<C2G_LoginRequest>.Rent();
+            c2G_LoginRequest.AutoReturn = autoReturn;
+            
+            if (!autoReturn)
+            {
+                c2G_LoginRequest.SetIsPool(false);
+            }
+            
+            return c2G_LoginRequest;
+        }
+        
+        public void Return()
+        {
+            if (!AutoReturn)
+            {
+                SetIsPool(true);
+                AutoReturn = true;
+            }
+            else if (!IsPool())
+            {
+                return;
+            }
+            Dispose();
+        }
+
+        public void Dispose()
+        {
+            if (!IsPool()) return; 
+            Token = default;
+            MessageObjectPool<C2G_LoginRequest>.Return(this);
+        }
+        public uint OpCode() { return OuterOpcode.C2G_LoginRequest; } 
+        [ProtoIgnore]
+        public G2C_LoginResponse ResponseType { get; set; }
+        [ProtoMember(1)]
+        public string Token { get; set; }
+    }
+    [Serializable]
+    [ProtoContract]
+    public partial class G2C_LoginResponse : AMessage, IResponse
+    {
+        public static G2C_LoginResponse Create(bool autoReturn = true)
+        {
+            var g2C_LoginResponse = MessageObjectPool<G2C_LoginResponse>.Rent();
+            g2C_LoginResponse.AutoReturn = autoReturn;
+            
+            if (!autoReturn)
+            {
+                g2C_LoginResponse.SetIsPool(false);
+            }
+            
+            return g2C_LoginResponse;
+        }
+        
+        public void Return()
+        {
+            if (!AutoReturn)
+            {
+                SetIsPool(true);
+                AutoReturn = true;
+            }
+            else if (!IsPool())
+            {
+                return;
+            }
+            Dispose();
+        }
+
+        public void Dispose()
+        {
+            if (!IsPool()) return; 
+            ErrorCode = 0;
+            MessageObjectPool<G2C_LoginResponse>.Return(this);
+        }
+        public uint OpCode() { return OuterOpcode.G2C_LoginResponse; } 
+        [ProtoMember(1)]
+        public uint ErrorCode { get; set; }
+    }
+    [Serializable]
+    [ProtoContract]
     public partial class C2G_TestMessage : AMessage, IMessage
     {
         public static C2G_TestMessage Create(bool autoReturn = true)

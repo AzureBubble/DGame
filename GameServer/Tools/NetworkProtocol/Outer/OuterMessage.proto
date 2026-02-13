@@ -36,6 +36,15 @@ message A2C_LoginResponse // IResponse
 {
 	string Token = 1;
 }
+// 客户端登录到Gate服务器
+message C2G_LoginRequest // IRequest,G2C_LoginResponse
+{
+	string Token = 1;
+}
+// 登录协议返回
+message G2C_LoginResponse // IResponse
+{
+}
 
 message C2G_TestMessage // IMessage
 {

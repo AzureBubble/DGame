@@ -92,7 +92,7 @@ public partial class GameStart
         return true;
     }
 
-    private static async void StartGame()
+    private static void StartGame()
     {
         Init().Forget();
 

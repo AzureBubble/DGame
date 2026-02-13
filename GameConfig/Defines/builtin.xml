@@ -7,7 +7,8 @@
             <option name="constructor" value="ExternalTypeUtil.NewVector2" />
         </mapper>
     </bean>
-    <bean name="vector3" valueType="1" sep=",">
+    <bean
+        name="vector3" valueType="1" sep=",">
         <var name="x" type="float" />
         <var name="y" type="float" />
         <var name="z" type="float" />
@@ -16,7 +17,8 @@
             <option name="constructor" value="ExternalTypeUtil.NewVector3" />
         </mapper>
     </bean>
-    <bean name="vector4" valueType="1" sep=",">
+    <bean
+        name="vector4" valueType="1" sep=",">
         <var name="x" type="float" />
         <var name="y" type="float" />
         <var name="z" type="float" />
@@ -26,7 +28,8 @@
             <option name="constructor" value="ExternalTypeUtil.NewVector4" />
         </mapper>
     </bean>
-    <bean name="vector2int" valueType="1" sep=",">
+    <bean
+        name="vector2int" valueType="1" sep=",">
         <var name="x" type="int" />
         <var name="y" type="int" />
         <mapper target="client" codeTarget="cs-bin,cs-simple-json,cs-newtonsoft-json">
@@ -34,7 +37,8 @@
             <option name="constructor" value="ExternalTypeUtil.NewVector2Int" />
         </mapper>
     </bean>
-    <bean name="vector3int" valueType="1" sep=",">
+    <bean
+        name="vector3int" valueType="1" sep=",">
         <var name="x" type="int" />
         <var name="y" type="int" />
         <var name="z" type="int" />
@@ -43,4 +47,16 @@
             <option name="constructor" value="ExternalTypeUtil.NewVector3" />
         </mapper>
     </bean>
+
+    <!-- 按组生成数据字典例子 -->
+
+    <!-- <bean
+        name="ItemConfig">
+        <var name="ItemID" type="int" />
+        <var name="GroupID" type="int" />
+        <var name="ItemName" type="string" />
+    </bean>
+
+    <table name="TbItemConfig" value="ItemConfig" mode="map" input="道具配置表.xlsx"
+        tags="group_by:GroupID" /> -->
 </module>

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Cysharp.Threading.Tasks;
 using GameLogic;
 using DGame;
 using YooAsset;
@@ -93,8 +94,14 @@ public partial class GameStart
 
     private static async void StartGame()
     {
-        await GameClient.Instance.InitAsync();
-        UIModule.Instance.ShowWindowAsync<MainWindow>();
+        Init().Forget();
+
+        async UniTaskVoid Init()
+        {
+            // 初始化 Fantasy 网络模块
+            await GameClient.Instance.InitAsync(m_hotfixAssembly);
+            UIModule.Instance.ShowWindowAsync<MainWindow>();
+        }
     }
 
     private static void OnDestroy()

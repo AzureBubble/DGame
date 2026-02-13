@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using DGame;
 using Fantasy;
 using Fantasy.Async;
+using Fantasy.Helper;
 using Fantasy.Network;
 using Fantasy.Network.Interface;
 
@@ -70,8 +73,19 @@ namespace GameLogic
             m_clientConnectWatcher = new ClientConnectWatcher(this);
         }
 
-        public async FTask InitAsync()
+        public async FTask InitAsync(List<Assembly> assemblies)
         {
+            // ⚠️ 重要: 手动加载程序集必须手动触发 Fantasy 注册
+            // RuntimeInitializeOnLoadMethod 只在 Unity 启动时自动执行一次
+            // 手动加载的 DLL 不会触发 RuntimeInitializeOnLoadMethod
+            // 调用 Assembly.EnsureLoaded() 来触发该程序集中的 Fantasy 框架注册
+            if (assemblies != null && assemblies.Count > 0)
+            {
+                foreach (var assembly in assemblies)
+                {
+                    assembly.EnsureLoaded();
+                }
+            }
             await Fantasy.Platform.Unity.Entry.Initialize();
             Scene = await Fantasy.Platform.Unity.Entry.CreateScene();
             DLogger.Info("Fantasy 初始化完成!");

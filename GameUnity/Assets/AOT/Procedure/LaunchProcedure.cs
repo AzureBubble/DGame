@@ -1,7 +1,5 @@
 using DGame;
-using GameLogic;
 using Launcher;
-using YooAsset;
 
 namespace Procedure
 {

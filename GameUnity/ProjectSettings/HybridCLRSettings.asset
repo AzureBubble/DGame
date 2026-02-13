@@ -21,6 +21,7 @@ MonoBehaviour:
   - Fantasy.Unity
   - GameProto
   - GameLogic
+  - Assembly-CSharpAssembly-CSharp
   preserveHotUpdateAssemblies: []
   hotUpdateDllCompileOutputRootDir: HybridCLRData/HotUpdateDlls
   externalHotUpdateAssembliyDirs: []

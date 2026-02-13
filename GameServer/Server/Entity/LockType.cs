@@ -12,10 +12,10 @@ public enum LockType
     /// <summary>
     /// 鉴权账号移除锁
     /// </summary>
-    Authentication_RemoveLock = 1,
+    Authentication_RemoveLock = 2,
 
     /// <summary>
     /// 鉴权登录锁
     /// </summary>
-    Authentication_LoginLock = 2,
+    Authentication_LoginLock = 3,
 }

@@ -24,7 +24,7 @@ namespace Launcher
                 return;
             }
 
-            DLogger.Info("======== 初始化 LauncherMgr 完成 ========");
+            // DLogger.Info("======== 初始化 LauncherMgr 完成 ========");
         }
 
         public static void ShowUI<T>(object param = null) where T : UIBase, new()

@@ -21,7 +21,7 @@ namespace Procedure
 
         public override void OnEnter()
         {
-            DLogger.Info("======== 1-进入游戏启动流程 ========");
+            // DLogger.Info("======== 1-进入游戏启动流程 ========");
             LauncherMgr.Initialize();
             InitAudioModuleSettings();
         }
@@ -51,7 +51,7 @@ namespace Procedure
             m_audioModule.SoundVolume = DGame.Utility.PlayerPrefsUtil.GetFloat(Constant.Settings.SOUND_VOLUME, 1f);
             m_audioModule.UISoundEnable = !DGame.Utility.PlayerPrefsUtil.GetBool(Constant.Settings.UI_SOUND_MUTED, false);
             m_audioModule.UISoundVolume = DGame.Utility.PlayerPrefsUtil.GetFloat(Constant.Settings.UI_SOUND_VOLUME, 1f);
-            DLogger.Info("======== 初始化音频模块完成 ========");
+            // DLogger.Info("======== 初始化音频模块完成 ========");
         }
     }
 }

@@ -17,7 +17,7 @@ namespace Procedure
 
         public override void OnEnter()
         {
-            DLogger.Info("======== 3-进入资源初始化 InitResourceProcedure 流程 ========");
+            // DLogger.Info("======== 4-进入资源初始化 InitResourceProcedure 流程 ========");
             m_initResourcesComplete = false;
             // 初始化资源中...
             LauncherMgr.ShowUI<LoadUpdateUI>(UpdateUIDefine.Instance.Init_Resource_Tips);
@@ -28,7 +28,7 @@ namespace Procedure
 
         private async UniTaskVoid InitResources()
         {
-            DLogger.Info("======== 更新资源清单 ========");
+            // DLogger.Info("======== 更新资源清单 ========");
             // 更新清单文件...
             LauncherMgr.ShowUI<LoadUpdateUI>(UpdateUIDefine.Instance.Init_Resource_Update_Manifest_Tips);
             // 1.获取资源清单的版本信息

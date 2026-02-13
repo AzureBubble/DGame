@@ -182,7 +182,7 @@ namespace DGame
             }
 
             await initOperation.ToUniTask();
-            DLogger.Info($"======== 初始化资源包版本：{initOperation?.Status} ========");
+            // DLogger.Info($"======== 初始化资源包版本：{initOperation?.Status} ========");
 
             if (needInitMainFest)
             {

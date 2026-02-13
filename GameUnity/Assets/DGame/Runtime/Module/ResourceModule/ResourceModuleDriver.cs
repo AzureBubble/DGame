@@ -208,7 +208,7 @@ namespace DGame
             m_resourceModule.AssetExpireTime = assetExpireTime;
             m_resourceModule.AssetPoolPriority = assetPoolPriority;
             m_resourceModule.SetForceUnloadUnusedAssetsAction(ForceUnloadUnusedAssets);
-            DLogger.Info($"======== 资源加载模式: {PlayMode} ========");
+            // DLogger.Info($"======== 资源加载模式: {PlayMode} ========");
         }
 
         #region 资源自动释放

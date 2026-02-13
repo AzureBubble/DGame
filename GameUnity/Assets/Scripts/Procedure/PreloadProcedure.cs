@@ -28,7 +28,7 @@ namespace Procedure
 
         public override void OnEnter()
         {
-            DLogger.Info("======== 9-预加载流程 ========");
+            // DLogger.Info("======== 9-预加载流程 ========");
             m_progress = 0;
             m_loadFlag.Clear();
             // 正在载入...{0}%

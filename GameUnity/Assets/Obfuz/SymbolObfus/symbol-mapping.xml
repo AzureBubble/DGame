@@ -1,0 +1,210 @@
+<mapping>
+  <assembly name="Obfuz.Runtime">
+    <type fullName="&lt;PrivateImplementationDetails&gt;" newFullName="$G" status="Renamed">
+      <field signature="[Obfuz.Runtime]&lt;PrivateImplementationDetails&gt;/$Obfuz$WatermarkDataHolderSize36_3 $Obfuz$WatermarkDataHolderField3" newName="$c" />
+      <field signature="[Obfuz.Runtime]&lt;PrivateImplementationDetails&gt;/$Obfuz$WatermarkDataHolderSize36_13 $Obfuz$WatermarkDataHolderField13" newName="$C" />
+      <field signature="[Obfuz.Runtime]&lt;PrivateImplementationDetails&gt;/$Obfuz$WatermarkDataHolderSize36_10 $Obfuz$WatermarkDataHolderField10" newName="$d" />
+      <field signature="[Obfuz.Runtime]&lt;PrivateImplementationDetails&gt;/$Obfuz$WatermarkDataHolderSize32_12 $Obfuz$WatermarkDataHolderField12" newName="$D" />
+      <field signature="[Obfuz.Runtime]&lt;PrivateImplementationDetails&gt;/$Obfuz$WatermarkDataHolderSize48_9 $Obfuz$WatermarkDataHolderField9" newName="$e" />
+      <field signature="[Obfuz.Runtime]&lt;PrivateImplementationDetails&gt;/$Obfuz$WatermarkDataHolderSize28_7 $Obfuz$WatermarkDataHolderField7" newName="$E" />
+      <field signature="[Obfuz.Runtime]&lt;PrivateImplementationDetails&gt;/__StaticArrayInitTypeSize=1122 9FB1EB86BE2D3DBB033097B7D759166AC20BAE7262C4F9FD2518CF3AE4E609F6" newName="$f" />
+      <field signature="[Obfuz.Runtime]&lt;PrivateImplementationDetails&gt;/$Obfuz$WatermarkDataHolderSize44_2 $Obfuz$WatermarkDataHolderField2" newName="$F" />
+      <field signature="[Obfuz.Runtime]&lt;PrivateImplementationDetails&gt;/$Obfuz$WatermarkDataHolderSize36_6 $Obfuz$WatermarkDataHolderField6" newName="$g" />
+      <field signature="[Obfuz.Runtime]&lt;PrivateImplementationDetails&gt;/$Obfuz$WatermarkDataHolderSize28_4 $Obfuz$WatermarkDataHolderField4" newName="$G" />
+      <field signature="[Obfuz.Runtime]&lt;PrivateImplementationDetails&gt;/$Obfuz$WatermarkDataHolderSize44_5 $Obfuz$WatermarkDataHolderField5" newName="$h" />
+      <field signature="[Obfuz.Runtime]&lt;PrivateImplementationDetails&gt;/$Obfuz$WatermarkDataHolderSize28_11 $Obfuz$WatermarkDataHolderField11" newName="$H" />
+      <field signature="[Obfuz.Runtime]&lt;PrivateImplementationDetails&gt;/__StaticArrayInitTypeSize=428 7DC72EACF4C52A1729F6C06DF08DBBB25CECF769449A70A0D97F6EADE43D51F3" newName="$i" />
+      <field signature="[Obfuz.Runtime]&lt;PrivateImplementationDetails&gt;/$Obfuz$WatermarkDataHolderSize36_8 $Obfuz$WatermarkDataHolderField8" newName="$I" />
+    </type>
+    <type fullName="&lt;PrivateImplementationDetails&gt;/$Obfuz$WatermarkDataHolderSize28_11" newFullName="$G/$M" status="Renamed" />
+    <type fullName="&lt;PrivateImplementationDetails&gt;/$Obfuz$WatermarkDataHolderSize28_4" newFullName="$G/$j" status="Renamed" />
+    <type fullName="&lt;PrivateImplementationDetails&gt;/$Obfuz$WatermarkDataHolderSize28_7" newFullName="$G/$K" status="Renamed" />
+    <type fullName="&lt;PrivateImplementationDetails&gt;/$Obfuz$WatermarkDataHolderSize32_12" newFullName="$G/$n" status="Renamed" />
+    <type fullName="&lt;PrivateImplementationDetails&gt;/$Obfuz$WatermarkDataHolderSize36_10" newFullName="$G/$m" status="Renamed" />
+    <type fullName="&lt;PrivateImplementationDetails&gt;/$Obfuz$WatermarkDataHolderSize36_13" newFullName="$G/$N" status="Renamed" />
+    <type fullName="&lt;PrivateImplementationDetails&gt;/$Obfuz$WatermarkDataHolderSize36_3" newFullName="$G/$I" status="Renamed" />
+    <type fullName="&lt;PrivateImplementationDetails&gt;/$Obfuz$WatermarkDataHolderSize36_6" newFullName="$G/$k" status="Renamed" />
+    <type fullName="&lt;PrivateImplementationDetails&gt;/$Obfuz$WatermarkDataHolderSize36_8" newFullName="$G/$l" status="Renamed" />
+    <type fullName="&lt;PrivateImplementationDetails&gt;/$Obfuz$WatermarkDataHolderSize44_2" newFullName="$G/$i" status="Renamed" />
+    <type fullName="&lt;PrivateImplementationDetails&gt;/$Obfuz$WatermarkDataHolderSize44_5" newFullName="$G/$J" status="Renamed" />
+    <type fullName="&lt;PrivateImplementationDetails&gt;/$Obfuz$WatermarkDataHolderSize48_9" newFullName="$G/$L" status="Renamed" />
+    <type fullName="&lt;PrivateImplementationDetails&gt;/__StaticArrayInitTypeSize=1122" newFullName="$G/$H" status="Renamed" />
+    <type fullName="&lt;PrivateImplementationDetails&gt;/__StaticArrayInitTypeSize=428" newFullName="$G/$h" status="Renamed" />
+    <type fullName="Obfuz.AssertUtility" newFullName="$a.$a" status="Renamed">
+      <method signature="void Obfuz.AssertUtility::@VerifySecretKey(int, int)" newName="$a" oldStackTraceSignature="Obfuz.AssertUtility:VerifySecretKey(Int32, Int32)" newStackTraceSignature="$a.$a:$a(Int32, Int32)" />
+    </type>
+    <type fullName="Obfuz.ConstUtility" newFullName="$a.$A" status="Renamed">
+      <method signature="int Obfuz.ConstUtility::@GetInt(byte[], int)" newName="$A" oldStackTraceSignature="Obfuz.ConstUtility:GetInt(Byte[], Int32)" newStackTraceSignature="$a.$A:$A(Byte[], Int32)" />
+      <method signature="long Obfuz.ConstUtility::@GetLong(byte[], int)" newName="$b" oldStackTraceSignature="Obfuz.ConstUtility:GetLong(Byte[], Int32)" newStackTraceSignature="$a.$A:$b(Byte[], Int32)" />
+      <method signature="float Obfuz.ConstUtility::@GetFloat(byte[], int)" newName="$B" oldStackTraceSignature="Obfuz.ConstUtility:GetFloat(Byte[], Int32)" newStackTraceSignature="$a.$A:$B(Byte[], Int32)" />
+      <method signature="double Obfuz.ConstUtility::@GetDouble(byte[], int)" newName="$c" oldStackTraceSignature="Obfuz.ConstUtility:GetDouble(Byte[], Int32)" newStackTraceSignature="$a.$A:$c(Byte[], Int32)" />
+      <method signature="string Obfuz.ConstUtility::@GetString(byte[], int, int)" newName="$C" oldStackTraceSignature="Obfuz.ConstUtility:GetString(Byte[], Int32, Int32)" newStackTraceSignature="$a.$A:$C(Byte[], Int32, Int32)" />
+      <method signature="byte[] Obfuz.ConstUtility::@GetBytes(byte[], int, int)" newName="$d" oldStackTraceSignature="Obfuz.ConstUtility:GetBytes(Byte[], Int32, Int32)" newStackTraceSignature="$a.$A:$d(Byte[], Int32, Int32)" />
+      <method signature="int[] Obfuz.ConstUtility::@GetInts(byte[], int, int)" newName="$D" oldStackTraceSignature="Obfuz.ConstUtility:GetInts(Byte[], Int32, Int32)" newStackTraceSignature="$a.$A:$D(Byte[], Int32, Int32)" />
+      <method signature="void Obfuz.ConstUtility::@InitializeArray(System.Array, byte[], int, int)" newName="$e" oldStackTraceSignature="Obfuz.ConstUtility:InitializeArray(Array, Byte[], Int32, Int32)" newStackTraceSignature="$a.$A:$e(Array, Byte[], Int32, Int32)" />
+      <method signature="int Obfuz.ConstUtility::@CastFloatAsInt(float)" newName="$E" oldStackTraceSignature="Obfuz.ConstUtility:CastFloatAsInt(Single)" newStackTraceSignature="$a.$A:$E(Single)" />
+      <method signature="float Obfuz.ConstUtility::@CastIntAsFloat(int)" newName="$f" oldStackTraceSignature="Obfuz.ConstUtility:CastIntAsFloat(Int32)" newStackTraceSignature="$a.$A:$f(Int32)" />
+      <method signature="long Obfuz.ConstUtility::@CastDoubleAsLong(double)" newName="$F" oldStackTraceSignature="Obfuz.ConstUtility:CastDoubleAsLong(Double)" newStackTraceSignature="$a.$A:$F(Double)" />
+      <method signature="double Obfuz.ConstUtility::@CastLongAsDouble(long)" newName="$g" oldStackTraceSignature="Obfuz.ConstUtility:CastLongAsDouble(Int64)" newStackTraceSignature="$a.$A:$g(Int64)" />
+    </type>
+    <type fullName="Obfuz.DefaultDynamicEncryptionScope" newFullName="$a.$c" status="Renamed">
+      <method signature="void Obfuz.DefaultDynamicEncryptionScope::ForcePreserveAOT([Obfuz.Runtime]Obfuz.DefaultDynamicEncryptionScope&amp;)" newName="$h" oldStackTraceSignature="Obfuz.DefaultDynamicEncryptionScope:ForcePreserveAOT()" newStackTraceSignature="$a.$c:$h()" />
+    </type>
+    <type fullName="Obfuz.DefaultStaticEncryptionScope" newFullName="$a.$C" status="Renamed">
+      <method signature="void Obfuz.DefaultStaticEncryptionScope::ForcePreserveAOT([Obfuz.Runtime]Obfuz.DefaultStaticEncryptionScope&amp;)" newName="$H" oldStackTraceSignature="Obfuz.DefaultStaticEncryptionScope:ForcePreserveAOT()" newStackTraceSignature="$a.$C:$H()" />
+    </type>
+    <type fullName="Obfuz.EncryptionScopeBase" newFullName="$a.$B" status="Renamed">
+      <method signature="void Obfuz.EncryptionScopeBase::ForcePreserveAOT([Obfuz.Runtime]Obfuz.EncryptionScopeBase)" newName="$G" oldStackTraceSignature="Obfuz.EncryptionScopeBase:ForcePreserveAOT()" newStackTraceSignature="$a.$B:$G()" />
+    </type>
+    <type fullName="Obfuz.EncryptionService`1" newFullName="$a.$d`1" status="Renamed">
+      <field signature="[Obfuz.Runtime]Obfuz.IEncryptor _encryptor" newName="$a" />
+      <property signature="[Obfuz.Runtime]Obfuz.IEncryptor Encryptor" newName="$a" />
+      <method signature="[Obfuz.Runtime]Obfuz.IEncryptor Obfuz.EncryptionService`1::@get_Encryptor()" newName="$i" oldStackTraceSignature="Obfuz.EncryptionService`1:get_Encryptor()" newStackTraceSignature="$a.$d`1:$i()" />
+      <method signature="void Obfuz.EncryptionService`1::@set_Encryptor([Obfuz.Runtime]Obfuz.IEncryptor)" newName="$I" oldStackTraceSignature="Obfuz.EncryptionService`1:set_Encryptor(IEncryptor)" newStackTraceSignature="$a.$d`1:$I($E)" />
+      <method signature="void Obfuz.EncryptionService`1::@EncryptBlock(byte[], int, int)" newName="$j" oldStackTraceSignature="Obfuz.EncryptionService`1:EncryptBlock(Byte[], Int32, Int32)" newStackTraceSignature="$a.$d`1:$j(Byte[], Int32, Int32)" />
+      <method signature="void Obfuz.EncryptionService`1::@DecryptBlock(byte[], int, int)" newName="$J" oldStackTraceSignature="Obfuz.EncryptionService`1:DecryptBlock(Byte[], Int32, Int32)" newStackTraceSignature="$a.$d`1:$J(Byte[], Int32, Int32)" />
+      <method signature="int Obfuz.EncryptionService`1::@Encrypt(int, int, int)" newName="$k" oldStackTraceSignature="Obfuz.EncryptionService`1:Encrypt(Int32, Int32, Int32)" newStackTraceSignature="$a.$d`1:$k(Int32, Int32, Int32)" />
+      <method signature="int Obfuz.EncryptionService`1::@Decrypt(int, int, int)" newName="$K" oldStackTraceSignature="Obfuz.EncryptionService`1:Decrypt(Int32, Int32, Int32)" newStackTraceSignature="$a.$d`1:$K(Int32, Int32, Int32)" />
+      <method signature="long Obfuz.EncryptionService`1::@Encrypt(long, int, int)" newName="$l" oldStackTraceSignature="Obfuz.EncryptionService`1:Encrypt(Int64, Int32, Int32)" newStackTraceSignature="$a.$d`1:$l(Int64, Int32, Int32)" />
+      <method signature="long Obfuz.EncryptionService`1::@Decrypt(long, int, int)" newName="$L" oldStackTraceSignature="Obfuz.EncryptionService`1:Decrypt(Int64, Int32, Int32)" newStackTraceSignature="$a.$d`1:$L(Int64, Int32, Int32)" />
+      <method signature="float Obfuz.EncryptionService`1::@Encrypt(float, int, int)" newName="$m" oldStackTraceSignature="Obfuz.EncryptionService`1:Encrypt(Single, Int32, Int32)" newStackTraceSignature="$a.$d`1:$m(Single, Int32, Int32)" />
+      <method signature="float Obfuz.EncryptionService`1::@Decrypt(float, int, int)" newName="$M" oldStackTraceSignature="Obfuz.EncryptionService`1:Decrypt(Single, Int32, Int32)" newStackTraceSignature="$a.$d`1:$M(Single, Int32, Int32)" />
+      <method signature="double Obfuz.EncryptionService`1::@Encrypt(double, int, int)" newName="$n" oldStackTraceSignature="Obfuz.EncryptionService`1:Encrypt(Double, Int32, Int32)" newStackTraceSignature="$a.$d`1:$n(Double, Int32, Int32)" />
+      <method signature="double Obfuz.EncryptionService`1::@Decrypt(double, int, int)" newName="$N" oldStackTraceSignature="Obfuz.EncryptionService`1:Decrypt(Double, Int32, Int32)" newStackTraceSignature="$a.$d`1:$N(Double, Int32, Int32)" />
+      <method signature="byte[] Obfuz.EncryptionService`1::@Encrypt(byte[], int, int, int, int)" newName="$o" oldStackTraceSignature="Obfuz.EncryptionService`1:Encrypt(Byte[], Int32, Int32, Int32, Int32)" newStackTraceSignature="$a.$d`1:$o(Byte[], Int32, Int32, Int32, Int32)" />
+      <method signature="byte[] Obfuz.EncryptionService`1::@Decrypt(byte[], int, int, int, int)" newName="$O" oldStackTraceSignature="Obfuz.EncryptionService`1:Decrypt(Byte[], Int32, Int32, Int32, Int32)" newStackTraceSignature="$a.$d`1:$O(Byte[], Int32, Int32, Int32, Int32)" />
+      <method signature="byte[] Obfuz.EncryptionService`1::@Encrypt(string, int, int)" newName="$p" oldStackTraceSignature="Obfuz.EncryptionService`1:Encrypt(String, Int32, Int32)" newStackTraceSignature="$a.$d`1:$p(String, Int32, Int32)" />
+      <method signature="string Obfuz.EncryptionService`1::@DecryptString(byte[], int, int, int, int)" newName="$P" oldStackTraceSignature="Obfuz.EncryptionService`1:DecryptString(Byte[], Int32, Int32, Int32, Int32)" newStackTraceSignature="$a.$d`1:$P(Byte[], Int32, Int32, Int32, Int32)" />
+      <method signature="int Obfuz.EncryptionService`1::@DecryptFromRvaInt(byte[], int, int, int)" newName="$q" oldStackTraceSignature="Obfuz.EncryptionService`1:DecryptFromRvaInt(Byte[], Int32, Int32, Int32)" newStackTraceSignature="$a.$d`1:$q(Byte[], Int32, Int32, Int32)" />
+      <method signature="long Obfuz.EncryptionService`1::@DecryptFromRvaLong(byte[], int, int, int)" newName="$Q" oldStackTraceSignature="Obfuz.EncryptionService`1:DecryptFromRvaLong(Byte[], Int32, Int32, Int32)" newStackTraceSignature="$a.$d`1:$Q(Byte[], Int32, Int32, Int32)" />
+      <method signature="float Obfuz.EncryptionService`1::@DecryptFromRvaFloat(byte[], int, int, int)" newName="$r" oldStackTraceSignature="Obfuz.EncryptionService`1:DecryptFromRvaFloat(Byte[], Int32, Int32, Int32)" newStackTraceSignature="$a.$d`1:$r(Byte[], Int32, Int32, Int32)" />
+      <method signature="double Obfuz.EncryptionService`1::@DecryptFromRvaDouble(byte[], int, int, int)" newName="$R" oldStackTraceSignature="Obfuz.EncryptionService`1:DecryptFromRvaDouble(Byte[], Int32, Int32, Int32)" newStackTraceSignature="$a.$d`1:$R(Byte[], Int32, Int32, Int32)" />
+      <method signature="string Obfuz.EncryptionService`1::@DecryptFromRvaString(byte[], int, int, int, int)" newName="$s" oldStackTraceSignature="Obfuz.EncryptionService`1:DecryptFromRvaString(Byte[], Int32, Int32, Int32, Int32)" newStackTraceSignature="$a.$d`1:$s(Byte[], Int32, Int32, Int32, Int32)" />
+      <method signature="byte[] Obfuz.EncryptionService`1::@DecryptFromRvaBytes(byte[], int, int, int, int)" newName="$S" oldStackTraceSignature="Obfuz.EncryptionService`1:DecryptFromRvaBytes(Byte[], Int32, Int32, Int32, Int32)" newStackTraceSignature="$a.$d`1:$S(Byte[], Int32, Int32, Int32, Int32)" />
+      <method signature="void Obfuz.EncryptionService`1::@DecryptInitializeArray(System.Array, System.RuntimeFieldHandle, int, int, int)" newName="$t" oldStackTraceSignature="Obfuz.EncryptionService`1:DecryptInitializeArray(Array, RuntimeFieldHandle, Int32, Int32, Int32)" newStackTraceSignature="$a.$d`1:$t(Array, RuntimeFieldHandle, Int32, Int32, Int32)" />
+    </type>
+    <type fullName="Obfuz.EncryptorBase" newFullName="$a.$D" status="Renamed">
+      <property signature="int OpCodeCount" newName="$a" />
+      <method signature="int Obfuz.EncryptorBase::get_OpCodeCount([Obfuz.Runtime]Obfuz.EncryptorBase)" newName="$xA" oldStackTraceSignature="Obfuz.EncryptorBase:get_OpCodeCount()" newStackTraceSignature="$a.$D:$xA()" />
+      <method signature="int[] Obfuz.EncryptorBase::@ConvertToIntKey(byte[])" newName="$T" oldStackTraceSignature="Obfuz.EncryptorBase:ConvertToIntKey(Byte[])" newStackTraceSignature="$a.$D:$T(Byte[])" />
+      <method signature="int Obfuz.EncryptorBase::Encrypt([Obfuz.Runtime]Obfuz.EncryptorBase, int, int, int)" newName="$XA" oldStackTraceSignature="Obfuz.EncryptorBase:Encrypt(Int32, Int32, Int32)" newStackTraceSignature="$a.$D:$XA(Int32, Int32, Int32)" />
+      <method signature="int Obfuz.EncryptorBase::Decrypt([Obfuz.Runtime]Obfuz.EncryptorBase, int, int, int)" newName="$yA" oldStackTraceSignature="Obfuz.EncryptorBase:Decrypt(Int32, Int32, Int32)" newStackTraceSignature="$a.$D:$yA(Int32, Int32, Int32)" />
+      <method signature="long Obfuz.EncryptorBase::Encrypt([Obfuz.Runtime]Obfuz.EncryptorBase, long, int, int)" newName="$YA" oldStackTraceSignature="Obfuz.EncryptorBase:Encrypt(Int64, Int32, Int32)" newStackTraceSignature="$a.$D:$YA(Int64, Int32, Int32)" />
+      <method signature="long Obfuz.EncryptorBase::Decrypt([Obfuz.Runtime]Obfuz.EncryptorBase, long, int, int)" newName="$zA" oldStackTraceSignature="Obfuz.EncryptorBase:Decrypt(Int64, Int32, Int32)" newStackTraceSignature="$a.$D:$zA(Int64, Int32, Int32)" />
+      <method signature="float Obfuz.EncryptorBase::Encrypt([Obfuz.Runtime]Obfuz.EncryptorBase, float, int, int)" newName="$ZA" oldStackTraceSignature="Obfuz.EncryptorBase:Encrypt(Single, Int32, Int32)" newStackTraceSignature="$a.$D:$ZA(Single, Int32, Int32)" />
+      <method signature="float Obfuz.EncryptorBase::Decrypt([Obfuz.Runtime]Obfuz.EncryptorBase, float, int, int)" newName="$ab" oldStackTraceSignature="Obfuz.EncryptorBase:Decrypt(Single, Int32, Int32)" newStackTraceSignature="$a.$D:$ab(Single, Int32, Int32)" />
+      <method signature="double Obfuz.EncryptorBase::Encrypt([Obfuz.Runtime]Obfuz.EncryptorBase, double, int, int)" newName="$Ab" oldStackTraceSignature="Obfuz.EncryptorBase:Encrypt(Double, Int32, Int32)" newStackTraceSignature="$a.$D:$Ab(Double, Int32, Int32)" />
+      <method signature="double Obfuz.EncryptorBase::Decrypt([Obfuz.Runtime]Obfuz.EncryptorBase, double, int, int)" newName="$bb" oldStackTraceSignature="Obfuz.EncryptorBase:Decrypt(Double, Int32, Int32)" newStackTraceSignature="$a.$D:$bb(Double, Int32, Int32)" />
+      <method signature="byte[] Obfuz.EncryptorBase::Encrypt([Obfuz.Runtime]Obfuz.EncryptorBase, byte[], int, int, int, int)" newName="$Bb" oldStackTraceSignature="Obfuz.EncryptorBase:Encrypt(Byte[], Int32, Int32, Int32, Int32)" newStackTraceSignature="$a.$D:$Bb(Byte[], Int32, Int32, Int32, Int32)" />
+      <method signature="byte[] Obfuz.EncryptorBase::Decrypt([Obfuz.Runtime]Obfuz.EncryptorBase, byte[], int, int, int, int)" newName="$cb" oldStackTraceSignature="Obfuz.EncryptorBase:Decrypt(Byte[], Int32, Int32, Int32, Int32)" newStackTraceSignature="$a.$D:$cb(Byte[], Int32, Int32, Int32, Int32)" />
+      <method signature="byte[] Obfuz.EncryptorBase::Encrypt([Obfuz.Runtime]Obfuz.EncryptorBase, string, int, int)" newName="$Cb" oldStackTraceSignature="Obfuz.EncryptorBase:Encrypt(String, Int32, Int32)" newStackTraceSignature="$a.$D:$Cb(String, Int32, Int32)" />
+      <method signature="string Obfuz.EncryptorBase::DecryptString([Obfuz.Runtime]Obfuz.EncryptorBase, byte[], int, int, int, int)" newName="$db" oldStackTraceSignature="Obfuz.EncryptorBase:DecryptString(Byte[], Int32, Int32, Int32, Int32)" newStackTraceSignature="$a.$D:$db(Byte[], Int32, Int32, Int32, Int32)" />
+      <method signature="void Obfuz.EncryptorBase::EncryptBlock([Obfuz.Runtime]Obfuz.EncryptorBase, byte[], int, int)" newName="$Db" oldStackTraceSignature="Obfuz.EncryptorBase:EncryptBlock(Byte[], Int32, Int32)" newStackTraceSignature="$a.$D:$Db(Byte[], Int32, Int32)" />
+      <method signature="void Obfuz.EncryptorBase::DecryptBlock([Obfuz.Runtime]Obfuz.EncryptorBase, byte[], int, int)" newName="$eb" oldStackTraceSignature="Obfuz.EncryptorBase:DecryptBlock(Byte[], Int32, Int32)" newStackTraceSignature="$a.$D:$eb(Byte[], Int32, Int32)" />
+      <method signature="void Obfuz.EncryptorBase::DecryptBlock([Obfuz.Runtime]Obfuz.EncryptorBase, byte*, int, int, int)" newName="$u" oldStackTraceSignature="Obfuz.EncryptorBase:DecryptBlock(Byte*, Int32, Int32, Int32)" newStackTraceSignature="$a.$D:$u(Byte*, Int32, Int32, Int32)" />
+      <method signature="void Obfuz.EncryptorBase::DecryptInitializeArray([Obfuz.Runtime]Obfuz.EncryptorBase, System.Array, System.RuntimeFieldHandle, int, int, int)" newName="$Eb" oldStackTraceSignature="Obfuz.EncryptorBase:DecryptInitializeArray(Array, RuntimeFieldHandle, Int32, Int32, Int32)" newStackTraceSignature="$a.$D:$Eb(Array, RuntimeFieldHandle, Int32, Int32, Int32)" />
+    </type>
+    <type fullName="Obfuz.ExprUtility" newFullName="$a.$e" status="Renamed">
+      <method signature="int Obfuz.ExprUtility::@Add(int, int)" newName="$U" oldStackTraceSignature="Obfuz.ExprUtility:Add(Int32, Int32)" newStackTraceSignature="$a.$e:$U(Int32, Int32)" />
+      <method signature="long Obfuz.ExprUtility::@Add(long, long)" newName="$v" oldStackTraceSignature="Obfuz.ExprUtility:Add(Int64, Int64)" newStackTraceSignature="$a.$e:$v(Int64, Int64)" />
+      <method signature="float Obfuz.ExprUtility::@Add(float, float)" newName="$V" oldStackTraceSignature="Obfuz.ExprUtility:Add(Single, Single)" newStackTraceSignature="$a.$e:$V(Single, Single)" />
+      <method signature="double Obfuz.ExprUtility::@Add(double, double)" newName="$w" oldStackTraceSignature="Obfuz.ExprUtility:Add(Double, Double)" newStackTraceSignature="$a.$e:$w(Double, Double)" />
+      <method signature="nint Obfuz.ExprUtility::@Add(nint, nint)" newName="$W" oldStackTraceSignature="Obfuz.ExprUtility:Add(IntPtr, IntPtr)" newStackTraceSignature="$a.$e:$W(IntPtr, IntPtr)" />
+      <method signature="nint Obfuz.ExprUtility::@Add(nint, int)" newName="$x" oldStackTraceSignature="Obfuz.ExprUtility:Add(IntPtr, Int32)" newStackTraceSignature="$a.$e:$x(IntPtr, Int32)" />
+      <method signature="int Obfuz.ExprUtility::@Subtract(int, int)" newName="$X" oldStackTraceSignature="Obfuz.ExprUtility:Subtract(Int32, Int32)" newStackTraceSignature="$a.$e:$X(Int32, Int32)" />
+      <method signature="long Obfuz.ExprUtility::@Subtract(long, long)" newName="$y" oldStackTraceSignature="Obfuz.ExprUtility:Subtract(Int64, Int64)" newStackTraceSignature="$a.$e:$y(Int64, Int64)" />
+      <method signature="float Obfuz.ExprUtility::@Subtract(float, float)" newName="$Y" oldStackTraceSignature="Obfuz.ExprUtility:Subtract(Single, Single)" newStackTraceSignature="$a.$e:$Y(Single, Single)" />
+      <method signature="double Obfuz.ExprUtility::@Subtract(double, double)" newName="$z" oldStackTraceSignature="Obfuz.ExprUtility:Subtract(Double, Double)" newStackTraceSignature="$a.$e:$z(Double, Double)" />
+      <method signature="nint Obfuz.ExprUtility::@Subtract(nint, nint)" newName="$Z" oldStackTraceSignature="Obfuz.ExprUtility:Subtract(IntPtr, IntPtr)" newStackTraceSignature="$a.$e:$Z(IntPtr, IntPtr)" />
+      <method signature="nint Obfuz.ExprUtility::@Subtract(nint, int)" newName="$aA" oldStackTraceSignature="Obfuz.ExprUtility:Subtract(IntPtr, Int32)" newStackTraceSignature="$a.$e:$aA(IntPtr, Int32)" />
+      <method signature="int Obfuz.ExprUtility::@Multiply(int, int)" newName="$AA" oldStackTraceSignature="Obfuz.ExprUtility:Multiply(Int32, Int32)" newStackTraceSignature="$a.$e:$AA(Int32, Int32)" />
+      <method signature="long Obfuz.ExprUtility::@Multiply(long, long)" newName="$bA" oldStackTraceSignature="Obfuz.ExprUtility:Multiply(Int64, Int64)" newStackTraceSignature="$a.$e:$bA(Int64, Int64)" />
+      <method signature="float Obfuz.ExprUtility::@Multiply(float, float)" newName="$BA" oldStackTraceSignature="Obfuz.ExprUtility:Multiply(Single, Single)" newStackTraceSignature="$a.$e:$BA(Single, Single)" />
+      <method signature="double Obfuz.ExprUtility::@Multiply(double, double)" newName="$cA" oldStackTraceSignature="Obfuz.ExprUtility:Multiply(Double, Double)" newStackTraceSignature="$a.$e:$cA(Double, Double)" />
+      <method signature="nint Obfuz.ExprUtility::@Multiply(nint, nint)" newName="$CA" oldStackTraceSignature="Obfuz.ExprUtility:Multiply(IntPtr, IntPtr)" newStackTraceSignature="$a.$e:$CA(IntPtr, IntPtr)" />
+      <method signature="nint Obfuz.ExprUtility::@Multiply(nint, int)" newName="$dA" oldStackTraceSignature="Obfuz.ExprUtility:Multiply(IntPtr, Int32)" newStackTraceSignature="$a.$e:$dA(IntPtr, Int32)" />
+      <method signature="int Obfuz.ExprUtility::@Divide(int, int)" newName="$DA" oldStackTraceSignature="Obfuz.ExprUtility:Divide(Int32, Int32)" newStackTraceSignature="$a.$e:$DA(Int32, Int32)" />
+      <method signature="long Obfuz.ExprUtility::@Divide(long, long)" newName="$eA" oldStackTraceSignature="Obfuz.ExprUtility:Divide(Int64, Int64)" newStackTraceSignature="$a.$e:$eA(Int64, Int64)" />
+      <method signature="float Obfuz.ExprUtility::@Divide(float, float)" newName="$EA" oldStackTraceSignature="Obfuz.ExprUtility:Divide(Single, Single)" newStackTraceSignature="$a.$e:$EA(Single, Single)" />
+      <method signature="double Obfuz.ExprUtility::@Divide(double, double)" newName="$fA" oldStackTraceSignature="Obfuz.ExprUtility:Divide(Double, Double)" newStackTraceSignature="$a.$e:$fA(Double, Double)" />
+      <method signature="int Obfuz.ExprUtility::@DivideUn(int, int)" newName="$FA" oldStackTraceSignature="Obfuz.ExprUtility:DivideUn(Int32, Int32)" newStackTraceSignature="$a.$e:$FA(Int32, Int32)" />
+      <method signature="long Obfuz.ExprUtility::@DivideUn(long, long)" newName="$gA" oldStackTraceSignature="Obfuz.ExprUtility:DivideUn(Int64, Int64)" newStackTraceSignature="$a.$e:$gA(Int64, Int64)" />
+      <method signature="int Obfuz.ExprUtility::@Rem(int, int)" newName="$GA" oldStackTraceSignature="Obfuz.ExprUtility:Rem(Int32, Int32)" newStackTraceSignature="$a.$e:$GA(Int32, Int32)" />
+      <method signature="long Obfuz.ExprUtility::@Rem(long, long)" newName="$hA" oldStackTraceSignature="Obfuz.ExprUtility:Rem(Int64, Int64)" newStackTraceSignature="$a.$e:$hA(Int64, Int64)" />
+      <method signature="float Obfuz.ExprUtility::@Rem(float, float)" newName="$HA" oldStackTraceSignature="Obfuz.ExprUtility:Rem(Single, Single)" newStackTraceSignature="$a.$e:$HA(Single, Single)" />
+      <method signature="double Obfuz.ExprUtility::@Rem(double, double)" newName="$iA" oldStackTraceSignature="Obfuz.ExprUtility:Rem(Double, Double)" newStackTraceSignature="$a.$e:$iA(Double, Double)" />
+      <method signature="int Obfuz.ExprUtility::@RemUn(int, int)" newName="$IA" oldStackTraceSignature="Obfuz.ExprUtility:RemUn(Int32, Int32)" newStackTraceSignature="$a.$e:$IA(Int32, Int32)" />
+      <method signature="long Obfuz.ExprUtility::@RemUn(long, long)" newName="$jA" oldStackTraceSignature="Obfuz.ExprUtility:RemUn(Int64, Int64)" newStackTraceSignature="$a.$e:$jA(Int64, Int64)" />
+      <method signature="int Obfuz.ExprUtility::@Negate(int)" newName="$JA" oldStackTraceSignature="Obfuz.ExprUtility:Negate(Int32)" newStackTraceSignature="$a.$e:$JA(Int32)" />
+      <method signature="long Obfuz.ExprUtility::@Negate(long)" newName="$kA" oldStackTraceSignature="Obfuz.ExprUtility:Negate(Int64)" newStackTraceSignature="$a.$e:$kA(Int64)" />
+      <method signature="float Obfuz.ExprUtility::@Negate(float)" newName="$KA" oldStackTraceSignature="Obfuz.ExprUtility:Negate(Single)" newStackTraceSignature="$a.$e:$KA(Single)" />
+      <method signature="double Obfuz.ExprUtility::@Negate(double)" newName="$lA" oldStackTraceSignature="Obfuz.ExprUtility:Negate(Double)" newStackTraceSignature="$a.$e:$lA(Double)" />
+      <method signature="int Obfuz.ExprUtility::@And(int, int)" newName="$LA" oldStackTraceSignature="Obfuz.ExprUtility:And(Int32, Int32)" newStackTraceSignature="$a.$e:$LA(Int32, Int32)" />
+      <method signature="long Obfuz.ExprUtility::@And(long, long)" newName="$mA" oldStackTraceSignature="Obfuz.ExprUtility:And(Int64, Int64)" newStackTraceSignature="$a.$e:$mA(Int64, Int64)" />
+      <method signature="int Obfuz.ExprUtility::@Or(int, int)" newName="$MA" oldStackTraceSignature="Obfuz.ExprUtility:Or(Int32, Int32)" newStackTraceSignature="$a.$e:$MA(Int32, Int32)" />
+      <method signature="long Obfuz.ExprUtility::@Or(long, long)" newName="$nA" oldStackTraceSignature="Obfuz.ExprUtility:Or(Int64, Int64)" newStackTraceSignature="$a.$e:$nA(Int64, Int64)" />
+      <method signature="int Obfuz.ExprUtility::@Xor(int, int)" newName="$NA" oldStackTraceSignature="Obfuz.ExprUtility:Xor(Int32, Int32)" newStackTraceSignature="$a.$e:$NA(Int32, Int32)" />
+      <method signature="long Obfuz.ExprUtility::@Xor(long, long)" newName="$oA" oldStackTraceSignature="Obfuz.ExprUtility:Xor(Int64, Int64)" newStackTraceSignature="$a.$e:$oA(Int64, Int64)" />
+      <method signature="int Obfuz.ExprUtility::@Not(int)" newName="$OA" oldStackTraceSignature="Obfuz.ExprUtility:Not(Int32)" newStackTraceSignature="$a.$e:$OA(Int32)" />
+      <method signature="long Obfuz.ExprUtility::@Not(long)" newName="$pA" oldStackTraceSignature="Obfuz.ExprUtility:Not(Int64)" newStackTraceSignature="$a.$e:$pA(Int64)" />
+      <method signature="int Obfuz.ExprUtility::@ShiftLeft(int, int)" newName="$PA" oldStackTraceSignature="Obfuz.ExprUtility:ShiftLeft(Int32, Int32)" newStackTraceSignature="$a.$e:$PA(Int32, Int32)" />
+      <method signature="long Obfuz.ExprUtility::@ShiftLeft(long, int)" newName="$qA" oldStackTraceSignature="Obfuz.ExprUtility:ShiftLeft(Int64, Int32)" newStackTraceSignature="$a.$e:$qA(Int64, Int32)" />
+      <method signature="int Obfuz.ExprUtility::@ShiftRight(int, int)" newName="$QA" oldStackTraceSignature="Obfuz.ExprUtility:ShiftRight(Int32, Int32)" newStackTraceSignature="$a.$e:$QA(Int32, Int32)" />
+      <method signature="long Obfuz.ExprUtility::@ShiftRight(long, int)" newName="$rA" oldStackTraceSignature="Obfuz.ExprUtility:ShiftRight(Int64, Int32)" newStackTraceSignature="$a.$e:$rA(Int64, Int32)" />
+      <method signature="int Obfuz.ExprUtility::@ShiftRightUn(int, int)" newName="$RA" oldStackTraceSignature="Obfuz.ExprUtility:ShiftRightUn(Int32, Int32)" newStackTraceSignature="$a.$e:$RA(Int32, Int32)" />
+      <method signature="long Obfuz.ExprUtility::@ShiftRightUn(long, int)" newName="$sA" oldStackTraceSignature="Obfuz.ExprUtility:ShiftRightUn(Int64, Int32)" newStackTraceSignature="$a.$e:$sA(Int64, Int32)" />
+    </type>
+    <type fullName="Obfuz.IEncryptionScope" newFullName="$a.$b" status="Renamed" />
+    <type fullName="Obfuz.IEncryptor" newFullName="$a.$E" status="Renamed">
+      <property signature="int OpCodeCount" newName="$a" />
+      <method signature="int Obfuz.IEncryptor::get_OpCodeCount([Obfuz.Runtime]Obfuz.IEncryptor)" newName="$xA" oldStackTraceSignature="Obfuz.IEncryptor:get_OpCodeCount()" newStackTraceSignature="$a.$E:$xA()" />
+      <method signature="void Obfuz.IEncryptor::EncryptBlock([Obfuz.Runtime]Obfuz.IEncryptor, byte[], int, int)" newName="$Db" oldStackTraceSignature="Obfuz.IEncryptor:EncryptBlock(Byte[], Int32, Int32)" newStackTraceSignature="$a.$E:$Db(Byte[], Int32, Int32)" />
+      <method signature="void Obfuz.IEncryptor::DecryptBlock([Obfuz.Runtime]Obfuz.IEncryptor, byte[], int, int)" newName="$eb" oldStackTraceSignature="Obfuz.IEncryptor:DecryptBlock(Byte[], Int32, Int32)" newStackTraceSignature="$a.$E:$eb(Byte[], Int32, Int32)" />
+      <method signature="int Obfuz.IEncryptor::Encrypt([Obfuz.Runtime]Obfuz.IEncryptor, int, int, int)" newName="$XA" oldStackTraceSignature="Obfuz.IEncryptor:Encrypt(Int32, Int32, Int32)" newStackTraceSignature="$a.$E:$XA(Int32, Int32, Int32)" />
+      <method signature="int Obfuz.IEncryptor::Decrypt([Obfuz.Runtime]Obfuz.IEncryptor, int, int, int)" newName="$yA" oldStackTraceSignature="Obfuz.IEncryptor:Decrypt(Int32, Int32, Int32)" newStackTraceSignature="$a.$E:$yA(Int32, Int32, Int32)" />
+      <method signature="long Obfuz.IEncryptor::Encrypt([Obfuz.Runtime]Obfuz.IEncryptor, long, int, int)" newName="$YA" oldStackTraceSignature="Obfuz.IEncryptor:Encrypt(Int64, Int32, Int32)" newStackTraceSignature="$a.$E:$YA(Int64, Int32, Int32)" />
+      <method signature="long Obfuz.IEncryptor::Decrypt([Obfuz.Runtime]Obfuz.IEncryptor, long, int, int)" newName="$zA" oldStackTraceSignature="Obfuz.IEncryptor:Decrypt(Int64, Int32, Int32)" newStackTraceSignature="$a.$E:$zA(Int64, Int32, Int32)" />
+      <method signature="float Obfuz.IEncryptor::Encrypt([Obfuz.Runtime]Obfuz.IEncryptor, float, int, int)" newName="$ZA" oldStackTraceSignature="Obfuz.IEncryptor:Encrypt(Single, Int32, Int32)" newStackTraceSignature="$a.$E:$ZA(Single, Int32, Int32)" />
+      <method signature="float Obfuz.IEncryptor::Decrypt([Obfuz.Runtime]Obfuz.IEncryptor, float, int, int)" newName="$ab" oldStackTraceSignature="Obfuz.IEncryptor:Decrypt(Single, Int32, Int32)" newStackTraceSignature="$a.$E:$ab(Single, Int32, Int32)" />
+      <method signature="double Obfuz.IEncryptor::Encrypt([Obfuz.Runtime]Obfuz.IEncryptor, double, int, int)" newName="$Ab" oldStackTraceSignature="Obfuz.IEncryptor:Encrypt(Double, Int32, Int32)" newStackTraceSignature="$a.$E:$Ab(Double, Int32, Int32)" />
+      <method signature="double Obfuz.IEncryptor::Decrypt([Obfuz.Runtime]Obfuz.IEncryptor, double, int, int)" newName="$bb" oldStackTraceSignature="Obfuz.IEncryptor:Decrypt(Double, Int32, Int32)" newStackTraceSignature="$a.$E:$bb(Double, Int32, Int32)" />
+      <method signature="byte[] Obfuz.IEncryptor::Encrypt([Obfuz.Runtime]Obfuz.IEncryptor, byte[], int, int, int, int)" newName="$Bb" oldStackTraceSignature="Obfuz.IEncryptor:Encrypt(Byte[], Int32, Int32, Int32, Int32)" newStackTraceSignature="$a.$E:$Bb(Byte[], Int32, Int32, Int32, Int32)" />
+      <method signature="byte[] Obfuz.IEncryptor::Decrypt([Obfuz.Runtime]Obfuz.IEncryptor, byte[], int, int, int, int)" newName="$cb" oldStackTraceSignature="Obfuz.IEncryptor:Decrypt(Byte[], Int32, Int32, Int32, Int32)" newStackTraceSignature="$a.$E:$cb(Byte[], Int32, Int32, Int32, Int32)" />
+      <method signature="byte[] Obfuz.IEncryptor::Encrypt([Obfuz.Runtime]Obfuz.IEncryptor, string, int, int)" newName="$Cb" oldStackTraceSignature="Obfuz.IEncryptor:Encrypt(String, Int32, Int32)" newStackTraceSignature="$a.$E:$Cb(String, Int32, Int32)" />
+      <method signature="string Obfuz.IEncryptor::DecryptString([Obfuz.Runtime]Obfuz.IEncryptor, byte[], int, int, int, int)" newName="$db" oldStackTraceSignature="Obfuz.IEncryptor:DecryptString(Byte[], Int32, Int32, Int32, Int32)" newStackTraceSignature="$a.$E:$db(Byte[], Int32, Int32, Int32, Int32)" />
+      <method signature="void Obfuz.IEncryptor::DecryptInitializeArray([Obfuz.Runtime]Obfuz.IEncryptor, System.Array, System.RuntimeFieldHandle, int, int, int)" newName="$Eb" oldStackTraceSignature="Obfuz.IEncryptor:DecryptInitializeArray(Array, RuntimeFieldHandle, Int32, Int32, Int32)" newStackTraceSignature="$a.$E:$Eb(Array, RuntimeFieldHandle, Int32, Int32, Int32)" />
+    </type>
+    <type fullName="Obfuz.NullEncryptor" newFullName="$a.$f" status="Renamed">
+      <field signature="byte[] _key" newName="$A" />
+      <property signature="int OpCodeCount" newName="$a" />
+      <method signature="int Obfuz.NullEncryptor::get_OpCodeCount([Obfuz.Runtime]Obfuz.NullEncryptor)" newName="$xA" oldStackTraceSignature="Obfuz.NullEncryptor:get_OpCodeCount()" newStackTraceSignature="$a.$f:$xA()" />
+      <method signature="int Obfuz.NullEncryptor::Encrypt([Obfuz.Runtime]Obfuz.NullEncryptor, int, int, int)" newName="$XA" oldStackTraceSignature="Obfuz.NullEncryptor:Encrypt(Int32, Int32, Int32)" newStackTraceSignature="$a.$f:$XA(Int32, Int32, Int32)" />
+      <method signature="int Obfuz.NullEncryptor::Decrypt([Obfuz.Runtime]Obfuz.NullEncryptor, int, int, int)" newName="$yA" oldStackTraceSignature="Obfuz.NullEncryptor:Decrypt(Int32, Int32, Int32)" newStackTraceSignature="$a.$f:$yA(Int32, Int32, Int32)" />
+      <method signature="long Obfuz.NullEncryptor::Encrypt([Obfuz.Runtime]Obfuz.NullEncryptor, long, int, int)" newName="$YA" oldStackTraceSignature="Obfuz.NullEncryptor:Encrypt(Int64, Int32, Int32)" newStackTraceSignature="$a.$f:$YA(Int64, Int32, Int32)" />
+      <method signature="long Obfuz.NullEncryptor::Decrypt([Obfuz.Runtime]Obfuz.NullEncryptor, long, int, int)" newName="$zA" oldStackTraceSignature="Obfuz.NullEncryptor:Decrypt(Int64, Int32, Int32)" newStackTraceSignature="$a.$f:$zA(Int64, Int32, Int32)" />
+      <method signature="float Obfuz.NullEncryptor::Encrypt([Obfuz.Runtime]Obfuz.NullEncryptor, float, int, int)" newName="$ZA" oldStackTraceSignature="Obfuz.NullEncryptor:Encrypt(Single, Int32, Int32)" newStackTraceSignature="$a.$f:$ZA(Single, Int32, Int32)" />
+      <method signature="float Obfuz.NullEncryptor::Decrypt([Obfuz.Runtime]Obfuz.NullEncryptor, float, int, int)" newName="$ab" oldStackTraceSignature="Obfuz.NullEncryptor:Decrypt(Single, Int32, Int32)" newStackTraceSignature="$a.$f:$ab(Single, Int32, Int32)" />
+      <method signature="double Obfuz.NullEncryptor::Encrypt([Obfuz.Runtime]Obfuz.NullEncryptor, double, int, int)" newName="$Ab" oldStackTraceSignature="Obfuz.NullEncryptor:Encrypt(Double, Int32, Int32)" newStackTraceSignature="$a.$f:$Ab(Double, Int32, Int32)" />
+      <method signature="double Obfuz.NullEncryptor::Decrypt([Obfuz.Runtime]Obfuz.NullEncryptor, double, int, int)" newName="$bb" oldStackTraceSignature="Obfuz.NullEncryptor:Decrypt(Double, Int32, Int32)" newStackTraceSignature="$a.$f:$bb(Double, Int32, Int32)" />
+      <method signature="byte[] Obfuz.NullEncryptor::Encrypt([Obfuz.Runtime]Obfuz.NullEncryptor, byte[], int, int, int, int)" newName="$Bb" oldStackTraceSignature="Obfuz.NullEncryptor:Encrypt(Byte[], Int32, Int32, Int32, Int32)" newStackTraceSignature="$a.$f:$Bb(Byte[], Int32, Int32, Int32, Int32)" />
+      <method signature="byte[] Obfuz.NullEncryptor::Decrypt([Obfuz.Runtime]Obfuz.NullEncryptor, byte[], int, int, int, int)" newName="$cb" oldStackTraceSignature="Obfuz.NullEncryptor:Decrypt(Byte[], Int32, Int32, Int32, Int32)" newStackTraceSignature="$a.$f:$cb(Byte[], Int32, Int32, Int32, Int32)" />
+      <method signature="byte[] Obfuz.NullEncryptor::Encrypt([Obfuz.Runtime]Obfuz.NullEncryptor, string, int, int)" newName="$Cb" oldStackTraceSignature="Obfuz.NullEncryptor:Encrypt(String, Int32, Int32)" newStackTraceSignature="$a.$f:$Cb(String, Int32, Int32)" />
+      <method signature="string Obfuz.NullEncryptor::DecryptString([Obfuz.Runtime]Obfuz.NullEncryptor, byte[], int, int, int, int)" newName="$db" oldStackTraceSignature="Obfuz.NullEncryptor:DecryptString(Byte[], Int32, Int32, Int32, Int32)" newStackTraceSignature="$a.$f:$db(Byte[], Int32, Int32, Int32, Int32)" />
+    </type>
+    <type fullName="Obfuz.ObfuscationInstincts" newFullName="$a.$F" status="Renamed">
+      <method signature="string Obfuz.ObfuscationInstincts::@FullNameOf`1()" newName="$SA" oldStackTraceSignature="Obfuz.ObfuscationInstincts:FullNameOf()" newStackTraceSignature="$a.$F:$SA()" />
+      <method signature="string Obfuz.ObfuscationInstincts::@NameOf`1()" newName="$tA" oldStackTraceSignature="Obfuz.ObfuscationInstincts:NameOf()" newStackTraceSignature="$a.$F:$tA()" />
+      <method signature="void Obfuz.ObfuscationInstincts::@RegisterReflectionType`1()" newName="$TA" oldStackTraceSignature="Obfuz.ObfuscationInstincts:RegisterReflectionType()" newStackTraceSignature="$a.$F:$TA()" />
+    </type>
+    <type fullName="Obfuz.ObfuscationTypeMapper" newFullName="$a.$g" status="Renamed">
+      <field signature="System.Collections.Generic.Dictionary`2&lt;System.Type,string&gt; _type2OriginalFullName" newName="$b" />
+      <field signature="System.Collections.Generic.Dictionary`2&lt;System.Reflection.Assembly,System.Collections.Generic.Dictionary`2&lt;string,System.Type&gt;&gt; _originalFullName2Types" newName="$B" />
+      <method signature="void Obfuz.ObfuscationTypeMapper::@RegisterType`1(string)" newName="$uA" oldStackTraceSignature="Obfuz.ObfuscationTypeMapper:RegisterType(String)" newStackTraceSignature="$a.$g:$uA(String)" />
+      <method signature="void Obfuz.ObfuscationTypeMapper::@RegisterType(System.Type, string)" newName="$UA" oldStackTraceSignature="Obfuz.ObfuscationTypeMapper:RegisterType(Type, String)" newStackTraceSignature="$a.$g:$UA(Type, String)" />
+      <method signature="string Obfuz.ObfuscationTypeMapper::@GetOriginalTypeFullName(System.Type)" newName="$vA" oldStackTraceSignature="Obfuz.ObfuscationTypeMapper:GetOriginalTypeFullName(Type)" newStackTraceSignature="$a.$g:$vA(Type)" />
+      <method signature="string Obfuz.ObfuscationTypeMapper::@GetOriginalTypeFullNameOrCurrent(System.Type)" newName="$VA" oldStackTraceSignature="Obfuz.ObfuscationTypeMapper:GetOriginalTypeFullNameOrCurrent(Type)" newStackTraceSignature="$a.$g:$VA(Type)" />
+      <method signature="System.Type Obfuz.ObfuscationTypeMapper::@GetTypeByOriginalFullName(System.Reflection.Assembly, string)" newName="$wA" oldStackTraceSignature="Obfuz.ObfuscationTypeMapper:GetTypeByOriginalFullName(Assembly, String)" newStackTraceSignature="$a.$g:$wA(Assembly, String)" />
+      <method signature="void Obfuz.ObfuscationTypeMapper::@Clear()" newName="$WA" oldStackTraceSignature="Obfuz.ObfuscationTypeMapper:Clear()" newStackTraceSignature="$a.$g:$WA()" />
+    </type>
+  </assembly>
+</mapping>

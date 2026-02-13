@@ -27,6 +27,7 @@ MonoBehaviour:
     - Assembly-CSharp
     - Launcher
     - Fantasy.Unity
+    - ObfuzAOT
     additionalAssemblySearchPaths: []
     obfuscateObfuzRuntime: 1
   obfuscationPassSettings:

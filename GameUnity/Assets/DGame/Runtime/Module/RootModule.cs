@@ -107,7 +107,7 @@ namespace DGame
         private void Awake()
         {
             InitMemoryPoolSetting();
-            DLogger.Info($"======== RootModule Awake() ========");
+            // DLogger.Info($"======== RootModule Awake() ========");
             m_instance = this;
             InitStringUtilHelper();
             InitLogHelper();

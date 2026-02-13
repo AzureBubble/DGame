@@ -19,7 +19,7 @@ namespace Procedure
 
         public override void OnEnter()
         {
-            DLogger.Info("======== 3-进入游戏初始化 Yooasset Package 流程 ========");
+            // DLogger.Info("======== 3-进入游戏初始化 Yooasset Package 流程 ========");
             InitPackage().Forget();
         }
 
@@ -41,7 +41,7 @@ namespace Procedure
 
         private async UniTaskVoid InitPackage()
         {
-            DLogger.Info("======== InitPackage ========");
+            // DLogger.Info("======== InitPackage ========");
             try
             {
                 var initOperation = await m_resourceModule.InitPackage(m_resourceModule.DefaultPackageName);

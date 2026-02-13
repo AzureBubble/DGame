@@ -29,7 +29,7 @@ namespace DGame
 
         public override void OnCreate()
         {
-            DLogger.Info("======== 对象池系统初始化 ========");
+            // DLogger.Info("======== 对象池系统初始化 ========");
         }
 
         public override void OnDestroy()

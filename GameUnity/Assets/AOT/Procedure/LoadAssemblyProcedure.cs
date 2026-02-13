@@ -50,7 +50,7 @@ namespace Procedure
 
         public override void OnEnter()
         {
-            DLogger.Info("======== 10-加载DLL流程 ========");
+            // DLogger.Info("======== 10-加载DLL流程 ========");
 
 #if ENABLE_HYBRIDCLR
 

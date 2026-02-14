@@ -1,7 +1,7 @@
 ﻿using Fantasy;
 using Fantasy.Network;
 
-namespace System;
+namespace System.Authentication;
 
 public static class SessionHelper
 {

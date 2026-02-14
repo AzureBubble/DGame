@@ -2,9 +2,9 @@
 using Fantasy.Async;
 using Fantasy.Event;
 
-namespace System;
+namespace System.Authentication;
 
-public class OnSceneCreate_Init : AsyncEventSystem<OnCreateScene>
+public sealed class OnSceneCreate_Init : AsyncEventSystem<OnCreateScene>
 {
     protected override async FTask Handler(OnCreateScene self)
     {
@@ -19,7 +19,9 @@ public class OnSceneCreate_Init : AsyncEventSystem<OnCreateScene>
                 break;
 
             case SceneType.Gate:
-                Log.Debug("Gate服务器启动成功");
+                // 用于验证Jwt是否合法的组件
+                scene.AddComponent<GateJwtComponent>();
+                Log.Debug($"Gate启动：{scene.SceneConfigId}");
                 break;
         }
 

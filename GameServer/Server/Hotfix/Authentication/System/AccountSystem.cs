@@ -1,9 +1,9 @@
 ﻿using Fantasy;
 using Fantasy.Entitas.Interface;
 
-namespace System;
+namespace System.Authentication;
 
-public class AccountSystem : DestroySystem<Account>
+public sealed class AccountSystem : DestroySystem<Account>
 {
     protected override void Destroy(Account self)
     {

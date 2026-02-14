@@ -119,6 +119,7 @@ namespace GameLogic
             Status = reconnect ? GameClientStatus.StatusReconnect : GameClientStatus.StatusInit;
             if (Scene.Session == null || Scene.Session.IsDisposed)
             {
+                DLogger.Info($"连接服务器: {address}:{port}");
                 Scene.Connect($"{address}:{port}", ProtocolType, OnConnectComplete, OnConnectFail, OnConnectDisconnect, false);
             }
         }

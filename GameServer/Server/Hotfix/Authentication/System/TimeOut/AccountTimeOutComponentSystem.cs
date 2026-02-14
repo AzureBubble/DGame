@@ -1,9 +1,9 @@
 ﻿using Fantasy;
 using Fantasy.Entitas.Interface;
 
-namespace System;
+namespace System.Authentication;
 
-public class AccountTimeOutDestroySystem : DestroySystem<AccountTimeOutComponent>
+public sealed class AccountTimeOutDestroySystem : DestroySystem<AccountTimeOutComponent>
 {
     protected override void Destroy(AccountTimeOutComponent self)
     {

@@ -2,7 +2,7 @@
 using Fantasy.Entitas.Interface;
 using Fantasy.Helper;
 
-namespace System;
+namespace System.Authentication;
 
 public sealed class AuthenticationSessionComponentDestroySystem : DestroySystem<AuthenticationSessionComponent>
 {

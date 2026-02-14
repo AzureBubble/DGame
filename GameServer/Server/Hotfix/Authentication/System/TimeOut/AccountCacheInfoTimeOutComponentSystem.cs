@@ -1,9 +1,9 @@
 ﻿using Fantasy;
 using Fantasy.Entitas.Interface;
 
-namespace System;
+namespace System.Authentication;
 
-public class AccountCacheInfoTimeOutDestroySystem : DestroySystem<AccountCacheInfoTimeOutComponent>
+public sealed class AccountCacheInfoTimeOutDestroySystem : DestroySystem<AccountCacheInfoTimeOutComponent>
 {
     protected override void Destroy(AccountCacheInfoTimeOutComponent self)
     {

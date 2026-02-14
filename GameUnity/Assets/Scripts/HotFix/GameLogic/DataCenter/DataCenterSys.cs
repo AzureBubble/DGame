@@ -68,6 +68,7 @@ namespace GameLogic
             {
                 DLogger.Info($"Login Success: UID: {payload.uid} address: {payload.address} port: {payload.port}");
                 // 根据Token返回的Address登录到Gate服务器
+
                 GameClient.Instance.Connect(payload.address, payload.port);
                 GameEvent.Get<ILoginUI>().OnLogin();
                 // 发送登录请求到Gate服务器

@@ -18,6 +18,11 @@
         public int port { get; set; }
 
         /// <summary>
+        /// 分配的Scene的Id
+        /// </summary>
+        public uint sceneId { get; set; }
+
+        /// <summary>
         ///
         /// </summary>
         public int exp { get; set; }

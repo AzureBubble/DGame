@@ -4,7 +4,7 @@ using Fantasy;
 using Fantasy.Entitas.Interface;
 using Microsoft.IdentityModel.Tokens;
 
-namespace System;
+namespace System.Authentication;
 
 public sealed class AuthenticationJwtComponentAwakeSystem : AwakeSystem<AuthenticationJwtComponent>
 {
@@ -42,14 +42,16 @@ public static class AuthenticationJwtComponentSystem
     /// <param name="uid">账号ID</param>
     /// <param name="address">登录的目标服务器地址</param>
     /// <param name="port">登录的目标服务器地址端口号</param>
+    /// <param name="sceneId">分配的Scene的Id</param>
     /// <returns></returns>
-    public static string GetToken(this AuthenticationJwtComponent self, long uid, string address, int port)
+    public static string GetToken(this AuthenticationJwtComponent self, long uid, string address, int port, uint sceneId)
     {
         var jwtPayload = new JwtPayload()
         {
             { "uid", uid },
             { "address", address },
             { "port", port },
+            { "sceneId", sceneId},
         };
         var jwtSecurityToken = new JwtSecurityToken
             (

@@ -61,6 +61,7 @@ namespace GameLogic
         private int m_lastPort = 0;
         private float m_lastLogDisconnectErrTime = 0f;
         private ClientConnectWatcher m_clientConnectWatcher;
+        private FTask<bool> m_connectTask;
 
         public Scene Scene { get; private set; }
 
@@ -119,8 +120,50 @@ namespace GameLogic
             Status = reconnect ? GameClientStatus.StatusReconnect : GameClientStatus.StatusInit;
             if (Scene.Session == null || Scene.Session.IsDisposed)
             {
-                DLogger.Info($"连接服务器: {address}:{port}");
                 Scene.Connect($"{address}:{port}", ProtocolType, OnConnectComplete, OnConnectFail, OnConnectDisconnect, false);
+            }
+        }
+
+        public async FTask<bool> ConnectAsync(string address, int port, bool reconnect = false)
+        {
+            if (Status == GameClientStatus.StatusConnected || Status == GameClientStatus.StatusLogin ||
+                Status == GameClientStatus.StatusEnter)
+            {
+                return true;
+            }
+
+            // 关闭重连监控
+            if (!reconnect)
+            {
+                SetWatchReconnect(false);
+            }
+
+            if (reconnect)
+            {
+                GameEvent.Get<ICommonUI>().ShowWaitingUI(WaitingUISeq.LOGINWORLD_SEQID, G.R("正在重连"));
+            }
+            else
+            {
+                GameEvent.Get<ICommonUI>().ShowWaitingUI(WaitingUISeq.LOGINWORLD_SEQID, string.Empty);
+            }
+
+            m_lastAddress = address;
+            m_lastPort = port;
+            Status = reconnect ? GameClientStatus.StatusReconnect : GameClientStatus.StatusInit;
+            // 创建待完成的 Task
+            m_connectTask = FTask<bool>.Create(isPool: false);
+            if (Scene.Session == null || Scene.Session.IsDisposed)
+            {
+                Scene.Connect($"{address}:{port}", ProtocolType, OnConnectComplete, OnConnectFail, OnConnectDisconnect, false);
+            }
+            return await m_connectTask;
+        }
+
+        public void Disconnect()
+        {
+            if (Scene != null && !Scene.IsDisposed && Scene.Session != null && !Scene.Session.IsDisposed)
+            {
+                Scene.Session.Dispose();
             }
         }
 
@@ -132,7 +175,7 @@ namespace GameLogic
                 return;
             }
             m_clientConnectWatcher?.Reconnect();
-            Connect(m_lastAddress, m_lastPort, true);
+            ConnectAsync(m_lastAddress, m_lastPort, true).Coroutine();
         }
 
         public void CheckClientVersion()
@@ -159,6 +202,8 @@ namespace GameLogic
             GameEvent.Get<ICommonUI>().FinishWaiting(WaitingUISeq.LOGINWORLD_SEQID);
             Status = GameClientStatus.StatusConnected;
             DLogger.Info("[GameClient] Connected to server success");
+            m_connectTask?.SetResult(true);
+            m_connectTask = null;
         }
 
         private void OnConnectFail()
@@ -167,6 +212,8 @@ namespace GameLogic
             GameEvent.Get<ICommonUI>().FinishWaiting(WaitingUISeq.LOGINWORLD_SEQID);
             Status = GameClientStatus.StatusClose;
             DLogger.Info("[GameClient] Connected to server fail");
+            m_connectTask?.SetResult(false);
+            m_connectTask = null;
         }
 
         private void OnConnectDisconnect()
@@ -175,6 +222,8 @@ namespace GameLogic
             GameEvent.Get<ICommonUI>().FinishWaiting();
             Status = GameClientStatus.StatusClose;
             DLogger.Info("[GameClient] Disconnected to server");
+            m_connectTask?.SetResult(false);
+            m_connectTask = null;
         }
 
         public bool IsStatusCanSendMsg(uint protocolCode)
@@ -185,10 +234,6 @@ namespace GameLogic
             {
                 canSend = protocolCode == OuterOpcode.C2A_LoginRequest
                     || protocolCode == OuterOpcode.C2G_LoginRequest;
-            }
-            if (Status == GameClientStatus.StatusConnected)
-            {
-                canSend = protocolCode == OuterOpcode.C2G_LoginRequest;
             }
             if (Status == GameClientStatus.StatusRegister)
             {

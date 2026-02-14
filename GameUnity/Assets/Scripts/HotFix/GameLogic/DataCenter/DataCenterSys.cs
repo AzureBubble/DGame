@@ -2,6 +2,8 @@
 using DGame;
 using Fantasy;
 using Fantasy.Async;
+using Fantasy.Network;
+using UnityEngine;
 
 namespace GameLogic
 {
@@ -28,7 +30,7 @@ namespace GameLogic
 
         public async FTask Register(string address, int port, string userName, string password)
         {
-            GameClient.Instance.Connect(address, port);
+            await GameClient.Instance.ConnectAsync(address, port);
             GameClient.Instance.Status = GameClientStatus.StatusRegister;
             var response = (A2C_RegisterResponse)await GameClient.Instance.Call(new C2A_RegisterRequest()
             {
@@ -47,7 +49,7 @@ namespace GameLogic
 
         public async FTask Login(string address, int port, string userName, string password)
         {
-            GameClient.Instance.Connect(address, port);
+            await GameClient.Instance.ConnectAsync(address, port);
             GameClient.Instance.Status = GameClientStatus.StatusLogin;
             var response = (A2C_LoginResponse)await GameClient.Instance.Call(new C2A_LoginRequest()
             {
@@ -68,8 +70,10 @@ namespace GameLogic
             {
                 DLogger.Info($"Login Success: UID: {payload.uid} address: {payload.address} port: {payload.port}");
                 // 根据Token返回的Address登录到Gate服务器
-
-                GameClient.Instance.Connect(payload.address, payload.port);
+                GameClient.Instance.Status = GameClientStatus.StatusInit;
+                GameClient.Instance.Disconnect();
+                await GameClient.Instance.ConnectAsync(payload.address, payload.port);
+                GameClient.Instance.Status = GameClientStatus.StatusLogin;
                 GameEvent.Get<ILoginUI>().OnLogin();
                 // 发送登录请求到Gate服务器
                 var loginResponse = (G2C_LoginResponse)await GameClient.Instance.Call(new C2G_LoginRequest()

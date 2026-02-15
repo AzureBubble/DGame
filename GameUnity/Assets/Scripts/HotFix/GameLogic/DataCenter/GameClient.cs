@@ -55,18 +55,30 @@ namespace GameLogic
     public sealed class GameClient : Singleton<GameClient>, IUpdate
     {
         private readonly NetworkProtocolType ProtocolType = NetworkProtocolType.KCP;
-        public GameClientStatus Status { get; set; } = GameClientStatus.StatusInit;
-
         private string m_lastAddress = string.Empty;
         private int m_lastPort = 0;
         private float m_lastLogDisconnectErrTime = 0f;
         private ClientConnectWatcher m_clientConnectWatcher;
         private FTask<bool> m_connectTask;
 
+        /// <summary>
+        /// 网络连接状态
+        /// </summary>
+        public GameClientStatus Status { get; set; } = GameClientStatus.StatusInit;
+
+        /// <summary>
+        /// Fantasy 网络框架的 Scene 网络由此驱动
+        /// </summary>
         public Scene Scene { get; private set; }
 
+        /// <summary>
+        /// 网络连接是否正常
+        /// </summary>
         public bool IsStatusEnter => Status == GameClientStatus.StatusEnter;
 
+        /// <summary>
+        /// 最后一次返回的网络错误码
+        /// </summary>
         public int LastNetErrorCode { get; private set; }
 
         protected override void OnInit()
@@ -74,6 +86,10 @@ namespace GameLogic
             m_clientConnectWatcher = new ClientConnectWatcher(this);
         }
 
+        /// <summary>
+        /// 异步初始化 Fantasy 网络框架
+        /// </summary>
+        /// <param name="assemblies">热更程序集</param>
         public async FTask InitAsync(List<Assembly> assemblies)
         {
             // ⚠️ 重要: 手动加载程序集必须手动触发 Fantasy 注册
@@ -92,6 +108,12 @@ namespace GameLogic
             DLogger.Info("Fantasy 初始化完成!");
         }
 
+        /// <summary>
+        /// 同步连接网络
+        /// </summary>
+        /// <param name="address">ip地址</param>
+        /// <param name="port">端口号</param>
+        /// <param name="reconnect">是否重连</param>
         public void Connect(string address, int port, bool reconnect = false)
         {
             if (Status == GameClientStatus.StatusConnected || Status == GameClientStatus.StatusLogin ||
@@ -124,6 +146,13 @@ namespace GameLogic
             }
         }
 
+        /// <summary>
+        /// 异步连接网络
+        /// </summary>
+        /// <param name="address">ip地址</param>
+        /// <param name="port">端口号</param>
+        /// <param name="reconnect">是否重连</param>
+        /// <returns></returns>
         public async FTask<bool> ConnectAsync(string address, int port, bool reconnect = false)
         {
             if (Status == GameClientStatus.StatusConnected || Status == GameClientStatus.StatusLogin ||
@@ -159,14 +188,21 @@ namespace GameLogic
             return await m_connectTask;
         }
 
+        /// <summary>
+        /// 断开当前网络连接
+        /// </summary>
         public void Disconnect()
         {
+            SetWatchReconnect(false);
             if (Scene != null && !Scene.IsDisposed && Scene.Session != null && !Scene.Session.IsDisposed)
             {
                 Scene.Session.Dispose();
             }
         }
 
+        /// <summary>
+        /// 网络重连
+        /// </summary>
         public void Reconnect()
         {
             if (string.IsNullOrEmpty(m_lastAddress) || m_lastPort <= 0)
@@ -178,6 +214,9 @@ namespace GameLogic
             ConnectAsync(m_lastAddress, m_lastPort, true).Coroutine();
         }
 
+        /// <summary>
+        /// 检查客户端资源版本
+        /// </summary>
         public void CheckClientVersion()
         {
             m_clientConnectWatcher?.CheckClientVersion();
@@ -187,7 +226,7 @@ namespace GameLogic
         /// 设置是否监控网络重连
         /// 登录成功后 开启监控 可以自动重连或者提示玩家重连
         /// </summary>
-        /// <param name="needWatch"></param>
+        /// <param name="needWatch">是否需要监控</param>
         public void SetWatchReconnect(bool needWatch)
         {
             if (m_clientConnectWatcher == null)
@@ -226,6 +265,11 @@ namespace GameLogic
             m_connectTask = null;
         }
 
+        /// <summary>
+        /// 网络状态是否可以发送消息给服务器
+        /// </summary>
+        /// <param name="protocolCode">网络协议码</param>
+        /// <returns></returns>
         public bool IsStatusCanSendMsg(uint protocolCode)
         {
             bool canSend = false;
@@ -257,6 +301,13 @@ namespace GameLogic
             return canSend;
         }
 
+        /// <summary>
+        /// 发送消息到服务器（不需要响应）
+        /// </summary>
+        /// <typeparam name="T">消息类型，必须实现 IMessage 接口</typeparam>
+        /// <param name="message">要发送的消息实例</param>
+        /// <param name="rpcID">RPC ID</param>
+        /// <param name="routeID">路由 ID，用于消息路由</param>
         public void Send<T>(T message, uint rpcID = 0, long routeID = 0) where T : IMessage
         {
             if (!CheckSceneIsValid())
@@ -271,6 +322,13 @@ namespace GameLogic
             }
         }
 
+        /// <summary>
+        /// 发送 RPC 请求到服务器并等待响应
+        /// </summary>
+        /// <typeparam name="T">请求类型，必须实现 IRequest 接口</typeparam>
+        /// <param name="request">请求实例</param>
+        /// <param name="routeId">路由 ID，用于消息路由</param>
+        /// <returns>服务器的响应结果</returns>
         public async FTask<IResponse> Call<T>(T request, long routeId = 0) where T : IRequest
         {
             if (!CheckSceneIsValid())
@@ -303,6 +361,11 @@ namespace GameLogic
             Scene?.Dispose();
         }
 
+        /// <summary>
+        /// 注册网络消息处理器
+        /// </summary>
+        /// <param name="protocolCode">协议码</param>
+        /// <param name="ctx">消息处理回调</param>
         public void RegisterMsgHandler(uint protocolCode, Action<IMessage> ctx)
         {
             if (!CheckSceneIsValid())
@@ -312,6 +375,11 @@ namespace GameLogic
             Scene.MessageDispatcherComponent?.RegisterMsgHandler(protocolCode, ctx);
         }
 
+        /// <summary>
+        /// 取消注册网络消息处理器
+        /// </summary>
+        /// <param name="protocolCode">协议码</param>
+        /// <param name="ctx">消息处理回调</param>
         public void UnRegisterMsgHandler(uint protocolCode, Action<IMessage> ctx)
         {
             if (!CheckSceneIsValid())
@@ -321,6 +389,9 @@ namespace GameLogic
             Scene.MessageDispatcherComponent?.UnRegisterMsgHandler(protocolCode, ctx);
         }
 
+        /// <summary>
+        /// 每帧更新，用于处理网络重连监控
+        /// </summary>
         public void OnUpdate()
         {
             m_clientConnectWatcher?.Update();

@@ -28,6 +28,13 @@ namespace GameLogic
 
         #region 网络操作
 
+        /// <summary>
+        /// 注册新账号。
+        /// </summary>
+        /// <param name="address">服务器地址</param>
+        /// <param name="port">服务器端口</param>
+        /// <param name="userName">用户名</param>
+        /// <param name="password">密码</param>
         public async FTask Register(string address, int port, string userName, string password)
         {
             await GameClient.Instance.ConnectAsync(address, port);
@@ -47,6 +54,13 @@ namespace GameLogic
             GameEvent.Get<ILoginUI>().OnRegister();
         }
 
+        /// <summary>
+        /// 登录账号并连接到 Gate 服务器。
+        /// </summary>
+        /// <param name="address">认证服务器地址</param>
+        /// <param name="port">认证服务器端口</param>
+        /// <param name="userName">用户名</param>
+        /// <param name="password">密码</param>
         public async FTask Login(string address, int port, string userName, string password)
         {
             await GameClient.Instance.ConnectAsync(address, port);

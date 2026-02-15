@@ -155,6 +155,13 @@ namespace GameLogic
         /// <returns></returns>
         public async FTask<bool> ConnectAsync(string address, int port, bool reconnect = false)
         {
+            // 防止重复多次重连
+            if (m_connectTask != null && !m_connectTask.IsCompleted)
+            {
+                DLogger.Warning("正在连接中...请勿重复发起连接");
+                return await m_connectTask;
+            }
+
             if (Status == GameClientStatus.StatusConnected || Status == GameClientStatus.StatusLogin ||
                 Status == GameClientStatus.StatusEnter)
             {
@@ -193,6 +200,8 @@ namespace GameLogic
         /// </summary>
         public void Disconnect()
         {
+            m_connectTask?.SetResult(false);
+            m_connectTask = null;
             SetWatchReconnect(false);
             if (Scene != null && !Scene.IsDisposed && Scene.Session != null && !Scene.Session.IsDisposed)
             {
@@ -210,6 +219,8 @@ namespace GameLogic
                 UIModule.Instance.ShowTipsUI("Invalid reconnect param");
                 return;
             }
+
+            Disconnect();
             m_clientConnectWatcher?.Reconnect();
             ConnectAsync(m_lastAddress, m_lastPort, true).Coroutine();
         }

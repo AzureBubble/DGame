@@ -115,6 +115,7 @@ namespace GameLogic
 
         private void InitModule()
         {
+            RegisterModule(LoginNetMgr.Instance);
         }
 
         /// <summary>

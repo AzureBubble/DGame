@@ -9,5 +9,6 @@ public class GameAccountDestroySystem : DestroySystem<GameAccount>
     {
         self.CreateTime = 0;
         self.LoginTime = 0;
+        self.SessionRuntimeId = 0;
     }
 }

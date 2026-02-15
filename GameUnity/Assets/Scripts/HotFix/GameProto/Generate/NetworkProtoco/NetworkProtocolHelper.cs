@@ -48,6 +48,17 @@ namespace Fantasy
 			return (G2C_LoginResponse)await session.Call(C2G_LoginRequest_request);
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void G2C_RepeatLogin(this Session session, G2C_RepeatLogin G2C_RepeatLogin_message)
+		{
+			session.Send(G2C_RepeatLogin_message);
+		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void G2C_RepeatLogin(this Session session)
+		{
+			using var message = Fantasy.G2C_RepeatLogin.Create();
+			session.Send(message);
+		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static void C2G_TestMessage(this Session session, C2G_TestMessage C2G_TestMessage_message)
 		{
 			session.Send(C2G_TestMessage_message);

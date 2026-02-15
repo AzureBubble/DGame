@@ -2,7 +2,7 @@
 
 namespace Fantasy;
 
-public class AuthenticationSessionComponent : Entity
+public class SessionTimeOutComponent : Entity
 {
     /// <summary>
     /// 主要是用于检测每次请求的间隔 这里存放的是下一次能正常通讯的时间

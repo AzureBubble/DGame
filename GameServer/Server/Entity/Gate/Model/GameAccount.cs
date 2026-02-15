@@ -1,4 +1,5 @@
 ﻿using Fantasy.Entitas;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace Fantasy;
 
@@ -15,4 +16,8 @@ public class GameAccount : Entity
     /// 登录时间
     /// </summary>
     public long LoginTime;
+
+    [BsonIgnore]
+    // BsonIgnore是让Bson保存到数据库中忽略掉这个字段
+    public long SessionRuntimeId;
 }

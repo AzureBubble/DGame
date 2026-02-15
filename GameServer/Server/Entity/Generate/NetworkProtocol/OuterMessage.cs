@@ -296,6 +296,44 @@ namespace Fantasy
     }
     [Serializable]
     [ProtoContract]
+    public partial class G2C_RepeatLogin : AMessage, IMessage
+    {
+        public static G2C_RepeatLogin Create(bool autoReturn = true)
+        {
+            var g2C_RepeatLogin = MessageObjectPool<G2C_RepeatLogin>.Rent();
+            g2C_RepeatLogin.AutoReturn = autoReturn;
+            
+            if (!autoReturn)
+            {
+                g2C_RepeatLogin.SetIsPool(false);
+            }
+            
+            return g2C_RepeatLogin;
+        }
+        
+        public void Return()
+        {
+            if (!AutoReturn)
+            {
+                SetIsPool(true);
+                AutoReturn = true;
+            }
+            else if (!IsPool())
+            {
+                return;
+            }
+            Dispose();
+        }
+
+        public void Dispose()
+        {
+            if (!IsPool()) return; 
+            MessageObjectPool<G2C_RepeatLogin>.Return(this);
+        }
+        public uint OpCode() { return OuterOpcode.G2C_RepeatLogin; } 
+    }
+    [Serializable]
+    [ProtoContract]
     public partial class GameAccountInfo : AMessage, IDisposable
     {
         public static GameAccountInfo Create(bool autoReturn = true)

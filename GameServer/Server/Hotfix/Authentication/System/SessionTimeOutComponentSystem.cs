@@ -4,9 +4,9 @@ using Fantasy.Helper;
 
 namespace System.Authentication;
 
-public sealed class AuthenticationSessionComponentDestroySystem : DestroySystem<AuthenticationSessionComponent>
+public sealed class SessionTimeOutComponentDestroySystem : DestroySystem<SessionTimeOutComponent>
 {
-    protected override void Destroy(AuthenticationSessionComponent self)
+    protected override void Destroy(SessionTimeOutComponent self)
     {
         if (self.TimerId != 0)
         {
@@ -18,9 +18,9 @@ public sealed class AuthenticationSessionComponentDestroySystem : DestroySystem<
     }
 }
 
-public static class AuthenticationSessionComponentSystem
+public static class SessionTimeOutComponentSystem
 {
-    public static void SetInterval(this AuthenticationSessionComponent self, int interval)
+    public static void SetInterval(this SessionTimeOutComponent self, int interval)
     {
         if (interval <= 0)
         {
@@ -31,7 +31,7 @@ public static class AuthenticationSessionComponentSystem
         self.NextTime = TimeHelper.Now + interval;
     }
 
-    public static bool CheckInterval(this AuthenticationSessionComponent self)
+    public static bool CheckInterval(this SessionTimeOutComponent self)
     {
         if (self.NextTime > TimeHelper.Now)
         {
@@ -42,7 +42,7 @@ public static class AuthenticationSessionComponentSystem
         return true;
     }
 
-    public static void TimeOut(this AuthenticationSessionComponent self, int timeout)
+    public static void TimeOut(this SessionTimeOutComponent self, int timeout)
     {
         var scene = self.Scene;
         var parentRuntimeId = scene.Parent.RuntimeId;

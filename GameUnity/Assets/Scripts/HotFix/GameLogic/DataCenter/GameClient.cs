@@ -158,7 +158,7 @@ namespace GameLogic
             // 防止重复多次重连
             if (m_connectTask != null && !m_connectTask.IsCompleted)
             {
-                DLogger.Warning("正在连接中...请勿重复发起连接");
+                DLogger.Warning("Connecting... Please do not initiate the connection again.");
                 return await m_connectTask;
             }
 
@@ -368,6 +368,7 @@ namespace GameLogic
 
         protected override void OnDestroy()
         {
+            Disconnect();
             m_clientConnectWatcher = null;
             Scene?.Dispose();
         }
@@ -379,7 +380,7 @@ namespace GameLogic
         /// <param name="ctx">消息处理回调</param>
         public void RegisterMsgHandler(uint protocolCode, Action<IMessage> ctx)
         {
-            if (!CheckSceneIsValid())
+            if (Scene == null || Scene.IsDisposed)
             {
                 return;
             }
@@ -393,7 +394,7 @@ namespace GameLogic
         /// <param name="ctx">消息处理回调</param>
         public void UnRegisterMsgHandler(uint protocolCode, Action<IMessage> ctx)
         {
-            if (!CheckSceneIsValid())
+            if (Scene == null || Scene.IsDisposed)
             {
                 return;
             }

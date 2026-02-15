@@ -46,7 +46,11 @@ message G2C_LoginResponse // IResponse
 {
 	GameAccountInfo GameAccountInfo = 1;
 }
+// 通知客户端重复登录
+message G2C_RepeatLogin // IMessage
+{
 
+}
 // GameAccount 实体类
 message GameAccountInfo
 {

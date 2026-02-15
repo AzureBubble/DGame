@@ -24,8 +24,8 @@ namespace GameLogic
         private event Action<int, int> m_switchTabAction;
 
         // tab按钮父节点
-        protected readonly Transform m_tfTabParent;
-        // 子UI父节点
+        private readonly Transform m_tfTabParent;
+
         /// <summary>
         /// 获取子页面父节点 Transform。
         /// </summary>
@@ -33,9 +33,9 @@ namespace GameLogic
 
         private readonly Dictionary<int, TabPageInfo> m_tabPageInfoDict = new Dictionary<int, TabPageInfo>(8);
         private readonly Dictionary<Type, BaseChildPage> m_childPageDict = new Dictionary<Type, BaseChildPage>(8);
-        protected readonly List<int> m_idList = new List<int>(8);
+        private readonly List<int> m_idList = new List<int>(8);
         private readonly UIWindow m_parentWindow;
-        protected int m_curSelectChildID = -100;
+        private int m_curSelectChildID = -100;
         private readonly ChildPageShareData m_shareData = new ChildPageShareData();
 
         /// <summary>

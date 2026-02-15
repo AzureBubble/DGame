@@ -21,6 +21,8 @@ public sealed class OnSceneCreate_Init : AsyncEventSystem<OnCreateScene>
             case SceneType.Gate:
                 // 用于验证Jwt是否合法的组件
                 scene.AddComponent<GateJwtComponent>();
+                // 用于管理GameAccount的组件
+                scene.AddComponent<GameAccountManageComponent>();
                 Log.Debug($"Gate启动：{scene.SceneConfigId}");
                 break;
         }

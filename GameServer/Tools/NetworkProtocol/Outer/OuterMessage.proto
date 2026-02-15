@@ -44,6 +44,14 @@ message C2G_LoginRequest // IRequest,G2C_LoginResponse
 // 登录协议返回
 message G2C_LoginResponse // IResponse
 {
+	GameAccountInfo GameAccountInfo = 1;
+}
+
+// GameAccount 实体类
+message GameAccountInfo
+{
+	int64 CreateTime = 1;
+	int64 LoginTime = 2;
 }
 
 message C2G_TestMessage // IMessage

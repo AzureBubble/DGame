@@ -101,6 +101,7 @@ namespace GameLogic
                     return;
                 }
                 DLogger.Info($"Login Gate Successfully.");
+                DLogger.Info($"CreateTime: {loginResponse.GameAccountInfo.CreateTime} LoginTime: {loginResponse.GameAccountInfo.LoginTime}");
             }
         }
 

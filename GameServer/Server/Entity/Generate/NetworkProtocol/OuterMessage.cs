@@ -281,11 +281,61 @@ namespace Fantasy
         {
             if (!IsPool()) return; 
             ErrorCode = 0;
+            if (GameAccountInfo != null)
+            {
+                GameAccountInfo.Dispose();
+                GameAccountInfo = null;
+            }
             MessageObjectPool<G2C_LoginResponse>.Return(this);
         }
         public uint OpCode() { return OuterOpcode.G2C_LoginResponse; } 
         [ProtoMember(1)]
         public uint ErrorCode { get; set; }
+        [ProtoMember(2)]
+        public GameAccountInfo GameAccountInfo { get; set; }
+    }
+    [Serializable]
+    [ProtoContract]
+    public partial class GameAccountInfo : AMessage, IDisposable
+    {
+        public static GameAccountInfo Create(bool autoReturn = true)
+        {
+            var gameAccountInfo = MessageObjectPool<GameAccountInfo>.Rent();
+            gameAccountInfo.AutoReturn = autoReturn;
+            
+            if (!autoReturn)
+            {
+                gameAccountInfo.SetIsPool(false);
+            }
+            
+            return gameAccountInfo;
+        }
+        
+        public void Return()
+        {
+            if (!AutoReturn)
+            {
+                SetIsPool(true);
+                AutoReturn = true;
+            }
+            else if (!IsPool())
+            {
+                return;
+            }
+            Dispose();
+        }
+
+        public void Dispose()
+        {
+            if (!IsPool()) return; 
+            CreateTime = default;
+            LoginTime = default;
+            MessageObjectPool<GameAccountInfo>.Return(this);
+        }
+        [ProtoMember(1)]
+        public long CreateTime { get; set; }
+        [ProtoMember(2)]
+        public long LoginTime { get; set; }
     }
     [Serializable]
     [ProtoContract]

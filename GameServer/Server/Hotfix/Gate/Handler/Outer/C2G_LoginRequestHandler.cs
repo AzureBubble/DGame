@@ -17,15 +17,40 @@ public sealed class C2G_LoginRequestHandler : MessageRPC<C2G_LoginRequest, G2C_L
             session.Dispose();
             return;
         }
-        Log.Debug($"Gate登录：{session.Scene.SceneConfigId}");
-        if (!GateJwtHelper.ValidateToken(session.Scene, request.Token, out var accountId))
+
+        var scene = session.Scene;
+        if (!GateJwtHelper.ValidateToken(scene, request.Token, out var accountId))
         {
             // 如果失败 恶意攻击  session.Dispose();
             Log.Error("恶意攻击");
             session.Dispose();
             return;
         }
-        Log.Debug($"当前Gate服务器: {session.Scene.SceneConfigId} accountId: {accountId}");
-        await FTask.CompletedTask;
+
+        Log.Debug("检查该账号是否存在");
+        // 在缓存中检查该账号是否存在
+        var gameAccountManageComponent = scene.GetComponent<GameAccountManageComponent>();
+        if (!gameAccountManageComponent.TryGet(accountId, out var gameAccount))
+        {
+            // 首先到数据库查询是否存在这个账号
+            gameAccount = await GameAccountHelper.LoadDataBase(scene, accountId);
+            // 如果有就直接加入缓存中即可
+            if (gameAccount == null)
+            {
+                Log.Debug("不存在 表示需要创建新账号");
+                // 如果没有就创建新的 然后保存到数据库中
+                // 如果不存在 表示需要创建新账号
+                gameAccount = await GameAccountFactory.Create(scene, accountId);
+            }
+            // 把创建完成的账号存入缓存中
+            gameAccountManageComponent.Add(gameAccount);
+        }
+        else
+        {
+            Log.Debug("在缓存中");
+        }
+        Log.Debug("加入缓存中");
+        response.GameAccountInfo = gameAccount.GetGameAccountInfo();
+        Log.Debug($"当前Gate服务器: {scene.SceneConfigId} accountId: {accountId}");
     }
 }

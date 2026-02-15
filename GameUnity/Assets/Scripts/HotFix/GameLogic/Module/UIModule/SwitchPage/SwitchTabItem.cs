@@ -4,6 +4,9 @@ using UnityEngine.UI;
 
 namespace GameLogic
 {
+    /// <summary>
+    /// 页签项，用于显示页签按钮的选中/未选中状态。
+    /// </summary>
     public class SwitchTabItem : UIEventItem<SwitchTabItem>
     {
         #region 脚本工具生成的代码
@@ -36,18 +39,32 @@ namespace GameLogic
         #region Properties
 
         protected bool m_selected;
+
+        /// <summary>
+        /// 获取或设置选中状态。
+        /// </summary>
         public bool Selected { get => m_selected; set => SetSelectedState(value); }
 
         #endregion
 
         #region 函数
 
+        /// <summary>
+        /// 设置 Tab 图标。
+        /// </summary>
+        /// <param name="selectedIconPath">选中状态图标路径</param>
+        /// <param name="noSelectIconPath">未选中状态图标路径</param>
         public void SetTabIcon(string selectedIconPath, string noSelectIconPath)
         {
             m_imgSelectedIcon?.SetSprite(selectedIconPath, true);
             m_imgNoSelectIcon?.SetSprite(noSelectIconPath, true);
         }
 
+        /// <summary>
+        /// 设置 Tab 图标位置。
+        /// </summary>
+        /// <param name="selectedIconPos">选中状态图标位置</param>
+        /// <param name="noSelectIconPos">未选中状态图标位置</param>
         public void SetTabIconPos(Vector2 selectedIconPos, Vector2 noSelectIconPos)
         {
             if (m_imgSelectedIcon != null && m_imgSelectedIcon.rectTransform != null)
@@ -60,6 +77,10 @@ namespace GameLogic
             }
         }
 
+        /// <summary>
+        /// 更新 Tab 名称。
+        /// </summary>
+        /// <param name="tabName">Tab 名称</param>
         public void UpdateTabName(string tabName)
         {
             if (m_textSelectedText != null)
@@ -72,6 +93,11 @@ namespace GameLogic
             }
         }
 
+        /// <summary>
+        /// 更新 Tab 名称并调整大小。
+        /// </summary>
+        /// <param name="tabName">Tab 名称</param>
+        /// <param name="isChangeSize">是否调整大小</param>
         public void UpdateTabNameChangeSize(string tabName, bool isChangeSize = true)
         {
             if (m_textSelectedText != null)
@@ -95,6 +121,10 @@ namespace GameLogic
             }
         }
 
+        /// <summary>
+        /// 设置 Tab 文本字体大小。
+        /// </summary>
+        /// <param name="fontSize">字体大小</param>
         public void SetTabTextFontSize(int fontSize)
         {
             if (m_textSelectedText != null)
@@ -108,6 +138,11 @@ namespace GameLogic
             }
         }
 
+        /// <summary>
+        /// 设置 Tab 文本颜色。
+        /// </summary>
+        /// <param name="selectedTextColor">选中状态文本颜色（十六进制）</param>
+        /// <param name="noSelectTextColor">未选中状态文本颜色（十六进制）</param>
         public void SetTabTextColor(string selectedTextColor, string noSelectTextColor)
         {
             if (m_textSelectedText != null)
@@ -121,6 +156,11 @@ namespace GameLogic
             }
         }
 
+        /// <summary>
+        /// 设置 Tab 背景图。
+        /// </summary>
+        /// <param name="selectedBgPath">选中状态背景路径</param>
+        /// <param name="noSelectBgPath">未选中状态背景路径</param>
         public void SetTabBg(string selectedBgPath, string noSelectBgPath)
         {
             if (!string.IsNullOrEmpty(selectedBgPath))
@@ -133,6 +173,10 @@ namespace GameLogic
             }
         }
 
+        /// <summary>
+        /// 设置选中状态。
+        /// </summary>
+        /// <param name="isSelected">是否选中</param>
         public virtual void SetSelectedState(bool isSelected)
         {
             m_selected = isSelected;
@@ -140,6 +184,10 @@ namespace GameLogic
             m_tfNoSelectNode?.SetActive(!isSelected);
         }
 
+        /// <summary>
+        /// 设置红点显示状态。
+        /// </summary>
+        /// <param name="isActive">是否显示红点</param>
         public virtual void SetRedNodeActive(bool isActive)
         {
             m_tfRedNode?.SetActive(isActive);

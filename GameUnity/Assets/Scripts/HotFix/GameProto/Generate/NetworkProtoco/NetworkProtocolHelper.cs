@@ -59,6 +59,18 @@ namespace Fantasy
 			session.Send(message);
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static async FTask<G2C_GetAccountInfoResponse> C2G_GetAccountInfoRequest(this Session session, C2G_GetAccountInfoRequest C2G_GetAccountInfoRequest_request)
+		{
+			return (G2C_GetAccountInfoResponse)await session.Call(C2G_GetAccountInfoRequest_request);
+		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static async FTask<G2C_GetAccountInfoResponse> C2G_GetAccountInfoRequest(this Session session, GameAccountInfo gameAccountInfo)
+		{
+			using var C2G_GetAccountInfoRequest_request = Fantasy.C2G_GetAccountInfoRequest.Create();
+			C2G_GetAccountInfoRequest_request.GameAccountInfo = gameAccountInfo;
+			return (G2C_GetAccountInfoResponse)await session.Call(C2G_GetAccountInfoRequest_request);
+		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static void C2G_TestMessage(this Session session, C2G_TestMessage C2G_TestMessage_message)
 		{
 			session.Send(C2G_TestMessage_message);

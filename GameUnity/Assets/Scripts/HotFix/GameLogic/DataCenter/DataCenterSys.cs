@@ -100,6 +100,7 @@ namespace GameLogic
                     DLogger.Error($"登录到Gate服务器发生错误: Error: {loginResponse.ErrorCode}");
                     return;
                 }
+                GameClient.Instance.Status = GameClientStatus.StatusEnter;
                 DLogger.Info($"Login Gate Successfully.");
                 DLogger.Info($"CreateTime: {loginResponse.GameAccountInfo.CreateTime} LoginTime: {loginResponse.GameAccountInfo.LoginTime}");
             }

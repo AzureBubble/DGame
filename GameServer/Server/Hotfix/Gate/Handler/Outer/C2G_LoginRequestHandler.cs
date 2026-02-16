@@ -69,7 +69,9 @@ public sealed class C2G_LoginRequestHandler : MessageRPC<C2G_LoginRequest, G2C_L
                 // 1、客户端断线重连 要给这个Session发送一个消息 通知它有人登录了
                 // 2、其他的客户端登录了这个账号 要给这个Session 发送一个消息 通知它有人登录了
                 // 顶号的情况 防止定时把Session清掉 就把它的AccountId置为0 就不会设置定时销毁Session的任务了
-                oldSession.GetComponent<GameAccountFlagComponent>().AccountId = 0;
+                var gameAccountFlagComponent = oldSession.GetComponent<GameAccountFlagComponent>();
+                gameAccountFlagComponent.AccountId = 0;
+                gameAccountFlagComponent.GameAccount = null;
                 // 给旧的客户端发送一个重复登录的消息 如果当前客户端是自己上次登录的 发送也收不到
                 oldSession.Send(new G2C_RepeatLogin());
                 // 延迟销毁旧的会话 延迟3秒 不定时销毁 有可能消息没有发送到客户端就销毁了
@@ -78,7 +80,9 @@ public sealed class C2G_LoginRequestHandler : MessageRPC<C2G_LoginRequest, G2C_L
         }
         Log.Debug("加入缓存中");
         // 给当前Session添加一个组件 当Session销毁的时候会销毁这个组件
-        session.AddComponent<GameAccountFlagComponent>().AccountId = accountId;
+        var accountFlagComponent = session.AddComponent<GameAccountFlagComponent>();
+        accountFlagComponent.AccountId = accountId;
+        accountFlagComponent.GameAccount = gameAccount;
         gameAccount.SessionRuntimeId = session.RuntimeId;
         response.GameAccountInfo = gameAccount.GetGameAccountInfo();
         Log.Debug($"当前Gate服务器: {scene.SceneConfigId} accountId: {accountId}");

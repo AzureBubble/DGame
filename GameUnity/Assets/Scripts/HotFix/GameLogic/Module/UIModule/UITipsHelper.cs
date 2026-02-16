@@ -10,6 +10,12 @@ namespace GameLogic
             ShowTipsUI(text);
         }
 
+        public void ShowErrorTipsUI(uint result)
+        {
+            string text = TextConfigMgr.Instance.GetText(result);
+            ShowErrorTipsUI(text);
+        }
+
         public void ShowTipsUI(string msg)
         {
             if (!string.IsNullOrEmpty(msg))

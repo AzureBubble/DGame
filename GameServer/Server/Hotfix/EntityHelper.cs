@@ -1,12 +1,13 @@
 ﻿using System.Authentication;
 using Fantasy;
+using Fantasy.Async;
 using Fantasy.Entitas;
 
 namespace System;
 
 public static class EntityHelper
 {
-    public static void SetTimeOut(this Entity entity, int timeout = 3000)
+    public static void SetTimeOut(this Entity entity, int timeout = 3000, Func<FTask>? task = null)
     {
         var sessionTimeOutComponent = entity.GetComponent<EntityTimeOutComponent>();
 
@@ -15,7 +16,7 @@ public static class EntityHelper
             sessionTimeOutComponent = entity.AddComponent<EntityTimeOutComponent>();
         }
         // 3秒后自动销毁的Session
-        sessionTimeOutComponent.TimeOut(timeout);
+        sessionTimeOutComponent.TimeOut(timeout, task);
     }
 
     public static bool CheckInterval(this Entity entity, int interval)

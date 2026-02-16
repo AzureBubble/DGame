@@ -78,7 +78,7 @@ public static class GameAccountHelper
         }
         // 如果不存在定时任务组件 那就添加并设置定时任务
         // 设置延时下线
-        gameAccount.SetTimeOut(timeOut);
+        gameAccount.SetTimeOut(timeOut, gameAccount.Disconnect);
     }
 
     /// <summary>
@@ -87,6 +87,7 @@ public static class GameAccountHelper
     /// <param name="self"></param>
     private static async FTask Disconnect(this GameAccount self)
     {
+        Log.Debug("Disconnect");
         // 保存该账号信息到数据库
         await self.SaveDataBase();
         // 在缓存移除该账号 并执行Dispose方法

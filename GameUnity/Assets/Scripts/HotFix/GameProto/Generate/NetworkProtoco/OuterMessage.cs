@@ -23,6 +23,9 @@ using Fantasy.Serialize;
 // ReSharper disable ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
 namespace Fantasy
 {
+    /// <summary>
+    /// 注册账号协议
+    /// </summary>
     [Serializable]
     [ProtoContract]
     public partial class C2A_RegisterRequest : AMessage, IRequest
@@ -69,6 +72,9 @@ namespace Fantasy
         [ProtoMember(2)]
         public string Password { get; set; }
     }
+    /// <summary>
+    /// 注册账号协议返回
+    /// </summary>
     [Serializable]
     [ProtoContract]
     public partial class A2C_RegisterResponse : AMessage, IResponse
@@ -110,6 +116,9 @@ namespace Fantasy
         [ProtoMember(1)]
         public uint ErrorCode { get; set; }
     }
+    /// <summary>
+    /// 登录协议
+    /// </summary>
     [Serializable]
     [ProtoContract]
     public partial class C2A_LoginRequest : AMessage, IRequest
@@ -159,6 +168,9 @@ namespace Fantasy
         [ProtoMember(3)]
         public uint LoginType { get; set; }
     }
+    /// <summary>
+    /// 登录协议返回
+    /// </summary>
     [Serializable]
     [ProtoContract]
     public partial class A2C_LoginResponse : AMessage, IResponse
@@ -203,6 +215,9 @@ namespace Fantasy
         [ProtoMember(2)]
         public string Token { get; set; }
     }
+    /// <summary>
+    /// 客户端登录到Gate服务器
+    /// </summary>
     [Serializable]
     [ProtoContract]
     public partial class C2G_LoginRequest : AMessage, IRequest
@@ -246,6 +261,9 @@ namespace Fantasy
         [ProtoMember(1)]
         public string Token { get; set; }
     }
+    /// <summary>
+    /// 登录协议返回
+    /// </summary>
     [Serializable]
     [ProtoContract]
     public partial class G2C_LoginResponse : AMessage, IResponse
@@ -294,6 +312,9 @@ namespace Fantasy
         [ProtoMember(2)]
         public GameAccountInfo GameAccountInfo { get; set; }
     }
+    /// <summary>
+    /// 通知客户端重复登录
+    /// </summary>
     [Serializable]
     [ProtoContract]
     public partial class G2C_RepeatLogin : AMessage, IMessage
@@ -332,6 +353,9 @@ namespace Fantasy
         }
         public uint OpCode() { return OuterOpcode.G2C_RepeatLogin; } 
     }
+    /// <summary>
+    /// GameAccount 实体类
+    /// </summary>
     [Serializable]
     [ProtoContract]
     public partial class GameAccountInfo : AMessage, IDisposable
@@ -374,6 +398,104 @@ namespace Fantasy
         public long CreateTime { get; set; }
         [ProtoMember(2)]
         public long LoginTime { get; set; }
+    }
+    /// <summary>
+    /// 拿到当前账号的信息
+    /// </summary>
+    [Serializable]
+    [ProtoContract]
+    public partial class C2G_GetAccountInfoRequest : AMessage, IRequest
+    {
+        public static C2G_GetAccountInfoRequest Create(bool autoReturn = true)
+        {
+            var c2G_GetAccountInfoRequest = MessageObjectPool<C2G_GetAccountInfoRequest>.Rent();
+            c2G_GetAccountInfoRequest.AutoReturn = autoReturn;
+            
+            if (!autoReturn)
+            {
+                c2G_GetAccountInfoRequest.SetIsPool(false);
+            }
+            
+            return c2G_GetAccountInfoRequest;
+        }
+        
+        public void Return()
+        {
+            if (!AutoReturn)
+            {
+                SetIsPool(true);
+                AutoReturn = true;
+            }
+            else if (!IsPool())
+            {
+                return;
+            }
+            Dispose();
+        }
+
+        public void Dispose()
+        {
+            if (!IsPool()) return; 
+            if (GameAccountInfo != null)
+            {
+                GameAccountInfo.Dispose();
+                GameAccountInfo = null;
+            }
+            MessageObjectPool<C2G_GetAccountInfoRequest>.Return(this);
+        }
+        public uint OpCode() { return OuterOpcode.C2G_GetAccountInfoRequest; } 
+        [ProtoIgnore]
+        public G2C_GetAccountInfoResponse ResponseType { get; set; }
+        [ProtoMember(1)]
+        public GameAccountInfo GameAccountInfo { get; set; }
+    }
+    [Serializable]
+    [ProtoContract]
+    public partial class G2C_GetAccountInfoResponse : AMessage, IResponse
+    {
+        public static G2C_GetAccountInfoResponse Create(bool autoReturn = true)
+        {
+            var g2C_GetAccountInfoResponse = MessageObjectPool<G2C_GetAccountInfoResponse>.Rent();
+            g2C_GetAccountInfoResponse.AutoReturn = autoReturn;
+            
+            if (!autoReturn)
+            {
+                g2C_GetAccountInfoResponse.SetIsPool(false);
+            }
+            
+            return g2C_GetAccountInfoResponse;
+        }
+        
+        public void Return()
+        {
+            if (!AutoReturn)
+            {
+                SetIsPool(true);
+                AutoReturn = true;
+            }
+            else if (!IsPool())
+            {
+                return;
+            }
+            Dispose();
+        }
+
+        public void Dispose()
+        {
+            if (!IsPool()) return; 
+            ErrorCode = 0;
+            if (GameAccountInfo != null)
+            {
+                GameAccountInfo.Dispose();
+                GameAccountInfo = null;
+            }
+            MessageObjectPool<G2C_GetAccountInfoResponse>.Return(this);
+        }
+        public uint OpCode() { return OuterOpcode.G2C_GetAccountInfoResponse; } 
+        [ProtoMember(1)]
+        public uint ErrorCode { get; set; }
+        [ProtoMember(2)]
+        public GameAccountInfo GameAccountInfo { get; set; }
     }
     [Serializable]
     [ProtoContract]

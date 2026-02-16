@@ -1,7 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
 using DGame;
-using UnityEngine;
+using Fantasy;
 
 namespace GameLogic
 {
@@ -13,5 +11,7 @@ namespace GameLogic
         void OnLogin();
 
         void ShowLoginUI();
+
+        void GetAccountInfo(GameAccountInfo accountInfo);
     }
 }

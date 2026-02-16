@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Fantasy;
 using Fantasy.Helper;
 
 namespace GameLogic
@@ -24,6 +25,7 @@ namespace GameLogic
 
 		protected override void RegisterEvent()
 		{
+			AddUIEvent<GameAccountInfo>(ILoginUI_Event.GetAccountInfo, OnGetAccountInfo);
 		}
 
 		#region 事件
@@ -46,6 +48,12 @@ namespace GameLogic
 
 		private partial void OnClickGetBtn()
 		{
+			LoginNetMgr.Instance.GetAccountInfoRequest().Coroutine();
+		}
+
+		private void OnGetAccountInfo(GameAccountInfo accountInfo)
+		{
+			m_textMsg.text = accountInfo.LoginTime.ToString();
 		}
 
 		#endregion

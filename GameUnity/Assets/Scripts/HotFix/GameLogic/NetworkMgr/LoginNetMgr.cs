@@ -1,5 +1,6 @@
 using DGame;
 using Fantasy;
+using Fantasy.Async;
 using Fantasy.Network.Interface;
 
 namespace GameLogic
@@ -19,6 +20,18 @@ namespace GameLogic
             }
             DLogger.Warning("客户端重复登录了");
             DLogger.Warning("客户端重复登录了 热更");
+        }
+
+        public async FTask GetAccountInfoRequest()
+        {
+            var response = (G2C_GetAccountInfoResponse)await GameClient.Instance.Call(new C2G_GetAccountInfoRequest());
+
+            if (response.ErrorCode != 0)
+            {
+                UIModule.Instance.ShowErrorTipsUI(response.ErrorCode);
+                return;
+            }
+            GameEvent.Get<ILoginUI>().GetAccountInfo(response.GameAccountInfo);
         }
     }
 }

@@ -4,7 +4,7 @@ echo %CD%
 set WORKSPACE=../
 set LUBAN_DLL=./Tools/LubanTools/Luban/Luban.dll
 set CONF_ROOT=.
-set DATA_OUTPATH=%WORKSPACE%/GameUnity/Assets/BundleAssets/Configs/Bytes/
+set DATA_OUTPATH=%WORKSPACE%/GameUnity/Assets/BundleAssets/Configs/Binary/
 set CODE_OUTPATH=%WORKSPACE%/GameUnity/Assets/Scripts/HotFix/GameProto/LubanConfig/
 
 xcopy /s /e /i /y "%CONF_ROOT%\CustomTemplate\Bin\ConfigSystem.cs" "%WORKSPACE%\GameUnity\Assets\Scripts\HotFix\GameProto\ConfigSystem.cs"

@@ -6,8 +6,8 @@ echo "当前目录: $(pwd)"
 export WORKSPACE="$(realpath ../)"
 export LUBAN_DLL="./Tools/LubanTools/Luban/Luban.dll"
 export CONF_ROOT="$(pwd)"
-export DATA_OUTPATH="${WORKSPACE}/GameUnity/Assets/BundleAssets/Configs/Json/"
-export CODE_OUTPATH="${WORKSPACE}/GameUnity/Assets/Scripts/HotFix/GameProto/LubanConfig/"
+export DATA_OUTPATH="${WORKSPACE}/GameServer/Configs/Json/"
+export CODE_OUTPATH="${WORKSPACE}/GameServer/Server/Entity/Generate/Config/"
 
 dotnet "${LUBAN_DLL}" \
     -t server \

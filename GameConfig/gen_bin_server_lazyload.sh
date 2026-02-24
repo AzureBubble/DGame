@@ -11,7 +11,7 @@ export JSON_DATA_OUTPATH="${WORKSPACE}/GameServer/Configs/Json/"
 export CODE_OUTPATH="${WORKSPACE}/GameServer/Server/Entity/Generate/Config/"
 
 cp -R "${CONF_ROOT}/CustomTemplate/Server/Bin/ConfigSystem.cs" \
-   "${CODE_OUTPATH}/ConfigSystem.cs"
+   "${WORKSPACE}/GameServer/Server/Entity/Generate/ConfigSystem.cs"
 
 dotnet "${LUBAN_DLL}" \
     -t server \

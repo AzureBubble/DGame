@@ -7,7 +7,7 @@ set CONF_ROOT=.
 set DATA_OUTPATH=%WORKSPACE%/GameServer/Configs/Json/
 set CODE_OUTPATH=%WORKSPACE%/GameServer/Server/Entity/Generate/Config/
 
-xcopy /s /e /i /y "%CONF_ROOT%\CustomTemplate\Server\Json\ConfigSystem.cs" "%WORKSPACE%\ConfigSystem.cs"
+xcopy /s /e /i /y "%CONF_ROOT%\CustomTemplate\Server\Json\ConfigSystem.cs" "%WORKSPACE%\GameServer\Server\Entity\Generate\ConfigSystem.cs"
 
 dotnet %LUBAN_DLL% ^
     -t server^

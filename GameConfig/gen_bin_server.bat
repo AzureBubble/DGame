@@ -8,7 +8,7 @@ set BINARY_DATA_OUTPATH=%WORKSPACE%/GameServer/Configs/Binary/
 set JSON_DATA_OUTPATH=%WORKSPACE%/GameServer/Configs/Json/
 set CODE_OUTPATH=%WORKSPACE%/GameServer/Server/Entity/Generate/Config/
 
-xcopy /s /e /i /y "%CONF_ROOT%\CustomTemplate\Server\Bin\ConfigSystem.cs" "%CODE_OUTPATH%\ConfigSystem.cs"
+xcopy /s /e /i /y "%CONF_ROOT%\CustomTemplate\Server\Bin\ConfigSystem.cs" "%WORKSPACE%\GameServer\Server\Entity\Generate\ConfigSystem.cs"
 
 dotnet %LUBAN_DLL% ^
     -t server^

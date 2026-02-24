@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using DGame;
+using GameProto;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -962,6 +964,11 @@ namespace GameLogic
             }
 
             clickHandler.Data = linkData;
+
+            if (OnLinkClicked == null)
+            {
+                OnLinkClicked = DefaultLinkTextClickHandler;
+            }
             clickHandler.Callback = OnLinkClicked;
             button.onClick.AddListener(clickHandler.OnClick);
 
@@ -1545,6 +1552,20 @@ namespace GameLogic
                 m_cts.Dispose();
                 m_cts = null;
             }
+        }
+
+        /// <summary>
+        /// 默认的点击超链接文本事件 只读道具表
+        /// </summary>
+        /// <param name="linkData"></param>
+        private void DefaultLinkTextClickHandler(LinkData linkData)
+        {
+            // 只有当 OnLinkClicked == null 的时候 才会使用这个默认的超链接点击事件
+            DLogger.Info("如果需要默认超链接点击事件 请在这里进行处理默认逻辑");
+            // if (TbItemConfig.TryGetValue(linkData.LinkID, out var itemCfg))
+            // {
+            //
+            // }
         }
 
         #endregion

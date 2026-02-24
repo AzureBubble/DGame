@@ -7,8 +7,8 @@ set CONF_ROOT=.
 set DATA_OUTPATH=%WORKSPACE%/GameUnity/Assets/BundleAssets/Configs/Binary/
 set CODE_OUTPATH=%WORKSPACE%/GameUnity/Assets/Scripts/HotFix/GameProto/LubanConfig/
 
-xcopy /s /e /i /y "%CONF_ROOT%\CustomTemplate\Bin\ConfigSystem.cs" "%WORKSPACE%\GameUnity\Assets\Scripts\HotFix\GameProto\ConfigSystem.cs"
-xcopy /s /e /i /y "%CONF_ROOT%\CustomTemplate\Bin\ExternalTypeUtil.cs" "%WORKSPACE%\GameUnity\Assets\Scripts\HotFix\GameProto\ExternalTypeUtil.cs"
+xcopy /s /e /i /y "%CONF_ROOT%\CustomTemplate\Client\Bin\ConfigSystem.cs" "%WORKSPACE%\GameUnity\Assets\Scripts\HotFix\GameProto\ConfigSystem.cs"
+xcopy /s /e /i /y "%CONF_ROOT%\CustomTemplate\Client\Bin\ExternalTypeUtil.cs" "%WORKSPACE%\GameUnity\Assets\Scripts\HotFix\GameProto\ExternalTypeUtil.cs"
 
 dotnet %LUBAN_DLL% ^
     -t client ^

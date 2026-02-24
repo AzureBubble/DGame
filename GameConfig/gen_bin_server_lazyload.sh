@@ -19,6 +19,7 @@ dotnet "${LUBAN_DLL}" \
     -d bin \
     -d json \
     --conf "${CONF_ROOT}/luban.conf" \
+    --customTemplateDir "${CONF_ROOT}/CustomTemplate/Server/CustomTemplate_Server_LazyLoad" \
     -x code.lineEnding=crlf \
     -x outputCodeDir="${CODE_OUTPATH}" \
     -x bin.outputDataDir="${BINARY_DATA_OUTPATH}" \

@@ -9,9 +9,9 @@ export CONF_ROOT="$(pwd)"
 export DATA_OUTPATH="${WORKSPACE}/GameUnity/Assets/BundleAssets/Configs/Json/"
 export CODE_OUTPATH="${WORKSPACE}/GameUnity/Assets/Scripts/HotFix/GameProto/LubanConfig/"
 
-cp -R "${CONF_ROOT}/CustomTemplate/Json/ConfigSystem.cs" \
+cp -R "${CONF_ROOT}/CustomTemplate/Client/Json/ConfigSystem.cs" \
    "${WORKSPACE}/GameUnity/Assets/Scripts/HotFix/GameProto/ConfigSystem.cs"
-cp -R "${CONF_ROOT}/CustomTemplate/Json/ExternalTypeUtil.cs" \
+cp -R "${CONF_ROOT}/CustomTemplate/Client/Json/ExternalTypeUtil.cs" \
     "${WORKSPACE}/GameUnity/Assets/Scripts/HotFix/GameProto/ExternalTypeUtil.cs"
 
 dotnet "${LUBAN_DLL}" \

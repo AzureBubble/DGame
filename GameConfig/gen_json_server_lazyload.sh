@@ -17,6 +17,7 @@ dotnet "${LUBAN_DLL}" \
     -c cs-simple-json \
     -d json2 \
     --conf "${CONF_ROOT}/luban.conf" \
+    --customTemplateDir "${CONF_ROOT}/CustomTemplate/Server/CustomTemplate_Server_LazyLoad" \
     -x code.lineEnding=crlf \
     -x outputCodeDir="${CODE_OUTPATH}" \
     -x outputDataDir="${DATA_OUTPATH}"

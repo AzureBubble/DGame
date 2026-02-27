@@ -25,11 +25,9 @@ MonoBehaviour:
     nonObfuscatedButReferencingObfuscatedAssemblies:
     - DGame.Runtime
     - Assembly-CSharp
-    - Launcher
-    - Fantasy.Unity
-    - ObfuzAOT
+    - DGame.AOT
     additionalAssemblySearchPaths: []
-    obfuscateObfuzRuntime: 1
+    obfuscateObfuzRuntime: 0
   obfuscationPassSettings:
     enabledPasses: -1
     ruleFiles: []
@@ -52,7 +50,8 @@ MonoBehaviour:
     keepUnknownSymbolInSymbolMappingFile: 1
     symbolMappingFile: Assets/Obfuz/SymbolObfus/symbol-mapping.xml
     debugSymbolMappingFile: Assets/Obfuz/SymbolObfus/symbol-mapping-debug.xml
-    ruleFiles: []
+    ruleFiles:
+    - Assets/Obfuz/SkipObfusRules.xml
     customRenamePolicyTypes: []
   constEncryptSettings:
     encryptionLevel: 1

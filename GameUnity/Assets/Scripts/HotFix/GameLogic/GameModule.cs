@@ -34,6 +34,14 @@ namespace GameLogic
         public static IFsmModule FsmModule => m_fsmModule == null
             ? m_fsmModule = GetModule<IFsmModule>() : m_fsmModule;
 
+        private static ISensitiveWordModule m_sensitiveWordModule;
+
+        /// <summary>
+        /// 敏感词模块
+        /// </summary>
+        public static ISensitiveWordModule SensitiveWordModule => m_sensitiveWordModule == null
+            ? m_sensitiveWordModule = GetModule<ISensitiveWordModule>() : m_sensitiveWordModule;
+
         private static IAnimModule m_animModule;
 
         /// <summary>
@@ -125,6 +133,7 @@ namespace GameLogic
             m_inputModule = null;
             m_localizationModule = null;
             m_gameObjectPool = null;
+            m_sensitiveWordModule = null;
         }
     }
 }

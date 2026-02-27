@@ -50,8 +50,7 @@ MonoBehaviour:
     keepUnknownSymbolInSymbolMappingFile: 1
     symbolMappingFile: Assets/Obfuz/SymbolObfus/symbol-mapping.xml
     debugSymbolMappingFile: Assets/Obfuz/SymbolObfus/symbol-mapping-debug.xml
-    ruleFiles:
-    - Assets/Obfuz/SkipObfusRules.xml
+    ruleFiles: []
     customRenamePolicyTypes: []
   constEncryptSettings:
     encryptionLevel: 1

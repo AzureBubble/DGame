@@ -10,6 +10,7 @@ namespace DGame
         private static readonly string[] m_runtimeAssemblyNames = new string[]
         {
             "DGame.Runtime",
+            "DGame.AOT",
             "Assembly-CSharp",
             "GameLauncher",
             "GameLogic"
@@ -18,6 +19,7 @@ namespace DGame
         private static readonly string[] m_runtimeOrEditorAssemblyNames =
         {
             "DGame.Runtime",
+            "DGame.AOT",
             "Assembly-CSharp",
             "DGame.Editor",
             "Assembly-CSharp-Editor",

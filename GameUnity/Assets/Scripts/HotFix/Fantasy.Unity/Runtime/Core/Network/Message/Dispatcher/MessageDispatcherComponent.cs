@@ -63,7 +63,6 @@ namespace Fantasy.Network.Interface
             }
         }
 #endif
-
         public override void Dispose()
         {
             if (IsDisposed)

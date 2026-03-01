@@ -4,7 +4,7 @@
 PlayerSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 26
-  productGUID: 95a9f9df75f25b74baa5dfe601d82ada
+  productGUID: 280c2cef31f8b3d40bcb330023267724
   AndroidProfiler: 0
   AndroidFilterTouchesWhenObscured: 0
   AndroidEnableSustainedPerformanceMode: 0
@@ -162,7 +162,8 @@ PlayerSettings:
   resetResolutionOnWindowResize: 0
   androidSupportedAspectRatio: 1
   androidMaxAspectRatio: 2.1
-  applicationIdentifier: {}
+  applicationIdentifier:
+    Standalone: com.DefaultCompany.GameUnity
   buildNumber:
     Standalone: 0
     VisionOS: 0
@@ -570,10 +571,15 @@ PlayerSettings:
   webGLMemoryGeometricGrowthCap: 96
   webGLPowerPreference: 2
   scriptingDefineSymbols:
-    Standalone: ODIN_INSPECTOR;ODIN_INSPECTOR_3;ODIN_INSPECTOR_3_1
+    Android: ENABLE_DGAME_LOG;ENABLE_HYBRIDCLR
+    Standalone: ODIN_INSPECTOR;ODIN_INSPECTOR_3;ODIN_INSPECTOR_3_1;ENABLE_DGAME_LOG;ENABLE_HYBRIDCLR
+    WebGL: ENABLE_DGAME_LOG;ENABLE_HYBRIDCLR
+    Windows Store Apps: ENABLE_DGAME_LOG;ENABLE_HYBRIDCLR
+    iPhone: ENABLE_DGAME_LOG;ENABLE_HYBRIDCLR
   additionalCompilerArguments: {}
   platformArchitecture: {}
-  scriptingBackend: {}
+  scriptingBackend:
+    Standalone: 1
   il2cppCompilerConfiguration: {}
   il2cppCodeGeneration: {}
   managedStrippingLevel: {}

@@ -1,0 +1,9 @@
+{
+  "WorkspacePath": "D:\\UnityProjects\\DGame_Fantasy\\GameServer\\Tools\\NetworkProtocol\\",
+  "OpenedTabs": [],
+  "ActiveTabFilePath": "导出设置",
+  "serverOutputDirectory": "../../Server/Entity/Generate/NetworkProtocol",
+  "clientOutputDirectory": "../../../GameUnity/Assets/Scripts/Hotfix/GameProto/Generate/NetworkProtoco",
+  "exportToServer": true,
+  "exportToClient": true
+}

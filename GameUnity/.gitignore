@@ -100,10 +100,13 @@ package/
 #YooAssets
 package/
 yoo/
-[Aa]ssets/TEngine/AssetSetting/Resources/BuiltinFileManifest.asset
-[Aa]ssets/TEngine/AssetSetting/Resources/BuiltinFileManifest.asset.meta
+[Aa]ssets/DGame/AssetSetting/Resources/BuiltinFileManifest.asset
+[Aa]ssets/DGame/AssetSetting/Resources/BuiltinFileManifest.asset.meta
 
 UserSettings/Layouts/
 UserSettings/Search.settings
 ProjectSettings/CommonBurstAotSettings.json
 ProjectSettings/BurstAotSettings_StandaloneWindows.json
+
+# 忽略效果图路径
+[Aa]ssets/BundleAssets/UIRaw/Atlas/Ignore

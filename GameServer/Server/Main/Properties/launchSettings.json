@@ -1,10 +1,25 @@
-{
+﻿{
   "$schema": "http://json.schemastore.org/launchsettings.json",
   "profiles": {
-    "Main": {
+    "开发模式 - 所有进程": {
       "commandName": "Project",
       "environmentVariables": {},
       "commandLineArgs": "--m Develop"
+    },
+    "发布模式 - Gate进程": {
+      "commandName": "Project",
+      "environmentVariables": {},
+      "commandLineArgs": "--m Release --pid 1"
+    },
+    "发布模式 - Game进程": {
+      "commandName": "Project",
+      "environmentVariables": {},
+      "commandLineArgs": "--m Release --pid 2"
+    },
+    "发布模式 - 一区进程": {
+      "commandName": "Project",
+      "environmentVariables": {},
+      "commandLineArgs": "--m Release --g 1"
     }
   }
 }

@@ -45,8 +45,17 @@ namespace GameProto
         private ByteBuf LoadByteBuf(string file)
         {
             // 在这里编写服务器加载配置的逻辑
-            byte[] bytes = new byte[1024];
+            var configPath = GenerateConfigPath(file);
+            var bytes = File.ReadAllBytes(configPath);
             return new ByteBuf(bytes);
         }
+
+        /// <summary>
+        /// 生成配置表存放路径。
+        /// </summary>
+        /// <param name="file">FileName</param>
+        /// <returns>configPath</returns>
+        private string GenerateConfigPath(string file)
+            => $"{AppContext.BaseDirectory}/../../../../../Configs/Binary/{file}.bytes";
     }
 }

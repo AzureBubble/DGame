@@ -44,6 +44,16 @@ public class ConfigSystem
     private JSONNode LoadJsonNode(string file)
     {
         // 在这里编写服务器加载配置的逻辑
-        return null;
+        var configPath = GenerateConfigPath(file);
+        var jsonText = File.ReadAllText(configPath);
+        return JSONNode.Parse(jsonText);
     }
+
+    /// <summary>
+    /// 生成配置表存放路径。
+    /// </summary>
+    /// <param name="file">FileName</param>
+    /// <returns>configPath</returns>
+    private string GenerateConfigPath(string file)
+        => $"{AppContext.BaseDirectory}/../../../../../Configs/Json/{file}.json";
 }

@@ -12,5 +12,6 @@ global.json
 .vs
 .vscode
 *.DS_Store
+*.meta
 
 Fantasy-main.zip

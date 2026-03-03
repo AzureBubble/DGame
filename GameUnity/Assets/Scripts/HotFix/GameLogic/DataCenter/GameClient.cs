@@ -62,6 +62,22 @@ namespace GameLogic
         private FTask<bool> m_connectTask;
 
         /// <summary>
+        /// 心跳间隔 3秒（小于服务器检测间隔5秒）
+        /// </summary>
+        private int m_heartBeatInterval = 3000;
+
+        /// <summary>
+        /// 心跳超时 3秒
+        /// 实际超时 = 3000 + 3000 = 6000ms (6秒) 小于 服务器8秒
+        /// </summary>
+        private int m_heartBeatTimeOut = 3000;
+
+        /// <summary>
+        /// 检测与服务器连接超时频率 4秒
+        /// </summary>
+        private int m_heartBeatIntervalTimeOut = 4000;
+
+        /// <summary>
         /// 网络连接状态
         /// </summary>
         public GameClientStatus Status { get; set; } = GameClientStatus.StatusInit;
@@ -196,6 +212,31 @@ namespace GameLogic
         }
 
         /// <summary>
+        /// 开启心跳检测
+        /// </summary>
+        public void StartHeartbeat()
+        {
+            if (Scene == null || Scene.IsDisposed || Scene.Session == null || Scene.Session.IsDisposed)
+            {
+                return;
+            }
+
+            var heartbeatComponent = Scene.GetComponent<SessionHeartbeatComponent>();
+            if (heartbeatComponent != null)
+            {
+                // 组件已存在，先停止再启动（重连场景）
+                heartbeatComponent.Stop();
+                heartbeatComponent.Start(m_heartBeatInterval, m_heartBeatTimeOut, m_heartBeatIntervalTimeOut);
+            }
+            else
+            {
+                // 组件不存在，添加新组件（首次登录场景）
+                Scene.AddComponent<SessionHeartbeatComponent>().Start(m_heartBeatInterval, m_heartBeatTimeOut,
+                    m_heartBeatIntervalTimeOut);
+            }
+        }
+
+        /// <summary>
         /// 断开当前网络连接
         /// </summary>
         public void Disconnect()
@@ -250,10 +291,19 @@ namespace GameLogic
         private void OnConnectComplete()
         {
             GameEvent.Get<ICommonUI>().FinishWaiting(WaitingUISeq.LOGINWORLD_SEQID);
-            Status = GameClientStatus.StatusConnected;
-            DLogger.Info("[GameClient] Connected to server success");
+            // 如果是重连，直接进入 Enter 状态并启动心跳
+            if (Status == GameClientStatus.StatusReconnect)
+            {
+                Status = GameClientStatus.StatusEnter;
+                StartHeartbeat();
+            }
+            else
+            {
+                Status = GameClientStatus.StatusConnected;
+            }
             m_connectTask?.SetResult(true);
             m_connectTask = null;
+            DLogger.Info("[GameClient] Connected to server success");
         }
 
         private void OnConnectFail()
@@ -261,9 +311,9 @@ namespace GameLogic
             UIModule.Instance.ShowTipsUI(G.R("进入服务器失败，请重试"));
             GameEvent.Get<ICommonUI>().FinishWaiting(WaitingUISeq.LOGINWORLD_SEQID);
             Status = GameClientStatus.StatusClose;
-            DLogger.Info("[GameClient] Connected to server fail");
             m_connectTask?.SetResult(false);
             m_connectTask = null;
+            DLogger.Info("[GameClient] Connected to server fail");
         }
 
         private void OnConnectDisconnect()

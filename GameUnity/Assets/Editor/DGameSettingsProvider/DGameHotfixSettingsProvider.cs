@@ -320,7 +320,7 @@ public static class DGameHotfixSettingsProvider
     private static void DrawUpdateSettings()
     {
         m_showUpdateSettings = EditorGUILayout.BeginFoldoutHeaderGroup(m_showUpdateSettings,
-            new GUIContent("🔄更新设置", "更新策略和提示设置"));
+            new GUIContent("更新设置", "更新策略和提示设置"));
 
         if (m_showUpdateSettings)
         {

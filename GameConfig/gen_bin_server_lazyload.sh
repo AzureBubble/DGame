@@ -24,6 +24,6 @@ dotnet "${LUBAN_DLL}" \
     -x outputCodeDir="${CODE_OUTPATH}" \
     -x bin.outputDataDir="${BINARY_DATA_OUTPATH}" \
     -x json.outputDataDir="${JSON_DATA_OUTPATH}" \
-    -x outputSaver.bin.cleanUpOutputDir=0 \
-    -x outputSaver.json.cleanUpOutputDir=0 \
-    -x outputSaver.cs-bin.cleanUpOutputDir=0
+    -x outputSaver.bin.cleanUpOutputDir=1 \
+    -x outputSaver.json.cleanUpOutputDir=1 \
+    -x outputSaver.cs-bin.cleanUpOutputDir=1

@@ -4,55 +4,58 @@ using DGame;
 using SimpleJSON;
 using UnityEngine;
 
-/// <summary>
-/// 配置加载器。
-/// </summary>
-public class ConfigSystem
+namespace GameProto
 {
-    private static ConfigSystem m_instance;
-
-    public static ConfigSystem Instance => m_instance != null ? m_instance : m_instance = new ConfigSystem();
-
-    private bool m_init = false;
-
-    private Tables m_tables;
-
-    public Tables Tables
+    /// <summary>
+    /// 配置加载器。
+    /// </summary>
+    public class ConfigSystem
     {
-        get
+        private static ConfigSystem m_instance;
+
+        public static ConfigSystem Instance => m_instance != null ? m_instance : m_instance = new ConfigSystem();
+
+        private bool m_init = false;
+
+        private Tables m_tables;
+
+        public Tables Tables
         {
-            if (!m_init)
+            get
             {
-                Load();
+                if (!m_init)
+                {
+                    Load();
+                }
+
+                return m_tables;
             }
-
-            return m_tables;
         }
-    }
 
-    private IResourceModule m_resourceModule;
+        private IResourceModule m_resourceModule;
 
-    /// <summary>
-    /// 加载配置。
-    /// </summary>
-    public void Load()
-    {
-        m_tables = new Tables(LoadJsonNode);
-        m_init = true;
-    }
-
-    /// <summary>
-    /// 加载Json配置。
-    /// </summary>
-    /// <param name="file">FileName</param>
-    /// <returns>ByteBuf</returns>
-    private JSONNode LoadJsonNode(string file)
-    {
-        if (m_resourceModule == null)
+        /// <summary>
+        /// 加载配置。
+        /// </summary>
+        public void Load()
         {
-            m_resourceModule = ModuleSystem.GetModule<IResourceModule>();
+            m_tables = new Tables(LoadJsonNode);
+            m_init = true;
         }
-        TextAsset textAsset = m_resourceModule.LoadAsset<TextAsset>(file);
-        return JsonUtility.FromJson<JSONNode>(textAsset.text);
+
+        /// <summary>
+        /// 加载Json配置。
+        /// </summary>
+        /// <param name="file">FileName</param>
+        /// <returns>ByteBuf</returns>
+        private JSONNode LoadJsonNode(string file)
+        {
+            if (m_resourceModule == null)
+            {
+                m_resourceModule = ModuleSystem.GetModule<IResourceModule>();
+            }
+            TextAsset textAsset = m_resourceModule.LoadAsset<TextAsset>(file);
+            return JsonUtility.FromJson<JSONNode>(textAsset.text);
+        }
     }
 }

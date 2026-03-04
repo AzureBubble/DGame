@@ -1,11 +1,7 @@
 Cd /d %~dp0
 echo %CD%
 
-set WORKSPACE=../
-set LUBAN_DLL=.\Tools\LubanTools\Luban\Luban.dll
-set CONF_ROOT=.
-set DATA_OUTPATH=%WORKSPACE%/GameUnity/Assets/BundleAssets/Configs/Json/
-set CODE_OUTPATH=%WORKSPACE%/GameUnity/Assets/Scripts/HotFix/GameProto/LubanConfig/
+call path_define.bat
 
 xcopy /s /e /i /y "%CONF_ROOT%\CustomTemplate\Client\Json\ConfigSystem.cs" "%WORKSPACE%\GameUnity\Assets\Scripts\HotFix\GameProto\ConfigSystem.cs"
 xcopy /s /e /i /y "%CONF_ROOT%\CustomTemplate\Client\Json\ExternalTypeUtil.cs" "%WORKSPACE%\GameUnity\Assets\Scripts\HotFix\GameProto\ExternalTypeUtil.cs"
@@ -15,12 +11,10 @@ dotnet %LUBAN_DLL% ^
     -c cs-simple-json ^
     -d json2 ^
     --conf %CONF_ROOT%\luban.conf ^
-    --customTemplateDir %CONF_ROOT%\CustomTemplate\Client\CustomTemplate_Client_LazyLoad ^
     -x code.lineEnding=crlf ^
-    -x outputCodeDir=%CODE_OUTPATH% ^
+    -x outputCodeDir=%CLIENT_CODE_OUTPATH% ^
     -x outputDataDir=%DATA_OUTPATH% ^
     -x outputSaver.bin.cleanUpOutputDir=1 ^
     -x outputSaver.json.cleanUpOutputDir=1 ^
     -x outputSaver.cs-bin.cleanUpOutputDir=1
 pause
-

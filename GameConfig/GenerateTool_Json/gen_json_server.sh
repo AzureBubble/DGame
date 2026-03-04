@@ -3,11 +3,7 @@
 cd "$(dirname "$0")"
 echo "当前目录: $(pwd)"
 
-export WORKSPACE="$(realpath ../)"
-export LUBAN_DLL="./Tools/LubanTools/Luban/Luban.dll"
-export CONF_ROOT="$(pwd)"
-export DATA_OUTPATH="${WORKSPACE}/GameServer/Configs/Json/"
-export CODE_OUTPATH="${WORKSPACE}/GameServer/Server/Entity/Generate/Config/"
+source ./path_define.sh
 
 cp -R "${CONF_ROOT}/CustomTemplate/Server/Json/ConfigSystem.cs" \
    "${WORKSPACE}/GameServer/Server/Entity/Generate/ConfigSystem.cs"
@@ -18,8 +14,8 @@ dotnet "${LUBAN_DLL}" \
     -d json2 \
     --conf "${CONF_ROOT}/luban.conf" \
     -x code.lineEnding=crlf \
-    -x outputCodeDir="${CODE_OUTPATH}" \
-    -x outputDataDir="${DATA_OUTPATH}" \
+    -x outputCodeDir="${SERVER_CODE_OUTPATH}" \
+    -x outputDataDir="${JSON_DATA_OUTPATH}" \
     -x outputSaver.bin.cleanUpOutputDir=1 \
     -x outputSaver.json.cleanUpOutputDir=1 \
     -x outputSaver.cs-bin.cleanUpOutputDir=1

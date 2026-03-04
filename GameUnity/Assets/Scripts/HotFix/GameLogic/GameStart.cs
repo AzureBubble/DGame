@@ -26,7 +26,8 @@ public partial class GameStart
     public static void Entrance(object[] objects)
     {
         m_hotfixAssembly = (List<Assembly>)objects[0];
-        GameEventLauncher.Init();
+        GameLogic.GameEventLauncher.Init();
+        GameBattle.GameEventLauncher.Init();
         // HybridCLR 不支持的特性
         // RuntimeInitializeOnLoadMethodCollector.ExecuteMethods();
         DGame.Utility.UnityUtil.AddDestroyListener(OnDestroy);

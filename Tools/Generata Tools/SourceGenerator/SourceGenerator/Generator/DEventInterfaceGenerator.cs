@@ -29,6 +29,7 @@ public class DEventInterfaceGenerator : ISourceGenerator
     private void GenerateGameEventExecute(GeneratorExecutionContext context, IEnumerable<SyntaxTree> syntaxTrees)
     {
         List<string> classNameList = new List<string>();
+        string namespaceName = Definition.NameSpace;
 
         foreach (var tree in syntaxTrees)
         {
@@ -50,13 +51,14 @@ public class DEventInterfaceGenerator : ISourceGenerator
             {
                 var interfaceName = interfaceNode.Identifier.ToString();
                 var fullName = GetInterfaceFullName(interfaceNode, interfaceName);
+                namespaceName = GetInterfaceNamespaceName(interfaceNode, interfaceName);
                 var eventClassName = $"{interfaceName}_Event";
-                var eventClassCode = GenerateEventClass(interfaceName, eventClassName, interfaceNode);
+                var eventClassCode = GenerateEventClass(interfaceName, eventClassName, namespaceName, interfaceNode);
                 context.AddSource($"{eventClassName}.g.cs", eventClassCode);
 
                 // 生成实现类
                 var implementationClassCode =
-                    GenerateImplementationClass(fullName, interfaceName, interfaceNode, context);
+                    GenerateImplementationClass(fullName, interfaceName, namespaceName, interfaceNode, context);
                 context.AddSource($"{interfaceName}_Gen.g.cs", implementationClassCode);
                 classNameList.Add($"{interfaceName}_Gen");
             }
@@ -65,7 +67,7 @@ public class DEventInterfaceGenerator : ISourceGenerator
         if (classNameList.Count > 0)
         {
             string uniqueFileName = $"GameEventLauncher.g.cs";
-            context.AddSource(uniqueFileName, GenerateGameEventHelper(classNameList));
+            context.AddSource(uniqueFileName, GenerateGameEventHelper(classNameList, namespaceName));
         }
     }
 
@@ -73,8 +75,9 @@ public class DEventInterfaceGenerator : ISourceGenerator
     /// 生成事件中心启动器脚本
     /// </summary>
     /// <param name="classNameList"></param>
+    /// <param name="namespaceName"></param>
     /// <returns></returns>
-    private string GenerateGameEventHelper(List<string> classNameList)
+    private string GenerateGameEventHelper(List<string> classNameList, string namespaceName)
     {
         var sb = new StringBuilder();
         sb.AppendLine("//----------------------------------------------------------");
@@ -92,7 +95,7 @@ public class DEventInterfaceGenerator : ISourceGenerator
         }
 
         sb.AppendLine();
-        sb.AppendLine($"namespace {Definition.NameSpace}");
+        sb.AppendLine($"namespace {namespaceName}");
         {
             sb.AppendLine("{");
             sb.AppendLine($"\tpublic static class GameEventLauncher");
@@ -123,10 +126,11 @@ public class DEventInterfaceGenerator : ISourceGenerator
     /// </summary>
     /// <param name="fullName"></param>
     /// <param name="interfaceName"></param>
+    /// <param name="namespaceName"></param>
     /// <param name="interfaceNode"></param>
     /// <param name="context"></param>
     /// <returns></returns>
-    private string GenerateImplementationClass(string fullName, string interfaceName,
+    private string GenerateImplementationClass(string fullName, string interfaceName, string namespaceName,
         InterfaceDeclarationSyntax interfaceNode, GeneratorExecutionContext context)
     {
         // 获取接口节点语法模型
@@ -147,7 +151,7 @@ public class DEventInterfaceGenerator : ISourceGenerator
         }
 
         sb.AppendLine();
-        sb.AppendLine($"namespace {Definition.NameSpace}");
+        sb.AppendLine($"namespace {namespaceName}");
         {
             sb.AppendLine("{");
             sb.AppendLine($"\tpublic partial class {interfaceName}_Gen : {interfaceName}");
@@ -220,9 +224,10 @@ public class DEventInterfaceGenerator : ISourceGenerator
     /// </summary>
     /// <param name="interfaceName"></param>
     /// <param name="eventClassName"></param>
+    /// <param name="namespaceName"></param>
     /// <param name="interfaceNode"></param>
     /// <returns></returns>
-    private string GenerateEventClass(string interfaceName, string eventClassName,
+    private string GenerateEventClass(string interfaceName, string eventClassName, string namespaceName,
         InterfaceDeclarationSyntax interfaceNode)
     {
         // 获取接口在的所有方法
@@ -244,7 +249,7 @@ public class DEventInterfaceGenerator : ISourceGenerator
         }
 
         sb.AppendLine();
-        sb.AppendLine($"namespace {Definition.NameSpace}");
+        sb.AppendLine($"namespace {namespaceName}");
         {
             sb.AppendLine("{");
             sb.AppendLine($"\tpublic partial class {eventClassName}");
@@ -281,6 +286,21 @@ public class DEventInterfaceGenerator : ISourceGenerator
             .Concat([interfaceName])
             .Aggregate((a, b) => $"{a}.{b}");
         return fullName;
+    }
+    
+    /// <summary>
+    /// 获取接口的FullName 带命名空间
+    /// </summary>
+    /// <param name="interfaceNode"></param>
+    /// <param name="interfaceName"></param>
+    /// <returns></returns>
+    private string GetInterfaceNamespaceName(InterfaceDeclarationSyntax interfaceNode, string interfaceName)
+    {
+        var namespaceDeclaration = interfaceNode.Ancestors()
+            .OfType<NamespaceDeclarationSyntax>()
+            .FirstOrDefault();
+
+        return namespaceDeclaration?.Name.ToString() ?? Definition.NameSpace;
     }
 
     /// <summary>
@@ -801,104 +821,6 @@ public class DEventInterfaceGenerator : ISourceGenerator
             .Where(i => i.AttributeLists.Count > 0
                         && i.AttributeLists.Any(attrList => attrList.Attributes
                             .Any(attr => attr.Name.ToString().Equals(Definition.RequireComponentAttributeName))));
-    }
-
-    #endregion
-
-    #region GenerateGameEvent
-
-    private void GenerateTextDefineEnumExecute(GeneratorExecutionContext context, IEnumerable<SyntaxTree> syntaxTrees)
-    {
-        List<string> enumMembers = new List<string>();
-
-        foreach (var tree in syntaxTrees)
-        {
-            // 获取语法树的根节点
-            var root = tree.GetRoot();
-
-            // 获取当前语法树中的所有命名空间节点
-            var namespaces = root.DescendantNodes().OfType<NamespaceDeclarationSyntax>();
-
-            // 判断语法树是否在指定检测的命名空间下
-            if (namespaces.All(ns => !Definition.TextDefineTargetNameSpaces.Contains(ns.Name.ToString())))
-            {
-                continue;
-            }
-
-            var enums = GetMatchEnums(root);
-
-            foreach (var item in enums)
-            {
-                var tempEnumMembers = item.DescendantNodes()
-                    .OfType<EnumMemberDeclarationSyntax>()
-                    .Select(member => member.Identifier.ToString())
-                    .ToList();
-                enumMembers.AddRange(tempEnumMembers);
-            }
-        }
-
-        if (enumMembers.Count > 0)
-        {
-            var enumClassName = $"{Definition.TextDefineEnumName}Converter";
-            var sourceCode = GenerateConverterClass(enumClassName, enumMembers);
-            // 添加到编译上下文中
-            context.AddSource($"{enumClassName}.g.cs", sourceCode);
-        }
-    }
-
-    /// <summary>
-    /// 生成TextDefineConverter
-    /// </summary>
-    /// <param name="enumMembers"></param>
-    /// <returns></returns>
-    private string GenerateConverterClass(string enumClassName, List<string> enumMembers)
-    {
-        var sb = new StringBuilder();
-        sb.AppendLine("//----------------------------------------------------------");
-        sb.AppendLine("// <auto-generated>");
-        sb.AppendLine("// \tThis code was generated by the source generator.");
-        sb.AppendLine("// \tChanges to this file may cause incorrect behavior.");
-        sb.AppendLine("// \twill be lost if the code is regenerated.");
-        sb.AppendLine("// <auto-generated/>");
-        sb.AppendLine("//----------------------------------------------------------");
-
-        sb.AppendLine();
-        sb.AppendLine($"namespace {Definition.TextDefineNameSpace}");
-        {
-            sb.AppendLine("{");
-            sb.AppendLine($"\tpublic class {enumClassName}");
-            {
-                sb.AppendLine("\t{");
-                sb.AppendLine($"\t\tpublic static string Convert({Definition.TextDefineEnumName} textDefine)");
-                {
-                    sb.AppendLine("\t\t\t=> textDefine switch");
-                    sb.AppendLine("\t\t\t{");
-                    {
-                        foreach (var enumName in enumMembers)
-                        {
-                            sb.AppendLine($"\t\t\t\t{Definition.TextDefineEnumName}.{enumName} => nameof({Definition.TextDefineEnumName}.{enumName}),");
-                        }
-                        sb.AppendLine($"\t\t\t\t_ => textDefine.ToString(),");
-                    }
-                    sb.AppendLine("\t\t\t};");
-                }
-                sb.AppendLine("\t}");
-            }
-            sb.AppendLine("}");
-        }
-
-        return sb.ToString();
-    }
-
-    /// <summary>
-    /// 获取匹配的接口声明语法
-    /// </summary>
-    /// <param name="root"></param>
-    /// <returns></returns>
-    private IEnumerable<EnumDeclarationSyntax> GetMatchEnums(SyntaxNode root)
-    {
-        return root.DescendantNodes().OfType<EnumDeclarationSyntax>()
-            .Where(e => e.Identifier.ValueText == Definition.TextDefineEnumName);
     }
 
     #endregion

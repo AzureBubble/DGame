@@ -20,6 +20,7 @@ MonoBehaviour:
   hotUpdateAssemblies:
   - Fantasy.Unity
   - GameProto
+  - GameBattle
   - GameLogic
   - Assembly-CSharp
   preserveHotUpdateAssemblies: []

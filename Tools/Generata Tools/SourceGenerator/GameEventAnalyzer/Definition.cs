@@ -92,5 +92,6 @@ public sealed class Definition
     public static readonly List<string> CommonNamespaces =
     [
         "GameLogic",
+        "GameBattle"
     ];
 }

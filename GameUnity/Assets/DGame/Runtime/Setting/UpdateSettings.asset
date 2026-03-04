@@ -16,6 +16,7 @@ MonoBehaviour:
   HotUpdateAssemblies:
   - Fantasy.Unity.dll
   - GameProto.dll
+  - GameBattle.dll
   - GameLogic.dll
   - Assembly-CSharp.dll
   AOTMetaAssemblies:

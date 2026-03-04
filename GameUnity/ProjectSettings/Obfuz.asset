@@ -21,6 +21,7 @@ MonoBehaviour:
   assemblySettings:
     assembliesToObfuscate:
     - GameProto
+    - GameBattle
     - GameLogic
     nonObfuscatedButReferencingObfuscatedAssemblies:
     - DGame.Runtime

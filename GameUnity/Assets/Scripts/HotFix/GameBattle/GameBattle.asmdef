@@ -2,7 +2,8 @@
     "name": "GameBattle",
     "rootNamespace": "GameBattle",
     "references": [
-        "GUID:0510f21df0bc72647b839474e83421bb"
+        "GUID:0510f21df0bc72647b839474e83421bb",
+        "GUID:0b7224b83ba514121aa026f3857f820a"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

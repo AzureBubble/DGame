@@ -1,6 +1,5 @@
 using System;
 using System.Runtime.Serialization;
-using System.Text;
 
 namespace DGame
 {

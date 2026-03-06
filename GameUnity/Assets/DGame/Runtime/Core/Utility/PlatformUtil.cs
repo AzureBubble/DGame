@@ -14,7 +14,7 @@
 #else
 
 #if !UNITY_WEBGL
-                Application.Quit();
+                UnityEngine.Application.Quit();
 #endif
 
 #endif

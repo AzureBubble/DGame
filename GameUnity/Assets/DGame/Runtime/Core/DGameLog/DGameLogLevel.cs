@@ -1,7 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
 namespace DGame
 {
     /// <summary>
@@ -9,29 +5,33 @@ namespace DGame
     /// </summary>
     public enum DGameLogLevel : byte
     {
+        None = 0,
+
         /// <summary>
         /// 调试
         /// </summary>
-        Debug = 0,
+        Debug = 1,
 
         /// <summary>
         /// 信息
         /// </summary>
-        Info ,
+        Info = 2,
 
         /// <summary>
         /// 警告
         /// </summary>
-        Warning,
+        Warning = 4,
 
         /// <summary>
         /// 错误
         /// </summary>
-        Error,
+        Error = 8,
 
         /// <summary>
         /// 严重错误
         /// </summary>
-        Fatal
+        Fatal = 16,
+
+        All = Debug | Info | Warning | Error | Fatal
     }
 }

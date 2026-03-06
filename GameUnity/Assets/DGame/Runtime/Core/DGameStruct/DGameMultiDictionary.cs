@@ -9,10 +9,13 @@ namespace DGame
     /// </summary>
     /// <typeparam name="TKey">主键类型</typeparam>
     /// <typeparam name="TValue">值类型</typeparam>
-    public sealed class DGameMultiDictionary<TKey, TValue> : IEnumerable<KeyValuePair<TKey, DGameLinkedListRange<TValue>>>, IEnumerable
+    public sealed class
+        DGameMultiDictionary<TKey, TValue> : IEnumerable<KeyValuePair<TKey, DGameLinkedListRange<TValue>>>, IEnumerable
     {
         private readonly DGameLinkedList<TValue> m_linkedList = new DGameLinkedList<TValue>();
-        private readonly Dictionary<TKey, DGameLinkedListRange<TValue>> m_dictionary = new Dictionary<TKey, DGameLinkedListRange<TValue>>();
+
+        private readonly Dictionary<TKey, DGameLinkedListRange<TValue>> m_dictionary =
+            new Dictionary<TKey, DGameLinkedListRange<TValue>>();
 
         public int Count => m_dictionary.Count;
 
@@ -42,6 +45,7 @@ namespace DGame
             {
                 return range.Contains(value);
             }
+
             return false;
         }
 
@@ -88,12 +92,15 @@ namespace DGame
                                 m_dictionary[key] = new DGameLinkedListRange<TValue>(next, range.Last);
                             }
                         }
+
                         m_linkedList.Remove(current);
                         return true;
                     }
+
                     current = current.Next;
                 }
             }
+
             return false;
         }
 
@@ -103,6 +110,7 @@ namespace DGame
             {
                 m_dictionary.Remove(key);
                 LinkedListNode<TValue> current = range.First;
+
                 while (current != null)
                 {
                     LinkedListNode<TValue> next = current != range.Last ? current.Next : null;
@@ -117,7 +125,8 @@ namespace DGame
             return new Enumerator(m_dictionary);
         }
 
-        IEnumerator<KeyValuePair<TKey, DGameLinkedListRange<TValue>>> IEnumerable<KeyValuePair<TKey, DGameLinkedListRange<TValue>>>.GetEnumerator()
+        IEnumerator<KeyValuePair<TKey, DGameLinkedListRange<TValue>>>
+            IEnumerable<KeyValuePair<TKey, DGameLinkedListRange<TValue>>>.GetEnumerator()
         {
             return GetEnumerator();
         }
@@ -138,6 +147,7 @@ namespace DGame
                 {
                     throw new DGameException("字典无效");
                 }
+
                 m_enumerator = dictionary.GetEnumerator();
             }
 

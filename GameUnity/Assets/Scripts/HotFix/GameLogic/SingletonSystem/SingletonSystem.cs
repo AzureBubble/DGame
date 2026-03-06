@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using DGame;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using Object = UnityEngine.Object;
 
 namespace GameLogic
 {

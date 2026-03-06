@@ -1,8 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using DGame;
-using UnityEngine;
-
 namespace Procedure
 {
     /// <summary>

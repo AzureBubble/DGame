@@ -1,9 +1,7 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using DGame;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace Launcher
 {
@@ -38,10 +36,10 @@ namespace Launcher
 
             if (!m_uiMapDict.TryGetValue(uiName, out var uiBase))
             {
-                Object obj = Resources.Load(UI_WINDOW_PATH + uiName);
+                UnityEngine.Object obj = Resources.Load(UI_WINDOW_PATH + uiName);
                 if (obj != null)
                 {
-                    var uiWindow = Object.Instantiate(obj) as GameObject;
+                    var uiWindow = UnityEngine.Object.Instantiate(obj) as GameObject;
 
                     if (uiWindow != null)
                     {
@@ -88,7 +86,7 @@ namespace Launcher
             }
 
             uiWindow?.Hide();
-            Object.DestroyImmediate(uiWindow?.gameObject);
+            UnityEngine.Object.DestroyImmediate(uiWindow?.gameObject);
             m_uiMapDict.Remove(uiName);
         }
 
@@ -107,7 +105,7 @@ namespace Launcher
             foreach (var ui in m_uiMapDict.Values)
             {
                 ui?.Hide();
-                Object.Destroy(ui?.gameObject);
+                UnityEngine.Object.Destroy(ui?.gameObject);
             }
             m_uiMapDict.Clear();
         }

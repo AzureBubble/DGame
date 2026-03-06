@@ -1,7 +1,9 @@
 {
     "name": "Fantasy.Unity",
     "rootNamespace": "",
-    "references": [],
+    "references": [
+        "Obfuz.Runtime"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": true,

@@ -135,6 +135,34 @@ public static void Error(string msg) { ... }
 
 ---
 
+### 4. Obfuz 包引用检查
+
+**检查内容**: 确认项目是否引入了 Obfuz 的包
+
+**检查步骤**:
+
+1. 检查项目中是否存在 `Obfuz` 相关的程序集引用
+2. 如果项目引用了 Obfuz 包，需要在 `Fantasy.Unity` 程序集定义中添加对 `Obfuz.Runtime` 的引用
+
+**修改方式**:
+
+在 `Fantasy.Unity.asmdef` 文件中，如果项目使用了 Obfuz，需要添加：
+
+```json
+{
+    "name": "Fantasy.Unity",
+    "references": [
+        "...其他引用...",
+        "Obfuz.Runtime"
+    ],
+    ...
+}
+```
+
+> **注意**: 只有在项目确实引入了 Obfuz 包的情况下才需要添加此引用
+
+---
+
 ## 使用示例
 
 ### 客户端监听服务器消息
@@ -162,4 +190,5 @@ GameClient.Instance.UnRegisterMsgHandler.UnRegisterMsgHandler(protocolCode, hand
 - [ ] MessageDispatcherComponent.cs 中已添加 `#if FANTASY_UNITY` 代码块
 - [ ] `MessageHandler()` 方法中已添加客户端回调触发逻辑
 - [ ] **Fantasy.Log 中 `Debug`、`Info`、`Warning`、`Error` 方法已添加条件宏定义**（`Trace` 和 `TraceInfo` 除外），防止打包输出相关的Debug代码
+- [ ] 检查项目是否引入了 Obfuz 包，如果引用了，在 `Fantasy.Unity` 程序集中添加 `Obfuz.Runtime` 引用
 - [ ] 编译无错误

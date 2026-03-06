@@ -1,7 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 
 namespace DGame
 {
@@ -13,8 +10,7 @@ namespace DGame
         public string Name => m_name;
 
         public TypeNamePair(Type type) : this(type, string.Empty)
-        {
-        }
+        { }
 
         public TypeNamePair(Type type, string name)
         {

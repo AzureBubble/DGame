@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.UI;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace GameLogic
 {

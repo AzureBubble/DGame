@@ -4,7 +4,6 @@ using System.Text;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using DGame;
-using GameProto;
 using UnityEngine;
 using UnityEngine.UI;
 

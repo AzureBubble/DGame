@@ -1,7 +1,5 @@
-﻿using System;
-using DGame;
+﻿using DGame;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace GameLogic
 {

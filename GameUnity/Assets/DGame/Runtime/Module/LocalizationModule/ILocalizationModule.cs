@@ -1,5 +1,3 @@
-using Cysharp.Threading.Tasks;
-
 namespace DGame
 {
     public interface ILocalizationModule

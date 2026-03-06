@@ -1,5 +1,4 @@
 using Luban;
-using GameProto;
 using DGame;
 using SimpleJSON;
 using UnityEngine;

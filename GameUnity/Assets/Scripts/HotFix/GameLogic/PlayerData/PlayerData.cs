@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace GameLogic
+﻿namespace GameLogic
 {
     public class PlayerData : BasePlayerData
     {

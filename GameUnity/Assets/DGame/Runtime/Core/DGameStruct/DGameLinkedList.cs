@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using UnityEngine;
 
 namespace DGame
 {
@@ -249,6 +248,7 @@ namespace DGame
                 Recycle(node);
                 return true;
             }
+
             return false;
         }
 
@@ -384,6 +384,7 @@ namespace DGame
                 {
                     throw new DGameException("链表是无效的");
                 }
+
                 m_enumerator = linkedList.GetEnumerator();
             }
 

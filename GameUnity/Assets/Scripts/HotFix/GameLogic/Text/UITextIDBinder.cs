@@ -1,4 +1,3 @@
-using System;
 using DGame;
 using GameProto;
 using UnityEngine;

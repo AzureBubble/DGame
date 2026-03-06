@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using UnityEngine;
 
 namespace DGame
 {
@@ -46,11 +45,13 @@ namespace DGame
                 int count = 0;
 
                 LinkedListNode<T> current = m_first;
+
                 while (current != null && current != m_last)
                 {
                     count++;
                     current = current.Next;
                 }
+
                 return count;
             }
         }
@@ -58,14 +59,17 @@ namespace DGame
         public bool Contains(T value)
         {
             LinkedListNode<T> current = m_first;
+
             while (current != null && current != m_last)
             {
                 if (current.Value.Equals(value))
                 {
                     return true;
                 }
+
                 current = current.Next;
             }
+
             return false;
         }
 
@@ -74,7 +78,7 @@ namespace DGame
             return new Enumerator(this);
         }
 
-        IEnumerator<T>  IEnumerable<T>.GetEnumerator()
+        IEnumerator<T> IEnumerable<T>.GetEnumerator()
         {
             return GetEnumerator();
         }
@@ -100,6 +104,7 @@ namespace DGame
                 {
                     throw new DGameException("链表范围无效");
                 }
+
                 m_listRange = range;
                 m_current = range.First;
                 m_currentValue = default(T);
@@ -129,6 +134,7 @@ namespace DGame
                 {
                     return false;
                 }
+
                 m_currentValue = m_current.Value;
                 m_current = m_current.Next;
                 return true;

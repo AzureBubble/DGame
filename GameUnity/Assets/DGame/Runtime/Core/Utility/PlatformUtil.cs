@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-namespace DGame
+﻿namespace DGame
 {
     public partial class Utility
     {

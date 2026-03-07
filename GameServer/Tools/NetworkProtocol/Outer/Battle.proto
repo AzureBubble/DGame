@@ -28,6 +28,43 @@ message C2S_SyncFrameDataReq // IMessage
 	CSOnePlayerFrameCmd FrameData = 4;			 // 帧数据
 }
 
+/// 客户端结束战斗 上报数据
+message S2C_BattleFinClientData // IMessage
+{
+	CSBattleStartParam StartParam = 1; 		// 关卡的初始化数据，用于和服务器校验
+	uint DurationTime = 2;					// 持续时间
+}
+
+/// 开始一场战斗的参数
+message CSBattleStartParam
+{
+	int RandSeed = 1; 						// 随机种子
+	int Fps = 2; 							// 模拟帧率
+	int PlayerCount = 3; 					// 玩家个数
+	int BattleStatus = 4; 					// 战斗状态
+	byte IsGuide = 5;						// 是否有新手引导
+	uint StartTime = 6;						// 战斗开始时间
+	ulong BattleGID = 7; 					// 战斗GID
+	byte MultiPlayerBattle = 8;				// 是否多人开始战斗
+	ulong CaptainPlayerId = 9; 				// 队长ID
+	uint LastOnlyBattleTime = 10; 			// 剩余战斗时间
+}
+
+/// 服务器通知进入战斗
+message S2C_NotifyEnterBattle // IMessage
+{
+	int RandSeed = 1; 						// 随机种子
+	int PlayerCount = 2; 					// 玩家个数
+	byte IsHaveRoomInfo = 3;				// 是否有房间信息
+	repeated CSRoomInfo RoomInfoList = 4; 	// 房间数据信息
+	int BattleStatus = 5; 					// 战斗状态
+	byte IsGuide = 6;						// 是否有新手引导
+	uint StartTime = 7;						// 战斗开始时间
+	ulong BattleGID = 8; 					// 战斗GID
+	byte MultiPlayerBattle = 9;				// 是否多人开始战斗
+	ulong CaptainPlayerId = 10; 			// 队长ID
+}
+
 /// 服务器同步帧数据
 message S2C_BroadcastFrameData // IMessage
 {

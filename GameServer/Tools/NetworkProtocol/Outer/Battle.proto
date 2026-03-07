@@ -19,15 +19,8 @@ enum FrameCmdType
 	FRAME_CMD_GM, 	// GM命令
 }
 
-/// 房间信息
-message CSRoomInfo
-{
-	int RoomId = 1;
-	int RoomSeq = 2;
-}
-
 /// 客户端同步帧数据
-message C2S_SyncFrameDataReq
+message C2S_SyncFrameDataReq // IMessage
 {
 	int RevClientFrameId = 1; 					 // 接收到的客户端帧ID
 	CSRoomInfo RoomInfo = 2; 				      // 房间信息
@@ -42,6 +35,13 @@ message S2C_BroadcastFrameData // IMessage
 	int SveFrameId = 2;      				      // 服务器帧ID
 	int FrameCount = 3;							// 帧数量（最多十帧）
 	repeated CSSyncOneFrameData FrameDataList = 4; //帧数据列表
+}
+
+/// 房间信息
+message CSRoomInfo
+{
+	int RoomId = 1;
+	int RoomSeq = 2;
 }
 
 /// 单帧数据

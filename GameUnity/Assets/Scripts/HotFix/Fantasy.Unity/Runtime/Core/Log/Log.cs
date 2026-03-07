@@ -118,12 +118,6 @@ namespace Fantasy
         /// 记录异常的错误级别的日志消息，并附带调用栈信息。
         /// </summary>
         /// <param name="e">异常对象。</param>
-        [Conditional("ENABLE_DGAME_LOG")]
-        [Conditional("ENABLE_DGAME_ERROR_LOG")]
-        [Conditional("ENABLE_DGAME_DEBUG_AND_ABOVE_LOG")]
-        [Conditional("ENABLE_DGAME_INFO_AND_ABOVE_LOG")]
-        [Conditional("ENABLE_DGAME_WARNING_AND_ABOVE_LOG")]
-        [Conditional("ENABLE_DGAME_ERROR_AND_ABOVE_LOG")]
         public static void Error(Exception e)
         {
             if (e.Data.Contains("StackTrace"))

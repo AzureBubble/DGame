@@ -58,20 +58,20 @@ message CSOnePlayerFrameCmd
 {
 	int PlayerId = 1;					// 玩家ID
 	int FrameCmdCount = 2;      		 // 命令数量
-	repeated FrameCmd FrameDataList = 4; // 命令列表
+	repeated CSFrameCmd FrameDataList = 4; // 命令列表
 }
 
 /// 帧命令
 message CSFrameCmd
 {
-	int Type = 1;		// 命令类型
-	FrameData Data = 2;  // 命令数据
+	byte Type = 1;		// 命令类型
+	CSFrameData Data = 2;  // 命令数据
 }
 
 /// 帧命令
 message CSFrameData
 {
-	FrameCmdGmInfo Gm = 1;
+	CSFrameCmdGmInfo Gm = 1;
 }
 
 /// GM命令

@@ -141,25 +141,43 @@ public static void Error(string msg) { ... }
 
 **检查步骤**:
 
-1. 检查项目中是否存在 `Obfuz` 相关的程序集引用
-2. 如果项目引用了 Obfuz 包，需要在 `Fantasy.Unity` 程序集定义中添加对 `Obfuz.Runtime` 的引用
+1. **检查 packages-lock.json 文件**
+   - 打开 Unity 项目根目录下的 `Packages/packages-lock.json` 文件
+   - 搜索 `com.code-philosophy.obfuz` 关键字
+   - 如果找到该引用，说明项目已引入 Obfuz 包
+
+   ```bash
+   # 或使用命令快速检查
+   grep "com.code-philosophy.obfuz" Packages/packages-lock.json
+   ```
+
+2. **添加 Obfuz.Runtime 引用**
+   - 如果项目引用了 Obfuz 包，需要在 `Fantasy.Unity.asmdef` 文件中添加对 `Obfuz.Runtime` 的引用
 
 **修改方式**:
 
-在 `Fantasy.Unity.asmdef` 文件中，如果项目使用了 Obfuz，需要添加：
+在 `Fantasy.Unity.asmdef` 文件的 `references` 数组中添加：
 
 ```json
 {
     "name": "Fantasy.Unity",
     "references": [
-        "...其他引用...",
         "Obfuz.Runtime"
     ],
     ...
 }
 ```
 
-> **注意**: 只有在项目确实引入了 Obfuz 包的情况下才需要添加此引用
+> **检查结果示例**:
+> ```json
+> // packages-lock.json 中存在以下内容则需添加引用
+> "com.code-philosophy.obfuz": {
+>   "version": "https://github.com/focus-creative-games/obfuz.git",
+>   "depth": 0,
+>   "source": "git",
+>   ...
+> }
+> ```
 
 ---
 

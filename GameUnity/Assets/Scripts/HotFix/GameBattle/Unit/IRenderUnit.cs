@@ -1,6 +1,6 @@
 namespace GameBattle
 {
-    public interface IRenderUnit 
+    public interface IRenderUnit
     {
         void OnEntityEvent(int eventId);
     }

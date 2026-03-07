@@ -3,7 +3,7 @@
 * 応彧剛　yingyugang@gmail.com
 * It's used by fixedpoint physics system.
 */
-namespace GameBattle
+namespace DGame
 {
     public enum ShapeType { 
         Line,

@@ -3,11 +3,10 @@
 * 応彧剛　yingyugang@gmail.com
 * It's used by fixedPoint physics system.
 */
-using GameBattle;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace GameBattle
+namespace DGame
 {
     public abstract class FpBumperPresenter : FPGameObject
     {

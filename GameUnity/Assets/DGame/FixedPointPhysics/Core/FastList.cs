@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections;
 
-namespace GameBattle
+namespace DGame
 {
     /// <summary>
     /// Represents an item that can be stored in a FastList.

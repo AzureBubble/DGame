@@ -4,7 +4,7 @@
 * It's used by fixedpoint physics system.
 */
 using UnityEngine;
-namespace GameBattle
+namespace DGame
 {
     public class FixedPointSphere : FixedPointShape
     {

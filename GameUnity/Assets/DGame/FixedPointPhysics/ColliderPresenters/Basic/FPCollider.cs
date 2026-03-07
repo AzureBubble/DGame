@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace GameBattle
+namespace DGame
 {
     public enum ColliderType
     {

@@ -1,6 +1,6 @@
 using UnityEditor;
 
-namespace GameBattle.Editor
+namespace DGame.Editor
 {
     public sealed class SerializedFixedPoint64
     {

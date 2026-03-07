@@ -1,7 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace GameBattle.Editor
+namespace DGame.Editor
 {
     /// <summary>
     /// Provides a custom editor interface in Unity for FixedPointAACapsuleColliderPresenter.

@@ -1,4 +1,4 @@
-namespace GameBattle
+namespace DGame
 {
     /// <summary>
     /// 代表在空间划分结构中特定节点内的碰撞器栈。

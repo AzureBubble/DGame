@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace GameBattle
+namespace DGame
 {
     /// <summary>
     /// Represents a transform component that uses fixed point arithmetic for position, rotation, and scale,

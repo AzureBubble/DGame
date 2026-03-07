@@ -1,6 +1,6 @@
 using System;
 
-namespace GameBattle
+namespace DGame
 {
     /// <summary>
     /// 基于Mersenne Twister (MT19937)算法的定点数随机数生成器。

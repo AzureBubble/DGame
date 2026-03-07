@@ -2,7 +2,7 @@
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
-namespace GameBattle
+namespace DGame
 {
 
     /// <summary>

@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace GameBattle
+namespace DGame
 {
     [System.Serializable]
     public class GameObjectPool

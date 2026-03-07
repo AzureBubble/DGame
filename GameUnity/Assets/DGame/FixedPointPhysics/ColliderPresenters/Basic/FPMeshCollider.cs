@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace GameBattle
+namespace DGame
 {
     /// <summary>
     /// 表示具有固定点精度的网格碰撞器。此类允许在自定义固定点物理引擎中表示和操作网格碰撞器，

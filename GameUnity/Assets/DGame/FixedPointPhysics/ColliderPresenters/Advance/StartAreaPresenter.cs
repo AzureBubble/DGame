@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace GameBattle
+namespace DGame
 {
     public sealed class StartAreaPresenter : FPGameObject
     {

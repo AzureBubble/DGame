@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace GameBattle
+namespace DGame
 {
     /// <summary>
     /// 代表一个轴对齐的边界框（AABB）碰撞器，使用固定点精度，在自定义物理引擎内。

@@ -1,7 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace GameBattle.Editor
+namespace DGame.Editor
 {
     /// <summary>
     /// A custom editor for FixedPointSphereColliderPresenter, extending the ColliderPresenterEditor.

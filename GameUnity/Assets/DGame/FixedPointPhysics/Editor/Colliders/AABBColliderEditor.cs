@@ -1,7 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace GameBattle.Editor
+namespace DGame.Editor
 {
     /// <summary>
     /// Custom editor for the AABBCollider component, providing enhanced UI elements in the Unity Editor.

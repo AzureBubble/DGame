@@ -9,7 +9,7 @@
 using System;
 using UnityEngine.Serialization;
 
-namespace GameBattle
+namespace DGame
 {
     using System.Collections.Generic;
     using UnityEngine;

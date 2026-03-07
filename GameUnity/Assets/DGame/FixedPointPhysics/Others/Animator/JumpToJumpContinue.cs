@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace GameBattle
+namespace DGame
 {
     /// <summary>
     /// Manages the transition from a jump state to a falling state in an Animator component,

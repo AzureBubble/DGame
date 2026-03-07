@@ -1,6 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 
-namespace GameBattle
+namespace DGame
 {
     public struct FixedPointInterval 
     {

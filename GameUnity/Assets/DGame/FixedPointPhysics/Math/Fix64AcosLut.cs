@@ -1,4 +1,4 @@
-namespace GameBattle {
+namespace DGame {
     partial struct FixedPoint64 {
         public static readonly long[] AcosLut = new[] {
             0x1921FB544L, 0x1921F63C7L, 0x1921F124AL, 0x1921EC0CDL, 0x1921E6F50L, 0x1921E1DD3L, 0x1921DCC56L, 0x1921D7AD9L, 

@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace GameBattle
+namespace DGame
 {
     /// <summary>
     /// 代表一个具有固定点精度的圆柱形碰撞器的展示器。

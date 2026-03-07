@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace GameBattle
+namespace DGame
 {
     /// <summary>
     /// An abstract base class for game objects that use fixed-point mathematics for physics simulations,

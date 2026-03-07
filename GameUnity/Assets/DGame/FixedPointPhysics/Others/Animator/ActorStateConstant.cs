@@ -1,4 +1,4 @@
-namespace GameBattle
+namespace DGame
 {
     /// <summary>
     /// Defines constants for actor states used in animations. These constants are used to control

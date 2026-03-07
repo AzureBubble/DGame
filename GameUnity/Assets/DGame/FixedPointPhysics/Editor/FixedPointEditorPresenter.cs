@@ -6,7 +6,7 @@
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
-namespace GameBattle
+namespace DGame
 {
     public static class FixedPointEditorPresenter
     {

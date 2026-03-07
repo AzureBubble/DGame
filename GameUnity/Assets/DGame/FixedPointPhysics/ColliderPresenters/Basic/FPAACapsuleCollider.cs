@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace GameBattle
+namespace DGame
 {
     /// <summary>
     /// 代表用于物理引擎的轴对齐胶囊碰撞器，使用固定点算术进行精确计算。

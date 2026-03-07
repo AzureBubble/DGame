@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace GameBattle
+namespace DGame
 {
     /// <summary>
     /// Controls the transition between dive animations in an Animator component, 

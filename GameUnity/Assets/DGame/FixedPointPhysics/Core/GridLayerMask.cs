@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GameBattle
+namespace DGame
 {
     public class GridLayerMask 
     {

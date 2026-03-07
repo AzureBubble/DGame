@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace GameBattle
+namespace DGame
 {
     [DefaultExecutionOrder(-999)]
     internal class FPPhysicsPresenter : SimpleSingleMonoBehaviour<FPPhysicsPresenter>

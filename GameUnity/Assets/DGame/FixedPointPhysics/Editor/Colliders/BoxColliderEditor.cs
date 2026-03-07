@@ -1,6 +1,6 @@
 using UnityEditor;
 
-namespace GameBattle.Editor
+namespace DGame.Editor
 {
     /// <summary>
     /// A custom editor for the FixedPointOBBColliderPresenter, extending the BaseBoxColliderPresenterEditor.

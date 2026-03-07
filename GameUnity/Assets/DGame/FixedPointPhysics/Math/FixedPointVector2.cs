@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 
-namespace GameBattle {
+namespace DGame {
 
     [Serializable]
     public struct FixedPointVector2 : IEquatable<FixedPointVector2>

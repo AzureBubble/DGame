@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace GameBattle
+namespace DGame
 {
     /// <summary>
     /// 代表一个使用固定点数学进行精确物理模拟的胶囊碰撞器的表示器。

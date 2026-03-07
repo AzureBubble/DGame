@@ -5,7 +5,7 @@
 */
 //reference: Game Physics Cookbook
 using UnityEngine;
-namespace GameBattle
+namespace DGame
 {
     public class FixedPointLineSegment : FixedPointShape
     {

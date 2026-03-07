@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace GameBattle
+namespace DGame
 {
     /// <summary>
     /// Manages the transition to continue the "down" animation in an Animator component,

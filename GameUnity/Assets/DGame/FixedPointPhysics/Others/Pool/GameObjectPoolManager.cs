@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace GameBattle
+namespace DGame
 {
     public class GameObjectPoolManager : SimpleSingleMonoBehaviour<GameObjectPoolManager>
     {

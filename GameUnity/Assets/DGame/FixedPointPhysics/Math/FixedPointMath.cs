@@ -1,6 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 
-namespace GameBattle {
+namespace DGame {
 
     /// <summary>
     /// Contains common math operations.

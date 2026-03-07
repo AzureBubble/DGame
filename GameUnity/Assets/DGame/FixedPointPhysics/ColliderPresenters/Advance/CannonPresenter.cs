@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace GameBattle
+namespace DGame
 {
     public sealed class CannonPresenter : FPGameObject
     {

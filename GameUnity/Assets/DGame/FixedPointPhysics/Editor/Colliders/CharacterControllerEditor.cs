@@ -1,7 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace GameBattle.Editor
+namespace DGame.Editor
 {
     [CustomEditor(typeof(FPCharacterController))]
     [CanEditMultipleObjects]

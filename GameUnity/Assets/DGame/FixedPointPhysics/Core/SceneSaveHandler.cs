@@ -4,7 +4,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine; 
 using UnityEngine.SceneManagement; 
 
-namespace GameBattle
+namespace DGame
 {
     /// <summary>
     /// A class that automatically initializes and attaches to editor events for handling actions during scene saves and updates.

@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-namespace GameBattle
+namespace DGame
 {
 	public enum CameraCollisionStyle
 	{

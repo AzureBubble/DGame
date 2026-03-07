@@ -1,7 +1,7 @@
 ﻿/*
 using GameBattle;
 
-namespace GameBattle
+namespace DGame
 {
     public static partial class FixedPointIntersection
     {

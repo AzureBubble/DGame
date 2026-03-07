@@ -5,7 +5,7 @@
 */
 using UnityEngine;
 
-namespace GameBattle
+namespace DGame
 {
     [ExecuteAlways]
     public class FPRigidbodyPresenter : MonoBehaviour

@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace GameBattle
+namespace DGame
 {
     /// <summary>
     /// 代表一个为了高效添加、移除和枚举元素而设计的快速访问列表。

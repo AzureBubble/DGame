@@ -1,4 +1,4 @@
-namespace GameBattle
+namespace DGame
 {
     using UnityEngine;
 

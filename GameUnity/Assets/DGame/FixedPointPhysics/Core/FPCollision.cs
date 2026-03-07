@@ -1,4 +1,4 @@
-﻿namespace GameBattle
+﻿namespace DGame
 {
     /// <summary>
     /// 代表在物理引擎中碰撞检测操作的结果，使用定点算术来提高模拟的精度和稳定性。

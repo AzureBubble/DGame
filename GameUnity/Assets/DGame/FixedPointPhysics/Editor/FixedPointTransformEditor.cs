@@ -1,6 +1,6 @@
 using UnityEditor;
 
-namespace GameBattle.Editor
+namespace DGame.Editor
 {
     [CustomEditor(typeof(FPTransform))]
     public sealed class FixedPointTransformEditor : UnityEditor.Editor

@@ -1,6 +1,6 @@
 using UnityEditor;
 
-namespace GameBattle.Editor
+namespace DGame.Editor
 {
     /// <summary>
     /// A custom editor for the FixedPointCapsuleColliderPresenter, extending the functionality of the BaseCapsuleColliderPresenterEditor.

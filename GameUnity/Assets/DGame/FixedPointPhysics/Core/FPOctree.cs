@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace GameBattle
+namespace DGame
 {
     internal class FPOctree
     {

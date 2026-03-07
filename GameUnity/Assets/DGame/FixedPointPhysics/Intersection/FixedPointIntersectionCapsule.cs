@@ -4,7 +4,7 @@
  * Math functions about capsule collisions.
  * It's used by fixedpoint physics system.
  */
-namespace GameBattle
+namespace DGame
 {
     public static partial class FixedPointIntersection
     {

@@ -3,7 +3,7 @@
  * 応彧剛　yingyugang@gmail.com
  * Math functions about y axis aligned capsule collisions.
  */
-namespace GameBattle
+namespace DGame
 {
     public static partial class FixedPointIntersection
     {

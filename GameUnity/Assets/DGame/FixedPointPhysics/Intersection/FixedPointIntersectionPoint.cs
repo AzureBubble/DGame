@@ -5,7 +5,7 @@
 */
 using System.Runtime.CompilerServices;
 
-namespace GameBattle
+namespace DGame
 {
     public static partial class FixedPointIntersection
     {

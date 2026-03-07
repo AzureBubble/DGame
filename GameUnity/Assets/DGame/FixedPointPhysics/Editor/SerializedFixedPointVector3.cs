@@ -1,7 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace GameBattle.Editor
+namespace DGame.Editor
 {
     public sealed class SerializedFixedPointVector3
     {

@@ -1,4 +1,4 @@
-﻿namespace GameBattle {
+﻿namespace DGame {
     public class FPRaycastHit
     {
         public FPCollider fpCollider { private set; get; }

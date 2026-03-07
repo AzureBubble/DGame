@@ -2,7 +2,7 @@
 using System.IO;
 using UnityEngine;
 
-namespace GameBattle {
+namespace DGame {
 
     [Serializable]
     public partial struct FixedPoint64 : IEquatable<FixedPoint64>, IComparable<FixedPoint64> {

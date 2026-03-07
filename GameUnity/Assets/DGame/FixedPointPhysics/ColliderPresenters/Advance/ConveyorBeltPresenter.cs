@@ -5,7 +5,7 @@
 */
 using UnityEngine;
 
-namespace GameBattle
+namespace DGame
 {
     public sealed class ConveyorBeltPresenter : FPGameObject
     {

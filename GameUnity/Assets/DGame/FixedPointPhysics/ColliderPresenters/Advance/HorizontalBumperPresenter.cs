@@ -7,7 +7,7 @@
 using UnityEngine;
 using UnityEngine.Serialization;
 
-namespace GameBattle
+namespace DGame
 {
     public sealed class HorizontalBumperPresenter : FpBumperPresenter
     {

@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace GameBattle
+namespace DGame
 {
     /// <summary>
     /// 在固定点物理系统中处理定向包围盒（OBB）碰撞器，扩展轴对齐包围盒（AABB）的功能，

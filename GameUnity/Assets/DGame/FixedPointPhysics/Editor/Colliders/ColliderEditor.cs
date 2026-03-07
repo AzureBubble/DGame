@@ -1,7 +1,7 @@
 ﻿using UnityEditor;
 using UnityEngine;
 
-namespace GameBattle.Editor
+namespace DGame.Editor
 {
     /// <summary>
     /// Serves as a base class for creating custom editor scripts for collider components within a custom physics engine. 

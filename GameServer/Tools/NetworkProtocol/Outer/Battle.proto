@@ -22,10 +22,11 @@ enum FrameCmdType
 /// 客户端同步帧数据
 message C2S_SyncFrameDataReq // IMessage
 {
-	int RevClientFrameId = 1; 					 // 接收到的客户端帧ID
-	CSRoomInfo RoomInfo = 2; 				      // 房间信息
-	int RoomPlayerId = 3;      				    // 房间玩家ID
-	CSOnePlayerFrameCmd FrameData = 4;			 // 帧数据
+	int ForecastFrameId = 1;					// 客户端预测帧ID
+	int RevClientFrameId = 2; 					// 接收到的客户端帧ID
+	CSRoomInfo RoomInfo = 3; 				    // 房间信息
+	int RoomPlayerId = 4;      				    // 房间玩家ID
+	CSOnePlayerFrameCmd FrameData = 5;			// 帧数据
 }
 
 /// 客户端结束战斗 上报数据

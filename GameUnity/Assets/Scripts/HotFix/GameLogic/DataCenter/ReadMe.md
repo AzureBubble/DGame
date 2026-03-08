@@ -152,11 +152,25 @@ public static void Error(string msg) { ... }
    ```
 
 2. **添加 Obfuz.Runtime 引用**
-   - 如果项目引用了 Obfuz 包，需要在 `Fantasy.Unity.asmdef` 文件中添加对 `Obfuz.Runtime` 的引用
+   - 如果项目引用了 Obfuz 包，需要在 `Fantasy.Unity.asmdef` 文件和 `Fantasy.Editor.asmdef` 文件中添加对 `Obfuz.Runtime` 的引用
 
 **修改方式**:
 
-在 `Fantasy.Unity.asmdef` 文件的 `references` 数组中添加：
+- 在 `Fantasy.Editor.asmdef` 文件的 `references` 数组中添加：
+
+```json
+{
+    "name": "Fantasy.Editor",
+    "references": [
+        "Fantasy.Unity",
+        "Obfuz.Runtime"
+    ],
+    ...
+}
+```
+
+- 在 `Fantasy.Unity.asmdef` 文件的 `references` 数组中添加：
+
 
 ```json
 {
@@ -169,13 +183,14 @@ public static void Error(string msg) { ... }
 ```
 
 > **检查结果示例**:
+>
 > ```json
 > // packages-lock.json 中存在以下内容则需添加引用
 > "com.code-philosophy.obfuz": {
->   "version": "https://github.com/focus-creative-games/obfuz.git",
->   "depth": 0,
->   "source": "git",
->   ...
+> "version": "https://github.com/focus-creative-games/obfuz.git",
+> "depth": 0,
+> "source": "git",
+> ...
 > }
 > ```
 
@@ -208,5 +223,5 @@ GameClient.Instance.UnRegisterMsgHandler.UnRegisterMsgHandler(protocolCode, hand
 - [ ] MessageDispatcherComponent.cs 中已添加 `#if FANTASY_UNITY` 代码块
 - [ ] `MessageHandler()` 方法中已添加客户端回调触发逻辑
 - [ ] **Fantasy.Log 中 `Debug`、`Info`、`Warning`、`Error` 方法已添加条件宏定义**（`Trace` 和 `TraceInfo` 除外），防止打包输出相关的Debug代码
-- [ ] 检查项目是否引入了 Obfuz 包，如果引用了，在 `Fantasy.Unity` 程序集中添加 `Obfuz.Runtime` 引用
+- [ ] 检查项目是否引入了 Obfuz 包，如果引用了，在 `Fantasy.Unity` 程序集和 `Fantasy.Editor` 程序集中添加 `Obfuz.Runtime` 引用
 - [ ] 编译无错误

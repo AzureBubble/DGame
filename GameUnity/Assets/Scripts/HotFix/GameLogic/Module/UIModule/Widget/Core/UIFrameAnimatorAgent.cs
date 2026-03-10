@@ -45,15 +45,11 @@ namespace GameLogic
         private float m_curBaseSpeed;
         private bool m_isDestroy;
 
-        public bool IsValid => !m_isDestroy || m_isInit || m_image == null;
+        public bool IsValid => !m_isDestroy && m_isInit && m_image != null;
 
         #endregion
 
-        public static UIFrameAnimatorAgent Create()
-        {
-            UIFrameAnimatorAgent agent = new UIFrameAnimatorAgent();
-            return agent;
-        }
+        public static UIFrameAnimatorAgent Create() => MemoryPool.Spawn<UIFrameAnimatorAgent>();
 
         public async UniTask Init(ModelConfig modelConfig)
         {
@@ -276,7 +272,6 @@ namespace GameLogic
                 m_image.sprite = null;
             }
             m_image = null;
-            m_isInit = false;
             m_curFrameAnimName = UIFrameAnimState.Idle;
             m_changeFrameAnimName = UIFrameAnimState.Idle;
             // m_deathFrameAnimName = UIFrameAnimState.Death;

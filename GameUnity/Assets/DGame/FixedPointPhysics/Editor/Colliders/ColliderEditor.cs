@@ -1,4 +1,6 @@
-﻿using UnityEditor;
+﻿#if UNITY_EDITOR
+
+using UnityEditor;
 using UnityEngine;
 
 namespace DGame.Editor
@@ -71,3 +73,5 @@ namespace DGame.Editor
         protected virtual void OnColliderInspectorGUI(){}
     }
 }
+
+#endif

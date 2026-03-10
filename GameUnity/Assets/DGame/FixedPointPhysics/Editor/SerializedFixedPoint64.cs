@@ -1,3 +1,5 @@
+#if UNITY_EDITOR
+
 using UnityEditor;
 
 namespace DGame.Editor
@@ -28,3 +30,5 @@ namespace DGame.Editor
         }
     }
 }
+
+#endif

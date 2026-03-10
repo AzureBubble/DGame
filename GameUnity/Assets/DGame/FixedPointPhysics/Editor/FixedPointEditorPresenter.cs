@@ -1,4 +1,6 @@
-﻿/*
+﻿#if UNITY_EDITOR
+
+/*
 * Create 2022/11/1
 * 応彧剛　yingyugang@gmail.com
 * It's used by fixedpoint physics system.
@@ -174,3 +176,5 @@ namespace DGame
         }
     }
 }
+
+#endif

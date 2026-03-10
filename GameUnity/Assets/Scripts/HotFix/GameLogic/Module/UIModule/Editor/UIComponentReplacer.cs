@@ -1,5 +1,6 @@
 #if UNITY_EDITOR
 
+using DGame;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
@@ -110,6 +111,88 @@ namespace GameLogic
         {
             return Selection.activeGameObject != null;
         }
+
+        #region 旧版
+
+        // [MenuItem("GameObject/UI/转化成UIImage和UIText和UIButton(给美术做动画后转化回来)")]
+        public static void ConvertToDodImage4Comp(MenuCommand menuCommand)
+        {
+            GameObject go = menuCommand.context as GameObject;
+            if (go != null)
+            {
+                var texts = go.GetComponentsInChildren<Text>(true);
+                if (texts != null)
+                {
+                    for (int i = 0; i < texts.Length; i++)
+                    {
+                        var text = texts[i];
+                        var ob = ClassReplaceHelper.ReplaceClass(text, typeof(UIText));
+                        ob.ApplyModifiedProperties();
+                    }
+                }
+                var images = go.GetComponentsInChildren<Image>(true);
+                if (images != null)
+                {
+                    for (int i = 0; i < images.Length; i++)
+                    {
+                        var image = images[i];
+                        var ob = ClassReplaceHelper.ReplaceClass(image, typeof(UIImage));
+                        ob.ApplyModifiedProperties();
+                    }
+                }
+                var buttons = go.GetComponentsInChildren<Button>(true);
+                if (buttons != null)
+                {
+                    for (int i = 0; i < buttons.Length; i++)
+                    {
+                        var button = buttons[i];
+                        var ob = ClassReplaceHelper.ReplaceClass(button, typeof(UIButton));
+                        ob.ApplyModifiedProperties();
+                    }
+                }
+            }
+        }
+
+        // [MenuItem("GameObject/UI/转化成原生Image和Text和Button(给美术做动画)")]
+        public static void ConvertToImageAndText(MenuCommand menuCommand)
+        {
+            GameObject go = menuCommand.context as GameObject;
+            if (go != null)
+            {
+                var texts = go.GetComponentsInChildren<UIText>(true);
+                if (texts != null)
+                {
+                    for (int i = 0; i < texts.Length; i++)
+                    {
+                        var text = texts[i];
+                        var ob = ClassReplaceHelper.ReplaceClass(text, typeof(Text));
+                        ob.ApplyModifiedProperties();
+                    }
+                }
+                var images = go.GetComponentsInChildren<UIImage>(true);
+                if (images != null)
+                {
+                    for (int i = 0; i < images.Length; i++)
+                    {
+                        var image = images[i];
+                        var ob = ClassReplaceHelper.ReplaceClass(image, typeof(Image));
+                        ob.ApplyModifiedProperties();
+                    }
+                }
+                var buttons = go.GetComponentsInChildren<UIButton>(true);
+                if (buttons != null)
+                {
+                    for (int i = 0; i < buttons.Length; i++)
+                    {
+                        var btn = buttons[i];
+                        var ob = ClassReplaceHelper.ReplaceClass(btn, typeof(Button));
+                        ob.ApplyModifiedProperties();
+                    }
+                }
+            }
+        }
+
+        #endregion
 
         /// <summary>
         /// 替换组件，保留基类属性

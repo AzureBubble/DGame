@@ -203,7 +203,7 @@ namespace GameLogic
             m_lastPort = port;
             Status = reconnect ? GameClientStatus.StatusReconnect : GameClientStatus.StatusInit;
             // 创建待完成的 Task
-            m_connectTask = FTask<bool>.Create(isPool: false);
+            m_connectTask = FTask<bool>.Create();
             if (Scene.Session == null || Scene.Session.IsDisposed)
             {
                 Scene.Connect($"{address}:{port}", ProtocolType, OnConnectComplete, OnConnectFail, OnConnectDisconnect, false);
@@ -290,6 +290,8 @@ namespace GameLogic
 
         private void OnConnectComplete()
         {
+            m_connectTask?.SetResult(true);
+            m_connectTask = null;
             GameEvent.Get<ICommonUI>().FinishWaiting(WaitingUISeq.LOGINWORLD_SEQID);
             // 如果是重连，直接进入 Enter 状态并启动心跳
             if (Status == GameClientStatus.StatusReconnect)
@@ -301,29 +303,27 @@ namespace GameLogic
             {
                 Status = GameClientStatus.StatusConnected;
             }
-            m_connectTask?.SetResult(true);
-            m_connectTask = null;
             DLogger.Info("[GameClient] Connected to server success");
         }
 
         private void OnConnectFail()
         {
+            m_connectTask?.SetResult(false);
+            m_connectTask = null;
             UIModule.Instance.ShowTipsUI(G.R("进入服务器失败，请重试"));
             GameEvent.Get<ICommonUI>().FinishWaiting(WaitingUISeq.LOGINWORLD_SEQID);
             Status = GameClientStatus.StatusClose;
-            m_connectTask?.SetResult(false);
-            m_connectTask = null;
             DLogger.Info("[GameClient] Connected to server fail");
         }
 
         private void OnConnectDisconnect()
         {
+            m_connectTask?.SetResult(false);
+            m_connectTask = null;
             UIModule.Instance.ShowTipsUI(G.R("连接已断开"));
             GameEvent.Get<ICommonUI>().FinishWaiting();
             Status = GameClientStatus.StatusClose;
             DLogger.Info("[GameClient] Disconnected to server");
-            m_connectTask?.SetResult(false);
-            m_connectTask = null;
         }
 
         /// <summary>

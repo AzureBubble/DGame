@@ -22,7 +22,8 @@
 
 > 📝 本文档由 AI（Claude）自动生成，内容可能存在偏差，如有疑问请参考源代码或提交 Issue。
 >
-> 新增功能已在多个商业化游戏上经过验证。
+> 新增功能均在多个商业化游戏及百万DAU项目经过验证。
+> Fantasy线和TE同步接入服务器框架Fantasy，区别在于本项目可能会做更多的项目细节处理，TE接入的就更纯净简洁
 
 ### ✨ 核心特性
 
@@ -899,6 +900,7 @@ await UIModule.Instance.ShowWindowAsync<MyWindow>(userData);
 [⭐ Star](https://github.com/AzureBubble/DGame) | [🐛 Issues](https://github.com/AzureBubble/DGame/issues) | [📖 Wiki](https://github.com/AzureBubble/DGame/wiki)
 
 </div>
+
 
 
 

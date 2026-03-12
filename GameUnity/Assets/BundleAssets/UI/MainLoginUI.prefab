@@ -950,7 +950,7 @@ MonoBehaviour:
   parent: {fileID: 405386106305443071}
   _position:
     x:
-      _serializedValue: 1395864502272
+      _serializedValue: 1395864371200
     y:
       _serializedValue: 1011121258496
     z:
@@ -3185,7 +3185,7 @@ MonoBehaviour:
   parent: {fileID: 8287324132232087865}
   _position:
     x:
-      _serializedValue: -837518557184
+      _serializedValue: -837518622720
     y:
       _serializedValue: 100201586688
     z:
@@ -4653,7 +4653,7 @@ MonoBehaviour:
   parent: {fileID: 3232726091509486142}
   _position:
     x:
-      _serializedValue: -255550521344
+      _serializedValue: -255550554112
     y:
       _serializedValue: 0
     z:
@@ -5306,7 +5306,7 @@ MonoBehaviour:
   parent: {fileID: 405386106305443071}
   _position:
     x:
-      _serializedValue: -1352914829312
+      _serializedValue: -1352914698240
     y:
       _serializedValue: 2478196129792
     z:
@@ -5575,7 +5575,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: "\u9ED1\u571F\u57301\u670D"
+  m_Text: "\u5B59\u609F\u7A7A1\u670D"
   m_uiTextSpacingExtend:
     m_isUseTextSpacing: 0
     m_textSpacing: 1
@@ -6211,7 +6211,7 @@ MonoBehaviour:
   parent: {fileID: 3161231411469619363}
   _position:
     x:
-      _serializedValue: 569083101184
+      _serializedValue: 569083166720
     y:
       _serializedValue: 0
     z:
@@ -6410,7 +6410,7 @@ MonoBehaviour:
   parent: {fileID: 3161231411469619363}
   _position:
     x:
-      _serializedValue: -457413984256
+      _serializedValue: -457414017024
     y:
       _serializedValue: 0
     z:
@@ -6572,7 +6572,7 @@ MonoBehaviour:
   parent: {fileID: 405386106305443071}
   _position:
     x:
-      _serializedValue: -1078036922368
+      _serializedValue: -1078036791296
     y:
       _serializedValue: 2787433775104
     z:

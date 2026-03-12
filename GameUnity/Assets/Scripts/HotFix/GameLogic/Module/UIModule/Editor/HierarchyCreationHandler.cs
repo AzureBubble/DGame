@@ -12,8 +12,8 @@ namespace GameLogic
     public class HierarchyCreationHandler : Editor
     {
         private static CanvasScaler.ScaleMode UIWINDOW_DEFAULT_SCALE_MODE = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        private static int UIWINDOW_WIDTH = 1920;
-        private static int UIWINDOW_HEIGHT = 1080;
+        private static int UIWINDOW_WIDTH = 750;
+        private static int UIWINDOW_HEIGHT = 1334;
 
         private static int m_lastProcessedInstanceId;
 

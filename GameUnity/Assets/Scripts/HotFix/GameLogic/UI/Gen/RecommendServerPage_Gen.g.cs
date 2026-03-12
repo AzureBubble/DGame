@@ -11,23 +11,21 @@ using DGame;
 
 namespace GameLogic
 {
-	public partial class AllSvrLeftItem : UIEventItem<AllSvrLeftItem>
+	public partial class RecommendServerPage : BaseChildPage
 	{
 		#region 脚本工具生成的代码
 
 		private UIBindComponent m_bindComponent;
-		private GameObject m_goSelect;
-		private Text m_textSelect;
-		private GameObject m_goNoSelect;
-		private Text m_textNoSelect;
+		private ScrollRect m_scrollServer;
+		private RectTransform m_rectSvrList;
+		private GameObject m_itemReSvr;
 
 		protected override void ScriptGenerator()
 		{
 			m_bindComponent = gameObject.GetComponent<UIBindComponent>();
-			m_goSelect = m_bindComponent.GetComponent<RectTransform>(0).gameObject;
-			m_textSelect = m_bindComponent.GetComponent<Text>(1);
-			m_goNoSelect = m_bindComponent.GetComponent<RectTransform>(2).gameObject;
-			m_textNoSelect = m_bindComponent.GetComponent<Text>(3);
+			m_scrollServer = m_bindComponent.GetComponent<ScrollRect>(0);
+			m_rectSvrList = m_bindComponent.GetComponent<RectTransform>(1);
+			m_itemReSvr = m_bindComponent.GetComponent<RectTransform>(2).gameObject;
 		}
 
 		#endregion

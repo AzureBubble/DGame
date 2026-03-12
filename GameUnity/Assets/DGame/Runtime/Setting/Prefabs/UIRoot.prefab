@@ -367,11 +367,11 @@ MonoBehaviour:
   parent: {fileID: 84900128148591288}
   _position:
     x:
-      _serializedValue: 0
+      _serializedValue: 1610612736000
     y:
-      _serializedValue: 0
+      _serializedValue: 2864743186432
     z:
-      _serializedValue: 429496729600
+      _serializedValue: 0
   _euler:
     x:
       _serializedValue: 0
@@ -381,11 +381,11 @@ MonoBehaviour:
       _serializedValue: 0
   _scale:
     x:
-      _serializedValue: 32196160
+      _serializedValue: 4294967296
     y:
-      _serializedValue: 32196160
+      _serializedValue: 4294967296
     z:
-      _serializedValue: 32196160
+      _serializedValue: 4294967296
   mLocalRotation:
     x:
       _serializedValue: 0

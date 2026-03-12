@@ -147,7 +147,7 @@ namespace GameLogic
         /// <param name="needSwitch">是否切换到指定 Tab</param>
         public void CreateTab<T>(int tabID, GameObject tabTemp = null, bool needSwitch = true) where T : SwitchTabItem, new()
         {
-            InternalCreateTab<T>(tabID, tabTemp, true, false);
+            InternalCreateTab<T>(tabID, tabTemp, needSwitch, false);
         }
 
         /// <summary>
@@ -188,8 +188,9 @@ namespace GameLogic
         /// <typeparam name="T">Tab 类型</typeparam>
         /// <param name="tabID">默认选中的 Tab ID</param>
         /// <param name="tabTemp">Tab 预制体</param>
+        /// <param name="needSwitch">是否切换到指定 Tab</param>
         /// <param name="setSizeDelta">是否自动调整大小</param>
-        public void CreateTabByPrefab<T>(int tabID, GameObject tabTemp, bool setSizeDelta = true) where T : SwitchTabItem, new()
+        public void CreateTabByPrefab<T>(int tabID, GameObject tabTemp, bool needSwitch = true, bool setSizeDelta = true) where T : SwitchTabItem, new()
         {
             if (tabTemp == null)
             {
@@ -197,7 +198,7 @@ namespace GameLogic
                 return;
             }
 
-            InternalCreateTab<T>(tabID, tabTemp, true, setSizeDelta, false);
+            InternalCreateTab<T>(tabID, tabTemp, needSwitch, setSizeDelta, false);
         }
 
         /// <summary>
@@ -205,10 +206,11 @@ namespace GameLogic
         /// </summary>
         /// <typeparam name="T">Tab 类型</typeparam>
         /// <param name="tabID">默认选中的 Tab ID</param>
+        /// <param name="needSwitch">是否切换到指定 Tab</param>
         /// <param name="setSizeDelta">是否自动调整大小</param>
-        public void CreateTabByType<T>(int tabID, bool setSizeDelta = true) where T : SwitchTabItem, new()
+        public void CreateTabByType<T>(int tabID, bool needSwitch = true, bool setSizeDelta = true) where T : SwitchTabItem, new()
         {
-            InternalCreateTab<T>(tabID, null, true, setSizeDelta, false);
+            InternalCreateTab<T>(tabID, null, needSwitch, setSizeDelta, false);
         }
 
         /// <summary>
@@ -217,22 +219,23 @@ namespace GameLogic
         /// <typeparam name="T">Tab 类型</typeparam>
         /// <param name="tabID">默认选中的 Tab ID</param>
         /// <param name="action">创建完成后的回调</param>
+        /// <param name="needSwitch">是否切换到指定 Tab</param>
         /// <param name="setSizeDelta">是否自动调整大小</param>
-        public void CreateTabByType<T>(int tabID, Action<int, T> action, bool setSizeDelta = true) where T : SwitchTabItem, new()
+        public void CreateTabByType<T>(int tabID, Action<int, T> action, bool needSwitch = true, bool setSizeDelta = true) where T : SwitchTabItem, new()
         {
-            InternalCreateTab<T>(tabID, null, true, setSizeDelta, false, action);
+            InternalCreateTab<T>(tabID, null, needSwitch, setSizeDelta, false, action);
         }
 
-        private void DoCreateTabByType<T>(int tabID, GameObject tabTemp, bool setSizeDelta = true)
+        private void DoCreateTabByType<T>(int tabID, GameObject tabTemp, bool needSwitch = true, bool setSizeDelta = true)
             where T : SwitchTabItem, new()
         {
-            InternalCreateTab<T>(tabID, tabTemp, true, setSizeDelta, false);
+            InternalCreateTab<T>(tabID, tabTemp, needSwitch, setSizeDelta, false);
         }
 
-        private void DoCreateTabByType<T>(int tabID, GameObject tabTemp, Action<int, T> action, bool setSizeDelta = true)
+        private void DoCreateTabByType<T>(int tabID, GameObject tabTemp, Action<int, T> action, bool needSwitch = true, bool setSizeDelta = true)
             where T : SwitchTabItem, new()
         {
-            InternalCreateTab<T>(tabID, tabTemp, true, setSizeDelta, false, action);
+            InternalCreateTab<T>(tabID, tabTemp, needSwitch, setSizeDelta, false, action);
         }
 
         private void InternalCreateTab<T>(int tabID,

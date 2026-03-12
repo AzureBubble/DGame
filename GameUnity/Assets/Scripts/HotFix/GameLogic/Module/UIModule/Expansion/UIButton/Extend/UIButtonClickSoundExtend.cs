@@ -7,7 +7,7 @@ namespace GameLogic
     public class UIButtonClickSoundExtend
     {
         [SerializeField] private bool m_isUseClickSound = true;
-        [SerializeField] private int m_clickSoundID = 1000002;
+        [SerializeField] private int m_clickSoundID = (int)SysSoundID.BTN_CLICK;
 
         public void OnPointerClick()
         {
@@ -21,7 +21,7 @@ namespace GameLogic
                 return;
             }
 
-            if(TbSoundConfig.TryGetValue((int)SysSoundID.BTN_CLICK, out var soundCfg))
+            if(TbSoundConfig.TryGetValue(m_clickSoundID, out var soundCfg))
             {
                 GameModule.AudioModule.Play(DGame.AudioType.UISound, soundCfg.Location, isInPool: true);
             }

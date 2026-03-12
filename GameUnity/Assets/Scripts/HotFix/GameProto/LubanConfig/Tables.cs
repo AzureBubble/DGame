@@ -143,6 +143,27 @@ namespace GameProto
                 m_TbGmConfig.ResolveRef(this);
             }
         }
+        /// <summary>
+        /// 服务器状态配置表
+        /// </summary>
+        private TbServerStateConfig m_TbServerStateConfig;
+        public TbServerStateConfig TbServerStateConfig 
+        {
+            get
+            {
+                if (m_TbServerStateConfig == null)
+                {
+                    m_TbServerStateConfig = new TbServerStateConfig(m_defaultLoader("tbserverstateconfig"));
+                    m_TbServerStateConfig.ResolveRef(this);
+                }
+                return m_TbServerStateConfig;
+            }
+            set
+            {
+                m_TbServerStateConfig = value;
+                m_TbServerStateConfig.ResolveRef(this);
+            }
+        }
 
         #endregion
 

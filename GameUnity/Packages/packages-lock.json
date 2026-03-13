@@ -21,6 +21,16 @@
       "dependencies": {},
       "hash": "c9214b2cf9869cf93e060442ec12b9fa828d98d5"
     },
+    "com.coffee.ui-particle": {
+      "version": "https://github.com/mob-sakai/ParticleEffectForUGUI.git#4.9.0",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.unity.ugui": "1.0.0",
+        "com.unity.modules.particlesystem": "1.0.0"
+      },
+      "hash": "4dfcb9075e166fa53fee5decc51975bdc247cdad"
+    },
     "com.tuyoogame.yooasset": {
       "version": "2.3.18",
       "depth": 0,

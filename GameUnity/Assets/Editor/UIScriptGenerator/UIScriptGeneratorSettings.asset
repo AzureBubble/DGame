@@ -38,7 +38,7 @@ MonoBehaviour:
     isUIWidget: 0
   - uiElementRegex: m_item
     componentName: 0
-    isUIWidget: 0
+    isUIWidget: 1
   - uiElementRegex: m_tf
     componentName: 1
     isUIWidget: 0

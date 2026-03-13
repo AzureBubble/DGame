@@ -8,7 +8,7 @@
 
 ### 1. Scene.cs - MessageDispatcherComponent 属性修改
 
-**文件位置**: `Fantasy/Scene/Scene.cs`
+**文件位置**: `Assets/Scripts/HotFix/Fantasy.Unity/Runtime/Core/Scene/Scene.cs`
 
 **修改内容**: 将 `MessageDispatcherComponent` 属性改为 `public`
 
@@ -23,7 +23,7 @@ public MessageDispatcherComponent MessageDispatcherComponent { get; internal set
 
 ### 2. MessageDispatcherComponent.cs - 添加客户端消息注册支持
 
-**文件位置**: `Fantasy/Network/MessageDispatcherComponent.cs`
+**文件位置**: `Assets/Scripts/HotFix/Fantasy.Unity/Runtime/Core/Network/Message/Dispatcher/MessageDispatcherComponent.cs`
 
 #### 2.1 添加字段和方法（在类的适当位置）
 
@@ -87,7 +87,7 @@ public MessageDispatcherComponent MessageDispatcherComponent { get; internal set
 
 ### 3. Log.cs - 确认条件宏定义与 DLogger 保持一致
 
-**文件位置**: `Fantasy.Unity/Runtime/Core/Log/Log.cs`
+**文件位置**: `Assets/Scripts/HotFix/Fantasy.Unity/Runtime/Core/Log/Log.cs`
 
 **检查内容**: 确认 `Debug`、`Info`、`Warning`、`Error` 方法的 `[Conditional]` 属性与 `DGame.DLogger` 保持一致（`Trace` 和 `TraceInfo` 除外）
 
@@ -156,7 +156,7 @@ public static void Error(string msg) { ... }
 
 **修改方式**:
 
-- 在 `Fantasy.Editor.asmdef` 文件的 `references` 数组中添加：
+- 在 `Assets/Scripts/HotFix/Fantasy.Unity/Editor/Runtime/Fantasy.Editor.asmdef` 文件的 `references` 数组中添加：
 
 ```json
 {
@@ -169,7 +169,7 @@ public static void Error(string msg) { ... }
 }
 ```
 
-- 在 `Fantasy.Unity.asmdef` 文件的 `references` 数组中添加：
+- 在 `Assets/Scripts/HotFix/Fantasy.Unity/Fantasy.Unity.asmdef` 文件的 `references` 数组中添加：
 
 
 ```json

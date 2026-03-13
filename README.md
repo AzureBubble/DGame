@@ -18,7 +18,7 @@
 
 ## 📖 简介
 
-**DGame** 是在 [TEngine](https://github.com/ALEXTANGXIAO/TEngine) 基础上深度优化演进的 Unity 游戏框架。保留 TEngine 核心优势的同时，针对商业游戏开发需求**新增了多个核心模块**，并对现有系统进行了**全面优化**。
+**DGame** 是在 [TEngine](https://github.com/ALEXTANGXIAO/TEngine) 基础上深度优化演进的 Unity 游戏框架。保留 TEngine 核心优势的同时，针对商业游戏开发需求**新增了多个核心模块**，并对现有系统进行了**部分优化**。
 
 > 📝 本文档由 AI（Claude）自动生成，内容可能存在偏差，如有疑问请参考源代码或提交 Issue。
 >

@@ -240,7 +240,7 @@ namespace GameLogic
 
         #endregion
 
-        public void Init(string windowName, string assetLocation)
+        public void Initialize(string windowName, string assetLocation)
         {
             WindowFullName = windowName;
             AssetLocation = assetLocation;

@@ -65,6 +65,10 @@ namespace GameLogic
 
         #region 函数
 
+        /// <summary>
+        /// 修改 Spine 模型缩放
+        /// </summary>
+        /// <param name="scale">缩放比例</param>
         public void ChangeScale(float scale)
         {
             if(scale != m_curScale && m_goSpineModel != null)
@@ -74,6 +78,10 @@ namespace GameLogic
             }
         }
 
+        /// <summary>
+        /// 镜像翻转 Spine 模型
+        /// </summary>
+        /// <param name="isMirror">是否镜像，true=水平翻转</param>
         public void ChangeMirror(bool isMirror)
         {
             if (m_goSpineModel != null)
@@ -82,6 +90,10 @@ namespace GameLogic
             }
         }
 
+        /// <summary>
+        /// 修改 Spine 模型位置
+        /// </summary>
+        /// <param name="pos">目标位置</param>
         public void ChangeLocalPos(Vector3 pos)
         {
             if (m_goSpineModel != null)
@@ -90,6 +102,12 @@ namespace GameLogic
             }
         }
 
+        /// <summary>
+        /// 播放 Spine 动画
+        /// </summary>
+        /// <param name="animName">动画名称</param>
+        /// <param name="loop">是否循环播放</param>
+        /// <param name="forceReplay">是否强制重播，true=清除当前动画并从头播放</param>
         public void SetAnimation(string animName, bool loop, bool forceReplay)
         {
             CancelTimer();
@@ -111,6 +129,13 @@ namespace GameLogic
             }
         }
 
+        /// <summary>
+        /// 延迟播放 Spine 动画
+        /// </summary>
+        /// <param name="animName">动画名称</param>
+        /// <param name="loop">是否循环播放</param>
+        /// <param name="forceReplay">是否强制重播</param>
+        /// <param name="dealy">延迟时间（秒）</param>
         public void SetAnimationDelay(string animName, bool loop, bool forceReplay, float dealy = 0)
         {
             if (dealy > 0 && !string.IsNullOrEmpty(animName))
@@ -125,6 +150,11 @@ namespace GameLogic
             }
         }
 
+        /// <summary>
+        /// 获取动画时长（秒），考虑 TimeScale 影响
+        /// </summary>
+        /// <param name="animName">动画名称</param>
+        /// <returns>动画时长，未找到或出错返回 0</returns>
         public float GetAnimationDuration(string animName)
         {
             if (m_curAnimState == null || m_skeletonGraphic == null || string.IsNullOrEmpty(animName))
@@ -222,6 +252,10 @@ namespace GameLogic
             return currentSet.SetEquals(targetSet);
         }
 
+        /// <summary>
+        /// 设置 Spine 颜色
+        /// </summary>
+        /// <param name="color">目标颜色</param>
         public void SetSpineColor(Color color)
         {
             if (m_skeletonGraphic != null)
@@ -236,6 +270,11 @@ namespace GameLogic
             m_gameTimer = null;
         }
 
+        /// <summary>
+        /// 绑定 Spine 点击事件，自动设置点击区域和响应
+        /// </summary>
+        /// <param name="clickAction">点击回调</param>
+        /// <param name="clickRange">点击区域大小</param>
         public void BindClickEvent(Action clickAction, Vector2 clickRange)
         {
             if (rectTransform != null)

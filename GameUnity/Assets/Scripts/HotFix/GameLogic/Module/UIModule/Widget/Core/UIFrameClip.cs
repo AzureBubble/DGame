@@ -11,6 +11,12 @@ namespace GameLogic
         private int m_cacheCount;
         private bool m_isLoop;
 
+        /// <summary>
+        /// 构造帧动画片段
+        /// </summary>
+        /// <param name="animName">动画状态名称</param>
+        /// <param name="sprites">精灵帧列表</param>
+        /// <param name="isLoop">是否循环播放</param>
         public UIFrameClip(UIFrameAnimState animName, List<Sprite> sprites, bool isLoop)
         {
             m_animName = animName;
@@ -20,6 +26,9 @@ namespace GameLogic
             m_isLoop = isLoop;
         }
 
+        /// <summary>
+        /// 获取下一帧精灵
+        /// </summary>
         public Sprite GetNext()
         {
             if (m_cacheCount <= 0)
@@ -39,11 +48,20 @@ namespace GameLogic
             return m_sprites[m_curIndex++];
         }
 
+        /// <summary>
+        /// 是否已停止播放（非循环动画播放完毕）
+        /// </summary>
         public bool IsStop()
             => !m_isLoop && m_curIndex >= m_cacheCount;
 
+        /// <summary>
+        /// 离开动画，重置播放位置
+        /// </summary>
         public void Leave() => m_curIndex = 0;
 
+        /// <summary>
+        /// 销毁动画片段，释放资源
+        /// </summary>
         public void OnDestroy()
         {
             m_animName = UIFrameAnimState.Max;

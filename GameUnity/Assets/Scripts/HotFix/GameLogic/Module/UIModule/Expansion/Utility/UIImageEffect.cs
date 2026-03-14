@@ -140,6 +140,19 @@ namespace GameLogic
             m_matDict.TryGetValue(GetMatKey(isGray, isCircle), out var mat);
             return mat;
         }
+        
+        public static void ClearCache()
+        {
+            foreach (var kvp in m_matDict)
+            {
+                if (kvp.Value != null)
+                {
+                    GameObject.Destroy(kvp.Value);
+                }
+            }
+            m_matDict.Clear();
+            m_init = false;
+        }
 
         public override void ModifyMesh(VertexHelper vh)
         {

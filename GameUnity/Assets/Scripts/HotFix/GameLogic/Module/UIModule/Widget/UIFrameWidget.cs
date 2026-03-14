@@ -47,6 +47,11 @@ namespace GameLogic
 
         #region 函数
 
+        /// <summary>
+        /// 初始化帧动画Widget，异步加载模型资源
+        /// </summary>
+        /// <param name="modelID">模型ID</param>
+        /// <param name="clickAction">点击回调</param>
         public async void Init(int modelID, Action<UIWidget> clickAction = null)
         {
             if (modelID <= 0)
@@ -63,12 +68,20 @@ namespace GameLogic
             m_animatorAgent?.StartAnim();
         }
 
+        /// <summary>
+        /// 绑定点击事件
+        /// </summary>
+        /// <param name="clickAction">点击回调</param>
         public void BindClickEvent(Action<UIWidget> clickAction)
         {
             m_clickAction = clickAction;
             m_btnSprite.interactable = clickAction != null;
         }
 
+        /// <summary>
+        /// 切换动画状态
+        /// </summary>
+        /// <param name="state">目标动画状态</param>
         public void SwitchAnim(UIFrameAnimState state)
         {
             m_animatorAgent?.SwitchAnim(state);

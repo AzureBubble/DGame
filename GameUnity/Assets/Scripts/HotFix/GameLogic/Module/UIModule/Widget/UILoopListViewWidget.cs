@@ -7,6 +7,9 @@ namespace GameLogic
 {
     public class UILoopListViewWidget<T> : UIWidget where T : UILoopItemWidget, new()
     {
+        /// <summary>
+        /// LoopListView组件
+        /// </summary>
         public LoopListView2 LoopRectView { private set; get; }
 
         private DGameDictionary<int, T> m_itemCache = new DGameDictionary<int, T>();
@@ -23,12 +26,19 @@ namespace GameLogic
             m_itemCache.Clear();
         }
 
+        /// <summary>
+        /// 创建Item
+        /// </summary>
         public T CreateItem()
         {
             string typeName = typeof(T).Name;
             return CreateItem(typeName);
         }
 
+        /// <summary>
+        /// 创建Item
+        /// </summary>
+        /// <param name="itemName">Item名称</param>
         public T CreateItem(string itemName)
         {
             T widget = null;
@@ -41,6 +51,10 @@ namespace GameLogic
             return widget;
         }
 
+        /// <summary>
+        /// 创建Item
+        /// </summary>
+        /// <param name="prefab">预制体</param>
         public T CreateItem(GameObject prefab)
         {
             if (prefab == null)
@@ -62,6 +76,9 @@ namespace GameLogic
             return widget;
         }
 
+        /// <summary>
+        /// 获取所有Item列表
+        /// </summary>
         public List<T> GetItemList()
         {
             List<T> list = new List<T>();
@@ -73,11 +90,17 @@ namespace GameLogic
             return list;
         }
 
+        /// <summary>
+        /// 获取Item数量
+        /// </summary>
         public int GetItemCount()
         {
             return m_itemCache.Count;
         }
 
+        /// <summary>
+        /// 根据GoID获取Item
+        /// </summary>
         public T GetItem(int goID)
         {
             return m_itemCache[goID];

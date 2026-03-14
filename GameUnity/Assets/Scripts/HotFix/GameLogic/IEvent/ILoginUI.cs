@@ -6,9 +6,9 @@ namespace GameLogic
     [EventInterface(EEventGroup.GroupUI)]
     public interface ILoginUI
     {
-        void OnRegister();
+        void OnRegisterSuccess();
 
-        void OnLogin();
+        void OnLoginSuccess();
 
         void ShowLoginUI();
 

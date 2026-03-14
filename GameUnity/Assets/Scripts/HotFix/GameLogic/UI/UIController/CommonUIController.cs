@@ -10,6 +10,7 @@ namespace GameLogic
         {
             GameEvent.AddEventListener<uint, string, System.Action>(ICommonUI_Event.ShowWaitingUI, OnShowWaitingUI);
             GameEvent.AddEventListener<uint>(ICommonUI_Event.FinishWaiting, OnFinishWaiting);
+            GameEvent.AddEventListener<string, string, bool>(ICommonUI_Event.ShowComTipsUI, OnShowComTipsUI);
         }
 
         #region FinishWaitingUI
@@ -38,6 +39,21 @@ namespace GameLogic
         {
             var ui = await UIModule.Instance.ShowWindowAsyncAwait<WaitingUI>();
             ui?.Init(waitFuncID, tips, callback);
+        }
+
+        #endregion
+        
+        #region OnShowComTipsUI
+
+        private void OnShowComTipsUI(string title, string content, bool isUserPrivacy)
+        {
+            OnOnShowComTipsUIAsync(title, content, isUserPrivacy).Forget();
+        }
+
+        private async UniTaskVoid OnOnShowComTipsUIAsync(string title, string content, bool isUserPrivacy)
+        {
+            var ui = await UIModule.Instance.ShowWindowAsyncAwait<ComTipsUI>();
+            ui?.Init(title, content, isUserPrivacy);
         }
 
         #endregion

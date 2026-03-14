@@ -51,7 +51,7 @@ namespace GameLogic
                 return;
             }
             DLogger.Info("Registered Successfully");
-            GameEvent.Get<ILoginUI>().OnRegister();
+            GameEvent.Get<ILoginUI>().OnRegisterSuccess();
         }
 
         /// <summary>
@@ -88,7 +88,7 @@ namespace GameLogic
                 GameClient.Instance.Disconnect();
                 await GameClient.Instance.ConnectAsync(payload.address, payload.port);
                 GameClient.Instance.Status = GameClientStatus.StatusLogin;
-                GameEvent.Get<ILoginUI>().OnLogin();
+                GameEvent.Get<ILoginUI>().OnLoginSuccess();
                 // 发送登录请求到Gate服务器
                 var loginResponse = (G2C_LoginResponse)await GameClient.Instance.Call(new C2G_LoginRequest()
                 {

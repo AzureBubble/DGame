@@ -15,7 +15,7 @@ namespace GameLogic
 			}
 
 			m_textState.text = config.StateName;
-			m_imgState.color = UICommonUtil.ParseColor(config.Color);
+			m_imgState.color = config.Color.ParseColor();
 			if (!string.IsNullOrEmpty(config.Location))
 			{
 				m_imgState.SetSprite(config.Location);

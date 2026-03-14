@@ -9,8 +9,17 @@ namespace GameLogic
         private object m_eventParam1;
         private object m_eventParam2;
         private object m_eventParam3;
+        /// <summary>
+        /// 事件参数1
+        /// </summary>
         public object EventParam1 => m_eventParam1;
+        /// <summary>
+        /// 事件参数2
+        /// </summary>
         public object EventParam2 => m_eventParam2;
+        /// <summary>
+        /// 事件参数3
+        /// </summary>
         public object EventParam3 => m_eventParam3;
         private Action<T> m_clickAction;
         private Action<T, bool> m_pressAction;
@@ -18,6 +27,14 @@ namespace GameLogic
         private Action<T, PointerEventData> m_dragAction;
         private Action<T, PointerEventData> m_endDragAction;
 
+        /// <summary>
+        /// 绑定点击事件（扩展版）
+        /// </summary>
+        /// <param name="clickAction">点击回调</param>
+        /// <param name="eParam1">事件参数1</param>
+        /// <param name="eParam2">事件参数2</param>
+        /// <param name="eParam3">事件参数3</param>
+        /// <param name="transition">按钮过渡效果</param>
         public void BindClickEventEx(Action<T> clickAction, object eParam1 = null, object eParam2 = null,
             object eParam3 = null, Selectable.Transition transition = Selectable.Transition.None)
         {
@@ -32,20 +49,40 @@ namespace GameLogic
             SetEventParam(eParam1, eParam2, eParam3);
         }
 
+        /// <summary>
+        /// 绑定点击事件
+        /// </summary>
+        /// <param name="clickAction">点击回调</param>
+        /// <param name="eParam1">事件参数1</param>
+        /// <param name="eParam2">事件参数2</param>
+        /// <param name="eParam3">事件参数3</param>
+        /// <param name="needEmptyImg">是否需要添加空Image组件用于射线检测</param>
         public void BindClickEvent(Action<T> clickAction, object eParam1 = null, object eParam2 = null,
-            object eParam3 = null)
+            object eParam3 = null, bool needEmptyImg = false)
         {
             if (m_clickAction == null)
             {
                 var button = DGame.Utility.UnityUtil.AddMonoBehaviour<UIButton>(gameObject);
                 button.transition = Selectable.Transition.None;
                 button.onClick.AddListener(() => { m_clickAction?.Invoke(this as T); });
+
+                if (needEmptyImg)
+                {
+                    DGame.Utility.UnityUtil.AddMonoBehaviour<EmptyGraph>(gameObject);
+                }
             }
 
             m_clickAction = clickAction;
             SetEventParam(eParam1, eParam2, eParam3);
         }
 
+        /// <summary>
+        /// 绑定开始拖拽事件
+        /// </summary>
+        /// <param name="dragAction">拖拽回调</param>
+        /// <param name="eParam1">事件参数1</param>
+        /// <param name="eParam2">事件参数2</param>
+        /// <param name="eParam3">事件参数3</param>
         public void BindBeginDragEvent(Action<T, PointerEventData> dragAction, object eParam1 = null,
             object eParam2 = null, object eParam3 = null)
         {
@@ -65,6 +102,13 @@ namespace GameLogic
             SetEventParam(eParam1, eParam2, eParam3);
         }
 
+        /// <summary>
+        /// 绑定拖拽事件
+        /// </summary>
+        /// <param name="dragAction">拖拽回调</param>
+        /// <param name="eParam1">事件参数1</param>
+        /// <param name="eParam2">事件参数2</param>
+        /// <param name="eParam3">事件参数3</param>
         public void BindDragEvent(Action<T, PointerEventData> dragAction, object eParam1 = null, object eParam2 = null,
             object eParam3 = null)
         {
@@ -82,6 +126,13 @@ namespace GameLogic
             SetEventParam(eParam1, eParam2, eParam3);
         }
 
+        /// <summary>
+        /// 绑定结束拖拽事件
+        /// </summary>
+        /// <param name="dragendAction">拖拽结束回调</param>
+        /// <param name="eParam1">事件参数1</param>
+        /// <param name="eParam2">事件参数2</param>
+        /// <param name="eParam3">事件参数3</param>
         public void BindEndDragEvent(Action<T, PointerEventData> dragendAction, object eParam1 = null,
             object eParam2 = null, object eParam3 = null)
         {
@@ -100,6 +151,13 @@ namespace GameLogic
             SetEventParam(eParam1, eParam2, eParam3);
         }
 
+        /// <summary>
+        /// 绑定按下事件
+        /// </summary>
+        /// <param name="pressAction">按下回调，参数表示是否按下</param>
+        /// <param name="eParam1">事件参数1</param>
+        /// <param name="eParam2">事件参数2</param>
+        /// <param name="eParam3">事件参数3</param>
         public void BindPressEvent(Action<T, bool> pressAction, object eParam1 = null, object eParam2 = null,
             object eParam3 = null)
         {
@@ -122,6 +180,14 @@ namespace GameLogic
             SetEventParam(eParam1, eParam2, eParam3);
         }
 
+        /// <summary>
+        /// 绑定长按事件
+        /// </summary>
+        /// <param name="pressAction">长按回调</param>
+        /// <param name="eParam1">事件参数1</param>
+        /// <param name="eParam2">事件参数2</param>
+        /// <param name="eParam3">事件参数3</param>
+        /// <param name="durationThreshold">长按触发时间阈值（秒）</param>
         public void BindPressEvent(Action<T, bool> pressAction, object eParam1 = null, object eParam2 = null,
             object eParam3 = null, float durationThreshold = 1)
         {
@@ -135,6 +201,9 @@ namespace GameLogic
             SetEventParam(eParam1, eParam2, eParam3);
         }
 
+        /// <summary>
+        /// 设置事件参数
+        /// </summary>
         public void SetEventParam(object eParam1, object eParam2 = null, object eParam3 = null)
         {
             m_eventParam1 = eParam1;
@@ -142,6 +211,9 @@ namespace GameLogic
             m_eventParam3 = eParam3;
         }
 
+        /// <summary>
+        /// 触发按钮点击事件
+        /// </summary>
         public void OnTriggerBtnEvent()
         {
             if (m_clickAction != null)

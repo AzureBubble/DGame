@@ -100,6 +100,7 @@ public partial class GameStart
     private static void OnDestroy()
     {
         SingletonSystem.Destroy();
+        UIImageEffect.ClearCache();
         DLogger.Warning("====== Destroy GameStart =======");
     }
 

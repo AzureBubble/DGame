@@ -50,8 +50,14 @@ namespace GameLogic
         /// </summary>
         protected int m_itemIndex;
 
+        /// <summary>
+        /// 获取索引
+        /// </summary>
         public int GetItemIndex() => m_itemIndex;
 
+        /// <summary>
+        /// 设置索引
+        /// </summary>
         public void SetItemIndex(int i) => m_itemIndex = i;
 
         /// <summary>
@@ -59,8 +65,14 @@ namespace GameLogic
         /// </summary>
         protected bool m_isSelected;
 
+        /// <summary>
+        /// 获取是否被选中
+        /// </summary>
         public virtual bool IsSelected() => m_isSelected;
 
+        /// <summary>
+        /// 设置是否选中
+        /// </summary>
         public virtual void SetSelected(bool v)
         {
             if (m_isSelected == v)

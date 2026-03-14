@@ -45,12 +45,22 @@ namespace GameLogic
         private float m_curBaseSpeed;
         private bool m_isDestroy;
 
+        /// <summary>
+        /// 是否有效（未销毁、已初始化、已绑定Image）
+        /// </summary>
         public bool IsValid => !m_isDestroy && m_isInit && m_image != null;
 
         #endregion
 
+        /// <summary>
+        /// 创建帧动画代理实例
+        /// </summary>
         public static UIFrameAnimatorAgent Create() => MemoryPool.Spawn<UIFrameAnimatorAgent>();
 
+        /// <summary>
+        /// 初始化帧动画代理，异步加载帧动画资源
+        /// </summary>
+        /// <param name="modelConfig">模型配置</param>
         public async UniTask Init(ModelConfig modelConfig)
         {
             if (modelConfig == null || string.IsNullOrEmpty(modelConfig.FrameCfgLocation))
@@ -89,11 +99,19 @@ namespace GameLogic
             SetFirstFrame();
         }
 
+        /// <summary>
+        /// 设置是否使用不受时间缩放影响的时间
+        /// </summary>
+        /// <param name="isUnscaledTime">true=使用UnscaledTime，false=使用普通Time</param>
         public void SetUnscaledTime(bool isUnscaledTime)
         {
             m_isUnscaledTime = isUnscaledTime;
         }
 
+        /// <summary>
+        /// 绑定显示用的Image组件
+        /// </summary>
+        /// <param name="image">Image组件</param>
         public void BindDisplayRender(Image image)
         {
             if (m_isBindDisplayImage)
@@ -144,6 +162,9 @@ namespace GameLogic
             m_image.sprite = sprite;
         }
 
+        /// <summary>
+        /// 开始播放帧动画
+        /// </summary>
         public void StartAnim()
         {
             if (!IsValid)
@@ -207,6 +228,9 @@ namespace GameLogic
             m_image.transform.localScale = revert ? Vector3.one : m_uiModelScale;
         }
 
+        /// <summary>
+        /// 获取当前动画播放速度
+        /// </summary>
         public float GetSpeed()
         {
             if (m_curFrameAnimName == UIFrameAnimState.Move)
@@ -222,6 +246,10 @@ namespace GameLogic
             return m_speedScale * m_curBaseSpeed;
         }
 
+        /// <summary>
+        /// 切换动画状态
+        /// </summary>
+        /// <param name="animName">目标动画状态</param>
         public void SwitchAnim(UIFrameAnimState animName)
         {
             if (!IsValid)
@@ -239,9 +267,18 @@ namespace GameLogic
             }
         }
 
+        /// <summary>
+        /// 判断指定动画是否循环播放
+        /// </summary>
+        /// <param name="animName">动画状态</param>
+        /// <returns>true=循环播放</returns>
         public bool IsLoopAnim(UIFrameAnimState animName)
             => animName == UIFrameAnimState.Idle || animName == UIFrameAnimState.Move;
 
+        /// <summary>
+        /// 设置动画播放速度缩放
+        /// </summary>
+        /// <param name="speed">速度缩放倍数</param>
         public void SetAnimSpeed(float speed)
         {
             m_speedScale = speed;

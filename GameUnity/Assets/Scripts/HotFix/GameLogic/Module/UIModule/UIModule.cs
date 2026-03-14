@@ -535,7 +535,7 @@ namespace GameLogic
             {
                 throw new DGameException($"窗口 {type.Name} 窗口实例化失败");
             }
-            window.Init(type.FullName, type.Name);
+            window.Initialize(type.FullName, type.Name);
             return window;
         }
 
@@ -546,7 +546,7 @@ namespace GameLogic
             {
                 throw new DGameException($"窗口 {type.Name} 窗口实例化失败");
             }
-            window.Init(type.FullName, type.Name);
+            window.Initialize(type.FullName, type.Name);
             return window;
         }
 
@@ -556,7 +556,7 @@ namespace GameLogic
             {
                 throw new DGameException($"窗口实例化失败");
             }
-            window.Init(window.GetType().FullName, window.GetType().Name);
+            window.Initialize(window.GetType().FullName, window.GetType().Name);
             return window;
         }
 

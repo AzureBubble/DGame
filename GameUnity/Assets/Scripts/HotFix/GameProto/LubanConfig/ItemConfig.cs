@@ -19,14 +19,27 @@ public sealed partial class ItemConfig : Luban.BeanBase
     public ItemConfig(ByteBuf _buf) 
     {
         ItemID = _buf.ReadInt();
-        ItemName = _buf.ReadString();
+        ItemNameId = _buf.ReadString();
         Quality = (ColorQuality)_buf.ReadInt();
         IconNameMan = _buf.ReadString();
         IconNameWoman = _buf.ReadString();
-        Desc = _buf.ReadString();
-        Price = _buf.ReadInt();
-        if(_buf.ReadBool()){ ExpireTime = _buf.ReadLong(); } else { ExpireTime = null; }
-        BatchUseable = _buf.ReadBool();
+        ItemType = _buf.ReadInt();
+        FuncDescId = _buf.ReadString();
+        MaxStack = _buf.ReadInt();
+        UseLevel = _buf.ReadInt();
+        FuncType = _buf.ReadInt();
+        {int n0 = _buf.ReadSize(); FuncValue = new System.Collections.Generic.List<int>(n0);for(var i0 = 0 ; i0 < n0 ; i0++) { int _e0;  _e0 = _buf.ReadInt(); FuncValue.Add(_e0);}}
+        DecomposeMoneyType = _buf.ReadInt();
+        DecomposeMoneyCnt = _buf.ReadInt();
+        DecomposeItemID = _buf.ReadInt();
+        DecomposeItemCnt = _buf.ReadInt();
+        GetDescId = _buf.ReadString();
+        AutoUse = _buf.ReadBool();
+        ActiveFashionID = _buf.ReadInt();
+        CanSell = _buf.ReadBool();
+        CanCompose = _buf.ReadBool();
+        {int n0 = _buf.ReadSize(); GetWayID = new System.Collections.Generic.List<int>(n0);for(var i0 = 0 ; i0 < n0 ; i0++) { int _e0;  _e0 = _buf.ReadInt(); GetWayID.Add(_e0);}}
+        JumpWayID = _buf.ReadInt();
     }
 
     public static ItemConfig DeserializeItemConfig(ByteBuf _buf)
@@ -39,37 +52,89 @@ public sealed partial class ItemConfig : Luban.BeanBase
     /// </summary>
     public int ItemID;
     /// <summary>
-    /// 道具名字
+    /// 道具名称ID
     /// </summary>
-    public string ItemName;
+    public string ItemNameId;
     /// <summary>
     /// 道具品质
     /// </summary>
     public ColorQuality Quality;
     /// <summary>
-    /// 图标资源名_男
+    /// 图标资源名称_男性
     /// </summary>
     public string IconNameMan;
     /// <summary>
-    /// 图标资源名_女
+    /// 图标资源名称_女性
     /// </summary>
     public string IconNameWoman;
     /// <summary>
-    /// 道具描述
+    /// 道具类型
     /// </summary>
-    public string Desc;
+    public int ItemType;
     /// <summary>
-    /// 价格
+    /// 功能描述ID
     /// </summary>
-    public int Price;
+    public string FuncDescId;
     /// <summary>
-    /// 过期时间
+    /// 最大叠加数
     /// </summary>
-    public long? ExpireTime;
+    public int MaxStack;
     /// <summary>
-    /// 能否批量使用
+    /// 使用等级
     /// </summary>
-    public bool BatchUseable;
+    public int UseLevel;
+    /// <summary>
+    /// 功能值_类型
+    /// </summary>
+    public int FuncType;
+    /// <summary>
+    /// 功能值_参数
+    /// </summary>
+    public System.Collections.Generic.List<int> FuncValue;
+    /// <summary>
+    /// 分解获得货币类型
+    /// </summary>
+    public int DecomposeMoneyType;
+    /// <summary>
+    /// 分解获得货币数量
+    /// </summary>
+    public int DecomposeMoneyCnt;
+    /// <summary>
+    /// 分解获得道具
+    /// </summary>
+    public int DecomposeItemID;
+    /// <summary>
+    /// 分解获得道具数量
+    /// </summary>
+    public int DecomposeItemCnt;
+    /// <summary>
+    /// 获得说明ID
+    /// </summary>
+    public string GetDescId;
+    /// <summary>
+    /// 获得是否自动使用
+    /// </summary>
+    public bool AutoUse;
+    /// <summary>
+    /// 可激活的时装ID
+    /// </summary>
+    public int ActiveFashionID;
+    /// <summary>
+    /// 可否出售
+    /// </summary>
+    public bool CanSell;
+    /// <summary>
+    /// 可否合成
+    /// </summary>
+    public bool CanCompose;
+    /// <summary>
+    /// 获取途径
+    /// </summary>
+    public System.Collections.Generic.List<int> GetWayID;
+    /// <summary>
+    /// 使用跳转
+    /// </summary>
+    public int JumpWayID;
 
     public const int __ID__ = -764023723;
     public override int GetTypeId() => __ID__;
@@ -86,28 +151,54 @@ public sealed partial class ItemConfig : Luban.BeanBase
             other = new ItemConfig();
         }
         other.ItemID = ItemID;
-        other.ItemName = ItemName;
+        other.ItemNameId = ItemNameId;
         other.Quality = Quality;
         other.IconNameMan = IconNameMan;
         other.IconNameWoman = IconNameWoman;
-        other.Desc = Desc;
-        other.Price = Price;
-        other.ExpireTime = ExpireTime;
-        other.BatchUseable = BatchUseable;
+        other.ItemType = ItemType;
+        other.FuncDescId = FuncDescId;
+        other.MaxStack = MaxStack;
+        other.UseLevel = UseLevel;
+        other.FuncType = FuncType;
+        other.FuncValue = FuncValue;
+        other.DecomposeMoneyType = DecomposeMoneyType;
+        other.DecomposeMoneyCnt = DecomposeMoneyCnt;
+        other.DecomposeItemID = DecomposeItemID;
+        other.DecomposeItemCnt = DecomposeItemCnt;
+        other.GetDescId = GetDescId;
+        other.AutoUse = AutoUse;
+        other.ActiveFashionID = ActiveFashionID;
+        other.CanSell = CanSell;
+        other.CanCompose = CanCompose;
+        other.GetWayID = GetWayID;
+        other.JumpWayID = JumpWayID;
     }
     
     public override string ToString()
     {
         return "{ "
         + "ItemID:" + ItemID + ","
-        + "ItemName:" + ItemName + ","
+        + "ItemNameId:" + ItemNameId + ","
         + "Quality:" + Quality + ","
         + "IconNameMan:" + IconNameMan + ","
         + "IconNameWoman:" + IconNameWoman + ","
-        + "Desc:" + Desc + ","
-        + "price:" + Price + ","
-        + "expireTime:" + ExpireTime + ","
-        + "batchUseable:" + BatchUseable + ","
+        + "ItemType:" + ItemType + ","
+        + "FuncDescId:" + FuncDescId + ","
+        + "MaxStack:" + MaxStack + ","
+        + "UseLevel:" + UseLevel + ","
+        + "FuncType:" + FuncType + ","
+        + "FuncValue:" + Luban.StringUtil.CollectionToString(FuncValue) + ","
+        + "DecomposeMoneyType:" + DecomposeMoneyType + ","
+        + "DecomposeMoneyCnt:" + DecomposeMoneyCnt + ","
+        + "DecomposeItemID:" + DecomposeItemID + ","
+        + "DecomposeItemCnt:" + DecomposeItemCnt + ","
+        + "GetDescId:" + GetDescId + ","
+        + "AutoUse:" + AutoUse + ","
+        + "ActiveFashionID:" + ActiveFashionID + ","
+        + "CanSell:" + CanSell + ","
+        + "CanCompose:" + CanCompose + ","
+        + "GetWayID:" + Luban.StringUtil.CollectionToString(GetWayID) + ","
+        + "JumpWayID:" + JumpWayID + ","
         + "}";
     }
 }

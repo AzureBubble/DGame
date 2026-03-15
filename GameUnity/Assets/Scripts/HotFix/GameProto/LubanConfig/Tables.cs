@@ -60,6 +60,27 @@ namespace GameProto
             }
         }
         /// <summary>
+        /// 获取途径配置表
+        /// </summary>
+        private TbGetWayConfig m_TbGetWayConfig;
+        public TbGetWayConfig TbGetWayConfig 
+        {
+            get
+            {
+                if (m_TbGetWayConfig == null)
+                {
+                    m_TbGetWayConfig = new TbGetWayConfig(m_defaultLoader("tbgetwayconfig"));
+                    m_TbGetWayConfig.ResolveRef(this);
+                }
+                return m_TbGetWayConfig;
+            }
+            set
+            {
+                m_TbGetWayConfig = value;
+                m_TbGetWayConfig.ResolveRef(this);
+            }
+        }
+        /// <summary>
         /// 音效配置表
         /// </summary>
         private TbSoundConfig m_TbSoundConfig;

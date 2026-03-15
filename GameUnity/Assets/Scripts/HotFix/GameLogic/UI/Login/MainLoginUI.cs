@@ -63,6 +63,7 @@ namespace GameLogic
 
 		private partial void OnClickStartGameBtn()
 		{
+			UIModule.Instance.ShowWindowAsync<GameMainUI>();
 		}
 
 		private partial void OnClickSelectServerBtn()

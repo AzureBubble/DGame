@@ -19,6 +19,8 @@ namespace GameLogic
 
         #endregion
 
+        #region CheckFuncOpen
+
         public bool CheckFuncOpen(FuncType funcType, bool showTips = false)
             => CheckFuncOpen((int)funcType, showTips);
 
@@ -32,5 +34,7 @@ namespace GameLogic
             }
             return isOpen;
         }
+
+        #endregion
     }
 }

@@ -11,10 +11,12 @@ public sealed class SensitiveWordComponentAwakeSystem : AwakeSystem<SensitiveWor
     {
         if (self.UseAdvancedFilter)
         {
-            self.IllegalWordsSearch = new IllegalWordsSearch();
-            self.IllegalWordsSearch.UseIgnoreCase = self.UseIgnoreCase;
-            self.IllegalWordsSearch.UseDBCcaseConverter = self.UseDBCcaseConverter;
-            self.IllegalWordsSearch.UseDuplicateWordFilter = self.UseDuplicateWordFilter;
+            self.IllegalWordsSearch = new IllegalWordsSearch
+            {
+                UseIgnoreCase = self.UseIgnoreCase,
+                UseDBCcaseConverter = self.UseDBCcaseConverter,
+                UseDuplicateWordFilter = self.UseDuplicateWordFilter
+            };
         }
         else
         {

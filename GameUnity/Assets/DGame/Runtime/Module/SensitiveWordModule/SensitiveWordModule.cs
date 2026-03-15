@@ -113,10 +113,12 @@ namespace DGame
         {
             if (m_useAdvancedFilter)
             {
-                m_illegalWordsSearch = new IllegalWordsSearch();
-                m_illegalWordsSearch.UseIgnoreCase = m_useIgnoreCase;
-                m_illegalWordsSearch.UseDBCcaseConverter = m_useDBCcaseConverter;
-                m_illegalWordsSearch.UseDuplicateWordFilter = m_useDuplicateWordFilter;
+                m_illegalWordsSearch = new IllegalWordsSearch
+                {
+                    UseIgnoreCase = m_useIgnoreCase,
+                    UseDBCcaseConverter = m_useDBCcaseConverter,
+                    UseDuplicateWordFilter = m_useDuplicateWordFilter
+                };
             }
             else
             {

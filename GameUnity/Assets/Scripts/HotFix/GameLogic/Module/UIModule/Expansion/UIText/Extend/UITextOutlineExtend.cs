@@ -425,7 +425,7 @@ namespace GameLogic
             {
                 if (m_text.material == m_text.defaultMaterial)
                 {
-                    Material material = UnityEditor.AssetDatabase.LoadAssetAtPath<Material>("Assets/Scripts/HotFix/GameLogic/Module/UIModule/Expansion/UIText/Shaders/UGUIPro_UIText.mat");
+                    Material material = UnityEditor.AssetDatabase.LoadAssetAtPath<Material>("Assets/BundleAssets/Materials/UGUIPro_UIText.mat");
                     if (material == null)
                     {
                         Debug.LogError("Text Out Line Material Not Find Please Check Material Path!");

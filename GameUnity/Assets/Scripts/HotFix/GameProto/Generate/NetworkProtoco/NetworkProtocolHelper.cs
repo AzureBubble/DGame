@@ -9,6 +9,71 @@ namespace Fantasy
    public static class NetworkProtocolHelper
    {
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void C2S_SyncFrameDataReq(this Session session, C2S_SyncFrameDataReq C2S_SyncFrameDataReq_message)
+		{
+			session.Send(C2S_SyncFrameDataReq_message);
+		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void C2S_SyncFrameDataReq(this Session session, int forecastFrameId, int revClientFrameId, CSRoomInfo roomInfo, int roomPlayerId, CSOnePlayerFrameCmd frameData)
+		{
+			using var C2S_SyncFrameDataReq_message = Fantasy.C2S_SyncFrameDataReq.Create();
+			C2S_SyncFrameDataReq_message.ForecastFrameId = forecastFrameId;
+			C2S_SyncFrameDataReq_message.RevClientFrameId = revClientFrameId;
+			C2S_SyncFrameDataReq_message.RoomInfo = roomInfo;
+			C2S_SyncFrameDataReq_message.RoomPlayerId = roomPlayerId;
+			C2S_SyncFrameDataReq_message.FrameData = frameData;
+			session.Send(C2S_SyncFrameDataReq_message);
+		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void S2C_BattleFinClientData(this Session session, S2C_BattleFinClientData S2C_BattleFinClientData_message)
+		{
+			session.Send(S2C_BattleFinClientData_message);
+		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void S2C_BattleFinClientData(this Session session, CSBattleStartParam startParam, uint durationTime)
+		{
+			using var S2C_BattleFinClientData_message = Fantasy.S2C_BattleFinClientData.Create();
+			S2C_BattleFinClientData_message.StartParam = startParam;
+			S2C_BattleFinClientData_message.DurationTime = durationTime;
+			session.Send(S2C_BattleFinClientData_message);
+		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void S2C_NotifyEnterBattle(this Session session, S2C_NotifyEnterBattle S2C_NotifyEnterBattle_message)
+		{
+			session.Send(S2C_NotifyEnterBattle_message);
+		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void S2C_NotifyEnterBattle(this Session session, int randSeed, int playerCount, byte isHaveRoomInfo, List<CSRoomInfo> roomInfoList, int battleStatus, byte isGuide, uint startTime, ulong battleGID, byte multiPlayerBattle, ulong captainPlayerId)
+		{
+			using var S2C_NotifyEnterBattle_message = Fantasy.S2C_NotifyEnterBattle.Create();
+			S2C_NotifyEnterBattle_message.RandSeed = randSeed;
+			S2C_NotifyEnterBattle_message.PlayerCount = playerCount;
+			S2C_NotifyEnterBattle_message.IsHaveRoomInfo = isHaveRoomInfo;
+			S2C_NotifyEnterBattle_message.RoomInfoList = roomInfoList;
+			S2C_NotifyEnterBattle_message.BattleStatus = battleStatus;
+			S2C_NotifyEnterBattle_message.IsGuide = isGuide;
+			S2C_NotifyEnterBattle_message.StartTime = startTime;
+			S2C_NotifyEnterBattle_message.BattleGID = battleGID;
+			S2C_NotifyEnterBattle_message.MultiPlayerBattle = multiPlayerBattle;
+			S2C_NotifyEnterBattle_message.CaptainPlayerId = captainPlayerId;
+			session.Send(S2C_NotifyEnterBattle_message);
+		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void S2C_BroadcastFrameData(this Session session, S2C_BroadcastFrameData S2C_BroadcastFrameData_message)
+		{
+			session.Send(S2C_BroadcastFrameData_message);
+		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void S2C_BroadcastFrameData(this Session session, CSRoomInfo roomInfo, int sveFrameId, int frameCount, List<CSSyncOneFrameData> frameDataList)
+		{
+			using var S2C_BroadcastFrameData_message = Fantasy.S2C_BroadcastFrameData.Create();
+			S2C_BroadcastFrameData_message.RoomInfo = roomInfo;
+			S2C_BroadcastFrameData_message.SveFrameId = sveFrameId;
+			S2C_BroadcastFrameData_message.FrameCount = frameCount;
+			S2C_BroadcastFrameData_message.FrameDataList = frameDataList;
+			session.Send(S2C_BroadcastFrameData_message);
+		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static async FTask<A2C_RegisterResponse> C2A_RegisterRequest(this Session session, C2A_RegisterRequest C2A_RegisterRequest_request)
 		{
 			return (A2C_RegisterResponse)await session.Call(C2A_RegisterRequest_request);

@@ -9,40 +9,42 @@ namespace GameLogic
 {
 	public enum GameMainBtnType
 	{
+		None = 0,
+		
 		/// <summary>
 		/// 商城
 		/// </summary>
-		Shop = 0,
+		Shop = 1,
 		
 		/// <summary>
 		/// 角色
 		/// </summary>
-		Actor = 1,
+		Actor = 2,
 		
 		/// <summary>
 		/// 主界面
 		/// </summary>
-		Main = 2,
+		Main = 3,
 		
 		/// <summary>
 		/// 公会
 		/// </summary>
-		League = 3,
+		League = 4,
 		
 		/// <summary>
 		/// 玩法
 		/// </summary>
-		GamePlay = 4,
+		GamePlay = 5,
 		
 		/// <summary>
 		/// 家园
 		/// </summary>
-		Home = 5,
+		Home = 6,
 		
 		/// <summary>
 		/// 最大
 		/// </summary>
-		Max = 6
+		Max = 7
 	}
 	
 	public partial class GameMainUI
@@ -109,7 +111,7 @@ namespace GameLogic
 
 		private void CreateGameMainButtons()
 		{
-			for (int i = 0; i < (int)GameMainBtnType.Max; i++)
+			for (int i = (int)GameMainBtnType.None + 1; i < (int)GameMainBtnType.Max; i++)
 			{
 				var btnType = (GameMainBtnType)i;
 				switch (btnType)

@@ -185,6 +185,27 @@ namespace GameProto
                 m_TbServerStateConfig.ResolveRef(this);
             }
         }
+        /// <summary>
+        /// 系统开放配置表
+        /// </summary>
+        private TbFuncOpenConfig m_TbFuncOpenConfig;
+        public TbFuncOpenConfig TbFuncOpenConfig 
+        {
+            get
+            {
+                if (m_TbFuncOpenConfig == null)
+                {
+                    m_TbFuncOpenConfig = new TbFuncOpenConfig(m_defaultLoader("tbfuncopenconfig"));
+                    m_TbFuncOpenConfig.ResolveRef(this);
+                }
+                return m_TbFuncOpenConfig;
+            }
+            set
+            {
+                m_TbFuncOpenConfig = value;
+                m_TbFuncOpenConfig.ResolveRef(this);
+            }
+        }
 
         #endregion
 

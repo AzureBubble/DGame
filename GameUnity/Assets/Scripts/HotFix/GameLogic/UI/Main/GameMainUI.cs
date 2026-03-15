@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 using DGame;
@@ -48,6 +49,10 @@ namespace GameLogic
 	{
 		#region Override
 
+		protected override ModelType GetModelType() => ModelType.NoneType;
+
+		public override bool FullScreen => true;
+
 		protected override void BindMemberProperty()
 		{
 			m_gridBtnNode = m_tfButtons.GetComponent<GridLayoutGroup>();
@@ -56,16 +61,51 @@ namespace GameLogic
 			CreateGameMainButtons();
 		}
 
+		protected override void OnCreate()
+		{
+			bool showGm = false;
+			if (!DGame.Utility.PlatformUtil.IsPcOrEditorPlatform())
+			{
+				showGm = false;
+			}
+			m_btnGm.SetActive(showGm);
+			RefreshMainPage();
+		}
+
 		#endregion
 		
 		#region 字段
 		
 		private GridLayoutGroup m_gridBtnNode;
 		private List<GameMainUIBtnItem> m_mainBtnList = new List<GameMainUIBtnItem>();
+		private Dictionary<GameMainBtnType, UIWidget> m_pageDict = new Dictionary<GameMainBtnType, UIWidget>();
+		private List<GameMainBtnType> m_loadingPage = new List<GameMainBtnType>();
+		private GameMainBtnType m_curShowPageType = GameMainBtnType.Main;
 
 		#endregion
 		
 		#region 函数
+		
+		private void RefreshMainPage()
+		{
+			if (!m_pageDict.ContainsKey(GameMainBtnType.Main))
+			{
+				var mainPage = CreateWidgetByType<MainPage>(m_tfPageNode);
+				if (mainPage != null)
+				{
+					m_pageDict.Add(GameMainBtnType.Main, mainPage);
+				}
+			}
+			SwitchPage(GameMainBtnType.Main);
+
+			foreach (var item in m_mainBtnList)
+			{
+				item.RefreshOpenState();
+			}
+		}
+
+		private UIWidget GetPageByGameMainBtnType(GameMainBtnType btnType) 
+			=> m_pageDict.TryGetValue(btnType, out UIWidget page) ? page : null;
 
 		private void CreateGameMainButtons()
 		{
@@ -118,9 +158,96 @@ namespace GameLogic
 			SwitchPage(btnType);
 		}
 
-		private void SwitchPage(GameMainBtnType btnType, Action<UIWidget> onSwitchPage = null)
+		private void SetGameMainBtnState()
 		{
-			
+			foreach (var btn in m_mainBtnList)
+			{
+				btn.SetSelectState(m_curShowPageType);
+			}
+		}
+
+		public void SwitchPage(GameMainBtnType btnType, Action<UIWidget> onSwitchPage = null)
+		{
+			m_curShowPageType = btnType;
+			CreatePageTabByGameMainBtnType(btnType, onSwitchPage);
+			SetGameMainBtnState();
+		}
+
+		private void CreatePageTabByGameMainBtnType(GameMainBtnType btnType, Action<UIWidget> onSwitchPage = null)
+		{
+			if (CheckPageIsOpen())
+			{
+				if (m_pageDict.TryGetValue(btnType, out UIWidget page))
+				{
+					foreach (var item in m_pageDict.Values)
+					{
+						item.Show(false);
+					}
+					page.Show(m_curShowPageType == btnType);
+					onSwitchPage?.Invoke(page);
+				}
+				else
+				{
+					foreach (var item in m_pageDict)
+					{
+						if (item.Key != btnType)
+						{
+							item.Value.Show(false);
+						}
+					}
+
+					if (!m_loadingPage.Contains(btnType))
+					{
+						CreatePageAsync(btnType, onSwitchPage).Forget();
+					}
+				}
+			}
+		}
+
+		private async UniTaskVoid CreatePageAsync(GameMainBtnType btnType, Action<UIWidget> onSwitchPage = null)
+		{
+			m_loadingPage.Add(btnType);
+			UIWidget page = null;
+			switch (btnType)
+			{
+				case GameMainBtnType.Shop:
+					page = await CreateWidgetByTypeAsync<ShopPage>(m_tfPageNode);
+					break;
+
+				case GameMainBtnType.Actor:
+					page = await CreateWidgetByTypeAsync<ActorPage>(m_tfPageNode);
+					break;
+
+				case GameMainBtnType.Main:
+					page = await CreateWidgetByTypeAsync<MainPage>(m_tfPageNode);
+					break;
+
+				case GameMainBtnType.League:
+					page = await CreateWidgetByTypeAsync<LeaguePage>(m_tfPageNode);
+					break;
+
+				case GameMainBtnType.GamePlay:
+					page = await CreateWidgetByTypeAsync<GamePlayPage>(m_tfPageNode);
+					break;
+
+				case GameMainBtnType.Home:
+					page = await CreateWidgetByTypeAsync<HomePage>(m_tfPageNode);
+					break;
+			}
+			m_loadingPage.Remove(btnType);
+			if (page == null)
+			{
+				DLogger.Warning($"加载界面失败: {btnType.ToString()}");
+				return;
+			}
+			m_pageDict.Add(btnType, page);
+			page.Show(m_curShowPageType == btnType);
+			onSwitchPage?.Invoke(page);
+		}
+
+		private bool CheckPageIsOpen()
+		{
+			return true;
 		}
 
 		#endregion

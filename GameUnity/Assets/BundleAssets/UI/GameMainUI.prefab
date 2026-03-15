@@ -581,7 +581,7 @@ MonoBehaviour:
     x:
       _serializedValue: 0
     y:
-      _serializedValue: -2864742924288
+      _serializedValue: -2864743186432
     z:
       _serializedValue: 0
   _euler:
@@ -1037,7 +1037,7 @@ MonoBehaviour:
     x:
       _serializedValue: 0
     y:
-      _serializedValue: -2864742924288
+      _serializedValue: -2864743186432
     z:
       _serializedValue: 0
   _euler:
@@ -1956,7 +1956,7 @@ MonoBehaviour:
     x:
       _serializedValue: 1288490188800
     y:
-      _serializedValue: 2735893905408
+      _serializedValue: 2735894167552
     z:
       _serializedValue: 0
   _euler:

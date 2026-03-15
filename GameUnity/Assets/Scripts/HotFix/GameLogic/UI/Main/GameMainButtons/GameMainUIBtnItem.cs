@@ -28,6 +28,20 @@ namespace GameLogic
 		{
 			MainBtnType = btnType;
 		}
+		
+		public void RefreshOpenState()
+		{
+			bool isOpen = true;
+			m_goLock.SetActive(!isOpen);
+			m_goUnlock.SetActive(isOpen);
+		}
+
+		public void SetSelectState(GameMainBtnType btnType)
+		{
+			bool isSelect = MainBtnType == btnType;
+			m_goSelect.SetActive(isSelect);
+			m_goNoSelect.SetActive(!isSelect);
+		}
 
 		#endregion
 		

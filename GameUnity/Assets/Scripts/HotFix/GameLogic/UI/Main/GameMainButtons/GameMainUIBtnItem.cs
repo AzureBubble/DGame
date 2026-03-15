@@ -17,10 +17,17 @@ namespace GameLogic
 		#endregion
 		
 		#region 字段
+		
+		public GameMainBtnType MainBtnType { get; private set; }
 
 		#endregion
 		
 		#region 函数
+
+		public void Init(GameMainBtnType btnType)
+		{
+			MainBtnType = btnType;
+		}
 
 		#endregion
 		

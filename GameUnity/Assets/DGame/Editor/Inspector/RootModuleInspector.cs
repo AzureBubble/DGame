@@ -22,6 +22,19 @@ namespace DGame
         private static readonly float[] m_gameSpeedArr = new float[] { 0f, 0.01f, 0.1f, 0.25f, 0.5f, 1f, 1.5f, 2f, 4f, 8f };
         private static readonly string[] m_gameSpeedForDisplay = new string[] { "0x", "0.01x", "0.1x", "0.25x", "0.5x", "1x", "1.5x", "2x", "4x", "8x" };
 
+        private static readonly ScreenOrientation[] m_screenOrientationArr = new ScreenOrientation[]
+        {
+            ScreenOrientation.Portrait,
+            ScreenOrientation.PortraitUpsideDown,
+            ScreenOrientation.LandscapeLeft,
+            ScreenOrientation.LandscapeRight,
+            ScreenOrientation.AutoRotation,
+        };
+        private static readonly string[] m_screenOrientationForDisplay = new string[]
+        {
+            "竖屏", "竖屏（倒置）", "横屏（左）", "横屏（右）", "自动旋转",
+        };
+
         private SerializedProperty m_stringUtilHelperTypeName = null;
         private SerializedProperty m_logHelperTypeName = null;
         private SerializedProperty m_jsonHelperTypeName = null;
@@ -29,6 +42,7 @@ namespace DGame
         private SerializedProperty m_frameRate = null;
         private SerializedProperty m_runInBackground = null;
         private SerializedProperty m_neverSleep = null;
+        private SerializedProperty m_screenOrientation = null;
         private SerializedProperty m_memoryStrictCheckType = null;
         private SerializedProperty m_editorLanguage = null;
 
@@ -264,6 +278,24 @@ namespace DGame
                         else
                         {
                             m_neverSleep.boolValue = neverSleep;
+                        }
+                    }
+
+                    int orientationIndex = GetScreenOrientationIndex((ScreenOrientation)m_screenOrientation.enumValueIndex);
+                    int newOrientationIndex = EditorGUILayout.Popup(
+                        new GUIContent("屏幕朝向", "游戏运行时锁定的屏幕朝向（横竖屏）"),
+                        orientationIndex, m_screenOrientationForDisplay);
+
+                    if (newOrientationIndex != orientationIndex)
+                    {
+                        ScreenOrientation screenOrientation = m_screenOrientationArr[newOrientationIndex];
+                        if (EditorApplication.isPlaying)
+                        {
+                            rootModule.ScreenOrientation = screenOrientation;
+                        }
+                        else
+                        {
+                            m_screenOrientation.enumValueIndex = (int)screenOrientation;
                         }
                     }
 
@@ -528,6 +560,19 @@ namespace DGame
             return status.Count > 0 ? string.Join("+", status) : "标准";
         }
 
+        private int GetScreenOrientationIndex(ScreenOrientation screenOrientation)
+        {
+            for (int i = 0; i < m_screenOrientationArr.Length; i++)
+            {
+                if (m_screenOrientationArr[i] == screenOrientation)
+                {
+                    return i;
+                }
+            }
+            // 兜底：字段值不在候选列表（如默认 Unknown）时，落到横屏（左）
+            return 2;
+        }
+
         private int GetSelectedGameSpeed(float gameSpeed)
         {
             for (int i = 0; i < m_gameSpeedArr.Length; i++)
@@ -580,6 +625,7 @@ namespace DGame
             m_frameRate = serializedObject?.FindProperty("frameRate");
             m_runInBackground = serializedObject?.FindProperty("runInBackground");
             m_neverSleep = serializedObject?.FindProperty("neverSleep");
+            m_screenOrientation = serializedObject?.FindProperty("screenOrientation");
             m_memoryStrictCheckType = serializedObject?.FindProperty("m_memoryStrictCheckType");
             m_editorLanguage = serializedObject?.FindProperty("editorLanguage");
             RefreshTypeNames();

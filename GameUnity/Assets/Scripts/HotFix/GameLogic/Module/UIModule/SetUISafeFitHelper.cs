@@ -87,6 +87,14 @@ namespace GameLogic
                     break;
             }
 
+            // 横屏：把竖屏的上下逻辑镜像到左右两侧
+            // LiuHaiFit(Top) 对准刘海侧、BottomFit(Bottom) 对准非刘海侧
+            if (Screen.width > Screen.height)
+            {
+                SetUIFitLandscape();
+                return;
+            }
+
             //启动刘海适配
             if (LiuHaiFit)
             {
@@ -131,6 +139,65 @@ namespace GameLogic
         }
 
         /// <summary>
+        /// 横屏适配：复用竖屏上下逻辑，映射到左右两侧。
+        /// 刘海侧套用顶部逻辑（TopSpacing 回补），非刘海侧套用底部逻辑（BottomSpacing 回补）。
+        /// 刘海在左还是右由安全区左右内缩量自动判定，无需固定横屏方向。
+        /// </summary>
+        private void SetUIFitLandscape()
+        {
+            Rect safeArea = Screen.safeArea;
+            // 左右两侧被系统安全区裁掉的量（屏幕像素）
+            float leftInset = Mathf.Max(0f, safeArea.xMin);
+            float rightInset = Mathf.Max(0f, Screen.width - safeArea.xMax);
+
+            // 刘海方向由屏幕朝向决定，而非左右内缩大小：
+            // 系统 safeArea 常左右对称收缩，用 inset 大小无法区分刘海真实方向。
+            // LandscapeLeft：竖屏顶部转到左边 → 刘海在左；LandscapeRight → 刘海在右。
+            bool notchOnLeft = Screen.orientation != ScreenOrientation.LandscapeRight;
+            float notchInset = notchOnLeft ? leftInset : rightInset;
+            float otherInset = notchOnLeft ? rightInset : leftInset;
+
+            // 刘海侧：对应竖屏 Top，安全区内缩基础上用 TopSpacing 回补（减少内缩）
+            float notchFit = 0f;
+            if (LiuHaiFit && notchInset > 0f)
+            {
+                notchFit = Mathf.Max(0f, notchInset - TopSpacing);
+            }
+
+            // 非刘海侧：对应竖屏 Bottom，安全区内缩基础上用 BottomSpacing 回补
+            float otherFit = 0f;
+            if (BottomFit && otherInset > 0f)
+            {
+                otherFit = Mathf.Abs(otherInset - BottomSpacing);
+            }
+
+            Vector2 offsetMin = m_curFitRect.offsetMin;
+            Vector2 offsetMax = m_curFitRect.offsetMax;
+
+            if (notchOnLeft)
+            {
+                // 左侧（刘海）向右内缩
+                offsetMin.x = notchFit;    
+                // 右侧（非刘海）向左内缩
+                offsetMax.x = -otherFit;   
+            }
+            else
+            {
+                // 右侧（刘海）向左内缩
+                offsetMax.x = -notchFit;  
+                // 左侧（非刘海）向右内缩
+                offsetMin.x = otherFit;    
+            }
+
+            // 横屏只处理左右，纵向保持铺满
+            offsetMin.y = 0f;
+            offsetMax.y = 0f;
+
+            m_curFitRect.offsetMin = offsetMin;
+            m_curFitRect.offsetMax = offsetMax;
+        }
+
+        /// <summary>
         /// 设置某一个节点不受m_curRect影响
         /// </summary>
         /// <param name="rect"></param>
@@ -140,16 +207,11 @@ namespace GameLogic
             {
                 return;
             }
-            // 获取当前适配 Rect 的局部位置
-            Vector3 localPos = rect.localPosition;
 
-            // 计算需要补偿的偏移量
-            // offsetMax.y 通常是负值（顶部被裁切），所以需要加上这个值来补偿
-            // offsetMin.y 通常是正值（底部被裁切），所以需要减去这个值来补偿
-            float compensationY = -m_curFitRect.offsetMax.y; // - m_curFitRect.offsetMin.y;
+            var position = rect.anchoredPosition;
 
-            // 应用补偿
-            rect.localPosition = new Vector3(localPos.x, localPos.y + compensationY, localPos.z);
+            rect.anchoredPosition = new Vector2(position.x - m_curFitRect.sizeDelta.x,
+                position.y - m_curFitRect.sizeDelta.y);
         }
 
         /// <summary>
@@ -164,16 +226,10 @@ namespace GameLogic
                 return;
             }
 
-            // 获取当前适配 Rect 的局部位置
-            Vector3 localPos = rect.localPosition;
+            var position = rect.anchoredPosition;
 
-            // 计算需要补偿的偏移量
-            // offsetMax.y 通常是负值（顶部被裁切），所以需要加上这个值来补偿
-            // offsetMin.y 通常是正值（底部被裁切），所以需要减去这个值来补偿(实测不减去这个值会更接近)
-            float compensationY = -refRect.offsetMax.y; // - m_curFitRect.offsetMin.y;
-
-            // 应用补偿
-            rect.localPosition = new Vector3(localPos.x, localPos.y + compensationY, localPos.z);
+            rect.anchoredPosition = new Vector2(position.x - refRect.sizeDelta.x,
+                position.y - refRect.sizeDelta.y);
         }
     }
 }

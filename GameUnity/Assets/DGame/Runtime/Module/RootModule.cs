@@ -49,10 +49,22 @@ namespace DGame
         [SerializeField]
         private bool neverSleep = true;
 
+        [SerializeField]
+        private ScreenOrientation screenOrientation = ScreenOrientation.Portrait;
+
         public int FrameRate
         {
             get => frameRate;
             set => Application.targetFrameRate = frameRate = value;
+        }
+
+        /// <summary>
+        /// 屏幕朝向（横竖屏）。
+        /// </summary>
+        public ScreenOrientation ScreenOrientation
+        {
+            get => screenOrientation;
+            set => Screen.orientation = screenOrientation = value;
         }
 
         public float GameSpeed
@@ -117,6 +129,7 @@ namespace DGame
             Time.timeScale = gameSpeed;
             Application.runInBackground = runInBackground;
             Screen.sleepTimeout = neverSleep ? SleepTimeout.NeverSleep : SleepTimeout.SystemSetting;
+            // Screen.orientation = screenOrientation;
 
             Application.lowMemory += OnLowMemory;
             GameTime.StartFrame();

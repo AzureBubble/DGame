@@ -12,8 +12,8 @@ namespace GameLogic
     public class HierarchyCreationHandler : Editor
     {
         private static CanvasScaler.ScaleMode UIWINDOW_DEFAULT_SCALE_MODE = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        private static int UIWINDOW_WIDTH = 750;
-        private static int UIWINDOW_HEIGHT = 1334;
+        private static int UIWINDOW_WIDTH = 1920;
+        private static int UIWINDOW_HEIGHT = 1080;
 
 #if UNITY_6000_1_OR_NEWER
         private static EntityId m_lastProcessedInstanceId;
@@ -32,7 +32,7 @@ namespace GameLogic
         private static void OnHierarchyChanged()
         {
             OnComponentCreated();
-            LoadUIWindowCamera();
+            // LoadUIWindowCamera();
         }
 
         private static void OnComponentCreated()
@@ -187,7 +187,7 @@ namespace GameLogic
 
                 if (selectedObj.TryGetComponent<Scrollbar>(out var scrollbar))
                 {
-                    selectedObj.name = "m_scrollbar";
+                    selectedObj.name = "m_scrollBar";
                     scrollbar.transition = Selectable.Transition.None;
                 }
 

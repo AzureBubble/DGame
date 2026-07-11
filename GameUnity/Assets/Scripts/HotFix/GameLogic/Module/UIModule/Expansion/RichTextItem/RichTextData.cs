@@ -48,6 +48,7 @@ namespace GameLogic
     /// <summary>
     /// 链接数据
     /// </summary>
+    [System.Serializable]
     public class LinkData
     {
         public int LinkID;                    // 链接ID

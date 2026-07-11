@@ -426,9 +426,9 @@ namespace GameLogic
         public bool ContainsWindow(Type type) => IsContains(type.FullName);
 
         private bool IsContains(string windowFullName)
-            => m_uiFullNameMap.TryGetValue(windowFullName, out _);
+            => m_uiFullNameMap.ContainsKey(windowFullName);
 
-        private bool IsContains(uint windowID) => m_uiMap.TryGetValue(windowID, out _);
+        private bool IsContains(uint windowID) => m_uiMap.ContainsKey(windowID);
 
         #endregion
 

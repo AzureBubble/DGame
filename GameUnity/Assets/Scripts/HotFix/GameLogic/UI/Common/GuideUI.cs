@@ -39,6 +39,7 @@ namespace GameLogic
         private Vector2 m_defaultTipsSize;
         private UIImage m_uiImgGuideMask;
         private GuideClickListener m_guideClickListener;
+        private EmptyGraph m_emptyGraphNextStep;
 
         protected override UILayer windowLayer => UILayer.Top;
 
@@ -52,6 +53,7 @@ namespace GameLogic
         {
             InitGuideMaskMaterial();
             InitGuideMaskImage();
+            InitEmptyGraphNextStep();
             InitTipsDefaultSize();
             HideUnusedGuideNodes();
         }
@@ -134,6 +136,15 @@ namespace GameLogic
             {
                 m_imgGuideMask.TryGetComponent(out m_uiImgGuideMask);
             }
+        }
+        
+        private void InitEmptyGraphNextStep()
+        {
+            if (m_btnNextStep == null)
+            {
+                return;
+            }
+            m_btnNextStep.TryGetComponent(out m_emptyGraphNextStep);
         }
 
         private void HideUnusedGuideNodes()

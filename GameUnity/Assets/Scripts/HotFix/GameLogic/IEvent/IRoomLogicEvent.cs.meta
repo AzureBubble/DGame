@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:GameUnity/Assets/Scripts/HotFix/GameLogic/IEvent/IRoomLogicEvent.cs.meta
 guid: c564af6a947aa0c4aaa588ccec0bdadd
+========
+guid: ed89d930a6283234796a03dfe3267cdd
+>>>>>>>> main:GameUnity/Assets/Scripts/HotFix/GameProto/LubanConfig/EGuideMaskShape.cs.meta
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2

@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:GameUnity/Assets/Scripts/HotFix/GameLogic/UI/Gen/ActorPage_Gen.g.cs.meta
 guid: be2e7a0d460267a4a8908cd3eb1069a8
+========
+guid: fb6dfa9c515a45e45a607b40624ab1d9
+>>>>>>>> main:GameUnity/Assets/Scripts/HotFix/GameProto/LubanConfig/EGuideFailurePolicy.cs.meta
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2

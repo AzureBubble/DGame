@@ -12,9 +12,6 @@ using Luban;
 
 namespace GameProto
 {
-/// <summary>
-/// 引导参数
-/// </summary>
 public partial struct GuideStepParam
 {
     

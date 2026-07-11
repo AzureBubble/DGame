@@ -91,11 +91,6 @@ public sealed partial class PathConfig : Luban.BeanBase
 
     public  void ResolveRef(Tables tables)
     {
-        MonsterPos?.ResolveRef(tables);
-        MonsterFlagPos?.ResolveRef(tables);
-        PortalPos?.ResolveRef(tables);
-        WaveArrowPos?.ResolveRef(tables);
-        foreach (var _e in PathList) { _e?.ResolveRef(tables); }
     }
 
 

@@ -258,7 +258,6 @@ public sealed partial class ChapterConfig : Luban.BeanBase
     {
         foreach (var _e in PassChapterCurrency) { _e?.ResolveRef(tables); }
         foreach (var _e in ChapterHangDropItem) { _e?.ResolveRef(tables); }
-        MainPlayerPos?.ResolveRef(tables);
     }
 
 

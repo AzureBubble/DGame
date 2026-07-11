@@ -71,8 +71,6 @@ public sealed partial class MapConfig : Luban.BeanBase
 
     public  void ResolveRef(Tables tables)
     {
-        WaveTipPos?.ResolveRef(tables);
-        BattleCenter?.ResolveRef(tables);
     }
 
 

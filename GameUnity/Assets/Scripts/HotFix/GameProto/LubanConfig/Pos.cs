@@ -12,9 +12,8 @@ using Luban;
 
 namespace GameProto
 {
-public sealed partial class Pos : Luban.BeanBase
+public partial struct Pos
 {
-    public Pos() { }
     
     public Pos(ByteBuf _buf) 
     {
@@ -36,8 +35,6 @@ public sealed partial class Pos : Luban.BeanBase
     /// </summary>
     public float Y;
 
-    public const int __ID__ = 80436;
-    public override int GetTypeId() => __ID__;
 
     public  void ResolveRef(Tables tables)
     {
@@ -46,10 +43,6 @@ public sealed partial class Pos : Luban.BeanBase
 
     public void CopyTo(ref Pos other)
     {
-        if (other == null)
-        {
-            other = new Pos();
-        }
         other.X = X;
         other.Y = Y;
     }

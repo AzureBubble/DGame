@@ -1,8 +1,9 @@
-using System;
 using DGame;
 using GameProto;
 using UnityEngine;
-using UnityEngine.EventSystems;
+#if ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
+#endif
 
 namespace GameLogic
 {
@@ -39,7 +40,13 @@ namespace GameLogic
         private Vector2 m_defaultTipsSize;
         private UIImage m_uiImgGuideMask;
         private GuideClickListener m_guideClickListener;
-        private EmptyGraph m_emptyGraphNextStep;
+        private bool m_waitWeakGuideInput;
+        private bool m_pendingWeakGuideComplete;
+        private bool m_blockWeakGuideInputUntilTimeReady;
+        private float m_guideElapsedTime;
+        private float m_guideMinTime;
+        private RectTransform m_pendingForceGuideMaskTarget;
+        private bool m_hasPendingForceGuideMaskTarget;
 
         protected override UILayer windowLayer => UILayer.Top;
 
@@ -53,7 +60,6 @@ namespace GameLogic
         {
             InitGuideMaskMaterial();
             InitGuideMaskImage();
-            InitEmptyGraphNextStep();
             InitTipsDefaultSize();
             HideUnusedGuideNodes();
         }
@@ -68,6 +74,7 @@ namespace GameLogic
                 ResetClickableArea();
                 HideTips();
                 ApplySkippable(false);
+                ResetGuideTime();
                 HideArrow();
                 return;
             }
@@ -77,6 +84,22 @@ namespace GameLogic
 
         protected override void OnUpdate()
         {
+            UpdateGuideTime();
+            UpdateWeakGuideBlocker();
+
+            if (m_pendingWeakGuideComplete)
+            {
+                m_pendingWeakGuideComplete = false;
+                m_waitWeakGuideInput = false;
+                TryCompleteCurrentStep();
+                return;
+            }
+
+            if (m_waitWeakGuideInput && IsGuideTimeReady() && HasWeakGuideInput())
+            {
+                m_pendingWeakGuideComplete = true;
+            }
+
             if (m_tweenMask && m_guideMaskMaterial != null)
             {
                 m_currentMaskSize.x = Mathf.SmoothDamp(
@@ -137,22 +160,12 @@ namespace GameLogic
                 m_imgGuideMask.TryGetComponent(out m_uiImgGuideMask);
             }
         }
-        
-        private void InitEmptyGraphNextStep()
-        {
-            if (m_btnNextStep == null)
-            {
-                return;
-            }
-            m_btnNextStep.TryGetComponent(out m_emptyGraphNextStep);
-        }
-
         private void HideUnusedGuideNodes()
         {
             m_rectTips.SetActive(false);
             m_rectArrow.SetActive(false);
             m_btnSkip.SetActive(false);
-            m_btnNextStep.SetActive(false);
+            SetNextStepButtonActive(false);
         }
 
         private GuideStepConfig ResolveGuideStep()
@@ -201,12 +214,14 @@ namespace GameLogic
                 ResetGuideMask(false);
                 ResetClickableArea();
                 ResetStepClickListener();
+                ResetGuideTime();
                 HideTips();
                 ApplySkippable(false);
                 HideArrow();
                 return;
             }
 
+            BeginGuideTime(stepCfg);
             ApplySkippable(stepCfg.Skippable);
             ApplyTips(stepCfg);
 
@@ -215,7 +230,6 @@ namespace GameLogic
                 return;
             }
 
-            m_imgGuideMask.gameObject.SetActive(true);
             var clickTarget = ApplyClickableArea(stepCfg);
             ApplyStepClickListener(stepCfg, clickTarget);
 
@@ -312,6 +326,51 @@ namespace GameLogic
             return Mathf.Clamp(minSize * MASK_RADIUS_RATIO, MIN_MASK_RADIUS, MAX_MASK_RADIUS);
         }
 
+        private void BeginGuideTime(GuideStepConfig stepCfg)
+        {
+            m_guideElapsedTime = 0f;
+            m_guideMinTime = Mathf.Max(0f, stepCfg.GuideTime);
+            m_pendingForceGuideMaskTarget = null;
+            m_hasPendingForceGuideMaskTarget = false;
+        }
+
+        private void ResetGuideTime()
+        {
+            m_guideElapsedTime = 0f;
+            m_guideMinTime = 0f;
+            m_pendingForceGuideMaskTarget = null;
+            m_hasPendingForceGuideMaskTarget = false;
+        }
+
+        private void UpdateGuideTime()
+        {
+            if (m_guideElapsedTime < m_guideMinTime)
+            {
+                m_guideElapsedTime = Mathf.Min(m_guideElapsedTime + Time.deltaTime, m_guideMinTime);
+            }
+
+            if (IsGuideTimeReady())
+            {
+                ApplyPendingForceGuideMaskTarget();
+            }
+        }
+
+        private bool IsGuideTimeReady()
+        {
+            return m_guideElapsedTime >= m_guideMinTime;
+        }
+
+        private void ApplyPendingForceGuideMaskTarget()
+        {
+            if (!m_hasPendingForceGuideMaskTarget || m_uiImgGuideMask == null)
+            {
+                return;
+            }
+
+            m_uiImgGuideMask.SetTarget(m_pendingForceGuideMaskTarget);
+            m_hasPendingForceGuideMaskTarget = false;
+        }
+
         private void ApplyMaskOrigin(Vector2 maskSize)
         {
             if (m_guideMaskMaterial == null)
@@ -340,7 +399,7 @@ namespace GameLogic
             m_textTips.text = TextConfigMgr.Instance.GetText(stepCfg.TipTextId);
             m_rectTips.sizeDelta = GetTipsSize(stepCfg);
             m_rectTips.anchoredPosition = GetTipsPosition(stepCfg);
-            m_rectTips.gameObject.SetActive(true);
+            m_rectTips.SetActive(true);
         }
 
         private Vector2 GetTipsSize(GuideStepConfig stepCfg)
@@ -407,15 +466,24 @@ namespace GameLogic
                 return null;
             }
 
-            var target = GetClickableTarget(stepCfg);
-            if (m_uiImgGuideMask != null)
+            var target = ResolveGuideTarget(stepCfg);
+            if (stepCfg.GuideType == EGuideType.WeakGuide)
             {
-                m_imgGuideMask.raycastTarget = true;
-                m_uiImgGuideMask.SetTarget(target);
+                m_imgGuideMask.SetActive(false);
+                m_imgGuideMask.raycastTarget = false;
+                m_uiImgGuideMask?.SetTarget(null);
                 return target;
             }
 
-            m_imgGuideMask.raycastTarget = target == null;
+            m_imgGuideMask.SetActive(true);
+            if (m_uiImgGuideMask != null)
+            {
+                m_imgGuideMask.raycastTarget = true;
+                SetForceGuideMaskTarget(GetForceGuideMaskTarget(stepCfg, target));
+                return target;
+            }
+
+            m_imgGuideMask.raycastTarget = GetForceGuideMaskTarget(stepCfg, target) == null;
             return target;
         }
 
@@ -423,16 +491,41 @@ namespace GameLogic
         {
             ResetStepClickListener();
 
+            if (stepCfg.GuideType == EGuideType.WeakGuide)
+            {
+                BeginWeakGuideInput();
+                return;
+            }
+
             switch (stepCfg.StepType)
             {
                 case EGuideStepType.Explain:
                 case EGuideStepType.ClickAnywhere:
-                    m_btnNextStep.SetActive(true);
+                    SetNextStepButtonActive(true);
                     break;
                 case EGuideStepType.ClickTarget:
                     BindTargetClickListener(clickTarget);
                     break;
             }
+        }
+
+        private void BeginWeakGuideInput()
+        {
+            m_waitWeakGuideInput = true;
+            m_pendingWeakGuideComplete = false;
+            m_blockWeakGuideInputUntilTimeReady = !IsGuideTimeReady();
+            SetNextStepButtonActive(m_blockWeakGuideInputUntilTimeReady, false);
+        }
+
+        private void UpdateWeakGuideBlocker()
+        {
+            if (!m_blockWeakGuideInputUntilTimeReady || !IsGuideTimeReady())
+            {
+                return;
+            }
+
+            m_blockWeakGuideInputUntilTimeReady = false;
+            SetNextStepButtonActive(false);
         }
 
         private void BindTargetClickListener(RectTransform clickTarget)
@@ -453,16 +546,19 @@ namespace GameLogic
 
         private void OnGuideTargetClicked()
         {
-            ResetStepClickListener();
-            GameModule.GuideModule.CompleteCurrentStep();
+            TryCompleteCurrentStep();
         }
 
         private void ResetStepClickListener()
         {
             if (m_btnNextStep != null)
             {
-                m_btnNextStep.SetActive(false);
+                SetNextStepButtonActive(false);
             }
+
+            m_waitWeakGuideInput = false;
+            m_pendingWeakGuideComplete = false;
+            m_blockWeakGuideInputUntilTimeReady = false;
 
             if (m_guideClickListener == null)
             {
@@ -474,7 +570,37 @@ namespace GameLogic
             m_guideClickListener = null;
         }
 
-        private RectTransform GetClickableTarget(GuideStepConfig stepCfg)
+        private void SetForceGuideMaskTarget(RectTransform target)
+        {
+            if (m_uiImgGuideMask == null)
+            {
+                return;
+            }
+
+            if (IsGuideTimeReady())
+            {
+                m_uiImgGuideMask.SetTarget(target);
+                return;
+            }
+
+            m_uiImgGuideMask.SetTarget(null);
+            m_pendingForceGuideMaskTarget = target;
+            m_hasPendingForceGuideMaskTarget = true;
+        }
+
+        private bool TryCompleteCurrentStep()
+        {
+            if (!IsGuideTimeReady())
+            {
+                return false;
+            }
+
+            ResetStepClickListener();
+            GameModule.GuideModule.CompleteCurrentStep();
+            return true;
+        }
+
+        private RectTransform GetForceGuideMaskTarget(GuideStepConfig stepCfg, RectTransform clickTarget)
         {
             switch (stepCfg.StepType)
             {
@@ -482,10 +608,16 @@ namespace GameLogic
                 case EGuideStepType.ClickAnywhere:
                     return m_imgGuideMask.rectTransform;
                 case EGuideStepType.ClickTarget:
-                    return ResolveClickTarget(stepCfg);
+                    return clickTarget;
                 default:
                     return null;
             }
+        }
+
+        private RectTransform ResolveGuideTarget(GuideStepConfig stepCfg)
+        {
+            return stepCfg.StepType == EGuideStepType.ClickTarget
+                ? ResolveClickTarget(stepCfg) : null;
         }
 
         private RectTransform ResolveClickTarget(GuideStepConfig stepCfg)
@@ -537,6 +669,8 @@ namespace GameLogic
 
             m_imgGuideMask.raycastTarget = true;
             m_uiImgGuideMask?.SetTarget(null);
+            m_pendingForceGuideMaskTarget = null;
+            m_hasPendingForceGuideMaskTarget = false;
         }
 
         private void ApplyArrow(GuideStepConfig stepCfg)
@@ -651,6 +785,17 @@ namespace GameLogic
             m_btnSkip.SetActive(skippable);
         }
 
+        private void SetNextStepButtonActive(bool active, bool interactable = true)
+        {
+            if (m_btnNextStep == null)
+            {
+                return;
+            }
+
+            m_btnNextStep.interactable = interactable;
+            m_btnNextStep.SetActive(active);
+        }
+
         private void ResetGuideMask(bool keepSolidMask)
         {
             m_tweenMask = false;
@@ -670,18 +815,76 @@ namespace GameLogic
 
         private static Vector2 ToVector2(Pos pos) => new Vector2(pos.X, pos.Y);
 
+        private static bool HasWeakGuideInput()
+        {
+#if ENABLE_INPUT_SYSTEM
+            if (Keyboard.current != null && Keyboard.current.anyKey.wasPressedThisFrame)
+            {
+                return true;
+            }
+
+            if (Mouse.current != null &&
+                (Mouse.current.leftButton.wasPressedThisFrame ||
+                 Mouse.current.rightButton.wasPressedThisFrame ||
+                 Mouse.current.middleButton.wasPressedThisFrame))
+            {
+                return true;
+            }
+
+            if (Touchscreen.current != null)
+            {
+                foreach (var touchControl in Touchscreen.current.touches)
+                {
+                    if (touchControl.press.wasPressedThisFrame)
+                    {
+                        return true;
+                    }
+                }
+            }
+#endif
+            if (Input.GetMouseButtonDown(0) ||
+                Input.GetMouseButtonDown(1) ||
+                Input.GetMouseButtonDown(2))
+            {
+                return true;
+            }
+
+            if (Input.touchCount > 0)
+            {
+                for (int i = 0; i < Input.touchCount; i++)
+                {
+                    if (Input.GetTouch(i).phase == UnityEngine.TouchPhase.Began)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            if (Input.anyKeyDown)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
         #endregion
 
         #region 事件
 
         private partial void OnClickSkipBtn()
         {
+            if (!IsGuideTimeReady())
+            {
+                return;
+            }
+
             GameModule.GuideModule.SkipCurrentGuide();
         }
 
         private partial void OnClickNextStepBtn()
         {
-            GameModule.GuideModule.CompleteCurrentStep();
+            TryCompleteCurrentStep();
         }
 
         #endregion

@@ -65,6 +65,7 @@ namespace GameProto
             }
             TextAsset textAsset = m_resourceModule.LoadAsset<TextAsset>(file);
             byte[] bytes = textAsset.bytes;
+            m_resourceModule.UnloadAsset(textAsset);
             return new ByteBuf(bytes);
         }
     }

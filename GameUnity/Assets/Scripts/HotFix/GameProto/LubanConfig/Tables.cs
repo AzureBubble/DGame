@@ -143,6 +143,48 @@ namespace GameProto
                 m_TbGmConfig.ResolveRef(this);
             }
         }
+        /// <summary>
+        /// 新手引导组配置表
+        /// </summary>
+        private TbGuideGroupConfig m_TbGuideGroupConfig;
+        public TbGuideGroupConfig TbGuideGroupConfig 
+        {
+            get
+            {
+                if (m_TbGuideGroupConfig == null)
+                {
+                    m_TbGuideGroupConfig = new TbGuideGroupConfig(m_defaultLoader("tbguidegroupconfig"));
+                    m_TbGuideGroupConfig.ResolveRef(this);
+                }
+                return m_TbGuideGroupConfig;
+            }
+            set
+            {
+                m_TbGuideGroupConfig = value;
+                m_TbGuideGroupConfig.ResolveRef(this);
+            }
+        }
+        /// <summary>
+        /// 新手引导步骤配置表
+        /// </summary>
+        private TbGuideStepConfig m_TbGuideStepConfig;
+        public TbGuideStepConfig TbGuideStepConfig 
+        {
+            get
+            {
+                if (m_TbGuideStepConfig == null)
+                {
+                    m_TbGuideStepConfig = new TbGuideStepConfig(m_defaultLoader("tbguidestepconfig"));
+                    m_TbGuideStepConfig.ResolveRef(this);
+                }
+                return m_TbGuideStepConfig;
+            }
+            set
+            {
+                m_TbGuideStepConfig = value;
+                m_TbGuideStepConfig.ResolveRef(this);
+            }
+        }
 
         #endregion
 
@@ -166,6 +208,8 @@ namespace GameProto
             m_TbModelConfig = null;
             m_TbEffectConfig = null;
             m_TbGmConfig = null;
+            m_TbGuideGroupConfig = null;
+            m_TbGuideStepConfig = null;
         }
 
         public void Init(){}

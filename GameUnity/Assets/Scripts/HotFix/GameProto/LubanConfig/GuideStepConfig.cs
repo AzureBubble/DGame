@@ -27,6 +27,8 @@ public sealed partial class GuideStepConfig : Luban.BeanBase
         if(_buf.ReadBool()){ StepParam = global::GameProto.GuideStepParam.DeserializeGuideStepParam(_buf); } else { StepParam = null; }
         Skippable = _buf.ReadBool();
         SkipScope = (EGuideSkipScope)_buf.ReadInt();
+        GuideType = (EGuideType)_buf.ReadInt();
+        GuideTime = _buf.ReadFloat();
         InputMode = (EGuideInputMode)_buf.ReadInt();
         MaskShape = (EGuideMaskShape)_buf.ReadInt();
         MaskPos = global::GameProto.Pos.DeserializePos(_buf);
@@ -86,6 +88,14 @@ public sealed partial class GuideStepConfig : Luban.BeanBase
     /// 跳过范围
     /// </summary>
     public EGuideSkipScope SkipScope;
+    /// <summary>
+    /// 引导类型
+    /// </summary>
+    public EGuideType GuideType;
+    /// <summary>
+    /// 引导时间
+    /// </summary>
+    public float GuideTime;
     /// <summary>
     /// 输入模式
     /// </summary>
@@ -174,6 +184,8 @@ public sealed partial class GuideStepConfig : Luban.BeanBase
         other.StepParam = StepParam;
         other.Skippable = Skippable;
         other.SkipScope = SkipScope;
+        other.GuideType = GuideType;
+        other.GuideTime = GuideTime;
         other.InputMode = InputMode;
         other.MaskShape = MaskShape;
         other.MaskPos = MaskPos;
@@ -204,6 +216,8 @@ public sealed partial class GuideStepConfig : Luban.BeanBase
         + "StepParam:" + StepParam + ","
         + "Skippable:" + Skippable + ","
         + "SkipScope:" + SkipScope + ","
+        + "GuideType:" + GuideType + ","
+        + "GuideTime:" + GuideTime + ","
         + "InputMode:" + InputMode + ","
         + "MaskShape:" + MaskShape + ","
         + "MaskPos:" + MaskPos + ","

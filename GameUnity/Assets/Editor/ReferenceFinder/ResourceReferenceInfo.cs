@@ -12,6 +12,8 @@ using Object = UnityEngine.Object;
 using TreeViewState = UnityEditor.IMGUI.Controls.TreeViewState<int>;
 #endif
 
+#pragma warning disable UAC1001
+
 namespace DGame
 {
     internal sealed class ResourceReferenceInfo : EditorWindow

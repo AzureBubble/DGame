@@ -426,9 +426,9 @@ namespace GameLogic
         public bool ContainsWindow(Type type) => IsContains(type.FullName);
 
         private bool IsContains(string windowFullName)
-            => m_uiFullNameMap.TryGetValue(windowFullName, out UIWindow window);
+            => m_uiFullNameMap.TryGetValue(windowFullName, out _);
 
-        private bool IsContains(uint windowID) => m_uiMap.TryGetValue(windowID, out UIWindow window);
+        private bool IsContains(uint windowID) => m_uiMap.TryGetValue(windowID, out _);
 
         #endregion
 
@@ -468,10 +468,7 @@ namespace GameLogic
 
         private void ShowWindowImp<T>(bool isAsync, params System.Object[] userDatas) where T : UIWindow, new()
         {
-            Type type = typeof(T);
-            string windowName = type.FullName;
-
-            if (!TryGetWindow(windowName, out UIWindow window, userDatas))
+            if (!TryGetWindow<T>(out UIWindow window, userDatas))
             {
                 window = InternalCreateWindow<T>();
                 Push(window);
@@ -652,9 +649,34 @@ namespace GameLogic
             return false;
         }
 
+        public bool TryGetWindow(string windowName, out UIWindow window)
+            => (window = GetWindow(windowName)) != null;
+        
         public UIWindow GetWindow<T>() where T : UIWindow, new() => GetWindow(typeof(T).FullName);
 
-        private UIWindow GetWindow(string windowName) => m_uiFullNameMap.GetValueOrDefault(windowName);
+        public UIWindow GetWindow(string windowName)
+        {
+            if (string.IsNullOrEmpty(windowName))
+            {
+                return null;
+            }
+
+            if (m_uiFullNameMap.TryGetValue(windowName, out var window))
+            {
+                return window;
+            }
+
+            if (windowName.IndexOf('.') < 0)
+            {
+                var namespaceName = typeof(UIModule).Namespace;
+                if (!string.IsNullOrEmpty(namespaceName))
+                {
+                    return m_uiFullNameMap.GetValueOrDefault($"{namespaceName}.{windowName}");
+                }
+            }
+
+            return null;
+        }
 
         private UIWindow GetWindow(uint windowID) => m_uiMap.GetValueOrDefault(windowID);
 

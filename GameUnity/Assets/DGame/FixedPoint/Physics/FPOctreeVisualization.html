@@ -1,0 +1,720 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>FPOctree 碰撞逻辑可视化</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --ink: #1d2421;
+            --muted: #64706a;
+            --paper: #f4f6f3;
+            --surface: #ffffff;
+            --line: #cbd2cc;
+            --dark: #202724;
+            --cyan: #1d8f9b;
+            --amber: #d18a22;
+            --coral: #cf5747;
+            --green: #4f8b55;
+            --violet: #7565a8;
+        }
+
+        * { box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            margin: 0;
+            min-width: 320px;
+            color: var(--ink);
+            background: var(--paper);
+            font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+            letter-spacing: 0;
+        }
+
+        button, input { font: inherit; }
+
+        .topbar {
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 10px clamp(16px, 4vw, 56px);
+            color: #fff;
+            background: var(--dark);
+            border-bottom: 3px solid var(--amber);
+        }
+
+        .brand { min-width: 0; }
+        .brand h1 { margin: 0; font-size: 20px; font-weight: 700; }
+        .brand p { margin: 3px 0 0; color: #bdc7c1; font-size: 12px; }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 0 0 auto;
+            color: #dce5df;
+            font-size: 12px;
+        }
+
+        .status-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: #77c281;
+            box-shadow: 0 0 0 4px rgba(119, 194, 129, .15);
+        }
+
+        main { width: 100%; }
+
+        .workbench {
+            min-height: calc(100vh - 60px);
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+            background: var(--surface);
+            border-bottom: 1px solid var(--line);
+        }
+
+        .stage {
+            min-width: 0;
+            padding: clamp(14px, 2.5vw, 34px);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: #eef1ed;
+        }
+
+        .stage-head {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .stage-head h2 { margin: 0; font-size: 17px; }
+        .stage-head span { color: var(--muted); font-size: 12px; }
+
+        .canvas-shell {
+            position: relative;
+            width: 100%;
+            flex: 1 1 auto;
+            min-height: 390px;
+            max-height: 720px;
+            aspect-ratio: 16 / 10;
+            overflow: hidden;
+            background: #161c19;
+            border: 1px solid #303936;
+            border-radius: 6px;
+        }
+
+        canvas { display: block; width: 100%; height: 100%; }
+
+        .canvas-label {
+            position: absolute;
+            left: 14px;
+            top: 14px;
+            max-width: min(420px, calc(100% - 28px));
+            padding: 8px 10px;
+            color: #e9efeb;
+            background: rgba(24, 31, 28, .88);
+            border-left: 3px solid var(--cyan);
+            font-size: 12px;
+            line-height: 1.55;
+            pointer-events: none;
+        }
+
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px 18px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .legend span { display: inline-flex; align-items: center; gap: 6px; }
+        .swatch { width: 11px; height: 11px; border-radius: 2px; }
+
+        .control-panel {
+            min-width: 0;
+            padding: 24px 22px;
+            border-left: 1px solid var(--line);
+            background: #fff;
+        }
+
+        .control-panel h2 { margin: 0 0 6px; font-size: 17px; }
+        .control-panel > p { margin: 0 0 20px; color: var(--muted); font-size: 13px; line-height: 1.65; }
+
+        .tabs {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            border: 1px solid #aeb8b1;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .tab {
+            min-height: 38px;
+            border: 0;
+            border-right: 1px solid #aeb8b1;
+            color: #3c4741;
+            background: #fff;
+            cursor: pointer;
+        }
+
+        .tab:last-child { border-right: 0; }
+        .tab[aria-selected="true"] { color: #fff; background: var(--dark); }
+        .tab:focus-visible, .icon-button:focus-visible { outline: 3px solid rgba(29, 143, 155, .35); outline-offset: 2px; }
+
+        .step-title {
+            margin: 24px 0 6px;
+            color: var(--cyan);
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .step-copy {
+            min-height: 82px;
+            margin: 0;
+            font-size: 14px;
+            line-height: 1.75;
+        }
+
+        .formula {
+            margin: 16px 0;
+            padding: 12px;
+            color: #e7eee9;
+            background: var(--dark);
+            border-radius: 5px;
+            font-family: Consolas, monospace;
+            font-size: 12px;
+            line-height: 1.65;
+            overflow-wrap: anywhere;
+        }
+
+        .transport {
+            display: grid;
+            grid-template-columns: 40px 1fr auto;
+            align-items: center;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .icon-button {
+            width: 40px;
+            height: 40px;
+            border: 1px solid #9ca8a0;
+            border-radius: 5px;
+            color: var(--ink);
+            background: #fff;
+            cursor: pointer;
+            font-size: 17px;
+        }
+
+        .icon-button:hover { background: #edf2ee; }
+
+        input[type="range"] { width: 100%; accent-color: var(--cyan); }
+        .step-count { min-width: 42px; color: var(--muted); font-size: 12px; text-align: right; }
+
+        .facts {
+            margin-top: 22px;
+            border-top: 1px solid var(--line);
+        }
+
+        .fact {
+            display: grid;
+            grid-template-columns: 86px 1fr;
+            gap: 12px;
+            padding: 11px 0;
+            border-bottom: 1px solid #e2e6e2;
+            font-size: 12px;
+            line-height: 1.55;
+        }
+
+        .fact dt { color: var(--muted); }
+        .fact dd { margin: 0; font-family: Consolas, "Microsoft YaHei", monospace; }
+
+        .band { padding: 52px clamp(18px, 6vw, 84px); }
+        .band:nth-of-type(even) { background: #fff; }
+        .inner { max-width: 1180px; margin: 0 auto; }
+        .section-head { display: grid; grid-template-columns: minmax(220px, .7fr) minmax(0, 1.3fr); gap: 36px; margin-bottom: 30px; }
+        .section-head h2 { margin: 0; font-size: 24px; }
+        .section-head p { margin: 0; color: var(--muted); line-height: 1.8; }
+
+        .flow {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            border-top: 1px solid var(--line);
+            border-bottom: 1px solid var(--line);
+        }
+
+        .flow-step { position: relative; min-height: 164px; padding: 22px 18px; border-right: 1px solid var(--line); }
+        .flow-step:last-child { border-right: 0; }
+        .flow-step b { display: block; margin-bottom: 12px; color: var(--cyan); font-size: 12px; }
+        .flow-step h3 { margin: 0 0 8px; font-size: 15px; }
+        .flow-step p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.65; }
+
+        .logic-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); }
+        .logic-item { min-height: 150px; padding: 22px; background: #fff; }
+        .logic-item h3 { margin: 0 0 9px; font-size: 15px; }
+        .logic-item p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.75; }
+        .logic-item code { color: #8f4e17; font-family: Consolas, monospace; }
+
+        .matrix { width: 100%; border-collapse: collapse; background: #fff; font-size: 13px; }
+        .matrix th, .matrix td { padding: 13px 14px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+        .matrix th { color: #fff; background: var(--dark); font-weight: 600; }
+        .matrix td:first-child { font-family: Consolas, monospace; font-weight: 700; }
+        .yes { color: var(--green); font-weight: 700; }
+        .partial { color: #a86816; font-weight: 700; }
+
+        .review { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 34px; }
+        .review-item { padding: 0 0 18px 18px; border-left: 3px solid var(--green); border-bottom: 1px solid var(--line); }
+        .review-item.pending { border-left-color: var(--amber); }
+        .review-item h3 { margin: 0 0 7px; font-size: 15px; }
+        .review-item p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.7; }
+
+        footer { padding: 24px; color: #bbc5bf; background: var(--dark); text-align: center; font-size: 12px; }
+
+        @media (max-width: 920px) {
+            .workbench { grid-template-columns: 1fr; }
+            .canvas-shell { min-height: 330px; }
+            .control-panel { border-left: 0; border-top: 1px solid var(--line); }
+            .flow { grid-template-columns: 1fr; }
+            .flow-step { min-height: auto; border-right: 0; border-bottom: 1px solid var(--line); }
+            .flow-step:last-child { border-bottom: 0; }
+        }
+
+        @media (max-width: 640px) {
+            .topbar { align-items: flex-start; }
+            .brand p { display: none; }
+            .status { padding-top: 4px; }
+            .stage { padding: 12px; }
+            .stage-head span { display: none; }
+            .canvas-shell { min-height: 290px; aspect-ratio: 4 / 3; }
+            .control-panel { padding: 20px 16px; }
+            .section-head { grid-template-columns: 1fr; gap: 12px; }
+            .logic-grid, .review { grid-template-columns: 1fr; }
+            .band { padding: 40px 16px; }
+            .matrix-wrap { overflow-x: auto; }
+            .matrix { min-width: 720px; }
+            .fact { grid-template-columns: 74px 1fr; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+        }
+    </style>
+</head>
+<body>
+    <header class="topbar">
+        <div class="brand">
+            <h1>FPOctree 碰撞逻辑</h1>
+            <p>从空间划分、碰撞器归属到查询剪枝的完整运行模型</p>
+        </div>
+        <div class="status"><span class="status-dot"></span><span>源码模型 · 单线程查询</span></div>
+    </header>
+
+    <main>
+        <section class="workbench" aria-label="八叉树交互演示">
+            <div class="stage">
+                <div class="stage-head">
+                    <h2>三维节点的双 Z 层投影</h2>
+                    <span>左侧为 Z-，右侧为 Z+，合计八个子节点</span>
+                </div>
+                <div class="canvas-shell">
+                    <canvas id="octreeCanvas" aria-label="八叉树划分和碰撞查询动画"></canvas>
+                    <div class="canvas-label" id="canvasLabel"></div>
+                </div>
+                <div class="legend">
+                    <span><i class="swatch" style="background:#1d8f9b"></i>正在访问</span>
+                    <span><i class="swatch" style="background:#d18a22"></i>节点内碰撞器</span>
+                    <span><i class="swatch" style="background:#cf5747"></i>精确命中</span>
+                    <span><i class="swatch" style="background:#4f8b55"></i>非空分支</span>
+                </div>
+            </div>
+
+            <aside class="control-panel">
+                <h2>算法阶段</h2>
+                <p>动画对应当前源码的真实决策顺序。二维画布同时展示前后两个 Z 层，因此每次划分仍然是八叉而不是四叉。</p>
+                <div class="tabs" role="tablist" aria-label="算法阶段">
+                    <button class="tab" role="tab" data-mode="split" aria-selected="true">划分</button>
+                    <button class="tab" role="tab" data-mode="insert" aria-selected="false">归属</button>
+                    <button class="tab" role="tab" data-mode="query" aria-selected="false">查询</button>
+                </div>
+                <div class="step-title" id="stepTitle"></div>
+                <p class="step-copy" id="stepCopy"></p>
+                <div class="formula" id="formula"></div>
+                <div class="transport">
+                    <button class="icon-button" id="playButton" type="button" title="暂停动画" aria-label="暂停动画">&#10074;&#10074;</button>
+                    <input id="stepRange" type="range" min="0" max="3" value="0" step="1" aria-label="动画步骤">
+                    <span class="step-count" id="stepCount"></span>
+                </div>
+                <dl class="facts">
+                    <div class="fact"><dt>根半范围</dt><dd>2^(floor(log2(size)) - 1)</dd></div>
+                    <div class="fact"><dt>子节点中心</dt><dd>parent.pos ± parent.halfSize / 2</dd></div>
+                    <div class="fact"><dt>下沉条件</dt><dd>Collider AABB 完整包含于 Child AABB</dd></div>
+                    <div class="fact"><dt>查询剪枝</dt><dd>colliderCount &gt; 0 且 Query ∩ Node AABB</dd></div>
+                </dl>
+            </aside>
+        </section>
+
+        <section class="band">
+            <div class="inner">
+                <div class="section-head">
+                    <h2>一次查询如何完成</h2>
+                    <p>八叉树不负责替代形状相交算法。它的职责是先快速排除绝大多数空间，再把少量候选交给定点数精确检测。</p>
+                </div>
+                <div class="flow">
+                    <div class="flow-step"><b>01</b><h3>初始化查询</h3><p>清空复用列表，重置读取索引，将根节点加入待访问列表，并生成新的 castIndex。</p></div>
+                    <div class="flow-step"><b>02</b><h3>处理本节点</h3><p>按球、AABB、OBB、胶囊等集合扫描节点直接持有的碰撞器。</p></div>
+                    <div class="flow-step"><b>03</b><h3>过滤候选</h3><p>依次检查 enabled、trigger、dynamic、layerMask 和本次查询去重标记。</p></div>
+                    <div class="flow-step"><b>04</b><h3>进入子节点</h3><p>只有非空子树且查询体与子节点 AABB 相交时，才加入 openList。</p></div>
+                    <div class="flow-step"><b>05</b><h3>精确相交</h3><p>候选数量已经很少，再调用对应形状组合的定点数相交函数生成结果。</p></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="band">
+            <div class="inner">
+                <div class="section-head">
+                    <h2>两个尺寸，各司其职</h2>
+                    <p><code>size</code> 与 <code>halfSize</code> 不是简单的完整边长和半边长字段。前者记录逻辑层级尺寸，后者决定节点真实 AABB。</p>
+                </div>
+                <div class="logic-grid">
+                    <article class="logic-item"><h3>逻辑尺寸 size</h3><p>根节点直接保存初始化参数；创建子节点时使用 <code>node.size / 2</code>。它还被 <code>IsOutOfBound</code> 用作逻辑边界。</p></article>
+                    <article class="logic-item"><h3>AABB 半范围 halfSize</h3><p>根节点通过二进制指数算法计算；子节点使用 <code>node.halfSize / 2</code>，并据此生成 Min 与 Max。</p></article>
+                    <article class="logic-item"><h3>小碰撞器下沉</h3><p>碰撞器 AABB 如果能被某一个子节点 AABB 完整容纳，就继续向该子节点搜索，直到叶节点。</p></article>
+                    <article class="logic-item"><h3>跨边界对象留在父节点</h3><p>物体只要跨越任一子节点分界，就保留在当前父节点。这样只存一份，不需要把同一个碰撞器复制到多个子节点。</p></article>
+                </div>
+            </div>
+        </section>
+
+        <section class="band">
+            <div class="inner">
+                <div class="section-head">
+                    <h2>当前查询能力</h2>
+                    <p>方法名不代表所有形状都已覆盖。表格按当前 <code>FPOctree</code> 源码列出真实处理范围，避免把历史未实现能力误认为完整支持。</p>
+                </div>
+                <div class="matrix-wrap">
+                    <table class="matrix">
+                        <thead><tr><th>查询方法</th><th>结果</th><th>当前处理形状</th><th>备注</th></tr></thead>
+                        <tbody>
+                            <tr><td>OverlayBoxCollision</td><td>FPCollision 列表</td><td class="partial">仅 Sphere</td><td>不是全形状 Box Overlap</td></tr>
+                            <tr><td>OverlaySphereCollision</td><td>复用结果列表</td><td class="yes">6 类基础形状</td><td>支持 dynamic 精确筛选</td></tr>
+                            <tr><td>OverlapSphere</td><td>复用 Collider 列表</td><td class="yes">6 类基础形状</td><td>不生成接触信息</td></tr>
+                            <tr><td>OverlayAACapsuleCollision</td><td>复用结果列表</td><td class="yes">6 类基础形状</td><td>胶囊查询的精确碰撞</td></tr>
+                            <tr><td>OverlapSphereNonAlloc</td><td>调用方数组</td><td class="partial">Sphere、AABB</td><td>数组写满立即返回</td></tr>
+                            <tr><td>OverlapAABB</td><td>Collider 列表</td><td class="partial">Sphere、AABB、OBB</td><td>会创建新的结果列表</td></tr>
+                            <tr><td>OverlayCharacterWith*</td><td>复用结果列表</td><td class="yes">Character</td><td>角色与刚体的专用路径</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section class="band">
+            <div class="inner">
+                <div class="section-head">
+                    <h2>本次逻辑审查</h2>
+                    <p>以下项目来自实际遍历状态和调用链检查。绿色项已在 <code>FPOctree</code> 内修复，黄色项需要结合生命周期或上层 API 单独处理。</p>
+                </div>
+                <div class="review">
+                    <article class="review-item"><h3>查询状态串联</h3><p>每次查询现在都会清空 openList 并重置 openListIndex，NonAlloc 提前退出不会污染下一次查询。</p></article>
+                    <article class="review-item"><h3>NonAlloc 数组越界</h3><p>在节点内部写满结果数组时立即返回，不再等到下一轮 while 才检查容量。</p></article>
+                    <article class="review-item"><h3>角色查询空引用</h3><p>角色集合和叶节点子数组都增加空值分支，空节点可以正常被遍历和跳过。</p></article>
+                    <article class="review-item"><h3>角色球体粗测反向</h3><p>AABB 不相交时直接跳过；只有粗测相交才进入 Sphere 与 AACapsule 的精确检测。</p></article>
+                    <article class="review-item"><h3>碰撞器注销链路</h3><p>OnDestroy 现在会经由 FPPhysicsContext 清理关联刚体、角色更新项、中央列表和所属节点，并同步递减祖先 colliderCount。</p></article>
+                    <article class="review-item"><h3>上层胶囊高度参数</h3><p>FPPhysicsContext 现在会把实际 height 转发给 FPOctree，节点粗检测范围不再误用 radius。</p></article>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>模型依据：DGame.FixedPoint.Physics / Core / FPOctree.cs</footer>
+
+    <script>
+        (() => {
+            const canvas = document.getElementById('octreeCanvas');
+            const ctx = canvas.getContext('2d');
+            const label = document.getElementById('canvasLabel');
+            const title = document.getElementById('stepTitle');
+            const copy = document.getElementById('stepCopy');
+            const formula = document.getElementById('formula');
+            const range = document.getElementById('stepRange');
+            const count = document.getElementById('stepCount');
+            const play = document.getElementById('playButton');
+            const tabs = [...document.querySelectorAll('.tab')];
+            const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+            const content = {
+                split: [
+                    ['根节点', '初始化参数先转换为根节点的 AABB 半范围。根节点中心固定在原点。', 'halfSize = 2^(floor(log2(size)) - 1)'],
+                    ['分成八个子节点', 'X、Y、Z 各分为正负两侧，组合成 2 × 2 × 2 共八个子节点。', 'child.pos = parent.pos ± parent.halfSize / 2'],
+                    ['前后两个 Z 层', '画布将 Z- 与 Z+ 并排展开。每层包含四个 XY 象限，合起来仍是八个立方体。', 'child.halfSize = parent.halfSize / 2'],
+                    ['递归到叶节点', '只有新子节点的 halfSize 大于最小阈值时才继续划分，最终形成固定深度的完整树。', 'continue when child.halfSize > minHalfSize']
+                ],
+                insert: [
+                    ['从根节点开始', '碰撞器更新 AABB 后，从根节点检查它能否被某个子节点完整容纳。', 'node = root'],
+                    ['完整容纳才下沉', '小碰撞器的 AABB 完整位于一个子节点内，因此继续进入更深层。', 'IsAABBInsideAABB(collider, child) == true'],
+                    ['跨边界保留在父节点', '大碰撞器跨过中心分界，没有任何单个子节点能完整容纳，于是只存放在当前父节点。', 'no child contains collider -> AddToImpactNode(parent)'],
+                    ['向祖先累计计数', '集合添加成功后，从所属节点一路向父节点递增 colliderCount，供查询快速跳过空分支。', 'while (node != null) node.colliderCount++']
+                ],
+                query: [
+                    ['独立查询状态', '查询先清空复用列表并加入根节点，避免上一次提前退出留下的节点干扰本次结果。', 'openList.Clear(); openList.Add(root)'],
+                    ['节点 AABB 粗检测', '查询体只进入几何范围相交的子节点，青色区域表示当前正在访问。', 'QueryVolume intersects ChildAABB'],
+                    ['空分支剪枝', 'colliderCount 为 0 的子树直接跳过；绿色标记表示确实包含碰撞器的分支。', 'child.colliderCount > 0'],
+                    ['形状精确检测', '对少量候选执行 Sphere、AABB、OBB、Capsule 等定点数相交算法，红色对象为最终命中。', 'broad phase -> narrow phase -> result']
+                ]
+            };
+
+            let mode = 'split';
+            let step = 0;
+            let playing = !reducedMotion;
+            let lastAdvance = performance.now();
+            let phase = 0;
+
+            function resize() {
+                const rect = canvas.getBoundingClientRect();
+                const dpr = Math.min(window.devicePixelRatio || 1, 2);
+                canvas.width = Math.max(1, Math.round(rect.width * dpr));
+                canvas.height = Math.max(1, Math.round(rect.height * dpr));
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            }
+
+            function updateText() {
+                const data = content[mode][step];
+                title.textContent = data[0];
+                copy.textContent = data[1];
+                formula.textContent = data[2];
+                label.textContent = data[1];
+                range.value = String(step);
+                count.textContent = `${step + 1} / 4`;
+                play.innerHTML = playing ? '&#10074;&#10074;' : '&#9654;';
+                play.title = playing ? '暂停动画' : '播放动画';
+                play.setAttribute('aria-label', play.title);
+            }
+
+            function roundedRect(x, y, w, h, radius) {
+                const r = Math.min(radius, w / 2, h / 2);
+                ctx.beginPath();
+                ctx.moveTo(x + r, y);
+                ctx.arcTo(x + w, y, x + w, y + h, r);
+                ctx.arcTo(x + w, y + h, x, y + h, r);
+                ctx.arcTo(x, y + h, x, y, r);
+                ctx.arcTo(x, y, x + w, y, r);
+                ctx.closePath();
+            }
+
+            function drawGridPanel(x, y, size, zLabel, options = {}) {
+                ctx.save();
+                ctx.fillStyle = options.fill || '#222b27';
+                ctx.strokeStyle = options.stroke || '#75827b';
+                ctx.lineWidth = options.lineWidth || 1.2;
+                roundedRect(x, y, size, size, 5);
+                ctx.fill();
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(x + size / 2, y);
+                ctx.lineTo(x + size / 2, y + size);
+                ctx.moveTo(x, y + size / 2);
+                ctx.lineTo(x + size, y + size / 2);
+                ctx.stroke();
+                ctx.fillStyle = '#aebbb4';
+                ctx.font = '12px Microsoft YaHei, sans-serif';
+                ctx.fillText(zLabel, x + 8, y + size - 9);
+                ctx.restore();
+            }
+
+            function drawNodeBadge(x, y, text, color) {
+                ctx.save();
+                ctx.fillStyle = color;
+                roundedRect(x, y, 46, 20, 4);
+                ctx.fill();
+                ctx.fillStyle = '#fff';
+                ctx.font = '11px Consolas, monospace';
+                ctx.textAlign = 'center';
+                ctx.fillText(text, x + 23, y + 14);
+                ctx.restore();
+            }
+
+            function drawCollider(x, y, radius, color, labelText, pulse = 0) {
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(x, y, radius + pulse, 0, Math.PI * 2);
+                ctx.fillStyle = color;
+                ctx.globalAlpha = .82;
+                ctx.fill();
+                ctx.globalAlpha = 1;
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+                ctx.fillStyle = '#fff';
+                ctx.font = '11px Microsoft YaHei, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(labelText, x, y + radius + 17);
+                ctx.restore();
+            }
+
+            function drawQuery(x, y, radius, pulse) {
+                ctx.save();
+                ctx.setLineDash([7, 5]);
+                ctx.strokeStyle = '#4dd1df';
+                ctx.lineWidth = 2.2;
+                ctx.beginPath();
+                ctx.arc(x, y, radius + pulse, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                ctx.fillStyle = 'rgba(29, 143, 155, .16)';
+                ctx.fill();
+                ctx.restore();
+            }
+
+            function render() {
+                const w = canvas.clientWidth;
+                const h = canvas.clientHeight;
+                ctx.clearRect(0, 0, w, h);
+                ctx.fillStyle = '#161c19';
+                ctx.fillRect(0, 0, w, h);
+
+                const gap = Math.max(24, w * .045);
+                const panel = Math.min((w - gap * 3) / 2, h * .66);
+                const total = panel * 2 + gap;
+                const left = (w - total) / 2;
+                const top = Math.max(82, (h - panel) / 2 + 14);
+                const right = left + panel + gap;
+                const pulse = Math.sin(phase) * 3;
+
+                ctx.fillStyle = '#89958f';
+                ctx.font = '12px Microsoft YaHei, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('Z- 后层', left + panel / 2, top - 15);
+                ctx.fillText('Z+ 前层', right + panel / 2, top - 15);
+
+                if (mode === 'split') {
+                    if (step === 0) {
+                        const rootW = Math.min(w * .52, h * .68);
+                        const x = (w - rootW) / 2;
+                        const y = (h - rootW * .62) / 2 + 20;
+                        ctx.fillStyle = '#27312c';
+                        ctx.strokeStyle = '#d18a22';
+                        ctx.lineWidth = 2.5;
+                        roundedRect(x, y, rootW, rootW * .62, 6);
+                        ctx.fill();
+                        ctx.stroke();
+                        drawNodeBadge(x + 12, y + 12, 'ROOT', '#d18a22');
+                        ctx.fillStyle = '#e6ece8';
+                        ctx.font = '15px Consolas, monospace';
+                        ctx.textAlign = 'center';
+                        ctx.fillText('AABB = [pos - halfSize, pos + halfSize)', w / 2, y + rootW * .32);
+                    } else {
+                        drawGridPanel(left, top, panel, 'z < 0', {stroke: '#8e9b94'});
+                        drawGridPanel(right, top, panel, 'z >= 0', {stroke: '#8e9b94'});
+                        for (let i = 0; i < 4; i++) {
+                            drawNodeBadge(left + 8 + (i % 2) * panel / 2, top + 8 + Math.floor(i / 2) * panel / 2, `N${i}`, '#7565a8');
+                            drawNodeBadge(right + 8 + (i % 2) * panel / 2, top + 8 + Math.floor(i / 2) * panel / 2, `N${i + 4}`, '#1d8f9b');
+                        }
+                        if (step >= 3) {
+                            const sub = panel / 2;
+                            ctx.strokeStyle = '#d18a22';
+                            ctx.lineWidth = 1.2;
+                            for (let i = 1; i < 4; i++) {
+                                ctx.beginPath();
+                                ctx.moveTo(right + sub * i / 2, top);
+                                ctx.lineTo(right + sub * i / 2, top + sub);
+                                ctx.moveTo(right, top + sub * i / 2);
+                                ctx.lineTo(right + sub, top + sub * i / 2);
+                                ctx.stroke();
+                            }
+                        }
+                    }
+                }
+
+                if (mode === 'insert') {
+                    drawGridPanel(left, top, panel, 'z < 0');
+                    drawGridPanel(right, top, panel, 'z >= 0');
+                    const smallStartX = w * .5;
+                    const smallStartY = top - 34;
+                    const targetX = right + panel * .75;
+                    const targetY = top + panel * .25;
+                    const t = step === 0 ? 0 : Math.min(1, .35 + .65 * ((Math.sin(phase - 1.2) + 1) / 2));
+                    const sx = smallStartX + (targetX - smallStartX) * t;
+                    const sy = smallStartY + (targetY - smallStartY) * t;
+                    drawCollider(sx, sy, Math.max(10, panel * .045), '#d18a22', '小 AABB');
+                    if (step >= 2) {
+                        drawCollider(right + panel * .5, top + panel * .55, panel * .18, '#cf5747', '跨界：留在父节点', pulse * .2);
+                    }
+                    if (step >= 3) {
+                        drawNodeBadge(right + panel * .56, top + 8, 'count 1', '#4f8b55');
+                        drawNodeBadge(right + 8, top + 8, 'count 2', '#4f8b55');
+                        ctx.strokeStyle = '#71bc7a';
+                        ctx.lineWidth = 2;
+                        ctx.beginPath();
+                        ctx.moveTo(targetX, targetY);
+                        ctx.lineTo(right + panel * .25, top + panel * .25);
+                        ctx.stroke();
+                    }
+                }
+
+                if (mode === 'query') {
+                    drawGridPanel(left, top, panel, 'z < 0', {stroke: step >= 1 ? '#1d8f9b' : '#75827b', lineWidth: step >= 1 ? 2.2 : 1.2});
+                    drawGridPanel(right, top, panel, 'z >= 0');
+                    const qx = left + panel * .68;
+                    const qy = top + panel * .38;
+                    drawQuery(qx, qy, panel * .23, pulse);
+                    drawCollider(left + panel * .73, top + panel * .34, panel * .055, step >= 3 ? '#cf5747' : '#d18a22', step >= 3 ? '命中' : '候选');
+                    drawCollider(right + panel * .75, top + panel * .72, panel * .045, '#66726c', '被剪枝');
+                    if (step >= 2) {
+                        drawNodeBadge(left + panel * .52, top + 8, 'count 1', '#4f8b55');
+                        drawNodeBadge(right + panel * .52, top + panel * .52, 'count 0', '#66726c');
+                    }
+                    if (step >= 3) {
+                        ctx.strokeStyle = `rgba(207, 87, 71, ${.7 + Math.sin(phase) * .2})`;
+                        ctx.lineWidth = 3;
+                        ctx.beginPath();
+                        ctx.arc(left + panel * .73, top + panel * .34, panel * .075 + pulse, 0, Math.PI * 2);
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            function frame(now) {
+                phase += reducedMotion ? 0 : .035;
+                if (playing && now - lastAdvance > 2200) {
+                    step = (step + 1) % 4;
+                    lastAdvance = now;
+                    updateText();
+                }
+                render();
+                requestAnimationFrame(frame);
+            }
+
+            tabs.forEach(tab => tab.addEventListener('click', () => {
+                mode = tab.dataset.mode;
+                step = 0;
+                lastAdvance = performance.now();
+                tabs.forEach(item => item.setAttribute('aria-selected', String(item === tab)));
+                updateText();
+            }));
+
+            range.addEventListener('input', () => {
+                step = Number(range.value);
+                lastAdvance = performance.now();
+                updateText();
+            });
+
+            play.addEventListener('click', () => {
+                playing = !playing;
+                lastAdvance = performance.now();
+                updateText();
+            });
+
+            window.addEventListener('resize', resize);
+            resize();
+            updateText();
+            requestAnimationFrame(frame);
+        })();
+    </script>
+</body>
+</html>

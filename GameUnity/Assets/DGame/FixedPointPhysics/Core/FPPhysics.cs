@@ -20,7 +20,7 @@ namespace DGame
 
         public static int OverlayCharacterWithCapsule(FixedPointVector3 position, FixedPoint64 height, FixedPointVector3 startPos, FixedPointVector3 endPos, FixedPoint64 radius, ref List<FPCollision> collisions)
         {
-            return FPPhysicsPresenter.Instance.fpOctree.OverlayCharacterWithCapsule(position, radius, startPos, endPos, radius, ref collisions);
+            return FPPhysicsPresenter.Instance.fpOctree.OverlayCharacterWithCapsule(position, height, startPos, endPos, radius, ref collisions);
         }
         
         public static List<FPCollision> OverlayBoxCollision(FixedPointVector3 position, FixedPointVector3 halfSize, FixedPointMatrix orientation, int layerMask = -1, bool includeTrigger = false)

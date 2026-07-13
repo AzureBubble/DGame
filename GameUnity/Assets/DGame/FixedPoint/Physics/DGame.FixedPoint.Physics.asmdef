@@ -1,0 +1,16 @@
+{
+    "name": "DGame.FixedPoint.Physics",
+    "rootNamespace": "DGame.FixedPoint",
+    "references": [
+        "GUID:355757da5f354168a8d896de5dec0dc1"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

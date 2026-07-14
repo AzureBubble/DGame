@@ -8,6 +8,9 @@ namespace DGame.FixedPoint
     /// 使用定点算术表示位置、旋转、缩放的变换。纯逻辑部分双端共用；Unity 序列化/同步部分见 FPTransform.Unity.cs。
     /// </summary>
     public partial class FPTransform
+#if UNITY_2021_3_OR_NEWER
+        : MonoBehaviour
+#endif
     {
         internal int indexInList;
 
@@ -29,7 +32,7 @@ namespace DGame.FixedPoint
 #if UNITY_2021_3_OR_NEWER
         [SerializeField]
 #endif
-        private FixedPointVector3 m_scale;
+        private FixedPointVector3 m_scale = FixedPointVector3.one;
 
 #if UNITY_2021_3_OR_NEWER
         [SerializeField]

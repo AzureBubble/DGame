@@ -311,7 +311,7 @@ namespace DGame.FixedPoint
                             continue;
                         }
                         item.castIndex = castIndex;
-                        fpCollision = FixedPointIntersection.IntersectWithSphereAndSphere(position, radius, item.position, item.radius);
+                        fpCollision = FixedPointIntersection.IntersectWithSphereAndSphere(position, radius, item.position, item.scaledRadius);
                         if (fpCollision.hit)
                         {
                             fpCollision.collider = item;
@@ -495,7 +495,7 @@ namespace DGame.FixedPoint
                             continue;
                         }
                         item.castIndex = castIndex;
-                        fpCollision = FixedPointIntersection.IntersectWithSphereAndCylinder(position, radius, item.startPos, item.endPos, item.radius);
+                        fpCollision = FixedPointIntersection.IntersectWithSphereAndCylinder(position, radius, item.startPos, item.endPos, item.scaledRadius);
                         if (fpCollision.hit)
                         {
                             fpCollision.collider = item;
@@ -1609,11 +1609,14 @@ namespace DGame.FixedPoint
         /// </summary>
         /// <param name="fixedPointFpSphereCollider">作为查询源的球形碰撞器。</param>
         /// <param name="collisions">接收碰撞结果的可复用列表；有效结果位于索引 <c>[0, 返回值)</c>。</param>
+        /// <param name="layerMask">参与查询的层掩码；<c>-1</c> 或 <c>0</c> 表示不限制层。</param>
+        /// <param name="includeTrigger">是否包含触发器。</param>
         /// <returns>写入的有效碰撞结果数量。</returns>
-        public int OverlayCharacterWithSphere(FPSphereCollider fixedPointFpSphereCollider, ref List<FPCollision> collisions)
+        public int OverlayCharacterWithSphere(FPSphereCollider fixedPointFpSphereCollider,
+            ref List<FPCollision> collisions, int layerMask = -1, bool includeTrigger = false)
         {
             var count = 0;
-            var radius = fixedPointFpSphereCollider.radius;
+            var radius = fixedPointFpSphereCollider.scaledRadius;
             fixedPointFpSphereCollider.UpdateAABB();
             var min = fixedPointFpSphereCollider.min;
             var max = fixedPointFpSphereCollider.max;
@@ -1635,6 +1638,14 @@ namespace DGame.FixedPoint
                         {
                             continue;
                         }
+                        if (item.isTrigger && !includeTrigger)
+                        {
+                            continue;
+                        }
+                        if (layerMask != -1 && !GridLayerMask.ValidateLayerMask(layerMask, 1 << item.layer))
+                        {
+                            continue;
+                        }
                         if (item.castIndex == castIndex)
                         {
                             continue;
@@ -1644,8 +1655,11 @@ namespace DGame.FixedPoint
                         {
                             continue;
                         }
-
-                        var fixedPointCollision = FixedPointIntersection.IntersectWithSphereAndAACapsule(fixedPointFpSphereCollider.position, radius, item.startPos, item.endPos, item.scaledRadius);
+                        var fixedPointCollision = item.characterColliderType == CharacterCollider.Sphere
+                            ? FixedPointIntersection.IntersectWithSphereAndSphere(fixedPointFpSphereCollider.position,
+                                radius, item.position, item.scaledRadius)
+                            : FixedPointIntersection.IntersectWithSphereAndAACapsule(fixedPointFpSphereCollider.position,
+                                radius, item.startPos, item.endPos, item.scaledRadius);
                         if (fixedPointCollision.hit)
                         {
                             fixedPointCollision.collider = item;

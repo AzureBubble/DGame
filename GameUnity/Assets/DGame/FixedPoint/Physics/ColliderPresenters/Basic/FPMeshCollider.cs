@@ -1,72 +1,104 @@
 #if UNITY_2021_3_OR_NEWER
 using UnityEngine;
 #endif
+using System;
 
 namespace DGame.FixedPoint
 {
     /// <summary>
-    /// 表示具有固定点精度的网格碰撞器。此类允许在自定义固定点物理引擎中表示和操作网格碰撞器。
+    /// 使用定点数三角形数据表示的网格碰撞器。
     /// </summary>
     public class FPMeshCollider : FPCollider
     {
-        // 定义网格几何体的顶点数组。
 #if UNITY_2021_3_OR_NEWER
         [SerializeField]
 #endif
-        internal FixedPointVector3[] vertices;
+        /// <summary>相对于碰撞器中心、已应用旋转和缩放的顶点。</summary>
+        internal FixedPointVector3[] vertices = Array.Empty<FixedPointVector3>();
 
-        // 定义网格三角形的索引。
 #if UNITY_2021_3_OR_NEWER
         [SerializeField]
 #endif
-        internal int[] triangles;
+        /// <summary>网格三角形索引，每三个元素定义一个三角形。</summary>
+        internal int[] triangles = Array.Empty<int>();
 
-        // 网格中每个顶点的法线。
 #if UNITY_2021_3_OR_NEWER
         [SerializeField]
 #endif
-        internal FixedPointVector3[] normals;
+        /// <summary>每个三角形在世界坐标中的单位法线。</summary>
+        internal FixedPointVector3[] normals = Array.Empty<FixedPointVector3>();
 
-        // 由三角形定义的每个平面到原点的距离。
 #if UNITY_2021_3_OR_NEWER
         [SerializeField]
 #endif
-        internal FixedPoint64[] distances;
+        /// <summary>每个三角形平面沿世界法线到世界原点的有符号距离。</summary>
+        internal FixedPoint64[] distances = Array.Empty<FixedPoint64>();
 
-        // 网格中每个三角形的最小边界，用于优化。
 #if UNITY_2021_3_OR_NEWER
         [SerializeField]
 #endif
-        internal FixedPointVector3[] minimals;
+        /// <summary>每个三角形相对于碰撞器中心的最小边界。</summary>
+        internal FixedPointVector3[] minimals = Array.Empty<FixedPointVector3>();
 
-        // 网格中每个三角形的最大边界，用于优化。
 #if UNITY_2021_3_OR_NEWER
         [SerializeField]
 #endif
-        internal FixedPointVector3[] maximals;
+        /// <summary>每个三角形相对于碰撞器中心的最大边界。</summary>
+        internal FixedPointVector3[] maximals = Array.Empty<FixedPointVector3>();
 
+#if UNITY_2021_3_OR_NEWER
+        [SerializeField]
+#endif
+        private FixedPointVector3[] localVertices = Array.Empty<FixedPointVector3>();
+
+        /// <summary>获取网格碰撞器类型。</summary>
         public override ColliderType colliderType => ColliderType.Mesh;
 
         /// <summary>
-        /// 根据网格顶点更新轴对齐包围盒(AABB)。
+        /// 重建变换后的三角形数据并更新轴对齐包围盒。
         /// </summary>
         internal override void UpdateAABB()
         {
+            EnsureLocalVertices();
+
+            if (localVertices.Length == 0)
+            {
+                vertices = Array.Empty<FixedPointVector3>();
+                triangles = Array.Empty<int>();
+                normals = Array.Empty<FixedPointVector3>();
+                distances = Array.Empty<FixedPoint64>();
+                minimals = Array.Empty<FixedPointVector3>();
+                maximals = Array.Empty<FixedPointVector3>();
+                _min = position;
+                _max = position;
+                return;
+            }
+
+            if (vertices.Length != localVertices.Length)
+            {
+                vertices = new FixedPointVector3[localVertices.Length];
+            }
+
+            var scale = fpTransform.scale;
+            var rotation = fpTransform.rotation;
             _min = FixedPointVector3.one * FixedPoint64.MaxValue;
             _max = FixedPointVector3.one * FixedPoint64.MinValue;
-            // 通过寻找最小和最大顶点位置来计算AABB。
-            foreach (var vertex in vertices)
+
+            for (var i = 0; i < localVertices.Length; i++)
             {
-                var point = FixedPointVector3.Scale((fpTransform.rotation * vertex) ,fpTransform.scale);
-                _min = FixedPointVector3.Min(min, point);
-                _max = FixedPointVector3.Max(max, point);
+                var transformedVertex = rotation * FixedPointVector3.Scale(localVertices[i], scale);
+                vertices[i] = transformedVertex;
+                _min = FixedPointVector3.Min(_min, transformedVertex);
+                _max = FixedPointVector3.Max(_max, transformedVertex);
             }
+
+            RebuildTriangles();
             _min += position;
             _max += position;
         }
 
         /// <summary>
-        /// 从其所属的所有冲击节点中移除此碰撞器，确保它不再参与碰撞检查。
+        /// 将碰撞器从当前八叉树节点的网格碰撞器集合中移除。
         /// </summary>
         protected override void RemoveFromImpactNotes()
         {
@@ -75,7 +107,7 @@ namespace DGame.FixedPoint
         }
 
         /// <summary>
-        /// 将此碰撞器添加到指定八叉树节点的圆柱碰撞器列表中，启用碰撞检查。
+        /// 将碰撞器加入指定八叉树节点的网格碰撞器集合。
         /// </summary>
         protected override void AddToImpactNote(FPOctreeNode node)
         {
@@ -85,75 +117,65 @@ namespace DGame.FixedPoint
         }
 
         /// <summary>
-        /// 从代表三角形的三个点计算平面。
+        /// 根据三个顶点计算三角形所在平面的单位法线和世界距离。
         /// </summary>
-        private static FixedPointPlane FromTriangle(FixedPointVector3 point, FixedPointVector3 point1, FixedPointVector3 point2)
+        private static void FromTriangle(FixedPointVector3 point, FixedPointVector3 point1,
+            FixedPointVector3 point2, FixedPointVector3 worldPosition, out FixedPointVector3 normal,
+            out FixedPoint64 distance)
         {
-            var normal = FixedPointVector3.Normalize(FixedPointVector3.Cross(point1 - point, point2 - point)); // 计算法线。
-            var distance = FixedPointVector3.Dot(normal, point); // 计算到原点的距离。
-            return new FixedPointPlane { normal = normal, distance = distance };
+            var cross = FixedPointVector3.Cross(point1 - point, point2 - point);
+
+            if (cross.IsZero())
+            {
+                normal = FixedPointVector3.zero;
+                distance = FixedPoint64.Zero;
+                return;
+            }
+
+            normal = cross.normalized;
+            distance = FixedPointVector3.Dot(normal, point + worldPosition);
         }
 
 #if UNITY_2021_3_OR_NEWER
         /// <summary>
-        /// 基于MeshFilter的边界初始化碰撞器大小，相应调整胶囊的高度和半径。
+        /// 从当前对象或子对象的网格筛选器读取本地三角形数据。
         /// </summary>
         protected override void InitColliderSize()
         {
-            var meshFilter = GetComponentInChildren<MeshFilter>(true); // 尝试找到MeshFilter组件。
-            if (meshFilter == null) return; // 如果找不到MeshFilter则退出。
-            var mesh = meshFilter.sharedMesh; // 获取共享网格。
-            if (mesh == null) return; // 如果没有可用的网格则退出。
+            var meshFilter = GetComponentInChildren<MeshFilter>(true);
 
-            // 将顶点转换为固定点格式。
-            vertices = new FixedPointVector3[mesh.vertices.Length];
-            for (var i = 0; i < vertices.Length; i++)
+            if (meshFilter == null || meshFilter.sharedMesh == null)
             {
-                vertices[i] = new FixedPointVector3(mesh.vertices[i]);
+                return;
             }
 
-            // 直接复制三角形索引，因为它们不需要转换。
-            triangles = new int[mesh.triangles.Length];
-            for (var i = 0; i < triangles.Length; i++)
+            var mesh = meshFilter.sharedMesh;
+
+            // 将子网格顶点转换到碰撞器对象的本地坐标空间。
+            localVertices = new FixedPointVector3[mesh.vertices.Length];
+
+            for (var i = 0; i < localVertices.Length; i++)
             {
-                triangles[i] = mesh.triangles[i];
+                var worldPoint = meshFilter.transform.TransformPoint(mesh.vertices[i]);
+                localVertices[i] = new FixedPointVector3(transform.InverseTransformPoint(worldPoint));
             }
 
-            // 转换顶点并计算三角形属性。
-            var triangleCount = triangles.Length / 3;
-            normals = new FixedPointVector3[triangleCount];
-            distances = new FixedPoint64[vertices.Length];
-            minimals = new FixedPointVector3[triangleCount];
-            maximals = new FixedPointVector3[triangleCount];
-
-            // 为每个三角形计算平面属性。
-            for (var i = 0; i < triangles.Length; i += 3)
-            {
-                var plane = FromTriangle(vertices[triangles[i]], vertices[triangles[i + 1]], vertices[triangles[i + 2]]);
-                var triangleIndex = i / 3;
-                normals[triangleIndex] = plane.normal;
-                distances[triangleIndex] = plane.distance;
-
-                // 计算三角形的包围盒，为最小厚度调整。
-                var triangleMin = FixedPointVector3.Min(vertices[triangles[i]], FixedPointVector3.Min(vertices[triangles[i + 1]], vertices[triangles[i + 2]]));
-                var triangleMax = FixedPointVector3.Max(vertices[triangles[i]], FixedPointVector3.Max(vertices[triangles[i + 1]], vertices[triangles[i + 2]]));
-                AdjustForMinimumThickness(ref triangleMin, ref triangleMax);
-                minimals[triangleIndex] = triangleMin;
-                maximals[triangleIndex] = triangleMax;
-            }
+            triangles = mesh.triangles;
+            vertices = new FixedPointVector3[localVertices.Length];
         }
 
         /// <summary>
-        /// 在Unity编辑器中使用Gizmos绘制网格碰撞器。此可视化有助于调试和设置碰撞器。
+        /// 在 Unity 场景视图中绘制网格碰撞器的三角形线框。
         /// </summary>
         protected override void OnDrawGizmosEditor()
         {
-            // 绘制网格碰撞器的每个三角形。
+            UpdateAABB();
+
             for (var i = 0; i < triangles.Length; i += 3)
             {
-                var point = FixedPointVector3.Scale((fpTransform.rotation * vertices[triangles[i]]) ,fpTransform.scale) + position;
-                var point1 = FixedPointVector3.Scale(fpTransform.rotation * vertices[triangles[i + 1]],fpTransform.scale)  + position;
-                var point2 = FixedPointVector3.Scale(fpTransform.rotation * vertices[triangles[i + 2]] ,fpTransform.scale) + position;
+                var point = vertices[triangles[i]] + position;
+                var point1 = vertices[triangles[i + 1]] + position;
+                var point2 = vertices[triangles[i + 2]] + position;
                 Gizmos.DrawLine(point.ToVector3(), point1.ToVector3());
                 Gizmos.DrawLine(point1.ToVector3(), point2.ToVector3());
                 Gizmos.DrawLine(point2.ToVector3(), point.ToVector3());
@@ -162,14 +184,73 @@ namespace DGame.FixedPoint
 #endif
 
         /// <summary>
-        /// 调整三角形包围盒的最小和最大向量，以确保其具有最小厚度。
+        /// 确保三角形包围盒在每个坐标轴上具有最小厚度。
         /// </summary>
         private static void AdjustForMinimumThickness(ref FixedPointVector3 min, ref FixedPointVector3 max)
         {
-            // 确保包围盒具有最小厚度，以防止数值不稳定。
-            if (max.x - min.x < FixedPoint64.EN2) { min.x -= 0.01; max.x += 0.01; }
-            if (max.y - min.y < FixedPoint64.EN2) { min.y -= 0.01; max.y += 0.01; }
-            if (max.z - min.z < FixedPoint64.EN2) { min.z -= 0.01; max.z += 0.01; }
+            if (max.x - min.x < FixedPoint64.EN2)
+            {
+                min.x -= 0.01;
+                max.x += 0.01;
+            }
+
+            if (max.y - min.y < FixedPoint64.EN2)
+            {
+                min.y -= 0.01;
+                max.y += 0.01;
+            }
+
+            if (max.z - min.z < FixedPoint64.EN2)
+            {
+                min.z -= 0.01;
+                max.z += 0.01;
+            }
+        }
+
+        /// <summary>
+        /// 兼容旧序列化数据，确保本地源顶点已初始化。
+        /// </summary>
+        private void EnsureLocalVertices()
+        {
+            if ((localVertices == null || localVertices.Length == 0) && vertices?.Length > 0)
+            {
+                localVertices = (FixedPointVector3[])vertices.Clone();
+            }
+
+            localVertices ??= Array.Empty<FixedPointVector3>();
+            triangles ??= Array.Empty<int>();
+        }
+
+        /// <summary>
+        /// 根据当前变换后的顶点重建三角形法线、平面距离和局部边界。
+        /// </summary>
+        private void RebuildTriangles()
+        {
+            var triangleCount = triangles.Length / 3;
+
+            if (normals.Length != triangleCount || distances.Length != triangleCount ||
+                minimals.Length != triangleCount || maximals.Length != triangleCount)
+            {
+                normals = new FixedPointVector3[triangleCount];
+                distances = new FixedPoint64[triangleCount];
+                minimals = new FixedPointVector3[triangleCount];
+                maximals = new FixedPointVector3[triangleCount];
+            }
+
+            for (var i = 0; i < triangleCount; i++)
+            {
+                var triangleOffset = i * 3;
+                var point = vertices[triangles[triangleOffset]];
+                var point1 = vertices[triangles[triangleOffset + 1]];
+                var point2 = vertices[triangles[triangleOffset + 2]];
+
+                FromTriangle(point, point1, point2, position, out normals[i], out distances[i]);
+                var triangleMin = FixedPointVector3.Min(point, FixedPointVector3.Min(point1, point2));
+                var triangleMax = FixedPointVector3.Max(point, FixedPointVector3.Max(point1, point2));
+                AdjustForMinimumThickness(ref triangleMin, ref triangleMax);
+                minimals[i] = triangleMin;
+                maximals[i] = triangleMax;
+            }
         }
     }
 }

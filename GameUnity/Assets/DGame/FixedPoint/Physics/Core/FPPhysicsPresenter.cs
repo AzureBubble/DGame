@@ -11,8 +11,7 @@ namespace DGame.FixedPoint
     /// 以及绘制八叉树 Gizmo。物理状态保存在 context 中，服务端不依赖本类型。
     /// 场景中只允许存在一个有效实例。
     /// </remarks>
-    [DefaultExecutionOrder(-999)]
-    public sealed class FPPhysicsPresenter : MonoBehaviour
+    public sealed class FPPhysicsPresenter
     {
         /// <summary>
         /// 获取当前 Unity 外壳持有的物理上下文。
@@ -22,7 +21,7 @@ namespace DGame.FixedPoint
         /// <summary>
         /// 当前场景中的有效实例。
         /// </summary>
-        private static FPPhysicsPresenter instance;
+        private static FPPhysicsPresenter m_instance;
 
         /// <summary>
         /// 获取当前场景中的定点物理表现外壳；场景尚未加载该组件时返回 <see langword="null"/>。
@@ -31,48 +30,34 @@ namespace DGame.FixedPoint
         {
             get
             {
-                if (instance == null)
+                if (m_instance == null)
                 {
-                    instance = FindObjectOfType(typeof(FPPhysicsPresenter), true) as FPPhysicsPresenter;
+                    m_instance = new FPPhysicsPresenter();
+                    m_instance.Initialize();
                 }
-                return instance;
+                return m_instance;
             }
         }
 
         /// <summary>
         /// 创建八叉树时使用的逻辑尺寸。
         /// </summary>
-        [SerializeField] private int octreeSize = 1024;
+        private int octreeSize = 1024;
 
         /// <summary>
         /// 与服务端保持一致的固定物理步长，不读取 <see cref="Time.fixedDeltaTime"/>。
         /// </summary>
-        [SerializeField] private double fixedDeltaTime = FPPhysicsContext.DefaultDeltaTime;
+        private double fixedDeltaTime = FPPhysicsContext.DefaultDeltaTime;
 
         /// <summary>
         /// 当前物理世界使用的确定性随机种子。
         /// </summary>
-        [SerializeField] private int randomSeed = 0;
+        private int randomSeed = 0;
 
         /// <summary>
         /// 是否在 Scene 视图中绘制包含碰撞器的八叉树节点。
         /// </summary>
         public bool drawGizmos = true;
-
-        /// <summary>
-        /// 建立场景单例并初始化物理上下文。
-        /// </summary>
-        private void Awake()
-        {
-            if (instance != null && instance != this)
-            {
-                Destroy(this);
-                return;
-            }
-
-            instance = this;
-            Initialize();
-        }
 
         /// <summary>
         /// 使用 Inspector 配置创建物理上下文；重复调用不会替换已经存在的上下文。
@@ -85,21 +70,10 @@ namespace DGame.FixedPoint
         /// <summary>
         /// 销毁当前有效实例时释放静态引用。
         /// </summary>
-        private void OnDestroy()
+        private void Destroy()
         {
-            if (instance == this)
-            {
-                instance = null;
-            }
+            m_instance = null;
         }
-
-#if UNITY_EDITOR
-        [UnityEditor.Callbacks.DidReloadScripts]
-        private static void OnScriptsReloaded()
-        {
-            // Debug.Log("OnScriptsReloaded");
-        }
-#endif
 
         /// <summary>
         /// 清空当前物理上下文中的全部模拟对象和累计时间。
@@ -122,28 +96,7 @@ namespace DGame.FixedPoint
         /// </summary>
         public void OnViewUpdate()
         {
-            if (context == null)
-            {
-                return;
-            }
-
-            for (var i = 0; i < context.fixedPointGameObjectFastList.Count; i++)
-            {
-                if (context.fixedPointGameObjectFastList[i] == null)
-                {
-                    continue;
-                }
-                context.fixedPointGameObjectFastList[i].OnViewUpdate();
-            }
-
-            foreach (var actor in context.fixedPointCharacterControllers)
-            {
-                if (actor == null)
-                {
-                    continue;
-                }
-                actor.OnViewUpdate();
-            }
+            context?.OnViewUpdate();
         }
 
         /// <summary>

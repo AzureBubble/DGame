@@ -4,26 +4,23 @@ using UnityEngine;
 namespace DGame.FixedPoint
 {
     /// <summary>
-    /// FPCollider 的 Unity 表现/序列化半边（MonoBehaviour）。仅客户端编译。
+    /// <see cref="FPCollider"/> 的 Unity 表现与序列化部分，仅在客户端编译。
     /// </summary>
     [RequireComponent(typeof(FPTransform))]
     [DefaultExecutionOrder(-899)]
     [ExecuteInEditMode]
     public abstract partial class FPCollider : MonoBehaviour
     {
-        [SerializeField]
-        private bool isInit; // 指示碰撞器是否已初始化。
+        [SerializeField] private bool isInit;
 
-        [SerializeField]
-        private bool drawAABB = true; // 在编辑器中绘制轴对齐包围盒的开关。
+        [SerializeField] private bool drawAABB = true;
 
-        [SerializeField]
-        private Color gizmosColor = Color.blue; // 在Unity编辑器中绘制的gizmos的颜色。
+        [SerializeField] private Color gizmosColor = Color.blue;
 
-        [SerializeField]
-        private bool drawDebugInfo; // 绘制额外调试信息的开关。
+        [SerializeField] private bool drawDebugInfo;
 
-        protected static readonly Vector3 DebugCubeSize = Vector3.one * 0.1f; // 调试立方体的标准大小。
+        /// <summary>调试标记立方体的统一尺寸。</summary>
+        protected static readonly Vector3 DebugCubeSize = Vector3.one * 0.1f;
 
         /// <summary>
         /// 初始化碰撞器，将其添加到物理系统中并设置必要的属性。
@@ -31,12 +28,14 @@ namespace DGame.FixedPoint
         protected virtual void Awake()
         {
             fpTransform = GetComponent<FPTransform>();
+
             if (!isInit)
             {
                 InitColliderSize();
                 isInit = true;
             }
-            if (Application.isPlaying)
+
+            if (Application.isPlaying && FPPhysicsPresenter.Instance?.context != null)
             {
                 context = FPPhysicsPresenter.Instance.context;
                 context.AddCollider(this);
@@ -54,33 +53,49 @@ namespace DGame.FixedPoint
         }
 
         /// <summary>
-        /// 初始化碰撞器大小的占位方法。由子类实现（仅 Unity 侧需要，依赖 MeshFilter）。
+        /// 根据关联的 Unity 网格初始化碰撞器尺寸。
         /// </summary>
         protected abstract void InitColliderSize();
 
         /// <summary>
-        /// 在Unity编辑器中绘制gizmos以进行视觉调试。
+        /// 在 Unity 场景视图中绘制碰撞器调试图形。
         /// </summary>
         private void OnDrawGizmos()
         {
-            if (!enabled) return;
+            if (!enabled)
+            {
+                return;
+            }
+
+            if (fpTransform == null)
+            {
+                fpTransform = GetComponent<FPTransform>();
+
+                if (fpTransform == null)
+                {
+                    return;
+                }
+            }
 
             var color = Gizmos.color;
             Gizmos.color = gizmosColor;
             OnDrawGizmosEditor();
+
             if (drawAABB)
             {
                 DrawAABBEditor();
             }
+
             if (drawDebugInfo)
             {
                 OnDrawDebugInfo();
             }
+
             Gizmos.color = color;
         }
 
         /// <summary>
-        /// 为调试目的在编辑器中绘制碰撞器的轴对齐包围盒（AABB）。
+        /// 在场景视图中绘制碰撞器的轴对齐包围盒。
         /// </summary>
         private void DrawAABBEditor()
         {
@@ -92,14 +107,16 @@ namespace DGame.FixedPoint
         }
 
         /// <summary>
-        /// 绘制特定于碰撞器的gizmos的抽象方法。由子类实现。
+        /// 绘制当前具体碰撞器的调试图形。
         /// </summary>
         protected abstract void OnDrawGizmosEditor();
 
         /// <summary>
-        /// 绘制额外调试信息的可选方法。可以被子类重写。
+        /// 绘制由子类提供的额外调试信息。
         /// </summary>
-        protected virtual void OnDrawDebugInfo() { }
+        protected virtual void OnDrawDebugInfo()
+        {
+        }
     }
 }
 #endif

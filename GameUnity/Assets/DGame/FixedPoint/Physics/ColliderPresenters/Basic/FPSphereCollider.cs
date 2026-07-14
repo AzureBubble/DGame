@@ -5,43 +5,46 @@ using UnityEngine;
 namespace DGame.FixedPoint
 {
     /// <summary>
-    /// 用于处理固定点物理系统中球形碰撞器的展示器。
+    /// 使用定点数表示的球形碰撞器。
     /// </summary>
     public class FPSphereCollider : FPCollider
     {
-        // 用于存储胶囊体半径的字段。
 #if UNITY_2021_3_OR_NEWER
         [SerializeField]
 #endif
         private FixedPoint64 _radius;
 
         /// <summary>
-        /// 获取或设置胶囊体的半径。设置半径会标记AABB为脏并更新边缘。
+        /// 获取或设置未应用变换缩放的本地半径。
         /// </summary>
         public FixedPoint64 radius
         {
             get => _radius;
             set
             {
-                _radius = value;
-                invRadius = 1 / _radius;
+                _radius = ValidateNonNegative(value, nameof(value));
+                invRadius = _radius > FixedPoint64.Zero ? 1 / _radius : FixedPoint64.Zero;
                 UpdateCollider();
             }
         }
 
+        /// <summary>
+        /// 获取本地半径的倒数；半径为零时返回零。
+        /// </summary>
         public FixedPoint64 invRadius { get; set; }
 
         /// <summary>
-        /// 表示对象的缩放半径，考虑到其原始半径和x及z轴之间的最大缩放因子。
-        /// 这确保对象在两个方向上均匀缩放。
+        /// 获取应用三个坐标轴中最大绝对缩放后的世界半径。
         /// </summary>
-        internal FixedPoint64 scaledRadius => _radius * FixedPointMath.Max(FixedPointMath.Max(fpTransform.scale.x, fpTransform.scale.z),fpTransform.scale.y);
+        internal FixedPoint64 scaledRadius => _radius * FixedPointMath.Max(
+            FixedPointMath.Max(absoluteScale.x, absoluteScale.z), absoluteScale.y);
 
+        /// <summary>获取球形碰撞器类型。</summary>
         public override ColliderType colliderType => ColliderType.Sphere;
 
+        /// <summary>根据世界半径更新轴对齐包围盒。</summary>
         internal override void UpdateAABB()
         {
-            // 通过调整胶囊体的起始和结束位置加上胶囊体的边缘（半径）来计算AABB的最小和最大点。
             var width = scaledRadius;
             var halfSize = new FixedPointVector3(width, width, width);
             _min = position - halfSize;
@@ -49,7 +52,7 @@ namespace DGame.FixedPoint
         }
 
         /// <summary>
-        /// 将此碰撞器从所有它所属的影响节点中移除，确保它不再参与碰撞检查。
+        /// 将碰撞器从当前八叉树节点的球形碰撞器集合中移除。
         /// </summary>
         protected override void RemoveFromImpactNotes()
         {
@@ -58,7 +61,7 @@ namespace DGame.FixedPoint
         }
 
         /// <summary>
-        /// 将此碰撞器添加到指定的八叉树节点的球形碰撞器列表中，启用碰撞检查。
+        /// 将碰撞器加入指定八叉树节点的球形碰撞器集合。
         /// </summary>
         protected override void AddToImpactNote(FPOctreeNode node)
         {
@@ -68,22 +71,27 @@ namespace DGame.FixedPoint
         }
 
 #if UNITY_2021_3_OR_NEWER
+        /// <summary>根据当前对象的网格边界初始化本地半径。</summary>
         protected override void InitColliderSize()
         {
             var mesh = GetComponent<MeshFilter>();
-            if (mesh == null)
+
+            if (mesh == null || mesh.sharedMesh == null)
+            {
                 return;
+            }
+
             var bounds = mesh.sharedMesh.bounds;
-            _radius = FixedPointMath.Max(bounds.size.z * 0.5f,FixedPointMath.Max(bounds.size.x * 0.5f, bounds.size.y * 0.5f));
+            _radius = FixedPointMath.Max(bounds.size.z * 0.5f,
+                FixedPointMath.Max(bounds.size.x * 0.5f, bounds.size.y * 0.5f));
+            invRadius = _radius > FixedPoint64.Zero ? 1 / _radius : FixedPoint64.Zero;
         }
 
         /// <summary>
-        /// 在Unity编辑器中绘制球形碰撞器的线框表示，用于可视化。
+        /// 在 Unity 场景视图中绘制球形碰撞器线框。
         /// </summary>
         protected override void OnDrawGizmosEditor()
         {
-            // 在碰撞器中心绘制一个线框球体，以及它的半径。
-            // 中心和半径从固定点转换为浮点数，以兼容Unity的Gizmos。
             Gizmos.DrawWireSphere(position.ToVector3(), scaledRadius.AsFloat());
         }
 #endif

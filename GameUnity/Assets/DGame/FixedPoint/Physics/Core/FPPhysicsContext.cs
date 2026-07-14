@@ -149,14 +149,14 @@ namespace DGame.FixedPoint
         {
             fpOctree.UpdateColliders();
 
-            #region Update the actor
+            #region 更新角色
             CharacterApplyForces();
             CharacterInteractions();
             CharacterOnUpdates();
             //UpdateCharacterConstraints();
             #endregion
 
-            #region Update the rigidbody
+            #region 更新刚体
             for (var i = 0; i < fixedPointRigidbodies.Count; i++)
             {
                 fixedPointRigidbodies[i].ApplyForces();
@@ -165,6 +165,9 @@ namespace DGame.FixedPoint
             {
                 fixedPointRigidbodies[i].OnUpdate();
             }
+
+            SolveRigidbodyInteractions();
+
             for (var i = 0; i < fixedPointRigidbodies.Count; i++)
             {
                 fixedPointRigidbodies[i].SolveConstraints();
@@ -182,6 +185,59 @@ namespace DGame.FixedPoint
             TimeSinceStart += DeltaTime;
             frame++;
         }
+
+        /// <summary>
+        /// 检测并求解当前物理世界中全部启用刚体之间的成对碰撞。
+        /// </summary>
+        /// <remarks>每对刚体每个物理步只处理一次。</remarks>
+        private void SolveRigidbodyInteractions()
+        {
+            for (var i = 0; i < fixedPointRigidbodies.Count; i++)
+            {
+                var rigidbody = fixedPointRigidbodies[i];
+                if (!rigidbody.CanSimulate)
+                {
+                    continue;
+                }
+
+                for (var j = i + 1; j < fixedPointRigidbodies.Count; j++)
+                {
+                    var targetRigidbody = fixedPointRigidbodies[j];
+                    if (!targetRigidbody.CanSimulate)
+                    {
+                        continue;
+                    }
+
+                    FPRigidbody.ResolveCollision(rigidbody, targetRigidbody);
+                }
+            }
+        }
+
+#if UNITY_2021_3_OR_NEWER
+        /// <summary>
+        /// 由外部表现帧驱动器调用，将定点逻辑状态同步到 Unity 表现对象。
+        /// </summary>
+        public void OnViewUpdate()
+        {
+            for (var i = 0; i < fixedPointGameObjectFastList.Count; i++)
+            {
+                if (fixedPointGameObjectFastList[i] == null)
+                {
+                    continue;
+                }
+                fixedPointGameObjectFastList[i].OnViewUpdate();
+            }
+
+            foreach (var actor in fixedPointCharacterControllers)
+            {
+                if (actor == null)
+                {
+                    continue;
+                }
+                actor.OnViewUpdate();
+            }
+        }
+#endif
 
         /// <summary>
         /// 为全部已启用角色计算当前物理帧的内部力。
@@ -202,7 +258,7 @@ namespace DGame.FixedPoint
         /// </summary>
         private void CharacterInteractions()
         {
-            //calculate the impulses between actors;
+            // 计算角色之间的冲量。
             for (var i = 0; i < fixedPointCharacterControllers.Count; i++)
             {
                 if (!fixedPointCharacterControllers[i].enabled)
@@ -210,7 +266,7 @@ namespace DGame.FixedPoint
                     continue;
                 }
 
-                //Important: Check rigidbody hit at here.
+                // 重要：在此检查刚体碰撞。
                 var actor = fixedPointCharacterControllers[i];
                 var count = actor.characterColliderType == CharacterCollider.Sphere ?
                            fpOctree.OverlaySphereCollision(actor.position, actor.scaledRadius, ref collisions, -1, true, true) :
@@ -220,12 +276,19 @@ namespace DGame.FixedPoint
                     var collision = collisions[j];
                     if (!collision.hit) continue;
                     if (collision.collider.isTrigger) continue;
-                    actor.AddImpulse(collision.normal * collision.depth * 2);
                     var hitCollider = collision.collider;
+                    if (TryGetRigidbody(hitCollider, out var hitRigidbody))
+                    {
+                        ResolveCharacterRigidbodyCollision(actor, hitRigidbody, collision);
+                    }
+                    else
+                    {
+                        actor.AddImpulse(collision.normal * collision.depth * 2);
+                    }
                     collision.collider = actor;
                     hitCollider.onCharacterCollide?.Invoke(collision);
                 }
-                //　Character 間の衝突判定
+                // 检测角色之间的碰撞。
                 for (var j = i; j < fixedPointCharacterControllers.Count; j++)
                 {
                     if (j == i)
@@ -242,6 +305,54 @@ namespace DGame.FixedPoint
         }
 
         /// <summary>
+        /// 查找绑定指定碰撞器的刚体。
+        /// </summary>
+        private bool TryGetRigidbody(FPCollider collider, out FPRigidbody rigidbody)
+        {
+            for (var i = 0; i < fixedPointRigidbodies.Count; i++)
+            {
+                var candidate = fixedPointRigidbodies[i];
+                if (ReferenceEquals(candidate.collider, collider))
+                {
+                    rigidbody = candidate;
+                    return true;
+                }
+            }
+
+            rigidbody = null;
+            return false;
+        }
+
+        /// <summary>
+        /// 按逆质量分配角色与刚体之间的位置修正，并调整双方速度。
+        /// </summary>
+        private static void ResolveCharacterRigidbodyCollision(FPCharacterController actor,
+            FPRigidbody rigidbody, FPCollision collision)
+        {
+            if (!GridLayerMask.ValidateLayerMask(actor.targetLayerMask, 1 << rigidbody.collider.layer) ||
+                !GridLayerMask.ValidateLayerMask(rigidbody.targetLayerMask, 1 << actor.layer))
+            {
+                return;
+            }
+
+            var actorInvMass = actor.mass > 0 ? actor.reverseMass : FixedPoint64.Zero;
+            var rigidbodyInvMass = rigidbody.CanSimulate ? rigidbody.invMass : FixedPoint64.Zero;
+            var invMassSum = actorInvMass + rigidbodyInvMass;
+            if (invMassSum <= 0)
+            {
+                return;
+            }
+
+            var penetration = collision.depth * 2;
+            var actorNormal = collision.normal;
+            actor.AddImpulse(actorNormal * penetration * (actorInvMass / invMassSum));
+            rigidbody.AddConstraints(-actorNormal * penetration * (rigidbodyInvMass / invMassSum));
+
+            AdjustVelocityByCollision(actor, actorNormal, rigidbody.collider.rebound);
+            rigidbody.AdjustVelocityByCollision(-actorNormal, actor.rebound);
+        }
+
+        /// <summary>
         /// 计算两个角色控制器之间的碰撞，并按质量分配分离冲量。
         /// </summary>
         /// <param name="fpCharacter">第一个角色控制器。</param>
@@ -249,7 +360,7 @@ namespace DGame.FixedPoint
         private static void CharacterInteraction(FPCharacterController fpCharacter,FPCharacterController targetFpCharacter)
         {
              FPCollision collision;
-            // 違うLayerのプレヤーが衝突しない
+            // 不同层的角色不会发生碰撞。
             if (fpCharacter.layer != targetFpCharacter.layer)
             {
                 collision.hit = false;
@@ -273,7 +384,7 @@ namespace DGame.FixedPoint
                 {
                     return;
                 }
-                // 軽いの方がプッシュしやすい
+                // 质量较小的角色更容易被推动。
                 var depth1 = collision.depth * 2 * targetFpCharacter.mass / totalMass;
                 var depth2 = collision.depth * 2 * fpCharacter.mass / totalMass;
                 fpCharacter.AddImpulse(collision.normal * depth1);
@@ -318,22 +429,22 @@ namespace DGame.FixedPoint
                 {
                     if (collision.closestPoint.y < actor.fpTransform.position.y + actor.scaledRadius + AdditionRadius)
                     {
-                        //(Old)actor.radius * 0.29より低いなら、45degree超えるので、落とす。（１ーCos45）＝　０.２９
-                        //(New)45degreeを登れる為に、50degree超えるので、落とす50degree超えるので、落とす。（１ーCos50）＝　０.36
+                        // （旧）低于 actor.radius * 0.29 时坡度超过 45 度，需要使角色下落。（1 - Cos45°）= 0.29
+                        // （新）为允许攀爬 45 度斜坡，仅在超过 50 度时使角色下落。（1 - Cos50°）= 0.36
                         if (collision.collider.layer != LayerConstant.WallLayer)
                         {
                             actor.isGround = true;
                             actor.groundNormal = collision.normal;
-                            //FixedPointVector3.Dot(actor.preVelocity ,collision.normal) < 0 -> 登れるかどうかの判断
+                            // FixedPointVector3.Dot(actor.preVelocity, collision.normal) < 0 用于判断角色是否正在攀爬。
                             if (actor.preVelocity != FixedPointVector3.zero && FixedPointVector3.Dot(actor.preVelocity, collision.normal) < 0)
                             {
-                                //登る時に落ちないようにFixedPointVector3.upを使う
+                                // 攀爬时使用 FixedPointVector3.up，防止角色下落。
                                 actor.AddConstraints(FixedPointVector3.up * collision.depth * 2);
                                 AdjustVelocityByCollision(actor, FixedPointVector3.up, collision.collider.rebound);
                             }
                             else
                             {
-                                //他の時に落ちないようにcollision.normalを使う
+                                // 其他情况下使用 collision.normal，防止角色下落。
                                 actor.AddConstraints(collision.normal * (collision.depth * 2));
                                 AdjustVelocityByCollision(actor, collision.normal, collision.collider.rebound);
                             }
@@ -395,7 +506,7 @@ namespace DGame.FixedPoint
                 }
             }
             var constraint = actor.constraint;
-            /* 他のStaticColliderとチェックする時に地面の優先度高くなって地面下に陥ちらないように。一旦保存
+            /* 与其他静态碰撞器检测时，暂存地面约束并提高其优先级，避免角色陷入地面。
             if (actor.groundNormal != FixedPointVector3.zero)
             {
                 var dotGroundNormal = FixedPointVector3.Dot(actor.constraint, actor.groundNormal);
@@ -404,7 +515,7 @@ namespace DGame.FixedPoint
             */
             var normal = constraint.normalized;
             var dot = FixedPointVector3.Dot(actor.velocity.normalized, normal);
-            // Velocityがconstraintと逆分量がある場合、逆分量を減少
+            // 当速度包含与约束方向相反的分量时，减小该反向分量。
             if ((dot <= 0 && constraint != FixedPointVector3.zero) || actor.isGround)
             {
                 actor.velocity -= actor.velocity * (1 + dot) * FixedPointVector3.Dot(normal,FixedPointVector3.up);// * speed;

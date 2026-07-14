@@ -134,18 +134,14 @@ namespace DGame.FixedPoint
             };
             if (hit.hit)
             {
-                if (point == target)
-                {
-                    hit.normal = FixedPointVector3.up;
-                    hit.closestPoint = point;
-                }
-                else
-                {
-                    hit.normal = (point - target).normalized;
-                    hit.closestPoint = point - hit.normal * radius;
-                    hit.t = radius + targetRadius - (point - target).magnitude;
-                    hit.depth = hit.t / 2;
-                }
+                var offset = point - target;
+                var distance = offset.magnitude;
+                hit.normal = distance > 0 ? offset / distance : FixedPointVector3.up;
+                hit.closestPoint = point - hit.normal * radius;
+                hit.outsidePoint = target + hit.normal * targetRadius;
+                hit.contactPoint = (hit.closestPoint + hit.outsidePoint) * FixedPoint64.Half;
+                hit.t = FixedPointMath.Max(FixedPoint64.Zero, radius + targetRadius - distance);
+                hit.depth = hit.t * FixedPoint64.Half;
             }
             return hit;
         }

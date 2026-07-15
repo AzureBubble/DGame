@@ -1,36 +1,41 @@
 namespace DGame.FixedPoint
 {
+    /// <summary>
+    /// 提供线段和无限直线相关的定点数最近点与相交查询。
+    /// </summary>
     public static partial class FixedPointIntersection
     {
-        public static (FixedPointVector3,FixedPointVector3,FixedPoint64) ClosestPointOnLineSegmentToLineSegment(FixedPointVector3 startA, FixedPointVector3 endA,FixedPointVector3 startB, FixedPointVector3 endB)
+        /// <summary>
+        /// 计算两条闭线段之间的一对最近点及其距离。
+        /// </summary>
+        /// <param name="startA">线段 A 的起点。</param>
+        /// <param name="endA">线段 A 的终点。</param>
+        /// <param name="startB">线段 B 的起点。</param>
+        /// <param name="endB">线段 B 的终点。</param>
+        /// <returns>依次返回线段 A 上的最近点、线段 B 上的最近点以及两点距离。</returns>
+        public static (
+            FixedPointVector3 pointOnA,
+            FixedPointVector3 pointOnB,
+            FixedPoint64 distance) ClosestPointOnLineSegmentToLineSegment(
+                FixedPointVector3 startA,
+                FixedPointVector3 endA,
+                FixedPointVector3 startB,
+                FixedPointVector3 endB)
         {
-            var a_A = startA;
-            var a_B = endA;
-            var b_A = startB;
-            var b_B = endB;
-            var v0 = b_A - a_A;
-            var v1 = b_B - a_A;
-            var v2 = b_A - a_B;
-            var v3 = b_B - a_B;
-            var d0 = FixedPointVector3.Dot(v0, v0);
-            var d1 = FixedPointVector3.Dot(v1, v1);
-            var d2 = FixedPointVector3.Dot(v2, v2);
-            var d3 = FixedPointVector3.Dot(v3, v3);
-            FixedPointVector3 bestA;
-            if (d2 < d0 || d2 < d1 || d3 < d0 || d3 < d1)
-            {
-                bestA = a_B;
-            }
-            else
-            {
-                bestA = a_A;
-            }
-            var bestB = ClosestPointWithPointAndLine(b_A, b_B, bestA);
-            bestA = ClosestPointWithPointAndLine(a_A, a_B, bestB);
-            var d4 = FixedPointVector3.Distance(bestB, bestA);
-            return (bestB,bestA, d4);
+            ClosestPointsOnLineSegments(startA, endA, startB, endB, out var pointOnA, out var pointOnB);
+            return (pointOnA, pointOnB, FixedPointVector3.Distance(pointOnA, pointOnB));
         }
 
+        /// <summary>
+        /// 计算无限直线穿过有向包围盒时的进入点和离开点。
+        /// </summary>
+        /// <param name="origin">直线上的一点。</param>
+        /// <param name="direct">直线的非零方向，无须归一化。</param>
+        /// <param name="position">有向包围盒中心。</param>
+        /// <param name="halfSize">有向包围盒在三个局部轴上的半尺寸。</param>
+        /// <param name="orientation">包含三个单位局部轴的旋转矩阵。</param>
+        /// <param name="intersection">命中时返回进入点、离开点和离开面的法线。</param>
+        /// <returns>沿 <paramref name="direct"/> 到离开点的参数；不相交时返回 <c>-1</c>。</returns>
         public static FixedPoint64 ClosestWithLineAndOBB(
             FixedPointVector3 origin,
             FixedPointVector3 direct,
@@ -40,101 +45,158 @@ namespace DGame.FixedPoint
             out FPCollision intersection)
         {
             intersection = new FPCollision();
-            var axisX = new FixedPointVector3(orientation.M11, orientation.M12, orientation.M13);
-            var axisY = new FixedPointVector3(orientation.M21, orientation.M22, orientation.M23);
-            var axisZ = new FixedPointVector3(orientation.M31, orientation.M32, orientation.M33);
-            var p = position - origin;
-            var f = new FixedPointVector3(FixedPointVector3.Dot(axisX, direct), FixedPointVector3.Dot(axisY, direct), FixedPointVector3.Dot(axisZ, direct));
-            var e = new FixedPointVector3(FixedPointVector3.Dot(axisX, p), FixedPointVector3.Dot(axisY, p), FixedPointVector3.Dot(axisZ, p));
-            FixedPoint64[] proportion = { 0, 0, 0, 0, 0, 0 };
-            FixedPointVector3[] boxNormals = { axisX, axisX * -1, axisY, axisY * -1, axisZ, axisZ * -1 };
-            if (f.x == 0)
-            {
-                if (-e.x - halfSize.x > 0 || -e.x + halfSize.x < 0)
-                {
-                    return -1;
-                }
-                f.x = 0.00001;
-            }
-            proportion[0] = (e.x + halfSize.x) / f.x;
-            proportion[1] = (e.x - halfSize.x) / f.x;
 
-            if (f.y == 0)
+            if (direct.IsZero())
             {
-                if (-e.y - halfSize.y > 0 || -e.y + halfSize.y < 0)
-                {
-                    return -1;
-                }
-                f.y = 0.00001;
+                return -1;
             }
-            proportion[2] = (e.y + halfSize.y) / f.y;
-            proportion[3] = (e.y - halfSize.y) / f.y;
-            if (f.z == 0)
-            {
-                if (-e.z - halfSize.z > 0 || -e.z + halfSize.z < 0)
-                {
-                    return -1;
-                }
-                f.z = 0.00001;
-            }
-            proportion[4] = (e.z + halfSize.z) / f.z;
-            proportion[5] = (e.z - halfSize.z) / f.z;
-            var tMin = FixedPointMath.Max(FixedPointMath.Max(FixedPointMath.Min(proportion[0], proportion[1]), FixedPointMath.Min(proportion[2], proportion[3])), FixedPointMath.Min(proportion[4], proportion[5]));
-            var tMax = FixedPointMath.Min(FixedPointMath.Min(FixedPointMath.Max(proportion[0], proportion[1]), FixedPointMath.Max(proportion[2], proportion[3])), FixedPointMath.Max(proportion[4], proportion[5]));
 
-            intersection.closestPoint = origin + direct * tMax;
+            var axes = new[]
+            {
+                new FixedPointVector3(orientation.M11, orientation.M12, orientation.M13),
+                new FixedPointVector3(orientation.M21, orientation.M22, orientation.M23),
+                new FixedPointVector3(orientation.M31, orientation.M32, orientation.M33)
+            };
+            var extents = new[] { halfSize.x, halfSize.y, halfSize.z };
+            var offset = position - origin;
+            var tMin = FixedPoint64.MinValue;
+            var tMax = FixedPoint64.MaxValue;
+            var exitNormal = FixedPointVector3.zero;
+
+            for (var i = 0; i < axes.Length; i++)
+            {
+                var projectedDirection = FixedPointVector3.Dot(axes[i], direct);
+                var projectedOffset = FixedPointVector3.Dot(axes[i], offset);
+
+                if (projectedDirection == FixedPoint64.Zero)
+                {
+                    if (FixedPointMath.Abs(projectedOffset) > extents[i])
+                    {
+                        return -1;
+                    }
+
+                    continue;
+                }
+
+                var first = (projectedOffset - extents[i]) / projectedDirection;
+                var second = (projectedOffset + extents[i]) / projectedDirection;
+                var firstNormal = -axes[i];
+                var secondNormal = axes[i];
+
+                if (first > second)
+                {
+                    (first, second) = (second, first);
+                    (firstNormal, secondNormal) = (secondNormal, firstNormal);
+                }
+
+                if (first > tMin)
+                {
+                    tMin = first;
+                }
+
+                if (second < tMax)
+                {
+                    tMax = second;
+                    exitNormal = secondNormal;
+                }
+
+                if (tMin > tMax)
+                {
+                    return -1;
+                }
+            }
+
+            intersection.hit = true;
             intersection.t = tMax;
             intersection.outsidePoint = origin + direct * tMin;
-            intersection.contactPoint = (intersection.closestPoint + intersection.outsidePoint) * 0.5;
-            intersection.hit = true;
-            for (var i = 0; i < proportion.Length; i++)
-            {
-                if (tMax == proportion[i])
-                {
-                    intersection.normal = boxNormals[i];
-                    break;
-                }
-            }
+            intersection.closestPoint = origin + direct * tMax;
+            intersection.contactPoint = (intersection.outsidePoint + intersection.closestPoint) * FixedPoint64.Half;
+            intersection.normal = exitNormal;
             return tMax;
-/*
-            if (tMax < 0)
+        }
+
+        /// <summary>
+        /// 使用《Real-Time Collision Detection》的线段最近点算法计算两条闭线段上的最近点。
+        /// </summary>
+        private static void ClosestPointsOnLineSegments(
+            FixedPointVector3 startA,
+            FixedPointVector3 endA,
+            FixedPointVector3 startB,
+            FixedPointVector3 endB,
+            out FixedPointVector3 pointOnA,
+            out FixedPointVector3 pointOnB)
+        {
+            var directionA = endA - startA;
+            var directionB = endB - startB;
+            var offset = startA - startB;
+            var lengthSquaredA = FixedPointVector3.Dot(directionA, directionA);
+            var lengthSquaredB = FixedPointVector3.Dot(directionB, directionB);
+            var directionBDotOffset = FixedPointVector3.Dot(directionB, offset);
+            FixedPoint64 parameterA;
+            FixedPoint64 parameterB;
+
+            if (lengthSquaredA == FixedPoint64.Zero && lengthSquaredB == FixedPoint64.Zero)
             {
-                return -1;
+                pointOnA = startA;
+                pointOnB = startB;
+                return;
             }
-            if (tMin > tMax)
+
+            if (lengthSquaredA == FixedPoint64.Zero)
             {
-                return -1;
+                parameterA = FixedPoint64.Zero;
+                parameterB = FixedPointMath.Clamp(
+                    directionBDotOffset / lengthSquaredB,
+                    FixedPoint64.Zero,
+                    FixedPoint64.One);
             }
-            if (tMin < 0)
+            else
             {
-                intersection.closestPoint = origin + direct * tMax;
-                intersection.t = tMax;
-                intersection.outsidePoint = origin + direct * tMin; ;
-                intersection.hit = true;
-                for (var i = 0; i < t.Length; i++)
+                var directionADotOffset = FixedPointVector3.Dot(directionA, offset);
+
+                if (lengthSquaredB == FixedPoint64.Zero)
                 {
-                    if (tMax == t[i])
+                    parameterB = FixedPoint64.Zero;
+                    parameterA = FixedPointMath.Clamp(
+                        -directionADotOffset / lengthSquaredA,
+                        FixedPoint64.Zero,
+                        FixedPoint64.One);
+                }
+                else
+                {
+                    var directionsDot = FixedPointVector3.Dot(directionA, directionB);
+                    var denominator = lengthSquaredA * lengthSquaredB - directionsDot * directionsDot;
+                    parameterA = denominator == FixedPoint64.Zero
+                        ? FixedPoint64.Zero
+                        : FixedPointMath.Clamp(
+                            (directionsDot * directionBDotOffset - directionADotOffset * lengthSquaredB) /
+                            denominator,
+                            FixedPoint64.Zero,
+                            FixedPoint64.One);
+
+                    parameterB = (directionsDot * parameterA + directionBDotOffset) / lengthSquaredB;
+
+                    if (parameterB < FixedPoint64.Zero)
                     {
-                        intersection.normal = normals[i];
-                        break;
+                        parameterB = FixedPoint64.Zero;
+                        parameterA = FixedPointMath.Clamp(
+                            -directionADotOffset / lengthSquaredA,
+                            FixedPoint64.Zero,
+                            FixedPoint64.One);
+                    }
+                    else if (parameterB > FixedPoint64.One)
+                    {
+                        parameterB = FixedPoint64.One;
+                        parameterA = FixedPointMath.Clamp(
+                            (directionsDot - directionADotOffset) / lengthSquaredA,
+                            FixedPoint64.Zero,
+                            FixedPoint64.One);
                     }
                 }
-                return tMax;
             }
-            intersection.closestPoint = origin + direct * tMin;
-            intersection.t = tMin;
-            intersection.outsidePoint = origin + direct * tMax; ;
-            for (var i = 0; i < t.Length; i++)
-            {
-                if (tMin == t[i])
-                {
-                    intersection.normal = normals[i];
-                    break;
-                }
-            }
-            intersection.hit = true;
-            return tMin;
-*/
+
+            pointOnA = startA + directionA * parameterA;
+            pointOnB = startB + directionB * parameterB;
         }
     }
 }

@@ -761,7 +761,7 @@ namespace DGame.FixedPoint
         /// <param name="layerMask">参与查询的层掩码；<c>-1</c> 或 <c>0</c> 表示不限制层。</param>
         /// <param name="includeTrigger">是否包含触发器。</param>
         /// <returns>命中支持的碰撞器时返回 <see langword="true"/>；否则返回 <see langword="false"/>。</returns>
-        /// <remarks>当前实现仅检测球、AABB 和 OBB，不包含胶囊体、圆柱体、网格及角色控制器。</remarks>
+        /// <remarks>当前实现检测球、AABB、OBB、胶囊体、轴对齐胶囊体及角色控制器，不包含圆柱体和网格。</remarks>
         public bool Raycast(FixedPointVector3 origin, FixedPointVector3 direct, FixedPoint64 length, out FPRaycastHit fpRaycastHit, int layerMask, bool includeTrigger)
         {
             var fixedPointRay = new FixedPointRay(origin, direct);
@@ -789,7 +789,7 @@ namespace DGame.FixedPoint
                         {
                             continue;
                         }
-                        if (FixedPointIntersection.IntersetWithRayAndSphereFixedPoint(origin, direct, length, item.position, item.radius, out fpCollision))
+                        if (FixedPointIntersection.IntersetWithRayAndSphereFixedPoint(origin, direct, length, item.position, item.scaledRadius, out fpCollision))
                         {
                             currentDistance = fpCollision.t * fpCollision.t;
                             if (currentDistance < sqrDistance)
@@ -851,6 +851,90 @@ namespace DGame.FixedPoint
                         }
                     }
                 }
+                if (node.FpCapsuleColliders != null)
+                {
+                    for (var i = 0; i < node.FpCapsuleColliders.Count; i++)
+                    {
+                        var item = node.FpCapsuleColliders[i];
+                        if (IsNodeInValidate(item, layerMask, includeTrigger))
+                        {
+                            continue;
+                        }
+                        fpCollision = FixedPointIntersection.IntersectWithRayAndCapsule(
+                            origin, direct, length, item.startPos, item.endPos, item.scaledRadius);
+                        if (fpCollision.hit)
+                        {
+                            currentDistance = fpCollision.t * fpCollision.t;
+                            if (currentDistance < sqrDistance)
+                            {
+                                sqrDistance = currentDistance;
+                                intersection = fpCollision.closestPoint;
+                                normal = fpCollision.normal;
+                                fpCollider = item;
+                            }
+                        }
+                    }
+                }
+                if (node.FpAACapsuleColliders != null)
+                {
+                    for (var i = 0; i < node.FpAACapsuleColliders.Count; i++)
+                    {
+                        var item = node.FpAACapsuleColliders[i];
+                        if (IsNodeInValidate(item, layerMask, includeTrigger))
+                        {
+                            continue;
+                        }
+                        fpCollision = FixedPointIntersection.IntersectWithRayAndCapsule(
+                            origin, direct, length, item.startPos, item.endPos, item.scaledRadius);
+                        if (fpCollision.hit)
+                        {
+                            currentDistance = fpCollision.t * fpCollision.t;
+                            if (currentDistance < sqrDistance)
+                            {
+                                sqrDistance = currentDistance;
+                                intersection = fpCollision.closestPoint;
+                                normal = fpCollision.normal;
+                                fpCollider = item;
+                            }
+                        }
+                    }
+                }
+                if (node.FpCharacterColliders != null)
+                {
+                    for (var i = 0; i < node.FpCharacterColliders.Count; i++)
+                    {
+                        var item = node.FpCharacterColliders[i];
+                        if (IsNodeInValidate(item, layerMask, includeTrigger))
+                        {
+                            continue;
+                        }
+                        if (item.characterColliderType == CharacterCollider.Sphere)
+                        {
+                            if (!FixedPointIntersection.IntersetWithRayAndSphereFixedPoint(
+                                    origin, direct, length, item.position, item.scaledRadius, out fpCollision))
+                            {
+                                continue;
+                            }
+                        }
+                        else
+                        {
+                            fpCollision = FixedPointIntersection.IntersectWithRayAndCapsule(
+                                origin, direct, length, item.startPos, item.endPos, item.scaledRadius);
+                            if (!fpCollision.hit)
+                            {
+                                continue;
+                            }
+                        }
+                        currentDistance = fpCollision.t * fpCollision.t;
+                        if (currentDistance < sqrDistance)
+                        {
+                            sqrDistance = currentDistance;
+                            intersection = fpCollision.closestPoint;
+                            normal = fpCollision.normal;
+                            fpCollider = item;
+                        }
+                    }
+                }
                 if (node.nodes != null)
                 {
                     foreach (var item in node.nodes)
@@ -868,6 +952,275 @@ namespace DGame.FixedPoint
             if (fpCollider == null) return false;
             fpRaycastHit = new FPRaycastHit(fpCollider, intersection, normal, outPoint);
             return true;
+        }
+
+        /// <summary>
+        /// 沿指定方向连续扫描球体，并返回八叉树中距离起点最近的碰撞结果。
+        /// </summary>
+        /// <param name="origin">扫描球心起点。</param>
+        /// <param name="radius">扫描球世界半径。</param>
+        /// <param name="direct">扫描方向，无须归一化。</param>
+        /// <param name="length">最大扫描距离。</param>
+        /// <param name="fpRaycastHit">命中时返回目标碰撞器、目标表面接触点及法线。</param>
+        /// <param name="layerMask">参与查询的层掩码；<c>-1</c> 或 <c>0</c> 表示不限制层。</param>
+        /// <param name="includeTrigger">是否包含触发器。</param>
+        /// <returns>扫描球在给定距离内命中支持的碰撞器时返回 <see langword="true"/>。</returns>
+        /// <remarks>
+        /// 查询只遍历一次八叉树，不执行固定子步进。当前精确支持球、AABB、OBB、胶囊体、
+        /// 轴对齐胶囊体及角色控制器；圆柱体和网格暂不参与该连续碰撞查询。
+        /// </remarks>
+        public bool SphereCast(
+            FixedPointVector3 origin,
+            FixedPoint64 radius,
+            FixedPointVector3 direct,
+            FixedPoint64 length,
+            out FPRaycastHit fpRaycastHit,
+            int layerMask = -1,
+            bool includeTrigger = false)
+        {
+            fpRaycastHit = null;
+
+            if (radius < FixedPoint64.Zero || length < FixedPoint64.Zero || direct.IsZero())
+            {
+                return false;
+            }
+
+            var direction = direct.normalized;
+            var delta = direction * length;
+            var end = origin + delta;
+            var radiusVector = new FixedPointVector3(radius, radius, radius);
+            var sweepMin = FixedPointVector3.Min(origin, end) - radiusVector;
+            var sweepMax = FixedPointVector3.Max(origin, end) + radiusVector;
+            var closestDistance = FixedPoint64.MaxValue;
+            var centerAtHit = FixedPointVector3.zero;
+            var hitNormal = FixedPointVector3.zero;
+            FPCollider hitCollider = null;
+            var physicsSearch = searchPool.Pull();
+            physicsSearch.openList.Clear();
+            physicsSearch.openList.Add(fpOctree.root);
+
+            while (physicsSearch.openList.Count > 0)
+            {
+                var node = physicsSearch.openList[0];
+                physicsSearch.openList.Remove(node);
+                FPCollision collision;
+
+                if (node.FpSphereColliders != null)
+                {
+                    for (var i = 0; i < node.FpSphereColliders.Count; i++)
+                    {
+                        var item = node.FpSphereColliders[i];
+                        if (IsNodeInValidate(item, layerMask, includeTrigger,
+                                sweepMin, sweepMax, item.min, item.max))
+                        {
+                            continue;
+                        }
+
+                        collision = IntersectSphereCastWithSphere(
+                            origin, direction, length, radius, item.position, item.scaledRadius);
+                        SelectClosestSphereCastHit(item, collision,
+                            ref closestDistance, ref centerAtHit, ref hitNormal, ref hitCollider);
+                    }
+                }
+
+                if (node.FpAABBColliders != null)
+                {
+                    for (var i = 0; i < node.FpAABBColliders.Count; i++)
+                    {
+                        var item = node.FpAABBColliders[i];
+                        if (IsNodeInValidate(item, layerMask, includeTrigger,
+                                sweepMin, sweepMax, item.min, item.max))
+                        {
+                            continue;
+                        }
+
+                        collision = FixedPointIntersection.IntersectWithRayAndRoundedAABB(
+                            origin, direction, length, item.min, item.max, radius);
+                        SelectClosestSphereCastHit(item, collision,
+                            ref closestDistance, ref centerAtHit, ref hitNormal, ref hitCollider);
+                    }
+                }
+
+                if (node.FpObbColliders != null)
+                {
+                    for (var i = 0; i < node.FpObbColliders.Count; i++)
+                    {
+                        var item = node.FpObbColliders[i];
+                        if (IsNodeInValidate(item, layerMask, includeTrigger,
+                                sweepMin, sweepMax, item.min, item.max))
+                        {
+                            continue;
+                        }
+
+                        collision = FixedPointIntersection.IntersectWithRayAndRoundedOBB(
+                            origin,
+                            direction,
+                            length,
+                            item.position,
+                            item.halfSize,
+                            item.fpTransform.fixedPointMatrix,
+                            radius);
+                        SelectClosestSphereCastHit(item, collision,
+                            ref closestDistance, ref centerAtHit, ref hitNormal, ref hitCollider);
+                    }
+                }
+
+                if (node.FpCapsuleColliders != null)
+                {
+                    for (var i = 0; i < node.FpCapsuleColliders.Count; i++)
+                    {
+                        var item = node.FpCapsuleColliders[i];
+                        if (IsNodeInValidate(item, layerMask, includeTrigger,
+                                sweepMin, sweepMax, item.min, item.max))
+                        {
+                            continue;
+                        }
+
+                        collision = IntersectSphereCastWithCapsule(
+                            origin, direction, length, radius, item.startPos, item.endPos, item.scaledRadius);
+                        SelectClosestSphereCastHit(item, collision,
+                            ref closestDistance, ref centerAtHit, ref hitNormal, ref hitCollider);
+                    }
+                }
+
+                if (node.FpAACapsuleColliders != null)
+                {
+                    for (var i = 0; i < node.FpAACapsuleColliders.Count; i++)
+                    {
+                        var item = node.FpAACapsuleColliders[i];
+                        if (IsNodeInValidate(item, layerMask, includeTrigger,
+                                sweepMin, sweepMax, item.min, item.max))
+                        {
+                            continue;
+                        }
+
+                        collision = IntersectSphereCastWithCapsule(
+                            origin, direction, length, radius, item.startPos, item.endPos, item.scaledRadius);
+                        SelectClosestSphereCastHit(item, collision,
+                            ref closestDistance, ref centerAtHit, ref hitNormal, ref hitCollider);
+                    }
+                }
+
+                if (node.FpCharacterColliders != null)
+                {
+                    for (var i = 0; i < node.FpCharacterColliders.Count; i++)
+                    {
+                        var item = node.FpCharacterColliders[i];
+                        if (IsNodeInValidate(item, layerMask, includeTrigger,
+                                sweepMin, sweepMax, item.min, item.max))
+                        {
+                            continue;
+                        }
+
+                        collision = item.characterColliderType == CharacterCollider.Sphere
+                            ? IntersectSphereCastWithSphere(
+                                origin, direction, length, radius, item.position, item.scaledRadius)
+                            : IntersectSphereCastWithCapsule(
+                                origin, direction, length, radius,
+                                item.startPos, item.endPos, item.scaledRadius);
+                        SelectClosestSphereCastHit(item, collision,
+                            ref closestDistance, ref centerAtHit, ref hitNormal, ref hitCollider);
+                    }
+                }
+
+                if (node.nodes == null)
+                {
+                    continue;
+                }
+
+                foreach (var child in node.nodes)
+                {
+                    if (child.colliderCount <= 0)
+                    {
+                        continue;
+                    }
+
+                    var expandedMin = child.fixedPointAABB.Min - radiusVector;
+                    var expandedMax = child.fixedPointAABB.Max + radiusVector;
+                    if (FixedPointIntersection.PointInAABB(origin, expandedMin, expandedMax) ||
+                        FixedPointIntersection.IntersectWithRayAndAABBFixedPoint(
+                            origin, delta, expandedMin, expandedMax, out collision) != FixedPoint64.MaxValue)
+                    {
+                        physicsSearch.openList.Add(child);
+                    }
+                }
+            }
+
+            searchPool.Push(physicsSearch);
+
+            if (hitCollider == null)
+            {
+                return false;
+            }
+
+            var contactPoint = centerAtHit - hitNormal * radius;
+            fpRaycastHit = new FPRaycastHit(hitCollider, contactPoint, hitNormal, FixedPointVector3.zero);
+            return true;
+        }
+
+        private static FPCollision IntersectSphereCastWithSphere(
+            FixedPointVector3 origin,
+            FixedPointVector3 direction,
+            FixedPoint64 length,
+            FixedPoint64 castRadius,
+            FixedPointVector3 targetCenter,
+            FixedPoint64 targetRadius)
+        {
+            var collision = FixedPointIntersection.IntersectWithSphereAndSphere(
+                origin, castRadius, targetCenter, targetRadius);
+
+            if (collision.hit)
+            {
+                collision.t = FixedPoint64.Zero;
+                collision.closestPoint = origin;
+                return collision;
+            }
+
+            FixedPointIntersection.IntersetWithRayAndSphereFixedPoint(
+                origin, direction, length, targetCenter, castRadius + targetRadius, out collision);
+            return collision;
+        }
+
+        private static FPCollision IntersectSphereCastWithCapsule(
+            FixedPointVector3 origin,
+            FixedPointVector3 direction,
+            FixedPoint64 length,
+            FixedPoint64 castRadius,
+            FixedPointVector3 capsuleStart,
+            FixedPointVector3 capsuleEnd,
+            FixedPoint64 capsuleRadius)
+        {
+            var collision = FixedPointIntersection.IntersectWithSphereAndCapsule(
+                origin, castRadius, capsuleStart, capsuleEnd, capsuleRadius);
+
+            if (collision.hit)
+            {
+                collision.t = FixedPoint64.Zero;
+                collision.closestPoint = origin;
+                return collision;
+            }
+
+            return FixedPointIntersection.IntersectWithRayAndCapsule(
+                origin, direction, length, capsuleStart, capsuleEnd, castRadius + capsuleRadius);
+        }
+
+        private static void SelectClosestSphereCastHit(
+            FPCollider collider,
+            FPCollision collision,
+            ref FixedPoint64 closestDistance,
+            ref FixedPointVector3 centerAtHit,
+            ref FixedPointVector3 hitNormal,
+            ref FPCollider hitCollider)
+        {
+            if (!collision.hit || collision.t >= closestDistance)
+            {
+                return;
+            }
+
+            closestDistance = collision.t;
+            centerAtHit = collision.closestPoint;
+            hitNormal = collision.normal;
+            hitCollider = collider;
         }
 
         /// <summary>

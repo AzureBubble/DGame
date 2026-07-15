@@ -1,166 +1,100 @@
-/*
-* Create 2022/11/1
-* 応彧剛　yingyugang@gmail.com
-* It's used by fixed point physics system.
-* TODO AACylinder vs Triangles(OBB split it to triangles)
-*/
 using System.Runtime.CompilerServices;
 
 namespace DGame.FixedPoint
 {
+    /// <summary>
+    /// 提供定点数几何体之间的相交、最近点和距离查询。
+    /// </summary>
     public static partial class FixedPointIntersection
     {
-        /*
-        public static bool Intersect(FixedPointRay r, FixedPointAABB aabb)
-        {
-            FixedPoint64 x0, x1, y0, y1, z0, z1;
-            int intercept = 0;
-            if (r.Dir.x != 0 &&  r.Dir.y != 0)
-            {
-                if (r.Dir.x != 0)
-                {
-                    y0 = (aabb.Min.x - r.Point.x) * r.Dir.y / r.Dir.x + r.Point.y;
-                    y1 = (aabb.Max.x - r.Point.x) * r.Dir.y / r.Dir.x + r.Point.y;
-                }
-                else
-                {
-                    y0 = aabb.Min.y;
-                    y1 = aabb.Max.y;
-                }
-                if ((y0 <= aabb.Max.y && y0 >= aabb.Min.y) || (y1 <= aabb.Max.y && y1 >= aabb.Min.y))
-                {
-                    intercept++;
-                }
-            }
-            else
-            {
-                y0 = y1 = r.Point.y;
-                if ((r.Point.y <= aabb.Max.y && r.Point.y >= aabb.Min.y) || (r.Point.x <= aabb.Max.x && r.Point.x >= aabb.Min.x))
-                {
-                    intercept++;
-                }
-            }
-
-            if (r.Dir.y != 0)
-            {
-                z0 = (aabb.Min.y - r.Point.y) * r.Dir.z / r.Dir.y + r.Point.z;
-                z1 = (aabb.Max.y - r.Point.y) * r.Dir.z / r.Dir.y + r.Point.z;
-            }
-            else
-            {
-                z0 = z1 = r.Point.z;
-            }
-            if ((z0 <= aabb.Max.z && z0 >= aabb.Min.z) || (z1 <= aabb.Max.z && z1 >= aabb.Min.z))
-            {
-                intercept++;
-            }
-
-            if (r.Dir.z != 0)
-            {
-                x0 = (aabb.Min.z - r.Point.z) * r.Dir.x / r.Dir.z + r.Point.x;
-                x1 = (aabb.Max.z - r.Point.z) * r.Dir.x / r.Dir.z + r.Point.x;
-            }
-            else
-            {
-                x0 = x1 = r.Point.x;
-            }
-            if ((x0 <= aabb.Max.x && x1 >= aabb.Min.x) || (x1 <= aabb.Max.x && z1 >= aabb.Min.x))
-            {
-                intercept++;
-            }
-
-            if (intercept > 1)
-            {
-                FixedPoint64 t = 0;
-                FixedPoint64 t0 = 0;
-                FixedPoint64 t1 = 0;
-                if (r.Dir.x != 0)
-                {
-                    t = r.Point.x / r.Dir.x;
-                    t0 = x0 / r.Dir.x;
-                    t1 = x1 / r.Dir.x;
-
-                }else if (r.Dir.y != 0)
-                {
-                    t = r.Point.y / r.Dir.y;
-                    t0 = y0 / r.Dir.y;
-                    t1 = y1 / r.Dir.y;
-                }
-                else if (r.Dir.z != 0)
-                {
-                    t = r.Point.z / r.Dir.z;
-                    t0 = z0 / r.Dir.z;
-                    t1 = z1 / r.Dir.z;
-                }
-                if (t0 < t && t1 < t)
-                {
-                    return false;
-                }
-                else
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-        */
-
-        public static bool IntersectWithLineAndPlaneFixedPoint(FixedPointVector3 point, FixedPointVector3 direct, FixedPointVector3 planeNormal, FixedPointVector3 planePoint, out FixedPointVector3 intersection)
+        /// <summary>
+        /// 计算无限直线与平面的交点。
+        /// </summary>
+        /// <param name="point">直线上的一点。</param>
+        /// <param name="direct">直线的非零方向。</param>
+        /// <param name="planeNormal">平面的非零法线。</param>
+        /// <param name="planePoint">平面上的一点。</param>
+        /// <param name="intersection">计算成功时返回交点。</param>
+        /// <returns>直线与平面不平行时返回 <see langword="true"/>。</returns>
+        public static bool IntersectWithLineAndPlaneFixedPoint(
+            FixedPointVector3 point,
+            FixedPointVector3 direct,
+            FixedPointVector3 planeNormal,
+            FixedPointVector3 planePoint,
+            out FixedPointVector3 intersection)
         {
             intersection = FixedPointVector3.zero;
-            var denominator = FixedPointVector3.Dot(direct.normalized, planeNormal);
-            if (denominator == 0)
+            var denominator = FixedPointVector3.Dot(direct, planeNormal);
+
+            if (denominator == FixedPoint64.Zero)
             {
                 return false;
             }
-            var d = FixedPointVector3.Dot(planePoint - point, planeNormal) / denominator;
-            intersection = d * direct.normalized + point;
+
+            var distance = FixedPointVector3.Dot(planePoint - point, planeNormal) / denominator;
+            intersection = point + direct * distance;
             return true;
         }
 
-        // based on https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-box-intersection
-        // reference https://github.com/mattatz/unity-intersections/blob/master/Assets/Intersections/Scripts/Shapes/Intersection.cs
-        public static bool Intersects(FixedPointRay r, FixedPointAABB aabb)
+        /// <summary>
+        /// 判断射线是否与轴对齐包围盒相交。
+        /// </summary>
+        /// <param name="ray">待检测的射线。</param>
+        /// <param name="aabb">待检测的轴对齐包围盒。</param>
+        /// <returns>射线在正向范围内命中或起点位于包围盒内时返回 <see langword="true"/>。</returns>
+        /// <remarks>
+        /// 使用分离区间（slab）算法。射线方向及其倒数由 <see cref="FixedPointRay"/> 预先计算。
+        /// </remarks>
+        public static bool Intersects(FixedPointRay ray, FixedPointAABB aabb)
         {
-            FixedPoint64 tmin, tmax, tymin, tymax, tzmin, tzmax;
-            tmin = ((r.Sign.x <= FixedPoint64.Epsilon ? aabb.Min.x : aabb.Max.x) - r.Point.x) * r.InvDir.x;
-            tmax = ((r.Sign.x <= FixedPoint64.Epsilon ? aabb.Max.x : aabb.Min.x) - r.Point.x) * r.InvDir.x;
-            tymin = ((r.Sign.y <= FixedPoint64.Epsilon ? aabb.Min.y : aabb.Max.y) - r.Point.y) * r.InvDir.y;
-            tymax = ((r.Sign.y <= FixedPoint64.Epsilon ? aabb.Max.y : aabb.Min.y) - r.Point.y) * r.InvDir.y;
-            if ((tmin > tymax) || (tymin > tmax))
-            {
-                return false;
-            }
-            if (tymin > tmin)
-            {
-                tmin = tymin;
-            }
+            var tMin = ((ray.Sign.x == FixedPoint64.Zero ? aabb.Min.x : aabb.Max.x) - ray.Point.x) * ray.InvDir.x;
+            var tMax = ((ray.Sign.x == FixedPoint64.Zero ? aabb.Max.x : aabb.Min.x) - ray.Point.x) * ray.InvDir.x;
+            var tyMin = ((ray.Sign.y == FixedPoint64.Zero ? aabb.Min.y : aabb.Max.y) - ray.Point.y) * ray.InvDir.y;
+            var tyMax = ((ray.Sign.y == FixedPoint64.Zero ? aabb.Max.y : aabb.Min.y) - ray.Point.y) * ray.InvDir.y;
 
-            if (tymax < tmax)
-            {
-                tmax = tymax;
-            }
-
-            tzmin = ((r.Sign.z <= FixedPoint64.Epsilon ? aabb.Min.z : aabb.Max.z) - r.Point.z) * r.InvDir.z;
-            tzmax = ((r.Sign.z <= FixedPoint64.Epsilon ? aabb.Max.z : aabb.Min.z) - r.Point.z) * r.InvDir.z;
-
-            if ((tmin > tzmax) || (tzmin > tmax))
+            if (tMin > tyMax || tyMin > tMax)
             {
                 return false;
             }
 
-            if (tzmin > tmin)
+            if (tyMin > tMin)
             {
-                tmin = tzmin;
+                tMin = tyMin;
             }
 
-            if (tzmax < tmax)
+            if (tyMax < tMax)
             {
-                tmax = tzmax;
+                tMax = tyMax;
             }
-            return true;
+
+            var tzMin = ((ray.Sign.z == FixedPoint64.Zero ? aabb.Min.z : aabb.Max.z) - ray.Point.z) * ray.InvDir.z;
+            var tzMax = ((ray.Sign.z == FixedPoint64.Zero ? aabb.Max.z : aabb.Min.z) - ray.Point.z) * ray.InvDir.z;
+
+            if (tMin > tzMax || tzMin > tMax)
+            {
+                return false;
+            }
+
+            if (tzMin > tMin)
+            {
+                tMin = tzMin;
+            }
+
+            if (tzMax < tMax)
+            {
+                tMax = tzMax;
+            }
+
+            // 整个相交区间都位于射线起点后方时，不属于射线命中。
+            return tMax >= FixedPoint64.Zero;
         }
 
+        /// <summary>
+        /// 计算点到射线所在无限直线的平方距离。
+        /// </summary>
+        /// <param name="ray">方向已归一化的射线。</param>
+        /// <param name="point">待计算的点。</param>
+        /// <returns>点到射线所在无限直线的平方距离。</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static FixedPoint64 SqrDistanceToLine(FixedPointRay ray, FixedPointVector3 point)
         {

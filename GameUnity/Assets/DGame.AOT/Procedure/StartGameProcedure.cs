@@ -5,7 +5,7 @@ namespace Procedure
     /// <summary>
     /// 11-开始游戏
     /// </summary>
-    public class StartGameProcedure : ProcedureBase
+    public sealed class StartGameProcedure : ProcedureBase
     {
         public override bool UseNativeDialog { get; }
 
@@ -18,22 +18,6 @@ namespace Procedure
         private void StartGame()
         {
             LauncherMgr.HideAllUI();
-        }
-
-        public override void OnUpdate(float elapseSeconds, float realElapseSeconds)
-        {
-        }
-
-        public override void OnFixedUpdate()
-        {
-        }
-
-        public override void OnExit()
-        {
-        }
-
-        public override void OnDestroy()
-        {
         }
     }
 }

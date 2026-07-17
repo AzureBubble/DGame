@@ -8,7 +8,7 @@ using YooAsset;
 
 namespace Procedure
 {
-    public class PreloadProcedure : ProcedureBase
+    public sealed class PreloadProcedure : ProcedureBase
     {
         public override bool UseNativeDialog => true;
         private float m_progress;
@@ -138,18 +138,6 @@ namespace Procedure
 
             m_progress = value;
             callback?.Invoke();
-        }
-
-        public override void OnFixedUpdate()
-        {
-        }
-
-        public override void OnExit()
-        {
-        }
-
-        public override void OnDestroy()
-        {
         }
 
         private void OnPreLoadAssetFailure(string assetName, LoadResourceStatus status, string errormessage, object userdata)

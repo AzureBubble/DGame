@@ -4,7 +4,7 @@ using YooAsset;
 
 namespace Procedure
 {
-    public class ClearCacheProcedure : ProcedureBase
+    public sealed class ClearCacheProcedure : ProcedureBase
     {
         public override bool UseNativeDialog { get; }
 
@@ -22,22 +22,6 @@ namespace Procedure
             // 清理完成 即将进入游戏...
             LauncherMgr.ShowUI<LoadUpdateUI>(UpdateUIDefine.Instance.Clear_Cache_Over_Tips);
             SwitchState<PreloadProcedure>();
-        }
-
-        public override void OnUpdate(float elapseSeconds, float realElapseSeconds)
-        {
-        }
-
-        public override void OnFixedUpdate()
-        {
-        }
-
-        public override void OnExit()
-        {
-        }
-
-        public override void OnDestroy()
-        {
         }
     }
 }

@@ -3,7 +3,7 @@ using Launcher;
 
 namespace Procedure
 {
-    public class DownloadOverProcedure : ProcedureBase
+    public sealed class DownloadOverProcedure : ProcedureBase
     {
         public override bool UseNativeDialog { get; }
 
@@ -28,18 +28,6 @@ namespace Procedure
             {
                 SwitchState<PreloadProcedure>();
             }
-        }
-
-        public override void OnFixedUpdate()
-        {
-        }
-
-        public override void OnExit()
-        {
-        }
-
-        public override void OnDestroy()
-        {
         }
     }
 }

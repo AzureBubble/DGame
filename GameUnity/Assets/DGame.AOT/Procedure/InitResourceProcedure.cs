@@ -9,7 +9,7 @@ namespace Procedure
     /// <summary>
     /// 4 - 初始化资源
     /// </summary>
-    public class InitResourceProcedure : ProcedureBase
+    public sealed class InitResourceProcedure : ProcedureBase
     {
         public override bool UseNativeDialog => true;
 
@@ -168,18 +168,6 @@ namespace Procedure
 
             // 单机模式和编辑器模式直接预载资源
             SwitchState<PreloadProcedure>();
-        }
-
-        public override void OnFixedUpdate()
-        {
-        }
-
-        public override void OnExit()
-        {
-        }
-
-        public override void OnDestroy()
-        {
         }
     }
 }

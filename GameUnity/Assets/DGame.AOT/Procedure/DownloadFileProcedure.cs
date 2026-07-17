@@ -7,7 +7,7 @@ using YooAsset;
 
 namespace Procedure
 {
-    public class DownloadFileProcedure : ProcedureBase
+    public sealed class DownloadFileProcedure : ProcedureBase
     {
         public override bool UseNativeDialog { get; }
 
@@ -105,22 +105,6 @@ namespace Procedure
             // 下载补丁文件失败: {0}
             LauncherMgr.ShowMessageBox(Utility.StringUtil.Format(UpdateUIDefine.Instance.Download_File_Error_Tips, data.FileName),
                 SwitchState<CreateDownloaderProcedure>, Application.Quit);
-        }
-
-        public override void OnUpdate(float elapseSeconds, float realElapseSeconds)
-        {
-        }
-
-        public override void OnFixedUpdate()
-        {
-        }
-
-        public override void OnExit()
-        {
-        }
-
-        public override void OnDestroy()
-        {
         }
     }
 }

@@ -31,6 +31,12 @@ namespace GameLogic
         private bool m_needMigratePlayerPrefsToJson;
 
         /// <summary>
+        /// JSON存档目录。
+        /// </summary>
+        public static string JsonSaveDirectoryPath
+            => Path.Combine(Application.persistentDataPath, JSON_FILE_DIRECTORY);
+
+        /// <summary>
         /// 当前存档已保存的数据版本。
         /// </summary>
         [JsonProperty]
@@ -206,7 +212,7 @@ namespace GameLogic
         /// 获取当前存档对应的JSON文件路径
         /// </summary>
         protected string GetJsonFilePath()
-            => Path.Combine(Application.persistentDataPath, JSON_FILE_DIRECTORY, $"{GetSafeFileName(m_saveKey)}.json");
+            => Path.Combine(JsonSaveDirectoryPath, $"{GetSafeFileName(m_saveKey)}.json");
 
         /// <summary>
         /// 检查并升级存档版本；升级后由调用方保存当前对象。

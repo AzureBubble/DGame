@@ -12,15 +12,17 @@ namespace GameLogic
         public static void CreateUIButton()
         {
             // 创建 UIButton 物体
-            UIButton uiBtn = new GameObject("UIButton", typeof(RectTransform), typeof(UIImage), typeof(UIButton)).GetComponent<UIButton>();
+            GameObject buttonObject = ObjectFactory.CreateGameObject("UIButton", typeof(RectTransform), typeof(UIImage), typeof(UIButton));
+            UIButton uiBtn = buttonObject.GetComponent<UIButton>();
             UnityEditorUtil.ResetInCanvasFor(uiBtn.rectTransform);
             uiBtn.transition = Selectable.Transition.None;
             // Navigation btnNavigation = uiBtn.navigation;
             // btnNavigation.mode = Navigation.Mode.None;
             // uiBtn.navigation = btnNavigation;
 
-            UIText uiText = new GameObject("Text", typeof(RectTransform), typeof(UIText)).GetComponent<UIText>();
-            uiText.transform.SetParent(uiBtn.rectTransform);
+            GameObject textObject = ObjectFactory.CreateGameObject("Text", typeof(RectTransform), typeof(UIText));
+            UIText uiText = textObject.GetComponent<UIText>();
+            Undo.SetTransformParent(uiText.transform, uiBtn.rectTransform, string.Empty);
             uiText.transform.localPosition = Vector3.zero;
             uiText.transform.localRotation = Quaternion.identity;
             uiText.transform.localScale = Vector3.one;
@@ -36,6 +38,11 @@ namespace GameLogic
             textRect.sizeDelta = Vector2.zero;
             uiBtn.rectTransform.sizeDelta = new Vector2(163, 50);
             uiBtn.rectTransform.localPosition = Vector3.zero;
+
+            GameObject undoTarget = uiBtn.transform.parent == null ? buttonObject : uiBtn.transform.parent.gameObject;
+            Undo.RegisterFullObjectHierarchyUndo(undoTarget, string.Empty);
+            Undo.SetCurrentGroupName($"Create {buttonObject.name}");
+            Selection.activeGameObject = buttonObject;
         }
 
         #region 开启连点保护模式

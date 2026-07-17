@@ -10,7 +10,7 @@ namespace Procedure
     /// <summary>
     /// 3 - 初始化 YooAsset Package
     /// </summary>
-    public class InitPackageProcedure : ProcedureBase
+    public sealed class InitPackageProcedure : ProcedureBase
     {
         public override bool UseNativeDialog { get; }
 
@@ -21,22 +21,6 @@ namespace Procedure
         {
             // DLogger.Info("======== 3-进入游戏初始化 Yooasset Package 流程 ========");
             InitPackage().Forget();
-        }
-
-        public override void OnUpdate(float elapseSeconds, float realElapseSeconds)
-        {
-        }
-
-        public override void OnFixedUpdate()
-        {
-        }
-
-        public override void OnExit()
-        {
-        }
-
-        public override void OnDestroy()
-        {
         }
 
         private async UniTaskVoid InitPackage()

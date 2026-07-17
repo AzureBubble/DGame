@@ -6,7 +6,7 @@ namespace Procedure
     /// <summary>
     /// 1 - 游戏启动
     /// </summary>
-    public class LaunchProcedure : ProcedureBase
+    public sealed class LaunchProcedure : ProcedureBase
     {
         public override bool UseNativeDialog => true;
         private IAudioModule m_audioModule;
@@ -27,18 +27,6 @@ namespace Procedure
         public override void OnUpdate(float elapseSeconds, float realElapseSeconds)
         {
             SwitchState<SplashProcedure>();
-        }
-
-        public override void OnFixedUpdate()
-        {
-        }
-
-        public override void OnExit()
-        {
-        }
-
-        public override void OnDestroy()
-        {
         }
 
         private void InitAudioModuleSettings()

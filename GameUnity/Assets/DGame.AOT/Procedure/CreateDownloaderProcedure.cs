@@ -10,7 +10,7 @@ namespace Procedure
     /// <summary>
     /// 5 - 创建热更资源下载器
     /// </summary>
-    public class CreateDownloaderProcedure : ProcedureBase
+    public sealed class CreateDownloaderProcedure : ProcedureBase
     {
         public override bool UseNativeDialog { get; }
 
@@ -61,22 +61,6 @@ namespace Procedure
         private void StartDownloadFiles()
         {
             SwitchState<DownloadFileProcedure>();
-        }
-
-        public override void OnUpdate(float elapseSeconds, float realElapseSeconds)
-        {
-        }
-
-        public override void OnFixedUpdate()
-        {
-        }
-
-        public override void OnExit()
-        {
-        }
-
-        public override void OnDestroy()
-        {
         }
     }
 }

@@ -9,9 +9,7 @@ using UnityEngine;
 using YooAsset;
 
 #if ENABLE_HYBRIDCLR
-
 using HybridCLR;
-
 #endif
 
 #if ENABLE_OBFUZ
@@ -24,7 +22,7 @@ namespace Procedure
     /// <summary>
     /// 10-加载DLL
     /// </summary>
-    public class LoadAssemblyProcedure : ProcedureBase
+    public sealed class LoadAssemblyProcedure : ProcedureBase
     {
         public override bool UseNativeDialog => true;
         private bool m_enableAddressable = true;
@@ -51,12 +49,12 @@ namespace Procedure
         public override void OnEnter()
         {
             // DLogger.Info("======== 10-加载DLL流程 ========");
+            
+            SetUpStaticSecretKey();
 
 #if ENABLE_HYBRIDCLR
-
             // 开始加载DLL之前先执行一下优化
             HybridCLROptimizer.OptimizeHybridCLR();
-
 #endif
 
             LoadAssembly().Forget();
@@ -278,7 +276,6 @@ namespace Procedure
 
         private void AllAssemblyLoadComplete()
         {
-            SetUpStaticSecretKey();
             SwitchState<StartGameProcedure>();
 
 #if UNITY_EDITOR
@@ -318,18 +315,6 @@ namespace Procedure
 #else
             DLogger.Info("Disable Obfuz");
 #endif
-        }
-
-        public override void OnFixedUpdate()
-        {
-        }
-
-        public override void OnExit()
-        {
-        }
-
-        public override void OnDestroy()
-        {
         }
     }
 }

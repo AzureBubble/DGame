@@ -897,7 +897,7 @@ namespace DGame
             //}
 
             EditorGUI.BeginDisabledGroup(true);
-            ShowObjectField(data.Sprite.texture, typeof(Texture), false, GUILayout.Width(200));
+            ShowObjectField(data.Sprite, typeof(Sprite), false, GUILayout.Width(200));
             ShowObjectField(data.Atlas, typeof(SpriteAtlas), false, GUILayout.Width(200));
             //GUILayout.Label(data.Atlas, GUILayout.Width(200));
             EditorGUI.EndDisabledGroup();
@@ -993,7 +993,7 @@ namespace DGame
             EditorGUI.BeginDisabledGroup(true);
             ShowObjectField(data.Prefab, typeof(GameObject), false, GUILayout.Width(200));
             ShowObjectField(data.Atlas, typeof(SpriteAtlas), false, GUILayout.Width(200));
-            ShowObjectField(data.Sprite.texture, typeof(Texture), false, GUILayout.Width(200));
+            ShowObjectField(data.Sprite, typeof(Sprite), false, GUILayout.Width(200));
             EditorGUI.EndDisabledGroup();
             int spriteRefPrefabCnt = 0;
             if (m_dicSpriteRef.TryGetValue(data.Sprite, out var spriteRefData))

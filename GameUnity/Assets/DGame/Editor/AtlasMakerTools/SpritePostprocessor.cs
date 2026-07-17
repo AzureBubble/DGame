@@ -334,6 +334,12 @@ namespace DGame
                 }
             }
 
+            if (importer.textureCompression != AtlasConfig.Instance.textureCompression)
+            {
+                importer.textureCompression = AtlasConfig.Instance.textureCompression;
+                isChange = true;
+            }
+
             if (isChange)
             {
                 LogProcessed("[Sprite Import Changed Reimport]", path);

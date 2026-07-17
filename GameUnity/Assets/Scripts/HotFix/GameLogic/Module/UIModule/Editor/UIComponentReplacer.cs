@@ -219,7 +219,6 @@ namespace GameLogic
                 return false;
             }
 
-            Undo.RecordObject(source, $"Replace {typeof(TSource).Name} To {typeof(TTarget).Name}");
             ClassReplaceHelper.ReplaceClass(source, typeof(TTarget));
 
             TTarget target = go.GetComponent<TTarget>();

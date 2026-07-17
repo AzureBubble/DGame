@@ -17,8 +17,7 @@ MonoBehaviour:
   - Assets/BundleAssets/UIRaw/Atlas
   rootChildAtlasDir:
   - Assets/BundleAssets/Actor/FrameSprite
-  singleAtlasDir:
-  - Assets/BundleAssets/UIRaw/Atlas/Background
+  singleAtlasDir: []
   excludeFolder:
   - Assets/BundleAssets/UIRaw/Raw
   androidFormat: 50
@@ -28,11 +27,13 @@ MonoBehaviour:
   enableRotation: 1
   blockOffset: 1
   tightPacking: 1
+  alphaDilation: 0
   compressionQuality: 50
   autoGenerate: 1
   enableLogging: 1
   enableV2: 1
   checkMipmaps: 0
   enableMipmaps: 1
+  textureCompression: 0
   excludeKeywords:
   - _Delete

@@ -10,6 +10,8 @@ namespace DGame
     [CustomEditor(typeof(ProcedureSettings))]
     internal sealed class ProcedureSettingsInspector : DGameInspector
     {
+        private const string DEFAULT_START_PROCEDURE_TYPE_NAME = "Procedure.LaunchProcedure";
+
         private SerializedProperty m_availableProcedureTypeNames;
         private SerializedProperty m_startProcedureTypeName;
 
@@ -284,12 +286,6 @@ namespace DGame
                                 m_startProcedureIndex = selectedIndex;
                                 m_startProcedureTypeName.stringValue = m_curAvailableProcedureTypeNames[selectedIndex];
                             }
-
-                            // 快速操作按钮
-                            if (GUILayout.Button("刷新", GUILayout.Width(50)))
-                            {
-                                RefreshTypeNames();
-                            }
                         }
                         EditorGUILayout.EndHorizontal();
 
@@ -307,6 +303,21 @@ namespace DGame
                     {
                         EditorGUILayout.HelpBox("请先在可用流程列表中勾选至少一个流程", MessageType.Warning);
                     }
+
+                    EditorGUILayout.BeginHorizontal();
+                    {
+                        GUILayout.FlexibleSpace();
+                        if (GUILayout.Button(new GUIContent("重置", "将起始流程重置为LaunchProcedure"), GUILayout.Width(60)))
+                        {
+                            ResetStartProcedure();
+                        }
+
+                        if (GUILayout.Button("刷新", GUILayout.Width(60)))
+                        {
+                            RefreshTypeNames();
+                        }
+                    }
+                    EditorGUILayout.EndHorizontal();
                 }
                 EditorGUILayout.EndVertical();
             }
@@ -406,6 +417,23 @@ namespace DGame
         {
             m_startProcedureTypeName.stringValue = procedureName;
             m_startProcedureIndex = m_curAvailableProcedureTypeNames.IndexOf(procedureName);
+        }
+
+        private void ResetStartProcedure()
+        {
+            if (!m_procedureTypeNames.Contains(DEFAULT_START_PROCEDURE_TYPE_NAME))
+            {
+                Debug.LogError($"未找到默认入口流程: {DEFAULT_START_PROCEDURE_TYPE_NAME}");
+                return;
+            }
+
+            if (!m_curAvailableProcedureTypeNames.Contains(DEFAULT_START_PROCEDURE_TYPE_NAME))
+            {
+                m_curAvailableProcedureTypeNames.Add(DEFAULT_START_PROCEDURE_TYPE_NAME);
+                WriteAvailableProcedureTypeNames();
+            }
+
+            SetAsStartProcedure(DEFAULT_START_PROCEDURE_TYPE_NAME);
         }
 
         protected override void OnCompileComplete()

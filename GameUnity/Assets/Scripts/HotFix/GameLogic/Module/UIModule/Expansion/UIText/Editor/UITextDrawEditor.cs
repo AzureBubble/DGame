@@ -1,4 +1,4 @@
-﻿#if UNITY_EDITOR
+#if UNITY_EDITOR
 
 using System;
 using System.Collections.Generic;
@@ -13,7 +13,8 @@ namespace GameLogic
         [MenuItem("GameObject/UI/UIText", priority = 31)]
         public static void CreateUIText()
         {
-            UIText uiText = new GameObject("UIText", typeof(RectTransform), typeof(UIText)).GetComponent<UIText>();
+            GameObject textObject = ObjectFactory.CreateGameObject("UIText", typeof(RectTransform), typeof(UIText));
+            UIText uiText = textObject.GetComponent<UIText>();
             UnityEditorUtil.ResetInCanvasFor(uiText.rectTransform);
             uiText.text = "UIText";
             uiText.color = Color.black;
@@ -22,6 +23,11 @@ namespace GameLogic
             uiText.rectTransform.sizeDelta = new Vector2(200, 50);
             uiText.alignment = TextAnchor.MiddleCenter;
             uiText.rectTransform.localPosition = Vector3.zero;
+
+            GameObject undoTarget = uiText.transform.parent == null ? textObject : uiText.transform.parent.gameObject;
+            Undo.RegisterFullObjectHierarchyUndo(undoTarget, string.Empty);
+            Undo.SetCurrentGroupName($"Create {textObject.name}");
+            Selection.activeGameObject = textObject;
         }
 
         #region 字符间距

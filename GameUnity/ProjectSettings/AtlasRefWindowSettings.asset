@@ -12,5 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 0}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp-Editor:DGame:AtlasRefWindow/AtlasRefWindowSettings
-  m_atlasFolderPath: Assets/AssetArt/Atlas
   m_uiPrefabFolderPath: Assets/BundleAssets/UI

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using System.Threading.Tasks;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -14,7 +13,7 @@ namespace DGame
     class AtlasRefWindow : EditorWindow
     {
         /// <summary>
-        /// Sprite 和 Prefab 的具体引用原因
+        /// UI Prefab 中 Image 组件引用 Sprite 的具体位置
         /// </summary>
         public class SpriteRefInfo
         {
@@ -33,7 +32,7 @@ namespace DGame
         }
 
         /// <summary>
-        /// Sprite 引用了哪些 Prefab 的数据
+        /// 引用了指定 Sprite 的 UI Prefab 数据
         /// </summary>
         public class SpriteRefData
         {
@@ -49,7 +48,7 @@ namespace DGame
         }
 
         /// <summary>
-        /// Sprite 引用某个 prefab 的原因
+        /// UI Prefab 引用指定 Sprite 的位置集合
         /// </summary>
         public class SpriteRefPrefabInfo
         {
@@ -65,7 +64,7 @@ namespace DGame
         }
 
         /// <summary>
-        /// Prefab 引用了哪些 Atlas 的数据
+        /// UI Prefab 使用的 SpriteAtlas 数据
         /// </summary>
         public class PrefabRefData
         {
@@ -79,7 +78,7 @@ namespace DGame
         }
 
         /// <summary>
-        /// Prefab 引用某个 Atlas 的原因
+        /// UI Prefab 使用指定 SpriteAtlas 的引用位置集合
         /// </summary>
         public class PrefabRefAtlasInfo
         {
@@ -95,18 +94,18 @@ namespace DGame
         }
 
         /// <summary>
-        /// Atlas 引用数据
+        /// Sprite 目录对应的 SpriteAtlas、Sprite 和引用 Prefab 数据
         /// </summary>
         public class AtlasRefData
         {
-            public string AtlasPath;
+            public string SpriteFolderPath;
             public SpriteAtlas Atlas;
             public List<SpriteRefData> SpriteList = new List<SpriteRefData>();
             public Dictionary<GameObject, PrefabRefAtlasInfo> PrefabInfoList = new Dictionary<GameObject, PrefabRefAtlasInfo>();
 
-            public AtlasRefData(string atlasPath, SpriteAtlas atlas)
+            public AtlasRefData(string spriteFolderPath, SpriteAtlas atlas)
             {
-                AtlasPath = atlasPath;
+                SpriteFolderPath = spriteFolderPath;
                 Atlas = atlas;
             }
         }
@@ -150,9 +149,10 @@ namespace DGame
         private string m_searchPrefabName;
         private string m_searchAtlasName;
 
-        private Vector2 m_scrollPos;
+        private Vector2 m_scrollPosition;
 
-        string[] inspectToolbarStrings = { "查看Sprite引用", "查看Prefab引用", "查看Atlas引用", "查看选中场景物体引用" };
+        private static readonly string[] INSPECT_TOOLBAR_LABELS =
+            { "查看Sprite引用", "查看Prefab引用", "查看Atlas引用", "查看选中场景物体引用" };
 
         enum InspectType
         {
@@ -161,28 +161,34 @@ namespace DGame
             Atlas,
             SceneGameObject,
         }
-        private InspectType ActiveInspectType;
+        private InspectType m_activeInspectType;
 
-        private static List<SpriteRefData> m_listSpriteRef = new List<SpriteRefData>();
-        private static Dictionary<Sprite, SpriteRefData> m_dicSpriteRef = new Dictionary<Sprite, SpriteRefData>();
+        private static readonly List<SpriteRefData> s_spriteRefDataList = new List<SpriteRefData>();
+        private static readonly Dictionary<Sprite, SpriteRefData> s_spriteRefDataBySprite = new Dictionary<Sprite, SpriteRefData>();
 
-        private static List<PrefabRefData> m_listPrefabRef = new List<PrefabRefData>();
-        private static Dictionary<GameObject, PrefabRefData> m_dicPrefabRef = new Dictionary<GameObject, PrefabRefData>();
+        private static readonly List<PrefabRefData> s_prefabRefDataList = new List<PrefabRefData>();
+        private static readonly Dictionary<GameObject, PrefabRefData> s_prefabRefDataByPrefab = new Dictionary<GameObject, PrefabRefData>();
 
-        private static List<AtlasRefData> m_listAtlasRef = new List<AtlasRefData>();
-        private static Dictionary<string, AtlasRefData> m_dicAtlasRef = new Dictionary<string, AtlasRefData>();
+        private static readonly List<AtlasRefData> s_atlasRefDataList = new List<AtlasRefData>();
+        private static readonly Dictionary<string, AtlasRefData> s_atlasRefDataBySpriteFolder = new Dictionary<string, AtlasRefData>();
 
-        private PrefabRefData m_goRef;
+        private PrefabRefData m_selectedObjectReference;
 
-        private const string DefaultAtlasFolderPath = "Assets/AssetArt/Atlas";
-        private const string DefaultUIPrefabFolderPath = "Assets/BundleAssets/UI";
+        private const string DEFAULT_UI_PREFAB_FOLDER_PATH = "Assets/BundleAssets/UI";
         private static string AtlasExtension => AtlasConfig.Instance.enableV2 ? ".spriteatlasv2" : ".spriteatlas";
-        private string UIPrefabPath => GetFullAssetFolderPath(AtlasRefWindowSettings.Instance?.UIPrefabFolderPath ?? DefaultUIPrefabFolderPath, DefaultUIPrefabFolderPath);
+        private static string AtlasFolderPath => NormalizeAssetFolderPath(AtlasConfig.Instance.outputAtlasDir, string.Empty);
+        private string UIPrefabPath => GetFullAssetFolderPath(AtlasRefWindowSettings.Instance?.UIPrefabFolderPath ?? DEFAULT_UI_PREFAB_FOLDER_PATH, DEFAULT_UI_PREFAB_FOLDER_PATH);
 
-        private static Texture2D m_selectBackground;
+        private static Texture2D s_selectBackground;
         private GUIStyle m_selectStyle;
-
-        private static StringBuilder m_sbGetHierarchyPath = new StringBuilder();
+        private GUIStyle m_panelStyle;
+        private GUIStyle m_titleStyle;
+        private GUIStyle m_subtitleStyle;
+        private GUIStyle m_tableHeaderStyle;
+        private GUIStyle m_primaryButtonStyle;
+        private GUIStyle m_metricValueStyle;
+        private GUIStyle m_metricLabelStyle;
+        private static readonly StringBuilder s_hierarchyPathBuilder = new StringBuilder();
         private bool m_showSettings;
         private Vector2 m_settingsScrollPos;
 
@@ -190,50 +196,47 @@ namespace DGame
         private class AtlasRefWindowSettings : UnityEditor.ScriptableSingleton<AtlasRefWindowSettings>
         {
             [SerializeField]
-            private string m_atlasFolderPath = DefaultAtlasFolderPath;
-
-            [SerializeField]
-            private string m_uiPrefabFolderPath = DefaultUIPrefabFolderPath;
+            private string m_uiPrefabFolderPath = DEFAULT_UI_PREFAB_FOLDER_PATH;
 
             public static AtlasRefWindowSettings Instance => instance;
 
-            public string AtlasFolderPath => NormalizeAssetFolderPath(m_atlasFolderPath, DefaultAtlasFolderPath);
-            public string UIPrefabFolderPath => NormalizeAssetFolderPath(m_uiPrefabFolderPath, DefaultUIPrefabFolderPath);
-
-            public void SetAtlasFolderPath(string path)
-            {
-                m_atlasFolderPath = NormalizeAssetFolderPath(path, DefaultAtlasFolderPath);
-                Save(true);
-            }
+            public string UIPrefabFolderPath => NormalizeAssetFolderPath(m_uiPrefabFolderPath, DEFAULT_UI_PREFAB_FOLDER_PATH);
 
             public void SetUIPrefabFolderPath(string path)
             {
-                m_uiPrefabFolderPath = NormalizeAssetFolderPath(path, DefaultUIPrefabFolderPath);
+                m_uiPrefabFolderPath = NormalizeAssetFolderPath(path, DEFAULT_UI_PREFAB_FOLDER_PATH);
                 Save(true);
             }
 
             public void ResetToDefault()
             {
-                m_atlasFolderPath = DefaultAtlasFolderPath;
-                m_uiPrefabFolderPath = DefaultUIPrefabFolderPath;
+                m_uiPrefabFolderPath = DEFAULT_UI_PREFAB_FOLDER_PATH;
                 Save(true);
             }
         }
 
-        [MenuItem("DGame Tools/性能分析工具/AtlasRefWindow")]
+        [MenuItem("DGame Tools/性能分析工具/图集引用分析工具")]
         static void OpenWindow()
         {
-            m_selectBackground = MakeTex(0, 255, 0, 128);
             AtlasRefWindow window = GetWindow<AtlasRefWindow>();
             window.Init();
+            window.titleContent = new GUIContent("Atlas 引用分析",
+                EditorGUIUtility.IconContent("SpriteAtlas Icon").image);
             window.minSize = new Vector2(1200, 600);
+        }
+
+        private void OnEnable()
+        {
+            titleContent = new GUIContent("Atlas 引用分析",
+                EditorGUIUtility.IconContent("SpriteAtlas Icon").image);
+            minSize = new Vector2(1200, 600);
         }
 
         private void Init()
         {
             m_stackData.Clear();
             PushStackData(new RefStackData(ShowType.Sprite, null, Vector2.zero));
-            ActiveInspectType = InspectType.Sprite;
+            m_activeInspectType = InspectType.Sprite;
         }
 
         private static string NormalizeAssetFolderPath(string path, string defaultPath)
@@ -296,16 +299,16 @@ namespace DGame
                 return false;
             }
 
-            if (!IsValidAssetFolder(settings.AtlasFolderPath))
+            if (!IsValidAssetFolder(AtlasFolderPath))
             {
-                Debug.LogError($"AtlasRefWindow 图集目录无效：{settings.AtlasFolderPath}");
+                Debug.LogError($"AtlasRefWindow 图集目录无效：{AtlasFolderPath}");
                 return false;
             }
 
             return true;
         }
 
-        private void AnalysisAtlas()
+        private void AnalyzeReferences()
         {
             if (!ValidateAnalysisSettings())
             {
@@ -313,12 +316,12 @@ namespace DGame
                 return;
             }
 
-            m_listSpriteRef.Clear();
-            m_dicSpriteRef.Clear();
-            m_listPrefabRef.Clear();
-            m_dicPrefabRef.Clear();
-            m_listAtlasRef.Clear();
-            m_dicAtlasRef.Clear();
+            s_spriteRefDataList.Clear();
+            s_spriteRefDataBySprite.Clear();
+            s_prefabRefDataList.Clear();
+            s_prefabRefDataByPrefab.Clear();
+            s_atlasRefDataList.Clear();
+            s_atlasRefDataBySpriteFolder.Clear();
 
             string prefabPath = UIPrefabPath;
             DirectoryInfo dicInfo = new DirectoryInfo(prefabPath);
@@ -345,20 +348,20 @@ namespace DGame
                         {
                             var sprite = image.sprite;
                             var assetPath = AssetDatabase.GetAssetPath(sprite);
-                            var atlasPath = Path.GetDirectoryName(assetPath);
-                            var atlas = GetAtlas(sprite);
+                            var spriteFolderPath = Path.GetDirectoryName(assetPath);
+                            var atlas = ResolveSpriteAtlas(sprite);
 
-                            var hierarchyPath = GetHierarchyPath(image.transform, prefab.transform);
+                            var hierarchyPath = BuildHierarchyPath(image.transform, prefab.transform);
 
                             // Sprite 数据
                             bool isNewSprite = false;
                             var spriteRefInfo = new SpriteRefInfo(sprite, atlas, prefab, hierarchyPath);
-                            if (!m_dicSpriteRef.TryGetValue(sprite, out var spriteRefData))
+                            if (!s_spriteRefDataBySprite.TryGetValue(sprite, out var spriteRefData))
                             {
                                 isNewSprite = true;
                                 spriteRefData = new SpriteRefData(sprite, atlas);
-                                m_dicSpriteRef.Add(sprite, spriteRefData);
-                                m_listSpriteRef.Add(spriteRefData);
+                                s_spriteRefDataBySprite.Add(sprite, spriteRefData);
+                                s_spriteRefDataList.Add(spriteRefData);
                             }
                             if (!spriteRefData.PrefabInfoList.TryGetValue(prefab, out var spriteRefPrefabInfo))
                             {
@@ -368,25 +371,25 @@ namespace DGame
                             spriteRefPrefabInfo.RefList.Add(spriteRefInfo);
 
                             // Prefab 数据
-                            if (!m_dicPrefabRef.TryGetValue(prefab, out var prefabRefData))
+                            if (!s_prefabRefDataByPrefab.TryGetValue(prefab, out var prefabRefData))
                             {
                                 prefabRefData = new PrefabRefData(prefab);
-                                m_dicPrefabRef.Add(prefab, prefabRefData);
-                                m_listPrefabRef.Add(prefabRefData);
+                                s_prefabRefDataByPrefab.Add(prefab, prefabRefData);
+                                s_prefabRefDataList.Add(prefabRefData);
                             }
-                            if (!prefabRefData.AtlasInfoList.TryGetValue(atlasPath, out var atlasRefInfo))
+                            if (!prefabRefData.AtlasInfoList.TryGetValue(spriteFolderPath, out var atlasRefInfo))
                             {
                                 atlasRefInfo = new PrefabRefAtlasInfo(prefab, atlas);
-                                prefabRefData.AtlasInfoList.Add(atlasPath, atlasRefInfo);
+                                prefabRefData.AtlasInfoList.Add(spriteFolderPath, atlasRefInfo);
                             }
                             atlasRefInfo.RefList.Add(spriteRefInfo);
 
                             // Atlas 数据
-                            if (!m_dicAtlasRef.TryGetValue(atlasPath, out var atlasRefData))
+                            if (!s_atlasRefDataBySpriteFolder.TryGetValue(spriteFolderPath, out var atlasRefData))
                             {
-                                atlasRefData = new AtlasRefData(atlasPath, atlas);
-                                m_dicAtlasRef.Add(atlasPath, atlasRefData);
-                                m_listAtlasRef.Add(atlasRefData);
+                                atlasRefData = new AtlasRefData(spriteFolderPath, atlas);
+                                s_atlasRefDataBySpriteFolder.Add(spriteFolderPath, atlasRefData);
+                                s_atlasRefDataList.Add(atlasRefData);
                             }
                             if (isNewSprite)
                             {
@@ -400,18 +403,18 @@ namespace DGame
 
             EditorUtility.ClearProgressBar();
 
-            //处理没有引用的 Sprite
-            int atlasCount = m_listAtlasRef.Count;
+            // 补充已发现 Sprite 目录中未被 UI Prefab 引用的顶层 PNG Sprite。
+            int atlasCount = s_atlasRefDataList.Count;
             for (var atlasIndex = 0; atlasIndex < atlasCount; atlasIndex++)
             {
-                var atlasRefData = m_listAtlasRef[atlasIndex];
+                var atlasRefData = s_atlasRefDataList[atlasIndex];
                 var cancel = EditorUtility.DisplayCancelableProgressBar("分析图集", $"分析图集：{atlasIndex}/{atlasCount}", (float)atlasIndex / atlasCount);
                 if (cancel)
                 {
                     break;
                 }
-                var atlasPath = atlasRefData.AtlasPath;
-                DirectoryInfo atlasDirInfo = new DirectoryInfo(atlasPath);
+                var spriteFolderPath = atlasRefData.SpriteFolderPath;
+                DirectoryInfo atlasDirInfo = new DirectoryInfo(spriteFolderPath);
                 if (!atlasDirInfo.Exists)
                 {
                     continue;
@@ -422,11 +425,11 @@ namespace DGame
                     string path = spriteFileInfo.FullName;
                     string assePath = path.Substring(path.IndexOf("Assets", StringComparison.Ordinal));
                     Sprite sprite = AssetDatabase.LoadAssetAtPath(assePath, typeof(Sprite)) as Sprite;
-                    if (sprite != null && !m_dicSpriteRef.ContainsKey(sprite))
+                    if (sprite != null && !s_spriteRefDataBySprite.ContainsKey(sprite))
                     {
                         var spriteRefData = new SpriteRefData(sprite, atlasRefData.Atlas);
-                        m_dicSpriteRef.Add(sprite, spriteRefData);
-                        m_listSpriteRef.Add(spriteRefData);
+                        s_spriteRefDataBySprite.Add(sprite, spriteRefData);
+                        s_spriteRefDataList.Add(spriteRefData);
                         atlasRefData.SpriteList.Add(spriteRefData);
                     }
                 }
@@ -440,21 +443,21 @@ namespace DGame
 
             EditorUtility.ClearProgressBar();
 
-            m_listSpriteRef.Sort((x, y) => -x.PrefabInfoList.Count.CompareTo(y.PrefabInfoList.Count));
-            m_listPrefabRef.Sort((x, y) => -x.AtlasInfoList.Count.CompareTo(y.AtlasInfoList.Count));
-            m_listAtlasRef.Sort((x, y) => -x.PrefabInfoList.Count.CompareTo(y.PrefabInfoList.Count));
+            s_spriteRefDataList.Sort((x, y) => -x.PrefabInfoList.Count.CompareTo(y.PrefabInfoList.Count));
+            s_prefabRefDataList.Sort((x, y) => -x.AtlasInfoList.Count.CompareTo(y.AtlasInfoList.Count));
+            s_atlasRefDataList.Sort((x, y) => -x.PrefabInfoList.Count.CompareTo(y.PrefabInfoList.Count));
 
-            Debug.Log("AnalysisAtlas Complete");
+            Debug.Log("AtlasRefWindow 引用分析完成");
         }
 
-        private void AnalysisGameObject()
+        private void AnalyzeSelectedSceneObject()
         {
-            m_goRef = null;
+            m_selectedObjectReference = null;
 
             var prefab = Selection.activeGameObject;
             if (prefab != null)
             {
-                m_goRef = new PrefabRefData(prefab);
+                m_selectedObjectReference = new PrefabRefData(prefab);
 
                 var arrImage = prefab.GetComponentsInChildren<Image>(true);
                 for (int i = 0; i < arrImage.Length; i++)
@@ -464,16 +467,16 @@ namespace DGame
                     {
                         var sprite = image.sprite;
                         var assetPath = AssetDatabase.GetAssetPath(sprite);
-                        var atlasPath = Path.GetDirectoryName(assetPath);
-                        var atlas = GetAtlas(sprite);
+                        var spriteFolderPath = Path.GetDirectoryName(assetPath);
+                        var atlas = ResolveSpriteAtlas(sprite);
 
-                        var hierarchyPath = GetHierarchyPath(image.transform, prefab.transform);
+                        var hierarchyPath = BuildHierarchyPath(image.transform, prefab.transform);
 
                         var spriteRefInfo = new SpriteRefInfo(sprite, atlas, prefab, hierarchyPath);
-                        if (!m_goRef.AtlasInfoList.TryGetValue(atlasPath, out var atlasRefInfo))
+                        if (!m_selectedObjectReference.AtlasInfoList.TryGetValue(spriteFolderPath, out var atlasRefInfo))
                         {
                             atlasRefInfo = new PrefabRefAtlasInfo(prefab, atlas);
-                            m_goRef.AtlasInfoList.Add(atlasPath, atlasRefInfo);
+                            m_selectedObjectReference.AtlasInfoList.Add(spriteFolderPath, atlasRefInfo);
                         }
                         atlasRefInfo.RefList.Add(spriteRefInfo);
                     }
@@ -481,69 +484,113 @@ namespace DGame
             }
         }
 
-        private static SpriteAtlas GetAtlas(Sprite sprite)
+        private static SpriteAtlas ResolveSpriteAtlas(Sprite sprite)
         {
             var assetPath = AssetDatabase.GetAssetPath(sprite);
-            string atlasName = TextureHelper.GetPackageTag(assetPath);
-            var atlasFolderPath = AtlasRefWindowSettings.Instance?.AtlasFolderPath ?? DefaultAtlasFolderPath;
-            var path = $"{atlasFolderPath}/{atlasName}{AtlasExtension}";
+            string atlasName = EditorSpriteSaveInfo.ResolveAtlasName(assetPath);
+            var path = $"{AtlasFolderPath}/{atlasName}{AtlasExtension}";
             return AssetDatabase.LoadAssetAtPath<SpriteAtlas>(path);
         }
-
-        public static string GetHierarchyPath(Transform target, Transform root = null)
+        private static string BuildHierarchyPath(Transform target, Transform root = null)
         {
-            m_sbGetHierarchyPath.Clear();
-            m_sbGetHierarchyPath.Append(target.name);
+            s_hierarchyPathBuilder.Clear();
+            s_hierarchyPathBuilder.Append(target.name);
 
             var transform = target.parent;
             while (transform != root && transform != null)
             {
-                m_sbGetHierarchyPath.Insert(0, transform.name + "/");
+                s_hierarchyPathBuilder.Insert(0, transform.name + "/");
                 transform = transform.parent;
             }
 
-            //if (root != null)
-            //{
-            //    m_sbGetHierarchyPath.Insert(0, root.name + "/");
-            //}
-
-            return m_sbGetHierarchyPath.ToString();
+            return s_hierarchyPathBuilder.ToString();
         }
 
-        private static Texture2D MakeTex(int r, int g, int b, int a)
+        private static Texture2D CreateSolidTexture(int r, int g, int b, int a)
         {
             Color color = new Color(r / 255f, g / 255f, b / 255f, a / 255f);
-            Texture2D tex = new Texture2D(1, 1);
+            Texture2D tex = new Texture2D(1, 1)
+            {
+                hideFlags = HideFlags.HideAndDontSave,
+                filterMode = FilterMode.Point,
+            };
             tex.SetPixel(0, 0, color);
             tex.Apply();
             return tex;
         }
 
-        private void ShowObjectField(UnityEngine.Object obj, System.Type objType, bool allowSceneObjects, params GUILayoutOption[] options)
+        private void EnsureStyles()
         {
-            //EditorGUILayout.ObjectField(obj, objType, allowSceneObjects, options);
+            if (s_selectBackground == null)
+            {
+                s_selectBackground = CreateSolidTexture(52, 120, 210, EditorGUIUtility.isProSkin ? 72 : 45);
+            }
+
+            m_selectStyle ??= new GUIStyle(EditorStyles.helpBox)
+            {
+                padding = new RectOffset(6, 6, 3, 3),
+                margin = new RectOffset(0, 0, 1, 1),
+            };
+            m_selectStyle.normal.background = s_selectBackground;
+
+            m_panelStyle ??= new GUIStyle(EditorStyles.helpBox)
+            {
+                padding = new RectOffset(12, 12, 10, 10),
+                margin = new RectOffset(6, 6, 6, 6),
+            };
+            m_titleStyle ??= new GUIStyle(EditorStyles.boldLabel)
+            {
+                fontSize = 17,
+            };
+            m_subtitleStyle ??= new GUIStyle(EditorStyles.miniLabel)
+            {
+                wordWrap = true,
+                normal = { textColor = EditorGUIUtility.isProSkin
+                    ? new Color(0.72f, 0.72f, 0.72f)
+                    : new Color(0.35f, 0.35f, 0.35f) },
+            };
+            m_tableHeaderStyle ??= new GUIStyle(EditorStyles.toolbar)
+            {
+                fixedHeight = 24f,
+                padding = new RectOffset(6, 6, 3, 3),
+                fontStyle = FontStyle.Bold,
+            };
+            m_primaryButtonStyle ??= new GUIStyle(GUI.skin.button)
+            {
+                fontStyle = FontStyle.Bold,
+                fixedHeight = 28f,
+            };
+            m_metricValueStyle ??= new GUIStyle(EditorStyles.largeLabel)
+            {
+                alignment = TextAnchor.MiddleCenter,
+                fontSize = 18,
+                fontStyle = FontStyle.Bold,
+                normal = { textColor = EditorGUIUtility.isProSkin
+                    ? new Color(0.42f, 0.72f, 1f)
+                    : new Color(0.08f, 0.4f, 0.75f) },
+            };
+            m_metricLabelStyle ??= new GUIStyle(EditorStyles.centeredGreyMiniLabel)
+            {
+                alignment = TextAnchor.MiddleCenter,
+            };
+        }
+        private static void DrawObjectField(UnityEngine.Object obj, Type objType, bool allowSceneObjects, params GUILayoutOption[] options)
+        {
             var rect = EditorGUILayout.GetControlRect(false, 18f, options);
             EditorGUI.ObjectField(rect, obj, objType, allowSceneObjects);
 
             EventType eventType = Event.current.type;
-            //if (!GUI.enabled && Event.current.rawType == EventType.MouseDown)
-            //{
-            //    eventType = Event.current.rawType;
-            //}
-
-            // EditorGUI.ObjectField 内部调用了 Event.current.Use() 改变了 EventType ，所以这里用  EventType.Used 而不是 EventType.MouseDown
+            // ObjectField 会消费鼠标按下事件，因此这里通过 Used 判断对象字段是否被点击。
             if (eventType == EventType.Used)
             {
-                //var rect = GUILayoutUtility.GetLastRect();
                 if (rect.Contains(Event.current.mousePosition))
                 {
-                    //EditorGUIUtility.PingObject(obj);
                     Selection.activeObject = obj;
                 }
             }
         }
 
-        private string GetSpriteSize(Sprite sprite)
+        private static string FormatSpriteSize(Sprite sprite)
         {
             return sprite.texture.width + " x " + sprite.texture.height;
         }
@@ -554,7 +601,7 @@ namespace DGame
             m_stackData.RemoveAt(m_stackData.Count - 1);
 
             m_lastSelect = data.Data;
-            m_scrollPos = data.LastScrollPos;
+            m_scrollPosition = data.LastScrollPos;
             return data;
         }
 
@@ -566,20 +613,20 @@ namespace DGame
         private void PushStackData(RefStackData data)
         {
             m_stackData.Add(data);
-            m_scrollPos = Vector2.zero;
+            m_scrollPosition = Vector2.zero;
         }
 
         private void ShowMainToolbar()
         {
-            GUILayout.BeginHorizontal(EditorStyles.toolbar);
+            GUILayout.BeginHorizontal(EditorStyles.toolbar, GUILayout.Height(26f));
             GUILayout.FlexibleSpace();
-            if (GUILayout.Button(m_showSettings ? "返回结果" : "设置", EditorStyles.toolbarButton, GUILayout.Width(80)))
+            if (GUILayout.Button(m_showSettings ? "返回结果" : "设置", EditorStyles.toolbarButton,
+                    GUILayout.Width(80f), GUILayout.Height(22f)))
             {
                 m_showSettings = !m_showSettings;
             }
             GUILayout.EndHorizontal();
         }
-
         private void ShowSettings()
         {
             var settings = AtlasRefWindowSettings.Instance;
@@ -590,47 +637,66 @@ namespace DGame
             }
 
             m_settingsScrollPos = EditorGUILayout.BeginScrollView(m_settingsScrollPos);
-            EditorGUILayout.LabelField("AtlasRefWindow设置", EditorStyles.boldLabel);
-            EditorGUILayout.Space(6);
-
-            var atlasFolderPath = DrawFolderField("图集目录", settings.AtlasFolderPath, DefaultAtlasFolderPath);
-            if (atlasFolderPath != settings.AtlasFolderPath)
+            using (new EditorGUILayout.VerticalScope(m_panelStyle))
             {
-                settings.SetAtlasFolderPath(atlasFolderPath);
+                GUILayout.Label("Atlas 引用分析设置", m_titleStyle);
+                GUILayout.Label("设置参与扫描的 UI Prefab 根目录；图集目录和命名规则统一读取图集配置。",
+                    m_subtitleStyle);
             }
 
-            var uiPrefabFolderPath = DrawFolderField("UI Prefab目录", settings.UIPrefabFolderPath, DefaultUIPrefabFolderPath);
-            if (uiPrefabFolderPath != settings.UIPrefabFolderPath)
+            using (new EditorGUILayout.VerticalScope(m_panelStyle))
             {
-                settings.SetUIPrefabFolderPath(uiPrefabFolderPath);
+                GUILayout.Label("扫描目录", EditorStyles.boldLabel);
+                EditorGUILayout.Space(3f);
+
+                var uiPrefabFolderPath = DrawFolderField("UI Prefab 目录", settings.UIPrefabFolderPath,
+                    DEFAULT_UI_PREFAB_FOLDER_PATH);
+                if (uiPrefabFolderPath != settings.UIPrefabFolderPath)
+                {
+                    settings.SetUIPrefabFolderPath(uiPrefabFolderPath);
+                }
             }
 
-            EditorGUILayout.Space(6);
-            EditorGUILayout.LabelField("当前图集扩展名", AtlasExtension);
-            EditorGUILayout.HelpBox("扩展名来源：图集配置窗口中的“启用V2打包”设置。启用时使用 .spriteatlasv2，未启用时使用 .spriteatlas。", MessageType.Info);
-
-            if (!IsValidAssetFolder(settings.AtlasFolderPath))
+            using (new EditorGUILayout.VerticalScope(m_panelStyle))
             {
-                EditorGUILayout.HelpBox($"图集目录无效：{settings.AtlasFolderPath}", MessageType.Error);
+                GUILayout.Label("图集格式", EditorStyles.boldLabel);
+                EditorGUILayout.LabelField("图集输出目录", AtlasFolderPath);
+                EditorGUILayout.LabelField("当前扩展名", AtlasExtension);
+                EditorGUILayout.HelpBox(
+                    "扩展名来源：图集配置窗口中的“启用V2打包”设置。启用时使用 .spriteatlasv2，未启用时使用 .spriteatlas。",
+                    MessageType.Info);
+                EditorGUILayout.HelpBox(
+                    "图集资源目录与命名规则来自图集配置窗口中的收集目录、根目录子级图集和单张图集目录。",
+                    MessageType.Info);
+                if (GUILayout.Button("打开图集配置窗口", GUILayout.Width(140f)))
+                {
+                    AtlasConfigWindow.ShowWindow();
+                }
+
+                if (!IsValidAssetFolder(AtlasFolderPath))
+                {
+                    EditorGUILayout.HelpBox($"图集目录无效：{AtlasFolderPath}", MessageType.Error);
+                }
+
+                if (!IsValidAssetFolder(settings.UIPrefabFolderPath))
+                {
+                    EditorGUILayout.HelpBox($"UI Prefab 目录无效：{settings.UIPrefabFolderPath}", MessageType.Error);
+                }
             }
 
-            if (!IsValidAssetFolder(settings.UIPrefabFolderPath))
+            using (new EditorGUILayout.HorizontalScope())
             {
-                EditorGUILayout.HelpBox($"UI Prefab目录无效：{settings.UIPrefabFolderPath}", MessageType.Error);
-            }
+                GUILayout.FlexibleSpace();
+                if (GUILayout.Button("恢复默认", GUILayout.Width(120f), GUILayout.Height(28f)))
+                {
+                    settings.ResetToDefault();
+                }
 
-            EditorGUILayout.Space(6);
-            GUILayout.BeginHorizontal();
-            if (GUILayout.Button("恢复默认", GUILayout.Width(120)))
-            {
-                settings.ResetToDefault();
+                if (GUILayout.Button("返回分析结果", m_primaryButtonStyle, GUILayout.Width(140f)))
+                {
+                    m_showSettings = false;
+                }
             }
-
-            if (GUILayout.Button("返回结果", GUILayout.Width(120)))
-            {
-                m_showSettings = false;
-            }
-            GUILayout.EndHorizontal();
 
             EditorGUILayout.EndScrollView();
         }
@@ -669,9 +735,7 @@ namespace DGame
 
         void OnGUI()
         {
-            m_selectStyle = new GUIStyle(GUI.skin.box);
-            // 设置背景颜色
-            m_selectStyle.normal.background = m_selectBackground;
+            EnsureStyles();
 
             if (m_stackData.Count == 0)
             {
@@ -685,11 +749,23 @@ namespace DGame
                 return;
             }
 
+            ShowSummaryHeader();
             if (m_stackData.Count > 1)
             {
-                if (GUILayout.Button("返回"))
+                using (new EditorGUILayout.HorizontalScope(m_panelStyle))
                 {
-                    PopStackData();
+                    GUILayout.FlexibleSpace();
+                    GUILayout.Label($"引用路径 · {m_stackData.Count - 1} 层",
+                        EditorStyles.centeredGreyMiniLabel, GUILayout.Width(110f), GUILayout.Height(28f));
+                    GUILayout.Space(8f);
+
+                    Color oldBackgroundColor = GUI.backgroundColor;
+                    GUI.backgroundColor = new Color(0.35f, 0.65f, 1f);
+                    if (GUILayout.Button("←  返回上一级", m_primaryButtonStyle, GUILayout.Width(135f)))
+                    {
+                        PopStackData();
+                    }
+                    GUI.backgroundColor = oldBackgroundColor;
                 }
 
                 foreach (var data in m_stackData)
@@ -760,8 +836,8 @@ namespace DGame
                     }
                 }
 
-                GUILayout.Box("", m_selectStyle, GUILayout.ExpandWidth(true), GUILayout.Height(2));
-                GUILayout.Space(10);
+                EditorGUILayout.LabelField(string.Empty, GUI.skin.horizontalSlider);
+                GUILayout.Space(6f);
             }
 
             var showType = PeekStackData().ShowType;
@@ -801,31 +877,142 @@ namespace DGame
             }
         }
 
+        private void ShowSummaryHeader()
+        {
+            using (new EditorGUILayout.VerticalScope(m_panelStyle))
+            {
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    GUILayout.Label("图集资源引用概览", m_titleStyle);
+                    GUILayout.FlexibleSpace();
+                    DrawMetric("Sprite", s_spriteRefDataList.Count);
+                    DrawMetricSeparator();
+                    DrawMetric("Prefab", s_prefabRefDataList.Count);
+                    DrawMetricSeparator();
+                    DrawMetric("Atlas", s_atlasRefDataList.Count);
+                }
+
+                GUILayout.Label("分析 UI Prefab、Sprite 与 SpriteAtlas 之间的引用关系，点击对象字段可在 Project 中定位资源。",
+                    m_subtitleStyle);
+            }
+        }
+
+        private void DrawMetric(string label, int value, float width = 72f)
+        {
+            using (new EditorGUILayout.VerticalScope(GUILayout.Width(width)))
+            {
+                GUILayout.Label(value.ToString(), m_metricValueStyle, GUILayout.Height(22f));
+                GUILayout.Label(label, m_metricLabelStyle, GUILayout.Height(16f));
+            }
+        }
+
+        private static void DrawMetricSeparator()
+        {
+            Rect separatorRect = GUILayoutUtility.GetRect(1f, 34f, GUILayout.Width(1f), GUILayout.Height(34f));
+            EditorGUI.DrawRect(separatorRect, EditorGUIUtility.isProSkin
+                ? new Color(1f, 1f, 1f, 0.15f)
+                : new Color(0f, 0f, 0f, 0.15f));
+        }
+
         private void ShowTypeToolbar()
         {
-            var type = (InspectType)GUILayout.Toolbar((int)ActiveInspectType, inspectToolbarStrings);
-            if (type != ActiveInspectType)
+            InspectType type;
+            using (new EditorGUILayout.HorizontalScope())
             {
-                ActiveInspectType = type;
-                switch (ActiveInspectType)
+                GUILayout.Space(6f);
+                type = (InspectType)GUILayout.Toolbar((int)m_activeInspectType, INSPECT_TOOLBAR_LABELS,
+                    GUILayout.Height(30f));
+                GUILayout.Space(6f);
+            }
+
+            if (type == m_activeInspectType)
+            {
+                return;
+            }
+
+            m_activeInspectType = type;
+            switch (m_activeInspectType)
+            {
+                case InspectType.Sprite:
+                    PopStackData();
+                    PushStackData(new RefStackData(ShowType.Sprite, null, Vector2.zero));
+                    break;
+                case InspectType.Prefab:
+                    PopStackData();
+                    PushStackData(new RefStackData(ShowType.Prefab, null, Vector2.zero));
+                    break;
+                case InspectType.Atlas:
+                    PopStackData();
+                    PushStackData(new RefStackData(ShowType.Atlas, null, Vector2.zero));
+                    break;
+                case InspectType.SceneGameObject:
+                    PopStackData();
+                    PushStackData(new RefStackData(ShowType.SceneGameObject, null, Vector2.zero));
+                    break;
+            }
+        }
+
+        private void DrawAnalysisPanel(string title, string description, int resultCount, Action analysisAction,
+            string buttonText = "重新分析")
+        {
+            using (new EditorGUILayout.VerticalScope(m_panelStyle))
+            {
+                using (new EditorGUILayout.HorizontalScope())
                 {
-                    case InspectType.Sprite:
-                        PopStackData();
-                        PushStackData(new RefStackData(ShowType.Sprite, null, Vector2.zero));
-                        break;
-                    case InspectType.Prefab:
-                        PopStackData();
-                        PushStackData(new RefStackData(ShowType.Prefab, null, Vector2.zero));
-                        break;
-                    case InspectType.Atlas:
-                        PopStackData();
-                        PushStackData(new RefStackData(ShowType.Atlas, null, Vector2.zero));
-                        break;
-                    case InspectType.SceneGameObject:
-                        PopStackData();
-                        PushStackData(new RefStackData(ShowType.SceneGameObject, null, Vector2.zero));
-                        break;
+                    GUILayout.Label(title, EditorStyles.boldLabel);
+                    GUILayout.FlexibleSpace();
+                    DrawMetric("结果", resultCount, 64f);
+                    GUILayout.Space(8f);
+                    if (GUILayout.Button(new GUIContent(buttonText,
+                            EditorGUIUtility.IconContent("Refresh").image), m_primaryButtonStyle,
+                        GUILayout.Width(140f)))
+                    {
+                        analysisAction?.Invoke();
+                    }
                 }
+
+                GUILayout.Label(description, m_subtitleStyle);
+            }
+        }
+
+        private string DrawSearchToolbar(string searchText, string placeholder)
+        {
+            using (new EditorGUILayout.HorizontalScope(EditorStyles.toolbar))
+            {
+                GUILayout.Label(EditorGUIUtility.IconContent("Search Icon"), GUILayout.Width(22f));
+                GUIStyle searchStyle = GUI.skin.FindStyle("ToolbarSearchTextField")
+                                       ?? EditorStyles.toolbarTextField;
+                searchText = GUILayout.TextField(searchText ?? string.Empty, searchStyle,
+                    GUILayout.ExpandWidth(true));
+                if (string.IsNullOrEmpty(searchText))
+                {
+                    GUILayout.Label(placeholder, EditorStyles.centeredGreyMiniLabel, GUILayout.Width(160f));
+                }
+
+                if (GUILayout.Button("清空", EditorStyles.toolbarButton, GUILayout.Width(50f)))
+                {
+                    GUI.FocusControl(null);
+                    searchText = string.Empty;
+                }
+            }
+
+            return searchText;
+        }
+
+        private void DrawEmptyState(string message)
+        {
+            using (new EditorGUILayout.VerticalScope(m_panelStyle, GUILayout.MinHeight(90f)))
+            {
+                GUILayout.FlexibleSpace();
+                GUILayout.Label(EditorGUIUtility.IconContent("console.infoicon"),
+                    new GUIStyle(EditorStyles.label) { alignment = TextAnchor.MiddleCenter },
+                    GUILayout.Height(24f));
+                GUILayout.Label(message, new GUIStyle(EditorStyles.centeredGreyMiniLabel)
+                {
+                    fontSize = 12,
+                    wordWrap = true,
+                });
+                GUILayout.FlexibleSpace();
             }
         }
 
@@ -835,25 +1022,23 @@ namespace DGame
 
         private void ShowSprite()
         {
-            if (GUILayout.Button("分析图集"))
-            {
-                AnalysisAtlas();
-            }
+            ShowTypeToolbar();
+            DrawAnalysisPanel("Sprite 引用", "查看每个 Sprite 所属图集及被 UI Prefab 引用的数量。",
+                s_spriteRefDataList.Count, AnalyzeReferences, s_spriteRefDataList.Count > 0 ? "重新分析" : "开始分析");
 
-            if (m_listSpriteRef.Count == 0)
+            if (s_spriteRefDataList.Count == 0)
             {
+                DrawEmptyState("暂无 Sprite 引用数据，点击“开始分析”扫描当前配置目录。");
                 return;
             }
 
-            ShowTypeToolbar();
-
-            m_searchSpriteName = EditorGUILayout.TextField("搜索：", m_searchSpriteName);
+            m_searchSpriteName = DrawSearchToolbar(m_searchSpriteName, "按 Sprite 名称筛选");
 
             ShowSpriteTitle();
-            m_scrollPos = EditorGUILayout.BeginScrollView(m_scrollPos);
-            for (var index = 0; index < m_listSpriteRef.Count; index++)
+            m_scrollPosition = EditorGUILayout.BeginScrollView(m_scrollPosition);
+            for (var index = 0; index < s_spriteRefDataList.Count; index++)
             {
-                var data = m_listSpriteRef[index];
+                var data = s_spriteRefDataList[index];
                 if (!string.IsNullOrEmpty(m_searchSpriteName) && !data.Sprite.name.Contains(m_searchSpriteName, StringComparison.OrdinalIgnoreCase))
                 {
                     continue;
@@ -869,7 +1054,7 @@ namespace DGame
                 ShowSpriteItem(data);
                 if (GUILayout.Button("查看引用原因", GUILayout.Width(150)))
                 {
-                    PushStackData(new RefStackData(ShowType.SpritePrefab, data, m_scrollPos));
+                    PushStackData(new RefStackData(ShowType.SpritePrefab, data, m_scrollPosition));
                 }
                 GUILayout.EndHorizontal();
             }
@@ -878,7 +1063,7 @@ namespace DGame
 
         private void ShowSpriteTitle()
         {
-            GUILayout.BeginHorizontal();
+            GUILayout.BeginHorizontal(m_tableHeaderStyle);
             GUILayout.Label("Sprite", GUILayout.Width(200));
             GUILayout.Label("所属图集", GUILayout.Width(200));
             GUILayout.Label("引用Prefab数量", GUILayout.Width(100));
@@ -888,22 +1073,13 @@ namespace DGame
 
         private void ShowSpriteItem(SpriteRefData data)
         {
-            //GUILayout.Label(data.Sprite.name, GUILayout.Width(m_spriteNameWidth));
-            //GUILayout.Box(data.Sprite.texture, GUILayout.Width(m_spriteSize), GUILayout.Height(m_spriteSize));
-            //var boxRect = GUILayoutUtility.GetLastRect();
-            //if (Event.current.type == EventType.MouseDown && boxRect.Contains(Event.current.mousePosition))
-            //{
-            //    EditorGUIUtility.PingObject(data.Sprite);
-            //}
-
             EditorGUI.BeginDisabledGroup(true);
-            ShowObjectField(data.Sprite, typeof(Sprite), false, GUILayout.Width(200));
-            ShowObjectField(data.Atlas, typeof(SpriteAtlas), false, GUILayout.Width(200));
-            //GUILayout.Label(data.Atlas, GUILayout.Width(200));
+            DrawObjectField(data.Sprite, typeof(Sprite), false, GUILayout.Width(200));
+            DrawObjectField(data.Atlas, typeof(SpriteAtlas), false, GUILayout.Width(200));
             EditorGUI.EndDisabledGroup();
 
             GUILayout.Label(data.PrefabInfoList.Count.ToString(), GUILayout.Width(100));
-            GUILayout.Label(GetSpriteSize(data.Sprite), GUILayout.Width(100));
+            GUILayout.Label(FormatSpriteSize(data.Sprite), GUILayout.Width(100));
         }
 
         #endregion
@@ -916,7 +1092,7 @@ namespace DGame
             if (curData != null)
             {
                 ShowSpritePrefabTitle();
-                m_scrollPos = EditorGUILayout.BeginScrollView(m_scrollPos);
+                m_scrollPosition = EditorGUILayout.BeginScrollView(m_scrollPosition);
                 foreach (var iter in curData.PrefabInfoList)
                 {
                     var data = iter.Value;
@@ -931,7 +1107,7 @@ namespace DGame
                     ShowSpritePrefabItem(data);
                     if (GUILayout.Button("查看引用原因", GUILayout.Width(150)))
                     {
-                        PushStackData(new RefStackData(ShowType.SpritePrefabReason, data, m_scrollPos));
+                        PushStackData(new RefStackData(ShowType.SpritePrefabReason, data, m_scrollPosition));
                     }
                     GUILayout.EndHorizontal();
                 }
@@ -942,7 +1118,7 @@ namespace DGame
 
         private void ShowSpritePrefabTitle()
         {
-            GUILayout.BeginHorizontal();
+            GUILayout.BeginHorizontal(m_tableHeaderStyle);
             GUILayout.Label("Prefab", GUILayout.Width(200));
             GUILayout.Label("引用数量", GUILayout.Width(100));
             GUILayout.EndHorizontal();
@@ -951,7 +1127,7 @@ namespace DGame
         private void ShowSpritePrefabItem(SpriteRefPrefabInfo data)
         {
             EditorGUI.BeginDisabledGroup(true);
-            ShowObjectField(data.Prefab, typeof(GameObject), false, GUILayout.Width(200));
+            DrawObjectField(data.Prefab, typeof(GameObject), false, GUILayout.Width(200));
             EditorGUI.EndDisabledGroup();
             GUILayout.Label(data.RefList.Count.ToString(), GUILayout.Width(100));
         }
@@ -966,7 +1142,7 @@ namespace DGame
             if (curData != null)
             {
                 ShowSpritePrefabReasonTitle();
-                m_scrollPos = EditorGUILayout.BeginScrollView(m_scrollPos);
+                m_scrollPosition = EditorGUILayout.BeginScrollView(m_scrollPosition);
                 foreach (var data in curData.RefList)
                 {
                     GUILayout.BeginHorizontal();
@@ -979,7 +1155,7 @@ namespace DGame
 
         private void ShowSpritePrefabReasonTitle()
         {
-            GUILayout.BeginHorizontal();
+            GUILayout.BeginHorizontal(m_tableHeaderStyle);
             GUILayout.Label("Prefab", GUILayout.Width(200));
             GUILayout.Label("图集", GUILayout.Width(200));
             GUILayout.Label("Sprite", GUILayout.Width(200));
@@ -991,12 +1167,12 @@ namespace DGame
         private void ShowSpritePrefabReasonItem(SpriteRefInfo data)
         {
             EditorGUI.BeginDisabledGroup(true);
-            ShowObjectField(data.Prefab, typeof(GameObject), false, GUILayout.Width(200));
-            ShowObjectField(data.Atlas, typeof(SpriteAtlas), false, GUILayout.Width(200));
-            ShowObjectField(data.Sprite, typeof(Sprite), false, GUILayout.Width(200));
+            DrawObjectField(data.Prefab, typeof(GameObject), false, GUILayout.Width(200));
+            DrawObjectField(data.Atlas, typeof(SpriteAtlas), false, GUILayout.Width(200));
+            DrawObjectField(data.Sprite, typeof(Sprite), false, GUILayout.Width(200));
             EditorGUI.EndDisabledGroup();
             int spriteRefPrefabCnt = 0;
-            if (m_dicSpriteRef.TryGetValue(data.Sprite, out var spriteRefData))
+            if (s_spriteRefDataBySprite.TryGetValue(data.Sprite, out var spriteRefData))
             {
                 spriteRefPrefabCnt = spriteRefData.PrefabInfoList.Count;
             }
@@ -1007,7 +1183,7 @@ namespace DGame
             {
                 if (m_stackData[0].ShowType == ShowType.SceneGameObject)
                 {
-                    Transform targetChild = m_goRef.Prefab.transform.Find(data.HierarchyPath);
+                    Transform targetChild = m_selectedObjectReference.Prefab.transform.Find(data.HierarchyPath);
                     if (targetChild != null)
                     {
                         EditorGUIUtility.PingObject(targetChild.gameObject);
@@ -1040,25 +1216,23 @@ namespace DGame
 
         private void ShowPrefab()
         {
-            if (GUILayout.Button("分析图集"))
-            {
-                AnalysisAtlas();
-            }
+            ShowTypeToolbar();
+            DrawAnalysisPanel("Prefab 引用", "查看每个 UI Prefab 使用的 SpriteAtlas 及引用详情。",
+                s_prefabRefDataList.Count, AnalyzeReferences, s_prefabRefDataList.Count > 0 ? "重新分析" : "开始分析");
 
-            if (m_listPrefabRef.Count == 0)
+            if (s_prefabRefDataList.Count == 0)
             {
+                DrawEmptyState("暂无 Prefab 引用数据，点击“开始分析”扫描当前配置目录。");
                 return;
             }
 
-            ShowTypeToolbar();
-
-            m_searchPrefabName = EditorGUILayout.TextField("搜索：", m_searchPrefabName);
+            m_searchPrefabName = DrawSearchToolbar(m_searchPrefabName, "按 Prefab 名称筛选");
 
             ShowPrefabTitle();
-            m_scrollPos = EditorGUILayout.BeginScrollView(m_scrollPos);
-            for (var index = 0; index < m_listPrefabRef.Count; index++)
+            m_scrollPosition = EditorGUILayout.BeginScrollView(m_scrollPosition);
+            for (var index = 0; index < s_prefabRefDataList.Count; index++)
             {
-                var data = m_listPrefabRef[index];
+                var data = s_prefabRefDataList[index];
                 if (!string.IsNullOrEmpty(m_searchPrefabName) && !data.Prefab.name.Contains(m_searchPrefabName, StringComparison.OrdinalIgnoreCase))
                 {
                     continue;
@@ -1074,7 +1248,7 @@ namespace DGame
                 ShowPrefabItem(data);
                 if (GUILayout.Button("查看引用原因", GUILayout.Width(150)))
                 {
-                    PushStackData(new RefStackData(ShowType.PrefabAtlas, data, m_scrollPos));
+                    PushStackData(new RefStackData(ShowType.PrefabAtlas, data, m_scrollPosition));
                 }
                 GUILayout.EndHorizontal();
             }
@@ -1083,7 +1257,7 @@ namespace DGame
 
         private void ShowPrefabTitle()
         {
-            GUILayout.BeginHorizontal();
+            GUILayout.BeginHorizontal(m_tableHeaderStyle);
             GUILayout.Label("Prefab", GUILayout.Width(200));
             GUILayout.Label("引用图集数量", GUILayout.Width(200));
             GUILayout.EndHorizontal();
@@ -1092,11 +1266,9 @@ namespace DGame
         private void ShowPrefabItem(PrefabRefData data)
         {
             EditorGUI.BeginDisabledGroup(true);
-            ShowObjectField(data.Prefab, typeof(GameObject), false, GUILayout.Width(200));
+            DrawObjectField(data.Prefab, typeof(GameObject), false, GUILayout.Width(200));
             EditorGUI.EndDisabledGroup();
             GUILayout.Label(data.AtlasInfoList.Count.ToString(), GUILayout.Width(100));
-            //GUILayout.Label(data.Atlas, GUILayout.Width(200));
-            //EditorGUILayout.TextField(data.HierarchyPath, GUILayout.Width(300));
         }
 
         #endregion
@@ -1109,7 +1281,7 @@ namespace DGame
             if (curData != null)
             {
                 ShowPrefabAtlasTitle();
-                m_scrollPos = EditorGUILayout.BeginScrollView(m_scrollPos);
+                m_scrollPosition = EditorGUILayout.BeginScrollView(m_scrollPosition);
                 foreach (var iter in curData.AtlasInfoList)
                 {
                     var data = iter.Value;
@@ -1124,7 +1296,7 @@ namespace DGame
                     ShowPrefabAtlasItem(data);
                     if (GUILayout.Button("查看引用原因", GUILayout.Width(150)))
                     {
-                        PushStackData(new RefStackData(ShowType.PrefabAtlasReason, data, m_scrollPos));
+                        PushStackData(new RefStackData(ShowType.PrefabAtlasReason, data, m_scrollPosition));
                     }
                     GUILayout.EndHorizontal();
                 }
@@ -1135,7 +1307,7 @@ namespace DGame
 
         private void ShowPrefabAtlasTitle()
         {
-            GUILayout.BeginHorizontal();
+            GUILayout.BeginHorizontal(m_tableHeaderStyle);
             GUILayout.Label("图集", GUILayout.Width(200));
             GUILayout.Label("引用数量", GUILayout.Width(200));
             GUILayout.EndHorizontal();
@@ -1144,7 +1316,7 @@ namespace DGame
         private void ShowPrefabAtlasItem(PrefabRefAtlasInfo data)
         {
             EditorGUI.BeginDisabledGroup(true);
-            ShowObjectField(data.Atlas, typeof(SpriteAtlas), false, GUILayout.Width(200));
+            DrawObjectField(data.Atlas, typeof(SpriteAtlas), false, GUILayout.Width(200));
             EditorGUI.EndDisabledGroup();
 
             GUILayout.Label(data.RefList.Count.ToString(), GUILayout.Width(100));
@@ -1160,16 +1332,16 @@ namespace DGame
             if (curData != null)
             {
                 ShowSpritePrefabReasonTitle();
-                m_scrollPos = EditorGUILayout.BeginScrollView(m_scrollPos);
+                m_scrollPosition = EditorGUILayout.BeginScrollView(m_scrollPosition);
                 foreach (var data in curData.RefList)
                 {
                     GUILayout.BeginHorizontal();
                     ShowSpritePrefabReasonItem(data);
                     if (GUILayout.Button("查看Sprite引用", GUILayout.Width(150)))
                     {
-                        if (m_dicSpriteRef.TryGetValue(data.Sprite, out var spriteData))
+                        if (s_spriteRefDataBySprite.TryGetValue(data.Sprite, out var spriteData))
                         {
-                            PushStackData(new RefStackData(ShowType.SpritePrefab, spriteData, m_scrollPos));
+                            PushStackData(new RefStackData(ShowType.SpritePrefab, spriteData, m_scrollPosition));
                         }
                     }
                     GUILayout.EndHorizontal();
@@ -1188,26 +1360,24 @@ namespace DGame
 
         private void ShowAtlas()
         {
-            if (GUILayout.Button("分析图集"))
-            {
-                AnalysisAtlas();
-            }
+            ShowTypeToolbar();
+            DrawAnalysisPanel("Atlas 引用", "查看每个 SpriteAtlas 包含的 Sprite 与引用它的 UI Prefab。",
+                s_atlasRefDataList.Count, AnalyzeReferences, s_atlasRefDataList.Count > 0 ? "重新分析" : "开始分析");
 
-            if (m_listAtlasRef.Count == 0)
+            if (s_atlasRefDataList.Count == 0)
             {
+                DrawEmptyState("暂无 Atlas 引用数据，点击“开始分析”扫描当前配置目录。");
                 return;
             }
 
-            ShowTypeToolbar();
-
-            m_searchAtlasName = EditorGUILayout.TextField("搜索：", m_searchAtlasName);
+            m_searchAtlasName = DrawSearchToolbar(m_searchAtlasName, "按 Atlas 路径筛选");
 
             ShowAtlasTitle();
-            m_scrollPos = EditorGUILayout.BeginScrollView(m_scrollPos);
-            for (var index = 0; index < m_listAtlasRef.Count; index++)
+            m_scrollPosition = EditorGUILayout.BeginScrollView(m_scrollPosition);
+            for (var index = 0; index < s_atlasRefDataList.Count; index++)
             {
-                var data = m_listAtlasRef[index];
-                if (!string.IsNullOrEmpty(m_searchAtlasName) && !data.AtlasPath.Contains(m_searchAtlasName, StringComparison.OrdinalIgnoreCase))
+                var data = s_atlasRefDataList[index];
+                if (!string.IsNullOrEmpty(m_searchAtlasName) && !data.SpriteFolderPath.Contains(m_searchAtlasName, StringComparison.OrdinalIgnoreCase))
                 {
                     continue;
                 }
@@ -1222,11 +1392,11 @@ namespace DGame
                 ShowAtlasItem(data);
                 if (GUILayout.Button("查看包含Sprite", GUILayout.Width(150)))
                 {
-                    PushStackData(new RefStackData(ShowType.AtlasSprite, data, m_scrollPos));
+                    PushStackData(new RefStackData(ShowType.AtlasSprite, data, m_scrollPosition));
                 }
                 if (GUILayout.Button("查看引用Prefab", GUILayout.Width(150)))
                 {
-                    PushStackData(new RefStackData(ShowType.AtlasPrefab, data, m_scrollPos));
+                    PushStackData(new RefStackData(ShowType.AtlasPrefab, data, m_scrollPosition));
                 }
                 GUILayout.EndHorizontal();
             }
@@ -1235,7 +1405,7 @@ namespace DGame
 
         private void ShowAtlasTitle()
         {
-            GUILayout.BeginHorizontal();
+            GUILayout.BeginHorizontal(m_tableHeaderStyle);
             GUILayout.Label("图集", GUILayout.Width(200));
             GUILayout.Label("包含Sprite数量", GUILayout.Width(100));
             GUILayout.Label("引用Prefab数量", GUILayout.Width(100));
@@ -1245,7 +1415,7 @@ namespace DGame
         private void ShowAtlasItem(AtlasRefData data)
         {
             EditorGUI.BeginDisabledGroup(true);
-            ShowObjectField(data.Atlas, typeof(SpriteAtlas), false, GUILayout.Width(200));
+            DrawObjectField(data.Atlas, typeof(SpriteAtlas), false, GUILayout.Width(200));
             EditorGUI.EndDisabledGroup();
             GUILayout.Label(data.SpriteList.Count.ToString(), GUILayout.Width(100));
             GUILayout.Label(data.PrefabInfoList.Count.ToString(), GUILayout.Width(100));
@@ -1261,7 +1431,7 @@ namespace DGame
             if (curData != null)
             {
                 ShowSpriteTitle();
-                m_scrollPos = EditorGUILayout.BeginScrollView(m_scrollPos);
+                m_scrollPosition = EditorGUILayout.BeginScrollView(m_scrollPosition);
                 foreach (var data in curData.SpriteList)
                 {
                     if (data == m_lastSelect)
@@ -1275,7 +1445,7 @@ namespace DGame
                     ShowSpriteItem(data);
                     if (GUILayout.Button("查看引用原因", GUILayout.Width(150)))
                     {
-                        PushStackData(new RefStackData(ShowType.SpritePrefab, data, m_scrollPos));
+                        PushStackData(new RefStackData(ShowType.SpritePrefab, data, m_scrollPosition));
                     }
                     GUILayout.EndHorizontal();
                 }
@@ -1294,7 +1464,7 @@ namespace DGame
             if (curData != null)
             {
                 ShowAtlasPrefabTitle();
-                m_scrollPos = EditorGUILayout.BeginScrollView(m_scrollPos);
+                m_scrollPosition = EditorGUILayout.BeginScrollView(m_scrollPosition);
                 foreach (var iter in curData.PrefabInfoList)
                 {
                     var data = iter.Value;
@@ -1309,7 +1479,7 @@ namespace DGame
                     ShowAtlasPrefabItem(data);
                     if (GUILayout.Button("查看引用原因", GUILayout.Width(150)))
                     {
-                        PushStackData(new RefStackData(ShowType.AtlasPrefabReason, data, m_scrollPos));
+                        PushStackData(new RefStackData(ShowType.AtlasPrefabReason, data, m_scrollPosition));
                     }
                     GUILayout.EndHorizontal();
                 }
@@ -1319,7 +1489,7 @@ namespace DGame
 
         private void ShowAtlasPrefabTitle()
         {
-            GUILayout.BeginHorizontal();
+            GUILayout.BeginHorizontal(m_tableHeaderStyle);
             GUILayout.Label("Prefab", GUILayout.Width(200));
             GUILayout.Label("引用数量", GUILayout.Width(200));
             GUILayout.EndHorizontal();
@@ -1328,7 +1498,7 @@ namespace DGame
         private void ShowAtlasPrefabItem(PrefabRefAtlasInfo data)
         {
             EditorGUI.BeginDisabledGroup(true);
-            ShowObjectField(data.Prefab, typeof(SpriteAtlas), false, GUILayout.Width(200));
+            DrawObjectField(data.Prefab, typeof(SpriteAtlas), false, GUILayout.Width(200));
             EditorGUI.EndDisabledGroup();
 
             GUILayout.Label(data.RefList.Count.ToString(), GUILayout.Width(100));
@@ -1342,31 +1512,45 @@ namespace DGame
 
         private void ShowSceneGameObject()
         {
-            if (GUILayout.Button("分析图集"))
-            {
-                AnalysisAtlas();
-            }
+            ShowTypeToolbar();
+            DrawAnalysisPanel("场景物体引用", "先刷新 Atlas 引用索引，再分析 Hierarchy 中当前选中的场景物体。",
+                m_selectedObjectReference?.AtlasInfoList.Count ?? 0, AnalyzeReferences,
+                s_prefabRefDataList.Count > 0 ? "刷新引用索引" : "生成引用索引");
 
-            if (m_listPrefabRef.Count == 0)
+            if (s_prefabRefDataList.Count == 0)
             {
+                DrawEmptyState("尚未生成引用索引，请先点击“生成引用索引”。");
                 return;
             }
 
-            ShowTypeToolbar();
-
-            if (GUILayout.Button("分析选中场景物体"))
+            using (new EditorGUILayout.VerticalScope(m_panelStyle))
             {
-                AnalysisGameObject();
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    GUILayout.Label("当前选择", EditorStyles.boldLabel);
+                    GUILayout.FlexibleSpace();
+                    if (GUILayout.Button(new GUIContent("分析选中场景物体",
+                            EditorGUIUtility.IconContent("d_SceneViewOrtho").image), m_primaryButtonStyle,
+                        GUILayout.Width(170f)))
+                    {
+                        AnalyzeSelectedSceneObject();
+                    }
+                }
+
+                if (Selection.activeGameObject == null)
+                {
+                    EditorGUILayout.HelpBox("请先在 Hierarchy 中选择一个场景物体。", MessageType.Info);
+                }
             }
 
             ShowSceneGameObjectTitle();
             GUILayout.BeginHorizontal();
-            ShowSceneGameObjectItem(m_goRef);
-            if (m_goRef != null)
+            ShowSceneGameObjectItem(m_selectedObjectReference);
+            if (m_selectedObjectReference != null)
             {
                 if (GUILayout.Button("查看引用原因", GUILayout.Width(150)))
                 {
-                    PushStackData(new RefStackData(ShowType.PrefabAtlas, m_goRef, m_scrollPos));
+                    PushStackData(new RefStackData(ShowType.PrefabAtlas, m_selectedObjectReference, m_scrollPosition));
                 }
             }
             GUILayout.EndHorizontal();
@@ -1374,7 +1558,7 @@ namespace DGame
 
         private void ShowSceneGameObjectTitle()
         {
-            GUILayout.BeginHorizontal();
+            GUILayout.BeginHorizontal(m_tableHeaderStyle);
             GUILayout.Label("当前选中场景物体", GUILayout.Width(200));
             GUILayout.Label("引用图集数量", GUILayout.Width(200));
             GUILayout.EndHorizontal();
@@ -1383,7 +1567,7 @@ namespace DGame
         private void ShowSceneGameObjectItem(PrefabRefData data)
         {
             EditorGUI.BeginDisabledGroup(true);
-            ShowObjectField(data != null ? data.Prefab : null, typeof(GameObject), true, GUILayout.Width(200));
+            DrawObjectField(data != null ? data.Prefab : null, typeof(GameObject), true, GUILayout.Width(200));
             EditorGUI.EndDisabledGroup();
             int count = data != null ? data.AtlasInfoList.Count : 0;
             GUILayout.Label(count.ToString(), GUILayout.Width(100));

@@ -409,20 +409,11 @@ namespace DGame
             }
 
             // 获取图集名字
-            var atlasName = GetAtlasName(spritePath);
+            var atlasName = ResolveAtlasName(spritePath);
 
             if (string.IsNullOrEmpty(atlasName))
             {
                 return;
-            }
-
-            if (CheckIsNeedGenerateSingleAtlas(spritePath))
-            {
-                atlasName = GetSingleAtlasName(spritePath);
-            }
-            else if (CheckIsNeedGenerateRootChildDirAtlas(spritePath))
-            {
-                atlasName = GetRootChildDirAtlasName(spritePath);
             }
 
             // 缓存sprite到图集缓存中
@@ -447,20 +438,11 @@ namespace DGame
             {
                 return;
             }
-            var atlasName = GetAtlasName(spritePath);
+            var atlasName = ResolveAtlasName(spritePath);
 
             if (string.IsNullOrEmpty(atlasName))
             {
                 return;
-            }
-
-            if (CheckIsNeedGenerateSingleAtlas(spritePath))
-            {
-                atlasName = GetSingleAtlasName(spritePath);
-            }
-            else if (CheckIsNeedGenerateRootChildDirAtlas(spritePath))
-            {
-                atlasName = GetRootChildDirAtlasName(spritePath);
             }
 
             if (m_atlasMap.TryGetValue(atlasName, out var atlasList))
@@ -544,6 +526,31 @@ namespace DGame
             {
                 ProcessDirtyAtlases();
             }
+        }
+
+        /// <summary>
+        /// 根据 AtlasConfig 的目录规则解析 Sprite 对应的图集名称。
+        /// </summary>
+        public static string ResolveAtlasName(string spritePath)
+        {
+            spritePath = spritePath.Replace("\\", "/");
+            string atlasName = GetAtlasName(spritePath);
+            if (string.IsNullOrEmpty(atlasName))
+            {
+                return atlasName;
+            }
+
+            if (CheckIsNeedGenerateSingleAtlas(spritePath))
+            {
+                return GetSingleAtlasName(spritePath);
+            }
+
+            if (CheckIsNeedGenerateRootChildDirAtlas(spritePath))
+            {
+                return GetRootChildDirAtlasName(spritePath);
+            }
+
+            return atlasName;
         }
 
         private static string GetAtlasName(string spritePath)

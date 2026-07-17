@@ -1,4 +1,4 @@
-﻿#if UNITY_EDITOR
+#if UNITY_EDITOR
 
 using UnityEditor;
 using UnityEngine;
@@ -10,9 +10,16 @@ namespace GameLogic
         [MenuItem("GameObject/UI/UIImage", priority = 32)]
         public static void CreateUIImage()
         {
-            UIImage uiImage = new GameObject("UIImage", typeof(RectTransform), typeof(UIImage)).GetComponent<UIImage>();
+            GameObject imageObject = ObjectFactory.CreateGameObject("UIImage", typeof(RectTransform), typeof(UIImage));
+            UIImage uiImage = imageObject.GetComponent<UIImage>();
             UnityEditorUtil.ResetInCanvasFor(uiImage.rectTransform);
             uiImage.rectTransform.localPosition = Vector3.zero;
+            uiImage.raycastTarget = false;
+
+            GameObject undoTarget = uiImage.transform.parent == null ? imageObject : uiImage.transform.parent.gameObject;
+            Undo.RegisterFullObjectHierarchyUndo(undoTarget, string.Empty);
+            Undo.SetCurrentGroupName($"Create {imageObject.name}");
+            Selection.activeGameObject = imageObject;
         }
 
         #region 图片不规则形状

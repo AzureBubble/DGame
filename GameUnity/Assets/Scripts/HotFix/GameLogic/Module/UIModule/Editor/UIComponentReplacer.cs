@@ -15,41 +15,45 @@ namespace GameLogic
             GameObject root = Selection.activeGameObject;
             if (root == null) return;
 
-            Undo.RegisterFullObjectHierarchyUndo(root, "Replace Extend Components To Unity Components");
+            const string undoName = "Replace Extend Components To Unity Components";
+            Undo.IncrementCurrentGroup();
+            int undoGroup = Undo.GetCurrentGroup();
+            Undo.SetCurrentGroupName(undoName);
+            Undo.RegisterFullObjectHierarchyUndo(root, undoName);
 
             int imageCount = 0, textCount = 0, buttonCount = 0;
 
-            // 获取所有Transform（包括自身和所有子对象）
-            Transform[] allTransforms = root.GetComponentsInChildren<Transform>(true);
-
-            foreach (Transform t in allTransforms)
+            try
             {
-                GameObject go = t.gameObject;
+                // 获取所有Transform（包括自身和所有子对象）
+                Transform[] allTransforms = root.GetComponentsInChildren<Transform>(true);
 
-                // 替换 UIButton -> Button
-                UIButton uiButton = go.GetComponent<UIButton>();
-                if (uiButton != null)
+                foreach (Transform t in allTransforms)
                 {
-                    ReplaceComponent<UIButton, Button>(go);
-                    buttonCount++;
+                    GameObject go = t.gameObject;
+
+                    if (ReplaceComponent<UIButton, Button>(go))
+                    {
+                        buttonCount++;
+                    }
+
+                    if (ReplaceComponent<UIImage, Image>(go))
+                    {
+                        imageCount++;
+                    }
+
+                    if (ReplaceComponent<UIText, Text>(go))
+                    {
+                        textCount++;
+                    }
                 }
 
-                // 替换 UIImage -> Image
-                UIImage uiImage = go.GetComponent<UIImage>();
-                if (uiImage != null)
-                {
-                    ReplaceComponent<UIImage, Image>(go);
-                    imageCount++;
-                }
-
-                // 替换 UIText -> Text
-                UIText uiText = go.GetComponent<UIText>();
-                if (uiText != null)
-                {
-                    // uiText.SetUITextLocalizationActive(false);
-                    ReplaceComponent<UIText, Text>(go);
-                    textCount++;
-                }
+                Undo.CollapseUndoOperations(undoGroup);
+            }
+            catch
+            {
+                Undo.RevertAllDownToGroup(undoGroup);
+                throw;
             }
 
             Debug.Log($"[UIComponentReplacer] 替换完成: UIImage -> Image: {imageCount}, UIText -> Text: {textCount}, UIButton -> Button: {buttonCount}");
@@ -67,40 +71,48 @@ namespace GameLogic
             GameObject root = Selection.activeGameObject;
             if (root == null) return;
 
-            Undo.RegisterFullObjectHierarchyUndo(root, "Replace Unity Components To Extend Components");
+            const string undoName = "Replace Unity Components To Extend Components";
+            Undo.IncrementCurrentGroup();
+            int undoGroup = Undo.GetCurrentGroup();
+            Undo.SetCurrentGroupName(undoName);
+            Undo.RegisterFullObjectHierarchyUndo(root, undoName);
 
             int imageCount = 0, textCount = 0, buttonCount = 0;
 
-            // 获取所有Transform（包括自身和所有子对象）
-            Transform[] allTransforms = root.GetComponentsInChildren<Transform>(true);
-
-            foreach (Transform t in allTransforms)
+            try
             {
-                GameObject go = t.gameObject;
+                // 获取所有Transform（包括自身和所有子对象）
+                Transform[] allTransforms = root.GetComponentsInChildren<Transform>(true);
 
-                // 替换 Button -> UIButton（排除已经是UIButton的）
-                Button button = go.GetComponent<Button>();
-                if (button != null && !(button is UIButton))
+                foreach (Transform t in allTransforms)
                 {
-                    ReplaceComponent<Button, UIButton>(go);
-                    buttonCount++;
+                    GameObject go = t.gameObject;
+
+                    Button button = go.GetComponent<Button>();
+                    if (button != null && !(button is UIButton) && ReplaceComponent<Button, UIButton>(go))
+                    {
+                        buttonCount++;
+                    }
+
+                    Image image = go.GetComponent<Image>();
+                    if (image != null && !(image is UIImage) && ReplaceComponent<Image, UIImage>(go))
+                    {
+                        imageCount++;
+                    }
+
+                    Text text = go.GetComponent<Text>();
+                    if (text != null && !(text is UIText) && ReplaceComponent<Text, UIText>(go))
+                    {
+                        textCount++;
+                    }
                 }
 
-                // 替换 Image -> UIImage（排除已经是UIImage的）
-                Image image = go.GetComponent<Image>();
-                if (image != null && !(image is UIImage))
-                {
-                    ReplaceComponent<Image, UIImage>(go);
-                    imageCount++;
-                }
-
-                // 替换 Text -> UIText（排除已经是UIText的）
-                Text text = go.GetComponent<Text>();
-                if (text != null && !(text is UIText))
-                {
-                    ReplaceComponent<Text, UIText>(go);
-                    textCount++;
-                }
+                Undo.CollapseUndoOperations(undoGroup);
+            }
+            catch
+            {
+                Undo.RevertAllDownToGroup(undoGroup);
+                throw;
             }
 
             Debug.Log($"[UIComponentReplacer] 替换完成: Image -> UIImage: {imageCount}, Text -> UIText: {textCount}, Button -> UIButton: {buttonCount}");
@@ -195,26 +207,33 @@ namespace GameLogic
         #endregion
 
         /// <summary>
-        /// 替换组件，保留基类属性
+        /// 原位替换组件脚本，保留组件fileID和现有序列化引用
         /// </summary>
-        private static void ReplaceComponent<TSource, TTarget>(GameObject go)
-            where TSource : Component
-            where TTarget : Component
+        private static bool ReplaceComponent<TSource, TTarget>(GameObject go)
+            where TSource : MonoBehaviour
+            where TTarget : MonoBehaviour
         {
             TSource source = go.GetComponent<TSource>();
-            if (source == null) return;
+            if (source == null)
+            {
+                return false;
+            }
 
-            // 序列化源组件数据
-            string json = EditorJsonUtility.ToJson(source);
+            Undo.RecordObject(source, $"Replace {typeof(TSource).Name} To {typeof(TTarget).Name}");
+            ClassReplaceHelper.ReplaceClass(source, typeof(TTarget));
 
-            // 删除源组件
-            Undo.DestroyObjectImmediate(source);
+            TTarget target = go.GetComponent<TTarget>();
+            if (target == null)
+            {
+                throw new MissingComponentException($"Replace {typeof(TSource).Name} To {typeof(TTarget).Name} failed.");
+            }
 
-            // 添加目标组件
-            TTarget target = Undo.AddComponent<TTarget>(go);
-
-            // 反序列化到目标组件（只会复制共有的字段）
-            EditorJsonUtility.FromJsonOverwrite(json, target);
+            EditorUtility.SetDirty(target);
+            if (PrefabUtility.IsPartOfPrefabInstance(target))
+            {
+                PrefabUtility.RecordPrefabInstancePropertyModifications(target);
+            }
+            return true;
         }
     }
 }

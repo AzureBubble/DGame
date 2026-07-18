@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using DGame;
 using GameProto;
@@ -216,6 +218,9 @@ namespace GameLogic
         /// </summary>
         public bool IsValid => !m_isDestroy && m_isInit && m_spriteRenderer != null;
 
+        private int m_initVersion;
+        private CancellationTokenSource m_initCts;
+
         #endregion
 
         /// <summary>
@@ -234,16 +239,35 @@ namespace GameLogic
         /// <param name="modelConfig">模型配置</param>
         public async UniTask Init(ModelConfig modelConfig)
         {
+            m_initCts?.Cancel();
+            m_initCts?.Dispose();
+            m_initCts = new CancellationTokenSource();
+            int version = ++m_initVersion;
+            var ct = m_initCts.Token;
             if (modelConfig == null || string.IsNullOrEmpty(modelConfig.FrameCfgLocation))
             {
                 DLogger.Error($"请检查模型配置表，模型配置表为空");
                 return;
             }
             m_curCfgLocation = modelConfig.FrameCfgLocation;
-            m_frameSpritePool = await FrameSpriteMgr.Instance.GetFrameSpritePool(m_curCfgLocation);
-            if (m_frameSpritePool == null)
+            try
             {
-                DLogger.Error($"没有找到帧动画配置文件: {m_curCfgLocation}");
+                var frameSpritePool = await FrameSpriteMgr.Instance.GetFrameSpritePool(m_curCfgLocation, ct);
+                if (ct.IsCancellationRequested || version != m_initVersion || m_isDestroy)
+                {
+                    return;
+                }
+
+                if (frameSpritePool == null)
+                {
+                    DLogger.Error($"没有找到帧动画配置文件: {m_curCfgLocation}");
+                    return;
+                }
+
+                m_frameSpritePool = frameSpritePool;
+            }
+            catch (OperationCanceledException)
+            {
                 return;
             }
 
@@ -391,6 +415,7 @@ namespace GameLogic
 
             m_isStarted = true;
             FrameSpriteMgr.Instance.RegisterAnimator(this);
+            m_preFrameTime = m_isUnscaledTime ? GameTime.UnscaledTime : GameTime.Time;
         }
 
         /// <summary>
@@ -670,6 +695,10 @@ namespace GameLogic
         /// </summary>
         public override void OnRelease()
         {
+            m_initVersion++;
+            m_initCts?.Cancel();
+            m_initCts?.Dispose();
+            m_initCts = null;
             if (FrameSpriteMgr.IsValid)
             {
                 FrameSpriteMgr.Instance.UnregisterAnimator(this);

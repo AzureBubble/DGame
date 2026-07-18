@@ -27,32 +27,6 @@ namespace Fantasy.Network.Interface
         private UInt32FrozenDictionary<Type> _opCodeDictionary;
         private UInt32FrozenDictionary<Type> _responseTypeDictionary;
         private UInt32FrozenDictionary<Func<Session, uint, object, FTask>> _messageHandlerDictionary;
-#if FANTASY_UNITY
-        /*
-         * 方便客户端通过 GameClient RegisterMsgHandler 注册的回调
-         * 客户端可以通过 GameClient 和协议号直接监听服务器数据的下发
-         */
-
-        public readonly Dictionary<uint, List<Action<IMessage>>> MsgHandles = new Dictionary<uint, List<Action<IMessage>>>();
-
-        public void RegisterMsgHandler(uint protocolCode, Action<IMessage> ctx)
-        {
-            if (!MsgHandles.ContainsKey(protocolCode))
-            {
-                MsgHandles[protocolCode] = new List<Action<IMessage>>();
-            }
-
-            MsgHandles[protocolCode].Add(ctx);
-        }
-
-        public void UnRegisterMsgHandler(uint protocolCode, Action<IMessage> ctx)
-        {
-            if (MsgHandles.TryGetValue(protocolCode, out var handle))
-            {
-                handle.Remove(ctx);
-            }
-        }
-#endif
         
         private readonly UInt32MergerFrozenDictionary<Type> _opCodeMerger = new();
         private readonly UInt32MergerFrozenDictionary<Type> _responseTypeMerger = new();
@@ -81,6 +55,32 @@ namespace Fantasy.Network.Interface
             AssemblyLifecycle.Remove(this);
             base.Dispose();
         }
+#if FANTASY_UNITY
+        /*
+         * 方便客户端通过 GameClient RegisterMsgHandler 注册的回调
+         * 客户端可以通过 GameClient 和协议号直接监听服务器数据的下发
+         */
+
+        public readonly Dictionary<uint, List<Action<IMessage>>> MsgHandles = new Dictionary<uint, List<Action<IMessage>>>();
+
+        public void RegisterMsgHandler(uint protocolCode, Action<IMessage> ctx)
+        {
+            if (!MsgHandles.ContainsKey(protocolCode))
+            {
+                MsgHandles[protocolCode] = new List<Action<IMessage>>();
+            }
+
+            MsgHandles[protocolCode].Add(ctx);
+        }
+
+        public void UnRegisterMsgHandler(uint protocolCode, Action<IMessage> ctx)
+        {
+            if (MsgHandles.TryGetValue(protocolCode, out var handle))
+            {
+                handle.Remove(ctx);
+            }
+        }
+#endif
 
         #region AssemblyManifest
 

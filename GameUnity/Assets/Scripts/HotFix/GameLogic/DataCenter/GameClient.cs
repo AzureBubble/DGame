@@ -172,8 +172,12 @@ namespace GameLogic
                     assembly.EnsureLoaded();
                 }
             }
+            // 1. 初始化 Fantasy 框架
             await Fantasy.Platform.Unity.Entry.Initialize();
-            Scene = await Fantasy.Platform.Unity.Entry.CreateScene();
+            // 2. 创建一个 Scene (客户端场景)
+            // Scene 是 Fantasy 框架的核心容器,所有功能都在 Scene 下运行
+            // SceneRuntimeMode.MainThread 表示在 Unity 主线程运行
+            Scene = await Scene.Create(SceneRuntimeMode.MainThread);
             DLogger.Info("Fantasy 初始化完成!");
         }
 

@@ -13,12 +13,4 @@
     <ProjectReference Include="..\Entity\Entity.csproj" />
     <ProjectReference Include="..\Hotfix\Hotfix.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="NLog" Version="*" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Update="NLog.config">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
 </Project>

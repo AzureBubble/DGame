@@ -3,7 +3,11 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Fantasy.Async;
 using Fantasy.IdFactory;
-
+#if FANTASY_WEBGL || UNITY_WEBGL
+using FCloseTask = Fantasy.Async.FTask;
+#else
+using FCloseTask = Fantasy.Async.FThreadTask;
+#endif
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 #pragma warning disable CS8601 // Possible null reference assignment.
 namespace Fantasy.Platform.Net;
@@ -18,15 +22,20 @@ public sealed class Process
     /// </summary>
     public readonly uint Id;
     /// <summary>
+    /// 进程所属的Namespace ID
+    /// </summary>
+    public readonly uint NamespaceId;
+    /// <summary>
     /// 进程关联的MachineId
     /// </summary>
     public readonly uint MachineId;
     private readonly ConcurrentDictionary<uint, Scene> _processScenes = new ConcurrentDictionary<uint, Scene>();
     private static readonly ConcurrentDictionary<uint, Scene> Scenes = new ConcurrentDictionary<uint, Scene>();
     private Process() {}
-    private Process(uint id, uint machineId)
+    private Process(uint id, uint namespaceId, uint machineId)
     {
         Id = id;
+        NamespaceId = namespaceId;
         MachineId = machineId;
     }
     
@@ -65,7 +74,7 @@ public sealed class Process
     /// <summary>
     /// 关闭
     /// </summary>
-    public async FTask Close()
+    public async FCloseTask Close()
     {
         if (_processScenes.IsEmpty)
         {
@@ -101,7 +110,7 @@ public sealed class Process
             return null;
         }
 
-        var process = new Process(processConfigId, processConfig.MachineId);
+        var process = new Process(processConfigId, processConfig.NamespaceId, processConfig.MachineId);
         var sceneConfigs = SceneConfigData.Instance.GetByProcess(processConfigId);
 
         foreach (var sceneConfig in sceneConfigs)

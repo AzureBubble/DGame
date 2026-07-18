@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using DGame;
 using UnityEngine;
@@ -242,11 +243,11 @@ namespace GameLogic
         /// </summary>
         /// <param name="location">资源定位地址。</param>
         /// <returns>帧动画资源池；加载失败时返回null。</returns>
-        public async UniTask<FrameSpritePool> GetFrameSpritePool(string location)
+        public async UniTask<FrameSpritePool> GetFrameSpritePool(string location, CancellationToken ct)
         {
             if (!m_frameSpritePools.TryGetValue(location, out var pool))
             {
-                var goCfg = await GameModule.ResourceModule.LoadAssetAsync<GameObject>(location);
+                var goCfg = await GameModule.ResourceModule.LoadAssetAsync<GameObject>(location, ct);
                 if (goCfg != null)
                 {
                     pool = goCfg.GetComponent<FrameSpritePool>();

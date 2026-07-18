@@ -70,7 +70,7 @@ namespace GameLogic
         /// </summary>
         /// <returns>true表示已经播放结束。</returns>
         public bool IsStop()
-            => !m_isLoop && m_curIndex >= m_cacheCount;
+            => m_cacheCount <= 0 || !m_isLoop && m_curIndex >= m_cacheCount;
 
         /// <summary>
         /// 随机设置初始帧索引。

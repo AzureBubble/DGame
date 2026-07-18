@@ -400,7 +400,7 @@ namespace DGame.FixedPoint
         /// <summary>
         /// 根据当前合力积分速度和位置，推进一个固定物理步。
         /// </summary>
-        /// <remarks>刚体当前位置超出八叉树逻辑边界时，本次更新会被跳过。</remarks>
+        /// <remarks>刚体当前位置超出八叉树逻辑边界时，本次更新会被跳过；高速位移自动使用 SphereCast CCD。</remarks>
         public void OnUpdate()
         {
             if (!CanSimulate || invMass == 0 || context.fpOctree.IsOutOfBound(transform.position))
@@ -412,7 +412,28 @@ namespace DGame.FixedPoint
             var acceleration = force * invMass;
             velocity = velocity + acceleration * context.DeltaTime;
             deltaMove = velocity * context.DeltaTime;
-            transform.position += deltaMove;
+            var scaledRadius = collider.scaledRadius;
+            if (scaledRadius > FixedPoint64.Zero && deltaMove.magnitude > scaledRadius &&
+                context.SphereCast(
+                    collider.position,
+                    scaledRadius,
+                    deltaMove.normalized,
+                    deltaMove.magnitude,
+                    out var hit,
+                    targetLayerMask,
+                    false,
+                    collider) &&
+                hit != null)
+            {
+                var safeDistance = FixedPointMath.Max(FixedPoint64.Zero, hit.distance - FixedPoint64.EN4);
+                deltaMove = deltaMove.normalized * safeDistance;
+                transform.position += deltaMove;
+                AdjustVelocityByCollision(hit.normal, hit.fpCollider.rebound);
+            }
+            else
+            {
+                transform.position += deltaMove;
+            }
             force = FixedPointVector3.zero;
         }
 

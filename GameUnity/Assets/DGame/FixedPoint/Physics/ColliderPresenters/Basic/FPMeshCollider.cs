@@ -2,6 +2,7 @@
 using UnityEngine;
 #endif
 using System;
+using System.Collections.Generic;
 
 namespace DGame.FixedPoint
 {
@@ -51,6 +52,11 @@ namespace DGame.FixedPoint
 #endif
         private FixedPointVector3[] localVertices = Array.Empty<FixedPointVector3>();
 
+        private const int BvhLeafTriangleCount = 4;
+        private MeshBvhNode[] m_bvhNodes = Array.Empty<MeshBvhNode>();
+        private int[] m_bvhTriangleIndices = Array.Empty<int>();
+        private int m_bvhNodeCount;
+
         /// <summary>获取网格碰撞器类型。</summary>
         public override ColliderType colliderType => ColliderType.Mesh;
 
@@ -69,6 +75,7 @@ namespace DGame.FixedPoint
                 distances = Array.Empty<FixedPoint64>();
                 minimals = Array.Empty<FixedPointVector3>();
                 maximals = Array.Empty<FixedPointVector3>();
+                m_bvhNodeCount = 0;
                 _min = position;
                 _max = position;
                 return;
@@ -251,6 +258,193 @@ namespace DGame.FixedPoint
                 minimals[i] = triangleMin;
                 maximals[i] = triangleMax;
             }
+
+            RebuildBvh(triangleCount);
+        }
+
+        /// <summary>收集世界 AABB 与查询范围重叠的三角形索引。</summary>
+        internal void CollectTriangleCandidates(
+            FixedPointVector3 queryMin,
+            FixedPointVector3 queryMax,
+            List<int> results)
+        {
+            results.Clear();
+            if (m_bvhNodeCount == 0)
+            {
+                return;
+            }
+
+            var meshPosition = position;
+            CollectBvhCandidates(0, queryMin - meshPosition, queryMax - meshPosition, results);
+        }
+
+        internal void GetWorldTriangle(int triangleIndex, out FixedPointVector3 a,
+            out FixedPointVector3 b, out FixedPointVector3 c)
+        {
+            var offset = triangleIndex * 3;
+            var meshPosition = position;
+            a = vertices[triangles[offset]] + meshPosition;
+            b = vertices[triangles[offset + 1]] + meshPosition;
+            c = vertices[triangles[offset + 2]] + meshPosition;
+        }
+
+        private void RebuildBvh(int triangleCount)
+        {
+            if (triangleCount == 0)
+            {
+                m_bvhNodeCount = 0;
+                return;
+            }
+
+            if (m_bvhTriangleIndices.Length != triangleCount)
+            {
+                m_bvhTriangleIndices = new int[triangleCount];
+            }
+
+            var requiredNodeCount = triangleCount * 2 - 1;
+            if (m_bvhNodes.Length < requiredNodeCount)
+            {
+                m_bvhNodes = new MeshBvhNode[requiredNodeCount];
+            }
+
+            for (var i = 0; i < triangleCount; i++)
+            {
+                m_bvhTriangleIndices[i] = i;
+            }
+
+            m_bvhNodeCount = 0;
+            BuildBvhNode(0, triangleCount);
+        }
+
+        private int BuildBvhNode(int start, int count)
+        {
+            var nodeIndex = m_bvhNodeCount++;
+            var min = FixedPointVector3.one * FixedPoint64.MaxValue;
+            var max = FixedPointVector3.one * FixedPoint64.MinValue;
+            var centroidMin = min;
+            var centroidMax = max;
+
+            for (var i = start; i < start + count; i++)
+            {
+                var triangleIndex = m_bvhTriangleIndices[i];
+                min = FixedPointVector3.Min(min, minimals[triangleIndex]);
+                max = FixedPointVector3.Max(max, maximals[triangleIndex]);
+                var centroid = (minimals[triangleIndex] + maximals[triangleIndex]) * FixedPoint64.Half;
+                centroidMin = FixedPointVector3.Min(centroidMin, centroid);
+                centroidMax = FixedPointVector3.Max(centroidMax, centroid);
+            }
+
+            if (count <= BvhLeafTriangleCount)
+            {
+                m_bvhNodes[nodeIndex] = new MeshBvhNode
+                {
+                    min = min,
+                    max = max,
+                    start = start,
+                    count = count,
+                    left = -1,
+                    right = -1
+                };
+                return nodeIndex;
+            }
+
+            var centroidExtent = centroidMax - centroidMin;
+            var splitAxis = centroidExtent.x >= centroidExtent.y && centroidExtent.x >= centroidExtent.z
+                ? 0
+                : centroidExtent.y >= centroidExtent.z ? 1 : 2;
+            SortTriangleRangeByAxis(start, start + count - 1, splitAxis);
+            var leftCount = count / 2;
+            var left = BuildBvhNode(start, leftCount);
+            var right = BuildBvhNode(start + leftCount, count - leftCount);
+            m_bvhNodes[nodeIndex] = new MeshBvhNode
+            {
+                min = min,
+                max = max,
+                start = 0,
+                count = 0,
+                left = left,
+                right = right
+            };
+            return nodeIndex;
+        }
+
+        private void SortTriangleRangeByAxis(int left, int right, int axis)
+        {
+            while (left < right)
+            {
+                var i = left;
+                var j = right;
+                var pivot = GetTriangleCentroidAxis(m_bvhTriangleIndices[(left + right) / 2], axis);
+                while (i <= j)
+                {
+                    while (GetTriangleCentroidAxis(m_bvhTriangleIndices[i], axis) < pivot) i++;
+                    while (GetTriangleCentroidAxis(m_bvhTriangleIndices[j], axis) > pivot) j--;
+                    if (i > j) continue;
+                    (m_bvhTriangleIndices[i], m_bvhTriangleIndices[j]) =
+                        (m_bvhTriangleIndices[j], m_bvhTriangleIndices[i]);
+                    i++;
+                    j--;
+                }
+
+                if (j - left < right - i)
+                {
+                    if (left < j) SortTriangleRangeByAxis(left, j, axis);
+                    left = i;
+                }
+                else
+                {
+                    if (i < right) SortTriangleRangeByAxis(i, right, axis);
+                    right = j;
+                }
+            }
+        }
+
+        private FixedPoint64 GetTriangleCentroidAxis(int triangleIndex, int axis)
+        {
+            var centroid = (minimals[triangleIndex] + maximals[triangleIndex]) * FixedPoint64.Half;
+            return axis == 0 ? centroid.x : axis == 1 ? centroid.y : centroid.z;
+        }
+
+        private void CollectBvhCandidates(
+            int nodeIndex,
+            FixedPointVector3 queryMin,
+            FixedPointVector3 queryMax,
+            List<int> results)
+        {
+            var node = m_bvhNodes[nodeIndex];
+            if (!FixedPointIntersection.IntersectWithAABBAndAABBFixedPoint(
+                    queryMin, queryMax, node.min, node.max))
+            {
+                return;
+            }
+
+            if (node.count > 0)
+            {
+                for (var i = node.start; i < node.start + node.count; i++)
+                {
+                    var triangleIndex = m_bvhTriangleIndices[i];
+                    if (FixedPointIntersection.IntersectWithAABBAndAABBFixedPoint(
+                            queryMin, queryMax, minimals[triangleIndex], maximals[triangleIndex]))
+                    {
+                        results.Add(triangleIndex);
+                    }
+                }
+
+                return;
+            }
+
+            CollectBvhCandidates(node.left, queryMin, queryMax, results);
+            CollectBvhCandidates(node.right, queryMin, queryMax, results);
+        }
+
+        private struct MeshBvhNode
+        {
+            internal FixedPointVector3 min;
+            internal FixedPointVector3 max;
+            internal int left;
+            internal int right;
+            internal int start;
+            internal int count;
         }
     }
 }

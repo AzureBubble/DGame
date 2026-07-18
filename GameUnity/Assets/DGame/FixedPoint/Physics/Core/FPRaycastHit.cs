@@ -32,6 +32,9 @@ namespace DGame.FixedPoint
         /// </summary>
         public FixedPointVector3 normal { private set; get; }
 
+        /// <summary>获取从查询起点到命中点的世界距离。</summary>
+        public FixedPoint64 distance { private set; get; }
+
         /// <summary>
         /// 创建一个定点物理射线命中结果。
         /// </summary>
@@ -40,12 +43,19 @@ namespace DGame.FixedPoint
         /// <param name="normal">命中点处的表面法线。</param>
         /// <param name="outPoint">射线与命中形状边界的另一个交点；未提供时为零向量。</param>
         public FPRaycastHit(FPCollider fpCollider, FixedPointVector3 point, FixedPointVector3 normal,
-            FixedPointVector3 outPoint)
+            FixedPointVector3 outPoint, FixedPoint64 distance)
         {
-            this.fpCollider = fpCollider;
-            this.point = point;
-            this.normal = normal;
-            this.outPoint = outPoint;
+            Set(fpCollider, point, normal, outPoint, distance);
+        }
+
+        internal void Set(FPCollider collider, FixedPointVector3 hitPoint,
+            FixedPointVector3 hitNormal, FixedPointVector3 exitPoint, FixedPoint64 hitDistance)
+        {
+            fpCollider = collider;
+            point = hitPoint;
+            normal = hitNormal;
+            outPoint = exitPoint;
+            distance = hitDistance;
         }
     }
 }

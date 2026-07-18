@@ -179,6 +179,118 @@ namespace DGame.FixedPoint
             return collision;
         }
 
+        /// <summary>检测胶囊体与单个三角形的重叠。</summary>
+        public static FPCollision IntersectWithCapsuleAndTriangle(
+            FixedPointVector3 start,
+            FixedPointVector3 end,
+            FixedPoint64 radius,
+            FixedPointVector3 a,
+            FixedPointVector3 b,
+            FixedPointVector3 c)
+        {
+            var triangleMin = FixedPointVector3.Min(a, FixedPointVector3.Min(b, c));
+            var triangleMax = FixedPointVector3.Max(a, FixedPointVector3.Max(b, c));
+            var pointOnSegment = start;
+            var pointOnTriangle = ClosestPointWithPointAndTriangle(
+                start, FixedPointVector3.zero, triangleMin, triangleMax, a, b, c);
+            var bestDistanceSquared = (pointOnSegment - pointOnTriangle).sqrMagnitude;
+            SelectPoint(end, ClosestPointWithPointAndTriangle(
+                end, FixedPointVector3.zero, triangleMin, triangleMax, a, b, c));
+            SelectPoint(ClosestPointWithPointAndLine(start, end, a), a);
+            SelectPoint(ClosestPointWithPointAndLine(start, end, b), b);
+            SelectPoint(ClosestPointWithPointAndLine(start, end, c), c);
+            SelectEdge(a, b);
+            SelectEdge(b, c);
+            SelectEdge(c, a);
+
+            var axis = end - start;
+            if (!axis.IsZero() && IntersectWithRayAndTriangleFixedPoint(
+                    start, axis.normalized, FixedPointVector3.zero,
+                    a, b, c, out var segmentHit) && segmentHit.t <= axis.magnitude)
+            {
+                pointOnSegment = segmentHit.closestPoint;
+                pointOnTriangle = segmentHit.closestPoint;
+                bestDistanceSquared = FixedPoint64.Zero;
+            }
+
+            var collision = new FPCollision();
+            if (bestDistanceSquared > radius * radius) return collision;
+            var distance = FixedPointMath.Sqrt(bestDistanceSquared);
+            var triangleNormal = FixedPointVector3.Cross(b - a, c - a).normalized;
+            var normal = distance > FixedPoint64.Zero
+                ? (pointOnSegment - pointOnTriangle) / distance
+                : FixedPointVector3.Dot((start + end) * FixedPoint64.Half - a, triangleNormal) >= 0
+                    ? triangleNormal
+                    : -triangleNormal;
+            var penetration = FixedPointMath.Max(FixedPoint64.Zero, radius - distance);
+            collision.hit = true;
+            collision.normal = normal.IsZero() ? FixedPointVector3.up : normal;
+            collision.closestPoint = pointOnTriangle;
+            collision.outsidePoint = pointOnSegment - collision.normal * radius;
+            collision.contactPoint = (collision.closestPoint + collision.outsidePoint) * FixedPoint64.Half;
+            collision.depth = penetration * FixedPoint64.Half;
+            return collision;
+
+            void SelectPoint(FixedPointVector3 segmentPoint, FixedPointVector3 trianglePoint)
+            {
+                var distanceSquared = (segmentPoint - trianglePoint).sqrMagnitude;
+                if (distanceSquared >= bestDistanceSquared) return;
+                bestDistanceSquared = distanceSquared;
+                pointOnSegment = segmentPoint;
+                pointOnTriangle = trianglePoint;
+            }
+
+            void SelectEdge(FixedPointVector3 edgeStart, FixedPointVector3 edgeEnd)
+            {
+                ClosestPointsOnLineSegments(start, end, edgeStart, edgeEnd,
+                    out var segmentPoint, out var edgePoint);
+                SelectPoint(segmentPoint, edgePoint);
+            }
+        }
+
+        /// <summary>检测胶囊体与网格候选三角形并合并接触约束。</summary>
+        public static FPCollision IntersectWithCapsuleAndMesh(
+            FixedPointVector3 start,
+            FixedPointVector3 end,
+            FixedPoint64 radius,
+            FPMeshCollider mesh,
+            System.Collections.Generic.List<int> candidates)
+        {
+            var radiusVector = FixedPointVector3.one * radius;
+            mesh.CollectTriangleCandidates(
+                FixedPointVector3.Min(start, end) - radiusVector,
+                FixedPointVector3.Max(start, end) + radiusVector,
+                candidates);
+            var constraint = FixedPointVector3.zero;
+            var closestPoint = FixedPointVector3.zero;
+            var outsidePoint = FixedPointVector3.zero;
+            var hasHit = false;
+
+            foreach (var triangleIndex in candidates)
+            {
+                mesh.GetWorldTriangle(triangleIndex, out var a, out var b, out var c);
+                var collision = IntersectWithCapsuleAndTriangle(start, end, radius, a, b, c);
+                if (!collision.hit) continue;
+                hasHit = true;
+                closestPoint = collision.closestPoint;
+                outsidePoint = collision.outsidePoint;
+                AddConstraints(ref constraint, collision.normal * (collision.depth * 2));
+            }
+
+            if (!hasHit) return default;
+            var normal = constraint.IsZero() ? FixedPointVector3.up : constraint.normalized;
+            return new FPCollision
+            {
+                hit = true,
+                collider = mesh,
+                normal = normal,
+                depth = constraint.magnitude * FixedPoint64.Half,
+                closestPoint = closestPoint,
+                outsidePoint = outsidePoint,
+                contactPoint = (closestPoint + outsidePoint) * FixedPoint64.Half
+            };
+        }
+
         /// <summary>检测两个胶囊碰撞器是否重叠。</summary>
         /// <param name="fpCapsuleA">胶囊碰撞器 A。</param>
         /// <param name="fpCapsuleB">胶囊碰撞器 B。</param>

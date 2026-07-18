@@ -31,6 +31,8 @@ namespace DGame.FixedPoint
         /// 查询期间复用的待访问节点列表。
         /// </summary>
         private readonly List<FPOctreeNode> openList = new ();
+        private readonly List<FPCollider> m_colliderCandidates = new();
+        private readonly List<int> m_meshTriangleCandidates = new();
 
         /// <summary>
         /// 当前查询编号，用于避免同一个碰撞器在一次查询中被重复处理。
@@ -149,6 +151,486 @@ namespace DGame.FixedPoint
             castIndex = castIndex == int.MaxValue ? int.MinValue : castIndex + 1;
         }
 
+        internal int CollectCandidates(
+            FixedPointVector3 queryMin,
+            FixedPointVector3 queryMax,
+            List<FPCollider> results,
+            int layerMask,
+            bool includeTrigger)
+        {
+            results.Clear();
+            BeginQuery();
+            while (openListIndex < openList.Count)
+            {
+                var node = openList[openListIndex++];
+                AddCandidateSet(node.FpSphereColliders, queryMin, queryMax,
+                    results, layerMask, includeTrigger);
+                AddCandidateSet(node.FpAABBColliders, queryMin, queryMax,
+                    results, layerMask, includeTrigger);
+                AddCandidateSet(node.FpObbColliders, queryMin, queryMax,
+                    results, layerMask, includeTrigger);
+                AddCandidateSet(node.FpCapsuleColliders, queryMin, queryMax,
+                    results, layerMask, includeTrigger);
+                AddCandidateSet(node.FpCylinderColliders, queryMin, queryMax,
+                    results, layerMask, includeTrigger);
+                AddCandidateSet(node.FpAACapsuleColliders, queryMin, queryMax,
+                    results, layerMask, includeTrigger);
+                AddCandidateSet(node.FpMeshColliders, queryMin, queryMax,
+                    results, layerMask, includeTrigger);
+                AddCandidateSet(node.FpCharacterColliders, queryMin, queryMax,
+                    results, layerMask, includeTrigger);
+
+                if (node.nodes == null) continue;
+                foreach (var child in node.nodes)
+                {
+                    if (child.colliderCount <= 0 ||
+                        !FixedPointIntersection.IntersectWithAABBAndAABBFixedPoint(
+                            queryMin, queryMax,
+                            child.fixedPointAABB.Min, child.fixedPointAABB.Max))
+                    {
+                        continue;
+                    }
+
+                    openList.Add(child);
+                }
+            }
+
+            return results.Count;
+        }
+
+        private void AddCandidateSet<T>(
+            FPOctreeColliderSet<T> colliderSet,
+            FixedPointVector3 queryMin,
+            FixedPointVector3 queryMax,
+            List<FPCollider> results,
+            int layerMask,
+            bool includeTrigger) where T : FPCollider
+        {
+            if (colliderSet == null) return;
+            for (var i = 0; i < colliderSet.Count; i++)
+            {
+                var item = colliderSet[i];
+                if (item == null ||
+                    !FixedPointIntersection.IntersectWithAABBAndAABBFixedPoint(
+                        queryMin, queryMax, item.min, item.max) ||
+                    !CanQueryCollider(item, layerMask, includeTrigger))
+                {
+                    continue;
+                }
+
+                results.Add(item);
+            }
+        }
+
+        /// <summary>
+        /// 使用指定碰撞器的 AABB 通过八叉树收集候选，再执行当前已实现的精确形状相交。
+        /// </summary>
+        public int OverlayColliderCollision(
+            FPCollider queryCollider,
+            ref List<FPCollision> collisions,
+            int layerMask = -1,
+            bool includeTrigger = false)
+        {
+            collisions.Clear();
+            if (queryCollider == null || !queryCollider.enabled)
+            {
+                return 0;
+            }
+
+            CollectCandidates(queryCollider.min, queryCollider.max,
+                m_colliderCandidates, layerMask, includeTrigger);
+
+            var count = 0;
+            foreach (var target in m_colliderCandidates)
+            {
+                if (target == null || target == queryCollider ||
+                    !TryIntersectColliders(queryCollider, target, out var collision) ||
+                    !collision.hit)
+                {
+                    continue;
+                }
+
+                collision.collider = target;
+                if (collisions.Count == count)
+                {
+                    collisions.Add(collision);
+                }
+                else
+                {
+                    collisions[count] = collision;
+                }
+
+                count++;
+            }
+
+            return count;
+        }
+
+        private bool TryIntersectColliders(
+            FPCollider active,
+            FPCollider target,
+            out FPCollision collision)
+        {
+            if (TryGetSphere(active, out var sphereCenter, out var sphereRadius))
+            {
+                return TryIntersectSphereWithTarget(sphereCenter, sphereRadius, target, out collision);
+            }
+
+            if (TryGetSphere(target, out sphereCenter, out sphereRadius))
+            {
+                var supported = TryIntersectSphereWithTarget(sphereCenter, sphereRadius, active, out collision);
+                FlipCollision(ref collision);
+                return supported;
+            }
+
+            var activeIsCapsule = TryGetCapsule(active, out var activeStart, out var activeEnd,
+                out var activeRadius);
+            var targetIsCapsule = TryGetCapsule(target, out var targetStart, out var targetEnd,
+                out var targetRadius);
+
+            if (activeIsCapsule && targetIsCapsule)
+            {
+                collision = FixedPointIntersection.IntersectWithCapsuleAndCapsule(
+                    activeStart, activeEnd, activeRadius, targetStart, targetEnd, targetRadius);
+                return true;
+            }
+
+            if (activeIsCapsule && target is FPCylinderCollider targetCylinder)
+            {
+                collision = FixedPointIntersection.IntersectWithCapsuleAndCylinder(
+                    activeStart, activeEnd, activeRadius,
+                    targetCylinder.startPos, targetCylinder.endPos, targetCylinder.scaledRadius);
+                return true;
+            }
+
+            if (active is FPCylinderCollider activeCylinder && targetIsCapsule)
+            {
+                collision = FixedPointIntersection.IntersectWithCapsuleAndCylinder(
+                    targetStart, targetEnd, targetRadius,
+                    activeCylinder.startPos, activeCylinder.endPos, activeCylinder.scaledRadius);
+                FlipCollision(ref collision);
+                return true;
+            }
+
+            if (active is FPCylinderCollider firstCylinder &&
+                target is FPCylinderCollider secondCylinder)
+            {
+                collision = FixedPointIntersection.IntersectWithCylinderAndCylinder(
+                    firstCylinder.startPos, firstCylinder.endPos, firstCylinder.scaledRadius,
+                    secondCylinder.startPos, secondCylinder.endPos, secondCylinder.scaledRadius);
+                return true;
+            }
+
+            if (active is FPCylinderCollider cylinderProbe && target is FPMeshCollider cylinderMesh)
+            {
+                collision = FixedPointIntersection.IntersectWithCylinderAndMesh(
+                    cylinderProbe.startPos, cylinderProbe.endPos, cylinderProbe.scaledRadius,
+                    cylinderMesh, m_meshTriangleCandidates);
+                return true;
+            }
+
+            if (active is FPMeshCollider meshCylinder && target is FPCylinderCollider cylinderTarget)
+            {
+                collision = FixedPointIntersection.IntersectWithCylinderAndMesh(
+                    cylinderTarget.startPos, cylinderTarget.endPos, cylinderTarget.scaledRadius,
+                    meshCylinder, m_meshTriangleCandidates);
+                FlipCollision(ref collision);
+                return true;
+            }
+
+            if (activeIsCapsule && target is FPMeshCollider targetMesh)
+            {
+                collision = FixedPointIntersection.IntersectWithCapsuleAndMesh(
+                    activeStart, activeEnd, activeRadius, targetMesh, m_meshTriangleCandidates);
+                return true;
+            }
+
+            if (active is FPMeshCollider activeMesh && targetIsCapsule)
+            {
+                collision = FixedPointIntersection.IntersectWithCapsuleAndMesh(
+                    targetStart, targetEnd, targetRadius, activeMesh, m_meshTriangleCandidates);
+                FlipCollision(ref collision);
+                return true;
+            }
+
+            if (active is FPBoxCollider activeObbMesh && target is FPMeshCollider targetObbMesh)
+            {
+                collision = FixedPointIntersection.IntersectWithOBBAndMesh(
+                    activeObbMesh.position, activeObbMesh.halfSize,
+                    activeObbMesh.fpTransform.fixedPointMatrix,
+                    activeObbMesh.min, activeObbMesh.max,
+                    targetObbMesh, m_meshTriangleCandidates);
+                return true;
+            }
+
+            if (active is FPMeshCollider activeObbMeshTarget && target is FPBoxCollider targetObbMeshBox)
+            {
+                collision = FixedPointIntersection.IntersectWithOBBAndMesh(
+                    targetObbMeshBox.position, targetObbMeshBox.halfSize,
+                    targetObbMeshBox.fpTransform.fixedPointMatrix,
+                    targetObbMeshBox.min, targetObbMeshBox.max,
+                    activeObbMeshTarget, m_meshTriangleCandidates);
+                FlipCollision(ref collision);
+                return true;
+            }
+
+            if (active is FPAABBCollider activeAabbMesh && active is not FPBoxCollider &&
+                target is FPMeshCollider targetAabbMesh)
+            {
+                collision = FixedPointIntersection.IntersectWithOBBAndMesh(
+                    activeAabbMesh.position, activeAabbMesh.halfSize, FixedPointMatrix.Identity,
+                    activeAabbMesh.min, activeAabbMesh.max,
+                    targetAabbMesh, m_meshTriangleCandidates);
+                return true;
+            }
+
+            if (active is FPMeshCollider activeAabbMeshTarget &&
+                target is FPAABBCollider targetAabbMeshBox && target is not FPBoxCollider)
+            {
+                collision = FixedPointIntersection.IntersectWithOBBAndMesh(
+                    targetAabbMeshBox.position, targetAabbMeshBox.halfSize, FixedPointMatrix.Identity,
+                    targetAabbMeshBox.min, targetAabbMeshBox.max,
+                    activeAabbMeshTarget, m_meshTriangleCandidates);
+                FlipCollision(ref collision);
+                return true;
+            }
+
+            if (activeIsCapsule && target is FPBoxCollider targetObb)
+            {
+                collision = FixedPointIntersection.IntersectWithAACapsuleAndOBB(
+                    activeStart, activeEnd, activeRadius,
+                    targetObb.position, targetObb.halfSize, targetObb.fpTransform.fixedPointMatrix,
+                    targetObb.min, targetObb.max);
+                return true;
+            }
+
+            if (active is FPBoxCollider activeObb && targetIsCapsule)
+            {
+                collision = FixedPointIntersection.IntersectWithAACapsuleAndOBB(
+                    targetStart, targetEnd, targetRadius,
+                    activeObb.position, activeObb.halfSize, activeObb.fpTransform.fixedPointMatrix,
+                    activeObb.min, activeObb.max);
+                FlipCollision(ref collision);
+                return true;
+            }
+
+            if (activeIsCapsule && target is FPAABBCollider targetAabb && target is not FPBoxCollider)
+            {
+                collision = FixedPointIntersection.IntersectWithAACapsuleAndAABB(
+                    activeStart, activeEnd, activeRadius, targetAabb.min, targetAabb.max);
+                return true;
+            }
+
+            if (active is FPAABBCollider activeAabb && active is not FPBoxCollider && targetIsCapsule)
+            {
+                collision = FixedPointIntersection.IntersectWithAACapsuleAndAABB(
+                    targetStart, targetEnd, targetRadius, activeAabb.min, activeAabb.max);
+                FlipCollision(ref collision);
+                return true;
+            }
+
+            if (active is FPAABBCollider activeBox && active is not FPBoxCollider &&
+                target is FPAABBCollider targetBox && target is not FPBoxCollider)
+            {
+                collision = FixedPointIntersection.IntersectWithAABBAndAABBCollision(
+                    activeBox.min, activeBox.max, targetBox.min, targetBox.max);
+                return true;
+            }
+
+            if (active is FPAABBCollider cylinderAabb && active is not FPBoxCollider &&
+                target is FPCylinderCollider aabbCylinder)
+            {
+                collision = FixedPointIntersection.IntersectWithAABBAndCylinder(
+                    cylinderAabb.min, cylinderAabb.max,
+                    aabbCylinder.startPos, aabbCylinder.endPos, aabbCylinder.scaledRadius);
+                return true;
+            }
+
+            if (active is FPCylinderCollider cylinderAabbTarget &&
+                target is FPAABBCollider aabbCylinderTarget && target is not FPBoxCollider)
+            {
+                collision = FixedPointIntersection.IntersectWithAABBAndCylinder(
+                    aabbCylinderTarget.min, aabbCylinderTarget.max,
+                    cylinderAabbTarget.startPos, cylinderAabbTarget.endPos,
+                    cylinderAabbTarget.scaledRadius);
+                FlipCollision(ref collision);
+                return true;
+            }
+
+            if (active is FPBoxCollider cylinderObb && target is FPCylinderCollider obbCylinder)
+            {
+                collision = FixedPointIntersection.IntersectWithOBBAndCylinder(
+                    cylinderObb.position, cylinderObb.halfSize,
+                    cylinderObb.fpTransform.fixedPointMatrix,
+                    obbCylinder.startPos, obbCylinder.endPos, obbCylinder.scaledRadius);
+                return true;
+            }
+
+            if (active is FPCylinderCollider cylinderObbTarget &&
+                target is FPBoxCollider obbCylinderTarget)
+            {
+                collision = FixedPointIntersection.IntersectWithOBBAndCylinder(
+                    obbCylinderTarget.position, obbCylinderTarget.halfSize,
+                    obbCylinderTarget.fpTransform.fixedPointMatrix,
+                    cylinderObbTarget.startPos, cylinderObbTarget.endPos,
+                    cylinderObbTarget.scaledRadius);
+                FlipCollision(ref collision);
+                return true;
+            }
+
+            if (active is FPAABBCollider axisAlignedBox && active is not FPBoxCollider &&
+                target is FPBoxCollider orientedBox)
+            {
+                collision = FixedPointIntersection.IntersectWithAABBAndOBBCollision(
+                    axisAlignedBox.min, axisAlignedBox.max,
+                    orientedBox.position, orientedBox.halfSize,
+                    orientedBox.fpTransform.fixedPointMatrix);
+                return true;
+            }
+
+            if (active is FPBoxCollider orientedActive &&
+                target is FPAABBCollider axisAlignedTarget && target is not FPBoxCollider)
+            {
+                collision = FixedPointIntersection.IntersectWithAABBAndOBBCollision(
+                    axisAlignedTarget.min, axisAlignedTarget.max,
+                    orientedActive.position, orientedActive.halfSize,
+                    orientedActive.fpTransform.fixedPointMatrix);
+                FlipCollision(ref collision);
+                return true;
+            }
+
+            if (active is FPBoxCollider firstObb && target is FPBoxCollider secondObb)
+            {
+                collision = FixedPointIntersection.IntersectWithOBBAndOBBCollision(
+                    firstObb.position, firstObb.halfSize, firstObb.fpTransform.fixedPointMatrix,
+                    secondObb.position, secondObb.halfSize, secondObb.fpTransform.fixedPointMatrix);
+                return true;
+            }
+
+            collision = default;
+            return false;
+        }
+
+        private bool TryIntersectSphereWithTarget(
+            FixedPointVector3 center,
+            FixedPoint64 radius,
+            FPCollider target,
+            out FPCollision collision)
+        {
+            if (TryGetSphere(target, out var targetCenter, out var targetRadius))
+            {
+                collision = FixedPointIntersection.IntersectWithSphereAndSphere(
+                    center, radius, targetCenter, targetRadius);
+                return true;
+            }
+
+            if (target is FPBoxCollider obb)
+            {
+                collision = FixedPointIntersection.IntersectWithSphereAndOBB(
+                    center, radius, obb.position, obb.halfSize, obb.fpTransform.fixedPointMatrix);
+                return true;
+            }
+
+            if (target is FPAABBCollider aabb && target is not FPBoxCollider)
+            {
+                collision = FixedPointIntersection.IntersectWithSphereAndAABB(
+                    center, radius, aabb.min, aabb.max);
+                return true;
+            }
+
+            if (target is FPCylinderCollider cylinder)
+            {
+                collision = FixedPointIntersection.IntersectWithSphereAndCylinder(
+                    center, radius, cylinder.startPos, cylinder.endPos, cylinder.scaledRadius);
+                return true;
+            }
+
+            if (TryGetCapsule(target, out var start, out var end, out var capsuleRadius))
+            {
+                collision = FixedPointIntersection.IntersectWithSphereAndCapsule(
+                    center, radius, start, end, capsuleRadius);
+                return true;
+            }
+
+            if (target is FPMeshCollider mesh)
+            {
+                collision = FixedPointIntersection.IntersectWithSphereAndMesh(center, radius, mesh);
+                return true;
+            }
+
+            collision = default;
+            return false;
+        }
+
+        private static bool TryGetSphere(
+            FPCollider collider,
+            out FixedPointVector3 center,
+            out FixedPoint64 radius)
+        {
+            if (collider is FPSphereCollider sphere)
+            {
+                center = sphere.position;
+                radius = sphere.scaledRadius;
+                return true;
+            }
+
+            if (collider is FPCharacterController character &&
+                character.characterColliderType == CharacterCollider.Sphere)
+            {
+                center = character.position;
+                radius = character.scaledRadius;
+                return true;
+            }
+
+            center = default;
+            radius = default;
+            return false;
+        }
+
+        private static bool TryGetCapsule(
+            FPCollider collider,
+            out FixedPointVector3 start,
+            out FixedPointVector3 end,
+            out FixedPoint64 radius)
+        {
+            if (collider is FPCharacterController character &&
+                character.characterColliderType == CharacterCollider.Sphere)
+            {
+                start = default;
+                end = default;
+                radius = default;
+                return false;
+            }
+
+            if (collider is FPAACapsuleCollider capsule)
+            {
+                start = capsule.startPos;
+                end = capsule.endPos;
+                radius = capsule.scaledRadius;
+                return true;
+            }
+
+            if (collider is FPCharacterController capsuleCharacter)
+            {
+                start = capsuleCharacter.startPos;
+                end = capsuleCharacter.endPos;
+                radius = capsuleCharacter.scaledRadius;
+                return true;
+            }
+
+            start = default;
+            end = default;
+            radius = default;
+            return false;
+        }
+
+        private static void FlipCollision(ref FPCollision collision)
+        {
+            collision.normal = -collision.normal;
+            (collision.closestPoint, collision.outsidePoint) =
+                (collision.outsidePoint, collision.closestPoint);
+        }
+
         /// <summary>
         /// 注册需要由八叉树更新和查询的碰撞器。
         /// </summary>
@@ -203,15 +685,51 @@ namespace DGame.FixedPoint
         /// <param name="layerMask">参与查询的层掩码；<c>-1</c> 或 <c>0</c> 表示不限制层。</param>
         /// <param name="includeTrigger">是否包含触发器。</param>
         /// <returns>与查询盒发生碰撞的结果列表。</returns>
-        /// <remarks>当前实现仅处理球形碰撞器。</remarks>
-        public List<FPCollision> OverlayBoxCollision(FixedPointVector3 position, FixedPointVector3 halfSize, FixedPointMatrix orientation, int layerMask = -1, bool includeTrigger = false)
+        /// <remarks>当前实现处理球、胶囊体、轴对齐胶囊体和角色控制器。</remarks>
+        public List<FPCollision> OverlayBoxCollision(FixedPointVector3 position,
+            FixedPointVector3 halfSize, FixedPointMatrix orientation,
+            int layerMask = -1, bool includeTrigger = false)
         {
             var collisions = new List<FPCollision>();
+            OverlayBoxCollision(position, halfSize, orientation, ref collisions,
+                layerMask, includeTrigger);
+            return collisions;
+        }
+
+        public int OverlayBoxCollision(FixedPointVector3 position,
+            FixedPointVector3 halfSize, FixedPointMatrix orientation,
+            ref List<FPCollision> collisions,
+            int layerMask = -1, bool includeTrigger = false)
+        {
+            collisions.Clear();
             BeginQuery();
             while (openList.Count > openListIndex)
             {
                 var node = openList[openListIndex];
                 openListIndex++;
+                if (node.FpAABBColliders != null)
+                {
+                    for (var i = 0; i < node.FpAABBColliders.Count; i++)
+                    {
+                        var item = node.FpAABBColliders[i];
+                        if (!CanQueryCollider(item, layerMask, includeTrigger)) continue;
+                        var collision = FixedPointIntersection.IntersectWithAABBAndOBBCollision(
+                            item.min, item.max, position, halfSize, orientation);
+                        AddBoxCollision(item, ref collision, collisions);
+                    }
+                }
+                if (node.FpObbColliders != null)
+                {
+                    for (var i = 0; i < node.FpObbColliders.Count; i++)
+                    {
+                        var item = node.FpObbColliders[i];
+                        if (!CanQueryCollider(item, layerMask, includeTrigger)) continue;
+                        var collision = FixedPointIntersection.IntersectWithOBBAndOBBCollision(
+                            item.position, item.halfSize, item.fpTransform.fixedPointMatrix,
+                            position, halfSize, orientation);
+                        AddBoxCollision(item, ref collision, collisions);
+                    }
+                }
                 if (node.FpSphereColliders != null)
                 {
                     for (var i = 0; i < node.FpSphereColliders.Count; i++)
@@ -238,11 +756,85 @@ namespace DGame.FixedPoint
                             continue;
                         }
                         item.castIndex = castIndex;
-                        var fixedPointCollision = FixedPointIntersection.IntersectWithSphereAndOBB(item.position, item.radius, position, halfSize, orientation);
+                        var fixedPointCollision = FixedPointIntersection.IntersectWithSphereAndOBB(item.position, item.scaledRadius, position, halfSize, orientation);
                         if (!fixedPointCollision.hit) continue;
                         fixedPointCollision.collider = item;
                         fixedPointCollision.normal = -fixedPointCollision.normal;
                         collisions.Add(fixedPointCollision);
+                    }
+                }
+                if (node.FpCapsuleColliders != null)
+                {
+                    for (var i = 0; i < node.FpCapsuleColliders.Count; i++)
+                    {
+                        var item = node.FpCapsuleColliders[i];
+                        if (!CanQueryCollider(item, layerMask, includeTrigger)) continue;
+                        var collision = FixedPointIntersection.IntersectWithAACapsuleAndOBB(
+                            item.startPos, item.endPos, item.scaledRadius,
+                            position, halfSize, orientation, item.min, item.max);
+                        AddBoxCollision(item, ref collision, collisions);
+                    }
+                }
+                if (node.FpAACapsuleColliders != null)
+                {
+                    for (var i = 0; i < node.FpAACapsuleColliders.Count; i++)
+                    {
+                        var item = node.FpAACapsuleColliders[i];
+                        if (!CanQueryCollider(item, layerMask, includeTrigger)) continue;
+                        var collision = FixedPointIntersection.IntersectWithAACapsuleAndOBB(
+                            item.startPos, item.endPos, item.scaledRadius,
+                            position, halfSize, orientation, item.min, item.max);
+                        AddBoxCollision(item, ref collision, collisions);
+                    }
+                }
+                if (node.FpCharacterColliders != null)
+                {
+                    for (var i = 0; i < node.FpCharacterColliders.Count; i++)
+                    {
+                        var item = node.FpCharacterColliders[i];
+                        if (!CanQueryCollider(item, layerMask, includeTrigger)) continue;
+                        var collision = item.characterColliderType == CharacterCollider.Sphere
+                            ? FixedPointIntersection.IntersectWithSphereAndOBB(
+                                item.position, item.scaledRadius, position, halfSize, orientation)
+                            : FixedPointIntersection.IntersectWithAACapsuleAndOBB(
+                                item.startPos, item.endPos, item.scaledRadius,
+                                position, halfSize, orientation, item.min, item.max);
+                        AddBoxCollision(item, ref collision, collisions);
+                    }
+                }
+                if (node.FpCylinderColliders != null)
+                {
+                    for (var i = 0; i < node.FpCylinderColliders.Count; i++)
+                    {
+                        var item = node.FpCylinderColliders[i];
+                        if (!CanQueryCollider(item, layerMask, includeTrigger)) continue;
+                        var collision = FixedPointIntersection.IntersectWithOBBAndCylinder(
+                            position, halfSize, orientation,
+                            item.startPos, item.endPos, item.scaledRadius);
+                        AddDirectBoxCollision(item, ref collision, collisions);
+                    }
+                }
+                if (node.FpMeshColliders != null)
+                {
+                    var axisX = new FixedPointVector3(
+                        orientation.M11, orientation.M12, orientation.M13);
+                    var axisY = new FixedPointVector3(
+                        orientation.M21, orientation.M22, orientation.M23);
+                    var axisZ = new FixedPointVector3(
+                        orientation.M31, orientation.M32, orientation.M33);
+                    var queryExtent = FixedPointVector3.Abs(axisX) * halfSize.x +
+                                      FixedPointVector3.Abs(axisY) * halfSize.y +
+                                      FixedPointVector3.Abs(axisZ) * halfSize.z;
+                    var queryMin = position - queryExtent;
+                    var queryMax = position + queryExtent;
+                    for (var i = 0; i < node.FpMeshColliders.Count; i++)
+                    {
+                        var item = node.FpMeshColliders[i];
+                        if (!CanQueryCollider(item, layerMask, includeTrigger)) continue;
+                        var collision = FixedPointIntersection.IntersectWithOBBAndMesh(
+                            position, halfSize, orientation, queryMin, queryMax,
+                            item, m_meshTriangleCandidates);
+                        AddDirectBoxCollision(item, ref collision, collisions);
                     }
                 }
 
@@ -259,8 +851,41 @@ namespace DGame.FixedPoint
                     }
                 }
             }
-            return collisions;
+            return collisions.Count;
         }
+
+        private bool CanQueryCollider(FPCollider item, int layerMask, bool includeTrigger)
+        {
+            if (item == null || !item.enabled || item.isTrigger && !includeTrigger ||
+                layerMask != -1 && !GridLayerMask.ValidateLayerMask(layerMask, 1 << item.layer) ||
+                item.castIndex == castIndex)
+            {
+                return false;
+            }
+
+            item.castIndex = castIndex;
+            return true;
+        }
+
+        private static void AddBoxCollision(FPCollider collider, ref FPCollision collision,
+            List<FPCollision> collisions)
+        {
+            if (!collision.hit) return;
+            collision.collider = collider;
+            collision.normal = -collision.normal;
+            (collision.closestPoint, collision.outsidePoint) =
+                (collision.outsidePoint, collision.closestPoint);
+            collisions.Add(collision);
+        }
+
+        private static void AddDirectBoxCollision(FPCollider collider, ref FPCollision collision,
+            List<FPCollision> collisions)
+        {
+            if (!collision.hit) return;
+            collision.collider = collider;
+            collisions.Add(collision);
+        }
+
         /// <summary>
         /// 检测指定球体与树中碰撞器的碰撞，并将结果写入可复用列表。
         /// </summary>
@@ -271,7 +896,7 @@ namespace DGame.FixedPoint
         /// <param name="includeTrigger">是否包含触发器。</param>
         /// <param name="dynamic">需要匹配的碰撞器动态标记。</param>
         /// <returns>写入的有效碰撞结果数量。</returns>
-        /// <remarks>当前实现处理球、AABB、OBB、胶囊体、圆柱体和轴对齐胶囊体。</remarks>
+        /// <remarks>当前实现处理球、AABB、OBB、胶囊体、圆柱体、轴对齐胶囊体和角色控制器。</remarks>
         public int OverlaySphereCollision(FixedPointVector3 position, FixedPoint64 radius,ref List<FPCollision> collisions, int layerMask = -1, bool includeTrigger = false,bool dynamic= false)
         {
             var count = 0;
@@ -557,6 +1182,39 @@ namespace DGame.FixedPoint
                         }
                     }
                 }
+                if (node.FpCharacterColliders != null)
+                {
+                    for (var i = 0; i < node.FpCharacterColliders.Count; i++)
+                    {
+                        var item = node.FpCharacterColliders[i];
+                        if (item == null || !item.enabled || item.isTrigger && !includeTrigger ||
+                            item.isDynamic != dynamic ||
+                            layerMask != -1 && !GridLayerMask.ValidateLayerMask(layerMask, 1 << item.layer) ||
+                            item.castIndex == castIndex)
+                        {
+                            continue;
+                        }
+                        item.castIndex = castIndex;
+                        fpCollision = item.characterColliderType == CharacterCollider.Sphere
+                            ? FixedPointIntersection.IntersectWithSphereAndSphere(
+                                position, radius, item.position, item.scaledRadius)
+                            : FixedPointIntersection.IntersectWithSphereAndAACapsule(
+                                position, radius, item.startPos, item.endPos, item.scaledRadius);
+                        if (fpCollision.hit)
+                        {
+                            fpCollision.collider = item;
+                            if (collisions.Count == count)
+                            {
+                                collisions.Add(fpCollision);
+                            }
+                            else
+                            {
+                                collisions[count] = fpCollision;
+                            }
+                            count++;
+                        }
+                    }
+                }
                 
                 if (node.nodes != null)
                 {
@@ -615,7 +1273,7 @@ namespace DGame.FixedPoint
                             continue;
                         }
                         item.castIndex = castIndex;
-                        if (FixedPointIntersection.IntersectWithAABBAndSphere(min, max, item.position, item.radius))
+                        if (FixedPointIntersection.IntersectWithAABBAndSphere(min, max, item.position, item.scaledRadius))
                         {
                             count++;
                         }
@@ -708,7 +1366,7 @@ namespace DGame.FixedPoint
         /// <param name="layerMask">参与查询的层掩码；<c>-1</c> 或 <c>0</c> 表示不限制层。</param>
         /// <param name="includeTrigger">是否包含触发器。</param>
         /// <returns>写入的有效碰撞器数量。</returns>
-        /// <remarks>当前实现处理球、AABB、OBB、胶囊体、圆柱体和轴对齐胶囊体。</remarks>
+        /// <remarks>当前实现处理球、AABB、OBB、胶囊体、圆柱体、轴对齐胶囊体和网格。</remarks>
         public int OverlapSphere(FixedPointVector3 position, FixedPoint64 radius,ref List<FPCollider> colliders ,int layerMask = -1, bool includeTrigger = false)
         {
             int count = 0;
@@ -745,7 +1403,7 @@ namespace DGame.FixedPoint
                             continue;
                         }
                         item.castIndex = castIndex;
-                        if ((radius + item.radius) * (radius + item.radius) > (item.position - position).sqrMagnitude)
+                        if ((radius + item.scaledRadius) * (radius + item.scaledRadius) > (item.position - position).sqrMagnitude)
                         {
                             if (colliders.Count == count)
                             {
@@ -908,7 +1566,7 @@ namespace DGame.FixedPoint
                             continue;
                         }
                         item.castIndex = castIndex;
-                        fpCollision = FixedPointIntersection.IntersectWithSphereAndCylinder(position, radius, item.startPos, item.endPos, item.radius);
+                        fpCollision = FixedPointIntersection.IntersectWithSphereAndCylinder(position, radius, item.startPos, item.endPos, item.scaledRadius);
                         if (fpCollision.hit)
                         {
                             if (colliders.Count == count)
@@ -1225,7 +1883,7 @@ namespace DGame.FixedPoint
                             continue;
                         }
                         item.castIndex = castIndex;
-                        fpCollision = FixedPointIntersection.IntersectWithCapsuleAndCylinder(startPos, endPos, radius, item.startPos, item.endPos, item.radius);
+                        fpCollision = FixedPointIntersection.IntersectWithCapsuleAndCylinder(startPos, endPos, radius, item.startPos, item.endPos, item.scaledRadius);
                         if (!fpCollision.hit) continue;
                         fpCollision.collider = item;
                         if (collisions.Count == count)
@@ -1287,6 +1945,30 @@ namespace DGame.FixedPoint
                         count++;
                     }
                 }
+                if (node.FpMeshColliders != null)
+                {
+                    for (var i = 0; i < node.FpMeshColliders.Count; i++)
+                    {
+                        var item = node.FpMeshColliders[i];
+                        if (item == null || !item.enabled || item.isTrigger && !includeTrigger ||
+                            item.isDynamic != dynamic ||
+                            layerMask != -1 && !GridLayerMask.ValidateLayerMask(layerMask, 1 << item.layer) ||
+                            item.castIndex == castIndex ||
+                            !FixedPointIntersection.IntersectWithAABBAndAABBFixedPoint(
+                                min, max, item.min, item.max))
+                        {
+                            continue;
+                        }
+                        item.castIndex = castIndex;
+                        fpCollision = FixedPointIntersection.IntersectWithCapsuleAndMesh(
+                            startPos, endPos, radius, item, m_meshTriangleCandidates);
+                        if (!fpCollision.hit) continue;
+                        fpCollision.collider = item;
+                        if (collisions.Count == count) collisions.Add(fpCollision);
+                        else collisions[count] = fpCollision;
+                        count++;
+                    }
+                }
                 if (node.nodes != null)
                 {
                     foreach (var item in node.nodes)
@@ -1309,7 +1991,7 @@ namespace DGame.FixedPoint
         /// <param name="radius">查询球体半径。</param>
         /// <param name="layerMask">参与查询的层掩码；<c>-1</c> 或 <c>0</c> 表示不限制层。</param>
         /// <returns>写入数组的碰撞器数量。</returns>
-        /// <remarks>当前实现排除触发器，并且只处理球形和 AABB 碰撞器。</remarks>
+        /// <remarks>当前实现排除触发器，并处理球、AABB、OBB、胶囊体、圆柱体、轴对齐胶囊体和角色控制器。</remarks>
         public int OverlapSphereNonAlloc(FPCollider[] colliders, FixedPointVector3 center, FixedPoint64 radius, int layerMask)
         {
             int count = 0;
@@ -1344,7 +2026,7 @@ namespace DGame.FixedPoint
                         item.castIndex = castIndex;
                         if (FixedPointIntersection.IntersectWithAABBAndAABBFixedPoint(item.min, item.max, min, max))
                         {
-                            if ((radius + item.radius) * (radius + item.radius) > (item.position - center).sqrMagnitude)
+                            if ((radius + item.scaledRadius) * (radius + item.scaledRadius) > (item.position - center).sqrMagnitude)
                             {
                                 colliders[count] = item;
                                 count++;
@@ -1390,6 +2072,65 @@ namespace DGame.FixedPoint
                                 }
                             }
                         }
+                    }
+                }
+                if (node.FpObbColliders != null)
+                {
+                    for (var i = 0; i < node.FpObbColliders.Count; i++)
+                    {
+                        var item = node.FpObbColliders[i];
+                        if (!CanQueryNonAlloc(item, layerMask, min, max)) continue;
+                        if (FixedPointIntersection.IntersectWithSphereAndOBB(
+                                center, radius, item.position, item.halfSize,
+                                item.fpTransform.fixedPointMatrix).hit &&
+                            TryAddNonAlloc(colliders, ref count, item)) return count;
+                    }
+                }
+                if (node.FpCapsuleColliders != null)
+                {
+                    for (var i = 0; i < node.FpCapsuleColliders.Count; i++)
+                    {
+                        var item = node.FpCapsuleColliders[i];
+                        if (!CanQueryNonAlloc(item, layerMask, min, max)) continue;
+                        if (FixedPointIntersection.IntersectWithSphereAndCapsule(
+                                center, radius, item.startPos, item.endPos, item.scaledRadius).hit &&
+                            TryAddNonAlloc(colliders, ref count, item)) return count;
+                    }
+                }
+                if (node.FpCylinderColliders != null)
+                {
+                    for (var i = 0; i < node.FpCylinderColliders.Count; i++)
+                    {
+                        var item = node.FpCylinderColliders[i];
+                        if (!CanQueryNonAlloc(item, layerMask, min, max)) continue;
+                        if (FixedPointIntersection.IntersectWithSphereAndCylinder(
+                                center, radius, item.startPos, item.endPos, item.scaledRadius).hit &&
+                            TryAddNonAlloc(colliders, ref count, item)) return count;
+                    }
+                }
+                if (node.FpAACapsuleColliders != null)
+                {
+                    for (var i = 0; i < node.FpAACapsuleColliders.Count; i++)
+                    {
+                        var item = node.FpAACapsuleColliders[i];
+                        if (!CanQueryNonAlloc(item, layerMask, min, max)) continue;
+                        if (FixedPointIntersection.IntersectWithSphereAndAACapsule(
+                                center, radius, item.startPos, item.endPos, item.scaledRadius).hit &&
+                            TryAddNonAlloc(colliders, ref count, item)) return count;
+                    }
+                }
+                if (node.FpCharacterColliders != null)
+                {
+                    for (var i = 0; i < node.FpCharacterColliders.Count; i++)
+                    {
+                        var item = node.FpCharacterColliders[i];
+                        if (!CanQueryNonAlloc(item, layerMask, min, max)) continue;
+                        var hit = item.characterColliderType == CharacterCollider.Sphere
+                            ? FixedPointIntersection.IntersectWithSphereAndSphere(
+                                center, radius, item.position, item.scaledRadius).hit
+                            : FixedPointIntersection.IntersectWithSphereAndAACapsule(
+                                center, radius, item.startPos, item.endPos, item.scaledRadius).hit;
+                        if (hit && TryAddNonAlloc(colliders, ref count, item)) return count;
                     }
                 }
                 if (node.nodes != null)
@@ -1454,7 +2195,7 @@ namespace DGame.FixedPoint
                             continue;
                         }
                         item.castIndex = castIndex;
-                        if (FixedPointIntersection.IntersectWithAABBAndSphere(min, max, item.position, item.radius))
+                        if (FixedPointIntersection.IntersectWithAABBAndSphere(min, max, item.position, item.scaledRadius))
                         {
                             intersectColliders.Add(item);
                         }
@@ -1591,7 +2332,6 @@ namespace DGame.FixedPoint
                         }
                     }
                 }
-
                 if (node.nodes == null) continue;
                 foreach (var item in node.nodes)
                 {
@@ -1603,6 +2343,27 @@ namespace DGame.FixedPoint
                 }
             }
             return count;
+        }
+
+        private bool CanQueryNonAlloc(FPCollider item, int layerMask,
+            FixedPointVector3 queryMin, FixedPointVector3 queryMax)
+        {
+            if (item == null || !item.enabled || item.isTrigger ||
+                layerMask != -1 && !GridLayerMask.ValidateLayerMask(layerMask, 1 << item.layer) ||
+                item.castIndex == castIndex)
+            {
+                return false;
+            }
+
+            item.castIndex = castIndex;
+            return FixedPointIntersection.IntersectWithAABBAndAABBFixedPoint(
+                item.min, item.max, queryMin, queryMax);
+        }
+
+        private static bool TryAddNonAlloc(FPCollider[] colliders, ref int count, FPCollider collider)
+        {
+            colliders[count++] = collider;
+            return count == colliders.Length;
         }
         /// <summary>
         /// 检测指定球形碰撞器与树中的角色控制器碰撞器是否发生碰撞。

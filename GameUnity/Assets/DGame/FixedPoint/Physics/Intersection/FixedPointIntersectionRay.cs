@@ -109,6 +109,70 @@ namespace DGame.FixedPoint
             return false;
         }
 
+        /// <summary>检测扫掠球与双面三角形的首次接触。</summary>
+        public static FPCollision IntersectWithSphereCastAndTriangle(
+            FixedPointVector3 origin,
+            FixedPointVector3 direct,
+            FixedPoint64 length,
+            FixedPoint64 radius,
+            FixedPointVector3 a,
+            FixedPointVector3 b,
+            FixedPointVector3 c)
+        {
+            var result = new FPCollision();
+            var direction = direct.normalized;
+            var triangleNormal = FixedPointVector3.Cross(b - a, c - a);
+            if (direction.IsZero() || triangleNormal.IsZero() || length < FixedPoint64.Zero ||
+                radius < FixedPoint64.Zero)
+            {
+                return result;
+            }
+
+            triangleNormal = triangleNormal.normalized;
+            var bestDistance = FixedPoint64.MaxValue;
+            var bestNormal = FixedPointVector3.zero;
+            var bestCenter = FixedPointVector3.zero;
+            var denominator = FixedPointVector3.Dot(direction, triangleNormal);
+            var signedOriginDistance = FixedPointVector3.Dot(origin - a, triangleNormal);
+
+            if (denominator != FixedPoint64.Zero)
+            {
+                SelectFaceHit((radius - signedOriginDistance) / denominator, triangleNormal);
+                SelectFaceHit((-radius - signedOriginDistance) / denominator, -triangleNormal);
+            }
+
+            SelectEdgeHit(a, b);
+            SelectEdgeHit(b, c);
+            SelectEdgeHit(c, a);
+            if (bestDistance == FixedPoint64.MaxValue) return result;
+            result.hit = true;
+            result.t = bestDistance;
+            result.closestPoint = bestCenter;
+            result.normal = bestNormal;
+            return result;
+
+            void SelectFaceHit(FixedPoint64 distance, FixedPointVector3 normal)
+            {
+                if (distance < FixedPoint64.Zero || distance > length || distance >= bestDistance) return;
+                var centerAtHit = origin + direction * distance;
+                var surfacePoint = centerAtHit - normal * radius;
+                if (!PointInTriangle(surfacePoint, a, b, c)) return;
+                bestDistance = distance;
+                bestCenter = centerAtHit;
+                bestNormal = normal;
+            }
+
+            void SelectEdgeHit(FixedPointVector3 edgeStart, FixedPointVector3 edgeEnd)
+            {
+                var collision = IntersectWithRayAndCapsule(
+                    origin, direction, length, edgeStart, edgeEnd, radius);
+                if (!collision.hit || collision.t >= bestDistance) return;
+                bestDistance = collision.t;
+                bestCenter = collision.closestPoint;
+                bestNormal = collision.normal;
+            }
+        }
+
         /// <summary>检测有限射线与轴对齐包围盒的相交。</summary>
         /// <param name="origin">射线起点。</param>
         /// <param name="direct">射线的非零方向，无须归一化。</param>
@@ -568,12 +632,9 @@ namespace DGame.FixedPoint
             }
 
             var root = FixedPointMath.Sqrt(discriminant);
-            var distance = -linear - root;
-
-            if (distance < FixedPoint64.Zero)
-            {
-                distance = -linear + root;
-            }
+            var nearDistance = -linear - root;
+            var farDistance = -linear + root;
+            var distance = nearDistance >= FixedPoint64.Zero ? nearDistance : farDistance;
 
             if (distance < FixedPoint64.Zero || distance > length)
             {
@@ -584,6 +645,10 @@ namespace DGame.FixedPoint
             intersection.t = distance;
             intersection.closestPoint = origin + normalizedDirection * distance;
             intersection.normal = (intersection.closestPoint - center).normalized;
+            if (distance == nearDistance && farDistance >= FixedPoint64.Zero && farDistance != nearDistance)
+            {
+                intersection.outsidePoint = origin + normalizedDirection * farDistance;
+            }
             return true;
         }
 

@@ -1,4 +1,7 @@
 namespace DGame.FixedPoint {
+    /// <summary>
+    /// <see cref="FixedPoint64"/> 的正切函数查找表分部定义。
+    /// </summary>
     partial struct FixedPoint64 {
         /// <summary>正切（Tan）函数预计算查找表，供定点数三角函数快速取值使用。</summary>
         public static readonly long[] TanLut = new[] {

@@ -6,7 +6,7 @@ namespace GameBattle
     /// <summary>
     /// 管理当前战斗上下文内创建的战斗域单例。
     /// </summary>
-    public sealed class SingletonManagerComponent : Fantasy.Entitas.Entity
+    public sealed class SingletonManagerComponent : Entity
     {
         /// <summary>
         /// 当前战斗上下文登记的单例列表。

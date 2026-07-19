@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace GameBattle.EcsSystem
+namespace GameBattle
 {
     #region Entity Interface
 

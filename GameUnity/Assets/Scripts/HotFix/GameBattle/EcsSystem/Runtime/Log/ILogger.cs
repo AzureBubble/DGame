@@ -1,4 +1,4 @@
-﻿namespace GameBattle.EcsSystem
+﻿namespace GameBattle
 {
     public interface ILogger
     {

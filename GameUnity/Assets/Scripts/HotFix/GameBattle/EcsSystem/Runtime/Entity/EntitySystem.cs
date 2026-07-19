@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using DGame;
 
-namespace GameBattle.EcsSystem
+namespace GameBattle
 {
     /// <summary>
     /// 实体生命周期调度器，负责调用实体自带生命周期接口和外置生命周期系统。
@@ -171,7 +171,7 @@ namespace GameBattle.EcsSystem
             }
             catch (Exception e)
             {
-                DLogger.Error($"[GameBattle.EcsSystem] {entity.GetType().FullName} Destroy error: {e}");
+                BLogger.Error($"[GameBattle.EcsSystem] {entity.GetType().FullName} Destroy error: {e}");
             }
         }
 
@@ -211,7 +211,7 @@ namespace GameBattle.EcsSystem
                 }
                 catch (Exception e)
                 {
-                    DLogger.Error($"[GameBattle.EcsSystem] {entity.GetType().FullName} Update error: {e}");
+                    BLogger.Error($"[GameBattle.EcsSystem] {entity.GetType().FullName} Update error: {e}");
                 }
 
                 node = next;
@@ -254,7 +254,7 @@ namespace GameBattle.EcsSystem
                 }
                 catch (Exception e)
                 {
-                    DLogger.Error($"[GameBattle.EcsSystem] {entity.GetType().FullName} LateUpdate error: {e}");
+                    BLogger.Error($"[GameBattle.EcsSystem] {entity.GetType().FullName} LateUpdate error: {e}");
                 }
 
                 node = next;
@@ -351,7 +351,7 @@ namespace GameBattle.EcsSystem
             }
             catch (Exception e)
             {
-                DLogger.Error($"[GameBattle.EcsSystem] {entity.GetType().FullName} AwakeSystem error: {e}");
+                BLogger.Error($"[GameBattle.EcsSystem] {entity.GetType().FullName} AwakeSystem error: {e}");
             }
         }
 
@@ -369,7 +369,7 @@ namespace GameBattle.EcsSystem
             }
             catch (Exception e)
             {
-                DLogger.Error($"[GameBattle.EcsSystem] {entity.GetType().FullName} AwakeSystem error: {e}");
+                BLogger.Error($"[GameBattle.EcsSystem] {entity.GetType().FullName} AwakeSystem error: {e}");
             }
         }
 
@@ -389,7 +389,7 @@ namespace GameBattle.EcsSystem
             }
             catch (Exception e)
             {
-                DLogger.Error($"[GameBattle.EcsSystem] {entity.GetType().FullName} AwakeSystem error: {e}");
+                BLogger.Error($"[GameBattle.EcsSystem] {entity.GetType().FullName} AwakeSystem error: {e}");
             }
         }
 
@@ -411,7 +411,7 @@ namespace GameBattle.EcsSystem
             }
             catch (Exception e)
             {
-                DLogger.Error($"[GameBattle.EcsSystem] {entity.GetType().FullName} AwakeSystem error: {e}");
+                BLogger.Error($"[GameBattle.EcsSystem] {entity.GetType().FullName} AwakeSystem error: {e}");
             }
         }
 
@@ -434,7 +434,7 @@ namespace GameBattle.EcsSystem
             }
             catch (Exception e)
             {
-                DLogger.Error($"[GameBattle.EcsSystem] {entity.GetType().FullName} {nameof(IAwake.Awake)} error: {e}");
+                BLogger.Error($"[GameBattle.EcsSystem] {entity.GetType().FullName} {nameof(IAwake.Awake)} error: {e}");
             }
         }
 
@@ -455,7 +455,7 @@ namespace GameBattle.EcsSystem
             }
             catch (Exception e)
             {
-                DLogger.Error($"[GameBattle.EcsSystem] {entity.GetType().FullName} {nameof(IAwake.Awake)} error: {e}");
+                BLogger.Error($"[GameBattle.EcsSystem] {entity.GetType().FullName} {nameof(IAwake.Awake)} error: {e}");
             }
         }
 
@@ -478,7 +478,7 @@ namespace GameBattle.EcsSystem
             }
             catch (Exception e)
             {
-                DLogger.Error($"[GameBattle.EcsSystem] {entity.GetType().FullName} {nameof(IAwake.Awake)} error: {e}");
+                BLogger.Error($"[GameBattle.EcsSystem] {entity.GetType().FullName} {nameof(IAwake.Awake)} error: {e}");
             }
         }
 
@@ -503,7 +503,7 @@ namespace GameBattle.EcsSystem
             }
             catch (Exception e)
             {
-                DLogger.Error($"[GameBattle.EcsSystem] {entity.GetType().FullName} {nameof(IAwake.Awake)} error: {e}");
+                BLogger.Error($"[GameBattle.EcsSystem] {entity.GetType().FullName} {nameof(IAwake.Awake)} error: {e}");
             }
         }
 

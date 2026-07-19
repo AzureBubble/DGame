@@ -1,13 +1,12 @@
-﻿namespace GameBattle.EcsSystem
+﻿namespace GameBattle
 {
     public static class BLogger
     {
-        private static ILogger m_logger = new DefaultEcsLoggerHelper();
-        
-        public static ILogger Logger
+        private static ILogger m_logger;
+
+        public static void SetLogger(ILogger logger)
         {
-            get => m_logger;
-            set => m_logger = value ?? throw new System.ArgumentNullException(nameof(value));
+            m_logger = logger;
         }
         
         public static void SetLogLevel(bool debug, bool info, bool warning, bool error)

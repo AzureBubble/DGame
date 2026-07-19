@@ -1,4 +1,4 @@
-namespace GameBattle.EcsSystem
+namespace GameBattle
 {
     #region Marker Interface
 

@@ -1,6 +1,6 @@
 using System;
 
-namespace GameBattle.EcsSystem
+namespace GameBattle
 {
     /// <summary>
     /// EventComponent.Subscribe 返回的值类型订阅句柄，用于显式或托管式取消订阅。

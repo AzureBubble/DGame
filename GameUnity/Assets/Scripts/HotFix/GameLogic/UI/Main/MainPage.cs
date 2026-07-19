@@ -41,7 +41,7 @@ namespace GameLogic
 				return;
 			}
 
-			BattleNetMgr.Instance.StartBattleRequest().Coroutine();
+			// BattleNetMgr.Instance.StartBattleRequest().Coroutine();
 		}
 
 		private partial void OnClickJoinBtn()

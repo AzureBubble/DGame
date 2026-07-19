@@ -1,6 +1,6 @@
 using System;
 
-namespace GameBattle.EcsSystem
+namespace GameBattle
 {
     #region Direct Lifecycle
 
@@ -41,7 +41,7 @@ namespace GameBattle.EcsSystem
     /// 外置 LateUpdate 系统基类。
     /// </summary>
     /// <typeparam name="T">目标实体类型。</typeparam>
-    public abstract class LateUpdateSystem<T> : ILateUpdateSystem, ISystemOrder where T : Entity
+    public abstract class EcsLateUpdateSystem<T> : ILateUpdateSystem, ISystemOrder where T : Entity
     {
         /// <summary>
         /// 当前系统处理的实体类型。

@@ -1,4 +1,4 @@
-namespace GameBattle.EcsSystem
+namespace GameBattle
 {
     /// <summary>
     /// 通过 World + RuntimeId 保存实体引用，并用捕获的实体实例检测对象池复用。

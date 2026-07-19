@@ -1,6 +1,6 @@
 using System;
 
-namespace GameBattle.EcsSystem
+namespace GameBattle
 {
     #region Base System
 

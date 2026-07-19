@@ -1,6 +1,6 @@
 using System;
 
-namespace GameBattle.EcsSystem
+namespace GameBattle
 {
     #region Direct Lifecycle
 
@@ -139,7 +139,7 @@ namespace GameBattle.EcsSystem
     /// 无参外置唤醒系统基类。
     /// </summary>
     /// <typeparam name="T">目标实体类型。</typeparam>
-    public abstract class AwakeSystem<T> : IAwakeSystem where T : Entity
+    public abstract class EcsAwakeSystem<T> : IAwakeSystem where T : Entity
     {
         /// <summary>
         /// 当前系统处理的实体类型。
@@ -164,7 +164,7 @@ namespace GameBattle.EcsSystem
     /// </summary>
     /// <typeparam name="T">目标实体类型。</typeparam>
     /// <typeparam name="T1">Awake 参数类型。</typeparam>
-    public abstract class AwakeSystem<T, T1> : IAwakeSystem<T1> where T : Entity
+    public abstract class EcsAwakeSystem<T, T1> : IAwakeSystem<T1> where T : Entity
     {
         /// <summary>
         /// 当前系统处理的实体类型。
@@ -192,7 +192,7 @@ namespace GameBattle.EcsSystem
     /// <typeparam name="T">目标实体类型。</typeparam>
     /// <typeparam name="T1">第一个 Awake 参数类型。</typeparam>
     /// <typeparam name="T2">第二个 Awake 参数类型。</typeparam>
-    public abstract class AwakeSystem<T, T1, T2> : IAwakeSystem<T1, T2> where T : Entity
+    public abstract class EcsAwakeSystem<T, T1, T2> : IAwakeSystem<T1, T2> where T : Entity
     {
         /// <summary>
         /// 当前系统处理的实体类型。
@@ -223,7 +223,7 @@ namespace GameBattle.EcsSystem
     /// <typeparam name="T1">第一个 Awake 参数类型。</typeparam>
     /// <typeparam name="T2">第二个 Awake 参数类型。</typeparam>
     /// <typeparam name="T3">第三个 Awake 参数类型。</typeparam>
-    public abstract class AwakeSystem<T, T1, T2, T3> : IAwakeSystem<T1, T2, T3> where T : Entity
+    public abstract class EcsAwakeSystem<T, T1, T2, T3> : IAwakeSystem<T1, T2, T3> where T : Entity
     {
         /// <summary>
         /// 当前系统处理的实体类型。

@@ -1,11 +1,9 @@
-using Fantasy.Entitas.Interface;
-
 namespace GameBattle
 {
     /// <summary>
     /// 负责在战斗上下文销毁时回收战斗域单例管理组件。
     /// </summary>
-    public sealed class SingletonManagerComponentDestroySystem : DestroySystem<SingletonManagerComponent>
+    public sealed class SingletonManagerComponentDestroySystem : EcsDestroySystem<SingletonManagerComponent>
     {
         /// <summary>
         /// 销毁战斗域单例管理组件及其登记的全部单例。

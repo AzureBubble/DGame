@@ -40,7 +40,7 @@ namespace GameBattle
             string st = new StackTrace().ToString();
             if (!st.Contains("GameBattle.Singleton`1[T].get_Instance"))
             {
-                DGame.DLogger.Error($"Singleton<{typeof(T).FullName}> should be instantiated via Instance only.");
+                BLogger.Error($"Singleton<{typeof(T).FullName}> should be instantiated via Instance only.");
             }
 #endif
         }

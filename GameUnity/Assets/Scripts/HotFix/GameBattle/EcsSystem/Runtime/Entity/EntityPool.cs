@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace GameBattle.EcsSystem
+namespace GameBattle
 {
     /// <summary>
     /// World 私有实体对象池，按实体精确类型缓存可复用实例。

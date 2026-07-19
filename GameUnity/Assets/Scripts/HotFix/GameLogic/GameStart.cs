@@ -108,7 +108,6 @@ public partial class GameStart
 
     private static void OnDestroy()
     {
-        BattleManager.DestroyBattle();
         SingletonSystem.Destroy();
         UIImageEffect.ClearCache();
         GameModule.Destroy();

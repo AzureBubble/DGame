@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using DGame;
+using DGame.FixedPoint;
 
-namespace GameBattle.EcsSystem
+namespace GameBattle
 {
     /// <summary>
     /// GameBattle 轻量 ECS 世界入口，负责实体创建、系统调度、事件根组件和对象池生命周期。

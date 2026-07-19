@@ -18,5 +18,5 @@ public sealed class Definition
     /// <summary>
     /// 新 ECS 外置实体系统接口完整类型名。
     /// </summary>
-    public const string EcsEntitySystemInterfaceName = "GameBattle.EcsSystem.IEntitySystem";
+    public const string EcsEntitySystemInterfaceName = "GameBattle.IEntitySystem";
 }

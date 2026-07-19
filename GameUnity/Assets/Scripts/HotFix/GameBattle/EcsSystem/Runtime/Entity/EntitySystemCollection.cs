@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace GameBattle.EcsSystem
+namespace GameBattle
 {
     /// <summary>
     /// 按实体类型保存外置生命周期系统。

@@ -23,16 +23,16 @@ namespace GameBattle
             {
                 if (m_instance == null)
                 {
-                    if (BattleManager.CurBattleContextComponent?.SingletonManager == null)
-                    {
-                        DGame.DLogger.Error($"BattleSingleton<{typeof(T).Name}> access failed: BattleContext or SingletonManager is null.");
-                    }
-                    else
-                    {
-                        m_instance = new T();
-                        m_instance.OnInit();
-                        BattleManager.CurBattleContextComponent.SingletonManager.Register(m_instance);
-                    }
+                    // if (BattleManager.CurBattleContextComponent?.SingletonManager == null)
+                    // {
+                    //     BLogger.Error($"BattleSingleton<{typeof(T).Name}> access failed: BattleContext or SingletonManager is null.");
+                    // }
+                    // else
+                    // {
+                    //     m_instance = new T();
+                    //     m_instance.OnInit();
+                    //     BattleManager.CurBattleContextComponent.SingletonManager.Register(m_instance);
+                    // }
                 }
                 return m_instance;
             }
@@ -47,7 +47,7 @@ namespace GameBattle
             string st = new StackTrace().ToString();
             if (!st.Contains("GameBattle.BattleSingleton`1[T].get_Instance"))
             {
-                DGame.DLogger.Error($"BattleSingleton<{typeof(T).FullName}> should be instantiated via Instance only.");
+                BLogger.Error($"BattleSingleton<{typeof(T).FullName}> should be instantiated via Instance only.");
             }
 #endif
         }

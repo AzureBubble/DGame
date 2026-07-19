@@ -1,6 +1,6 @@
 using System;
 
-namespace GameBattle.EcsSystem
+namespace GameBattle
 {
     #region Direct Lifecycle
 
@@ -39,7 +39,7 @@ namespace GameBattle.EcsSystem
     /// 外置销毁系统基类。
     /// </summary>
     /// <typeparam name="T">目标实体类型。</typeparam>
-    public abstract class DestroySystem<T> : IDestroySystem where T : Entity
+    public abstract class EcsDestroySystem<T> : IDestroySystem where T : Entity
     {
         /// <summary>
         /// 当前系统处理的实体类型。

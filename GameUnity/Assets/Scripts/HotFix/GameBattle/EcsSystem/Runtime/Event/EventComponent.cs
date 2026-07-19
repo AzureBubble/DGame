@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace GameBattle.EcsSystem
+namespace GameBattle
 {
     /// <summary>
     /// GameBattle 内部事件组件，按事件数据类型管理订阅和派发。

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace GameBattle.EcsSystem
+namespace GameBattle
 {
     /// <summary>
     /// 事件订阅生命周期容器，用于集中释放一组订阅 token。

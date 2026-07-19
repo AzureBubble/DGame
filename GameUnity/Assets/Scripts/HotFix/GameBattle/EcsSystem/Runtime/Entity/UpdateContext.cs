@@ -1,6 +1,7 @@
 using DGame;
+using DGame.FixedPoint;
 
-namespace GameBattle.EcsSystem
+namespace GameBattle
 {
     /// <summary>
     /// 战斗 ECS 单帧更新上下文。

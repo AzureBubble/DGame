@@ -143,8 +143,8 @@ namespace DGame
                 case ELogLevel.Debug:
                     m_stringBuilder.AppendFormat(
                         showColor
-                            ? "<color=#CFCFCF><b>[Debug] ► </b></color> - <color=#00FF18>{0}</color>"
-                            : "<color=#00FF18><b>[Debug] ► </b></color> - {0}", logStr);
+                            ? "<color=#CFCFCF><b>[DEBUG] ► </b></color> - <color=#00FF18>{0}</color>"
+                            : "<color=#00FF18><b>[DEBUG] ► </b></color> - {0}", logStr);
                     break;
                 case ELogLevel.Info:
                     m_stringBuilder.AppendFormat(

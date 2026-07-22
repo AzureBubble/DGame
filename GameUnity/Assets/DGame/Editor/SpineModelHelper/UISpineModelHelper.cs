@@ -21,6 +21,7 @@ namespace DGame
         private const string SPINE_PATH = "Assets/AssetArt/Actor/Spine";
         private const string UI_SPINE_SAVE_PATH = "Assets/BundleAssets/Prefabs/UISpineModel";
         private const string SPINE_SAVE_PATH = "Assets/BundleAssets/Prefabs/Model";
+        private const string UI_SPINE_PREFAB_PREFIX = "uispine_";
 
         #endregion
 
@@ -109,6 +110,7 @@ namespace DGame
                     if (skeletonDataAsset != null)
                     {
                         var assetName = skeletonDataAsset.name.Replace(AssetUtility.SkeletonDataSuffix, "");
+                        var uiSpinePrefabName = GetUISpinePrefabName(assetName);
                         var animationName = onePath.StartsWith(SPINE_PATH) ? "idle" : "run";
 
                         GameObject canvasGameObject = new GameObject("Canvas");
@@ -116,7 +118,7 @@ namespace DGame
                         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
 
                         GameObject parentGameObject = new GameObject();
-                        parentGameObject.name = assetName;
+                        parentGameObject.name = uiSpinePrefabName;
                         parentGameObject.layer = LayerMask.NameToLayer("UI");
                         parentGameObject.transform.SetParent(canvas.transform, false);
                         parentGameObject.AddComponent<RectTransform>();
@@ -178,7 +180,7 @@ namespace DGame
                             Directory.CreateDirectory(savePath);
                         }
 
-                        savePath = $"{savePath}/{assetName}.prefab";
+                        savePath = $"{savePath}/{uiSpinePrefabName}.prefab";
                         PrefabUtility.SaveAsPrefabAsset(parentGameObject, savePath);
                         Debug.LogFormat("UISpine模型生成结束. {0}", savePath);
                         //GameObject.DestroyImmediate(newGameObject);
@@ -188,6 +190,13 @@ namespace DGame
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
+        }
+
+        private static string GetUISpinePrefabName(string assetName)
+        {
+            return assetName.StartsWith(UI_SPINE_PREFAB_PREFIX)
+                ? assetName
+                : $"{UI_SPINE_PREFAB_PREFIX}{assetName}";
         }
 
         public static string GetSavePath(string originalPath, bool isUI = false)

@@ -26,6 +26,14 @@ namespace GameLogic
         /// </summary>
         Death,
         /// <summary>
+        /// 攻击状态。
+        /// </summary>
+        Attack,
+        /// <summary>
+        /// 技能状态。
+        /// </summary>
+        Skill,
+        /// <summary>
         /// 技能1状态。
         /// </summary>
         Skill1,
@@ -60,6 +68,10 @@ namespace GameLogic
         /// 技能索引参数。
         /// </summary>
         public static readonly int SkillIndex = Animator.StringToHash("SkillIndex");
+        /// <summary>
+        /// 攻击状态参数。
+        /// </summary>
+        public static readonly int Attack = Animator.StringToHash("Attack");
         /// <summary>
         /// 受击表现参数。
         /// </summary>
@@ -289,6 +301,10 @@ namespace GameLogic
             m_animClips[(int)FrameAnimState.Move] = moveClip;
             m_animClips[(int)FrameAnimState.Death] = new FrameClip(FrameAnimName.death,
                 m_frameSpritePool.GetSprites(FrameAnimName.death), IsLoopAnim(FrameAnimState.Death));
+            m_animClips[(int)FrameAnimState.Attack] = new FrameClip(FrameAnimName.attack,
+                m_frameSpritePool.GetSprites(FrameAnimName.attack), IsLoopAnim(FrameAnimState.Attack));
+            m_animClips[(int)FrameAnimState.Skill] = new FrameClip(FrameAnimName.skill,
+                m_frameSpritePool.GetSprites(FrameAnimName.skill), IsLoopAnim(FrameAnimState.Skill));
             m_animClips[(int)FrameAnimState.Skill1] = new FrameClip(FrameAnimName.skill1,
                 m_frameSpritePool.GetSprites(FrameAnimName.skill1), IsLoopAnim(FrameAnimState.Skill1));
             m_animClips[(int)FrameAnimState.Skill2] = new FrameClip(FrameAnimName.skill2,
@@ -542,6 +558,13 @@ namespace GameLogic
                     state = FrameAnimState.Move;
                 }
             }
+            else if (id == FrameAnimParamDefine.Attack)
+            {
+                if (value)
+                {
+                    state = FrameAnimState.Attack;
+                }
+            }
 
             SwitchAnim(state);
         }
@@ -558,6 +581,9 @@ namespace GameLogic
             {
                 switch (value)
                 {
+                    case 0:
+                        state = FrameAnimState.Skill;
+                        break;
                     case 1:
                         state = FrameAnimState.Skill1;
                         break;

@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:GameUnity/Assets/Scripts/HotFix/GameLogic/UI/Gen/AllSvrLeftItem_Gen.g.cs.meta
 guid: 3f4c8f92035a3314687bc14b020c5784
+========
+guid: e0f83798825d4fb4ea58f16e58214958
+>>>>>>>> main:GameUnity/Assets/Scripts/HotFix/GameBattle/Log/BLogger.cs.meta
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2

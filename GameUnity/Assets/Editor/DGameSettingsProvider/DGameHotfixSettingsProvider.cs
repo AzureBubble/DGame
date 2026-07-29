@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using DGame;
+using HybridCLR.Editor.Settings;
 using UnityEditor;
 using UnityEngine;
 using YooAsset.Editor;
@@ -30,6 +31,7 @@ public static class DGameHotfixSettingsProvider
     private static SerializedObject m_serializedObject;
     private static int m_packageNameIndex;
     private static string[] m_packageNames;
+    private static bool m_isHybridClrSettingsEnabled;
 
     // UI状态
     private static Vector2 m_scrollPosition;
@@ -58,6 +60,7 @@ public static class DGameHotfixSettingsProvider
             },
             activateHandler = (searchContext, rootElement) =>
             {
+                RefreshHybridClrState();
                 UpdateSettingsInspector.ForceUpdateAssemblies2();
                 var settings = Settings.UpdateSettings;
                 if (settings == null)
@@ -191,6 +194,7 @@ public static class DGameHotfixSettingsProvider
                     if (EditorUtility.DisplayDialog("启用 HybridCLR", "确定要启用 HybridCLR 热更新功能吗？", "确定", "取消"))
                     {
                         HybridCLRDefineSymbols.EnableHybridCLR();
+                        RefreshHybridClrState();
                         Debug.Log("HybridCLR 已启用");
                     }
                 }
@@ -203,6 +207,7 @@ public static class DGameHotfixSettingsProvider
                     if (EditorUtility.DisplayDialog("禁用 HybridCLR", "确定要禁用 HybridCLR 热更新功能吗？", "确定", "取消"))
                     {
                         HybridCLRDefineSymbols.DisableHybridCLR();
+                        RefreshHybridClrState();
                         Debug.Log("HybridCLR 已禁用");
                     }
                 }
@@ -212,19 +217,30 @@ public static class DGameHotfixSettingsProvider
             EditorGUILayout.EndHorizontal();
 
             // 状态显示
-            bool isHybridCLREnabled =
+            bool isHybridClrDefineEnabled =
 #if ENABLE_HYBRIDCLR
                 true;
 #else
                 false;
 #endif
-            string statusText = isHybridCLREnabled ? "HybridCLR 已启用" : "HybridCLR 已禁用";
-            MessageType statusType = isHybridCLREnabled ? MessageType.Info : MessageType.Warning;
+            bool isHybridClrEnabled = isHybridClrDefineEnabled && m_isHybridClrSettingsEnabled;
+            string statusText = isHybridClrDefineEnabled == m_isHybridClrSettingsEnabled
+                ? $"HybridCLR {(isHybridClrEnabled ? "已启用" : "已禁用")}"
+                : "HybridCLR 配置状态不一致";
+            statusText += $"\nHybridCLRSettings.enable: {(m_isHybridClrSettingsEnabled ? "启用" : "禁用")}";
+            statusText += $"\nENABLE_HYBRIDCLR: {(isHybridClrDefineEnabled ? "已定义" : "未定义")}";
+            MessageType statusType = isHybridClrEnabled ? MessageType.Info : MessageType.Warning;
 
             EditorGUILayout.HelpBox(statusText, statusType);
         }
         EditorGUILayout.EndVertical();
         GUILayout.Space(10);
+    }
+
+    private static void RefreshHybridClrState()
+    {
+        HybridCLRSettings settings = HybridCLRSettings.LoadOrCreate();
+        m_isHybridClrSettingsEnabled = settings != null && settings.enable;
     }
 
     private static void DrawBasicSettings(UpdateSettings updateSettings)

@@ -4,6 +4,8 @@ cd "$(dirname "$0")"
 
 source ./path_define.sh
 
+bash "${WORKSPACE}/../GameConfig/GenerateTool_Binary/gen_bin_client_lazyload.sh" || exit 1
+
 echo "Log File: ${BUILD_LOGFILE}"
 
 "${UNITYEDITOR_PATH}/Unity" \
@@ -25,8 +27,5 @@ fi
 if [[ -f "${BUILD_LOGFILE}" ]]; then
   cat "${BUILD_LOGFILE}"
 fi
-
-echo "Press any key to continue..."
-read -n 1 -s -r
 
 exit ${status}

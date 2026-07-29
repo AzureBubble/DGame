@@ -75,14 +75,6 @@ namespace GameLogic
         public static IGameTimerModule GameTimerModule => m_gameTimerModule == null
             ? m_gameTimerModule = GetModule<IGameTimerModule>() : m_gameTimerModule;
 
-        private static DGame.IInputModule m_inputModule;
-
-        /// <summary>
-        /// 输入模块
-        /// </summary>
-        public static DGame.IInputModule InputModule => m_inputModule == null
-            ? m_inputModule = GetModule<DGame.IInputModule>() : m_inputModule;
-
 #if ENABLE_INPUT_SYSTEM
         private static GameLogic.IInputModule m_input;
 
@@ -156,7 +148,6 @@ namespace GameLogic
             m_animModule = null;
             m_resourceModule = null;
             m_fsmModule = null;
-            m_inputModule = null;
             m_localizationModule = null;
             m_gameObjectPool = null;
             m_sensitiveWordModule = null;

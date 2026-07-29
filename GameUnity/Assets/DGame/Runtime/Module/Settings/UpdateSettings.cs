@@ -240,7 +240,7 @@ namespace DGame
         /// </summary>
         private static string GetAutoBuildPackageVersion()
         {
-            int totalMinutes = DateTime.Now.Hour * 6 + DateTime.Now.Minute;
+            int totalMinutes = DateTime.Now.Hour * 6 + DateTime.Now.Minute / 10;
             return DateTime.Now.ToString("yyyy-MM-dd") + "-" + totalMinutes;
         }
 

@@ -17,6 +17,8 @@ if [[ -z "${VERSION}" ]]; then
   exit 1
 fi
 
+bash "${WORKSPACE}/../GameConfig/GenerateTool_Binary/gen_bin_client_lazyload.sh" || exit 1
+
 echo "========================================"
 echo "Building Android (Manual Version: ${VERSION})"
 echo "========================================"

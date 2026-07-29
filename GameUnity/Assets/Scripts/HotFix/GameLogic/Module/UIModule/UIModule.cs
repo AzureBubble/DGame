@@ -5,6 +5,9 @@ using Cysharp.Threading.Tasks;
 using DGame;
 using UnityEngine;
 using UnityEngine.UI;
+#if ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
+#endif
 
 namespace GameLogic
 {
@@ -121,11 +124,17 @@ namespace GameLogic
                 var window = m_uiStack[i];
                 window.InternalUpdate();
             }
-
+#if ENABLE_INPUT_SYSTEM
+            if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
+            {
+                GetAndCloseTopWindow((int)UILayer.System);
+            }
+#else
             if (Input.GetKeyDown(KeyCode.Escape))
             {
                 GetAndCloseTopWindow((int)UILayer.System);
             }
+#endif
         }
 
         /// <summary>

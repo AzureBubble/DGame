@@ -139,9 +139,11 @@ namespace DGame
             GUI.color = Color.yellow;
             if (GUILayout.Button(new GUIContent(" 立即全量刷新", EditorGUIUtility.IconContent("Refresh").image), GUILayout.ExpandWidth(true), GUILayout.Height(30)))
             {
-                if (EditorUtility.DisplayDialog("确认刷新", "此操作将原地刷新所有有效图集，并在全部成功后清理失效图集。现有图集 GUID 将保持不变，确定继续吗？", "刷新", "取消"))
+                if (EditorUtility.DisplayDialog("确认重新生成",
+                        "此操作将原地更新全部图集，并在成功后清理失效图集。现有图集 GUID 将保持不变，确定继续吗？",
+                        "重新生成", "取消"))
                 {
-                    EditorSpriteSaveInfo.RefreshAllForBuild();
+                    EditorSpriteSaveInfo.ForceGenerateAll(true);
                 }
             }
             GUI.color = originalColor;

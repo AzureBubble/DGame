@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using DGame;
 using UnityEngine;
+#if ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
+#endif
 
 namespace GameLogic
 {
@@ -121,10 +124,17 @@ namespace GameLogic
             {
                 return;
             }
+#if ENABLE_INPUT_SYSTEM
+            if (Keyboard.current != null && Keyboard.current.f1Key.wasPressedThisFrame)
+            {
+                GameModule.UIModule.ShowWindowAsync<GMPanel>();
+            }
+#else
             if (Input.GetKeyDown(KeyCode.F1))
             {
                 GameModule.UIModule.ShowWindowAsync<GMPanel>();
             }
+#endif
         }
     }
 }

@@ -137,11 +137,11 @@ namespace DGame
             using var horizontalScope = new EditorGUILayout.HorizontalScope();
             Color originalColor = GUI.color;
             GUI.color = Color.yellow;
-            if (GUILayout.Button(new GUIContent(" 立即重新生成", EditorGUIUtility.IconContent("Refresh").image), GUILayout.ExpandWidth(true), GUILayout.Height(30)))
+            if (GUILayout.Button(new GUIContent(" 立即全量刷新", EditorGUIUtility.IconContent("Refresh").image), GUILayout.ExpandWidth(true), GUILayout.Height(30)))
             {
-                if (EditorUtility.DisplayDialog("确认删除", "此操作将会立即删除相关路径下的所有图集资源，并重新生成，确定继续吗？", "删除", "取消"))
+                if (EditorUtility.DisplayDialog("确认刷新", "此操作将原地刷新所有有效图集，并在全部成功后清理失效图集。现有图集 GUID 将保持不变，确定继续吗？", "刷新", "取消"))
                 {
-                    EditorSpriteSaveInfo.ForceGenerateAll(true);
+                    EditorSpriteSaveInfo.RefreshAllForBuild();
                 }
             }
             GUI.color = originalColor;

@@ -1,17 +1,28 @@
 cd /d %~dp0
 
 call path_define.bat
+set "UNITY_PROJECT_PATH=%WORKSPACE%"
+
+set "AUTO_CONTINUE=1"
+call "%UNITY_PROJECT_PATH%\..\GameConfig\GenerateTool_Binary\gen_bin_client_lazyload.bat"
+if errorlevel 1 (
+    set "BUILD_EXIT_CODE=%ERRORLEVEL%"
+    echo Table generation failed.
+    goto BUILD_FINISHED
+)
 
 echo Log File: %BUILD_LOGFILE%
 
-"%UNITYEDITOR_PATH%\Unity.exe" -projectPath "%WORKSPACE%" -batchmode -quit -logFile "%BUILD_LOGFILE%" -executeMethod DGame.ReleaseTools.AutoBuildAndroid -CustomArgs:Language=en_US;"%WORKSPACE%"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0run_unity_with_log.ps1" -UnityEditorPath "%UNITYEDITOR_PATH%" -ProjectPath "%UNITY_PROJECT_PATH%" -LogFile "%BUILD_LOGFILE%" -ExecuteMethod "DGame.ReleaseTools.AutoBuildAndroid"
 
-if errorlevel 1 (
+set "BUILD_EXIT_CODE=%ERRORLEVEL%"
+
+:BUILD_FINISHED
+if not "%BUILD_EXIT_CODE%"=="0" (
     echo Build failed. Check log: %BUILD_LOGFILE%
 ) else (
     echo Build finished. Check log: %BUILD_LOGFILE%
 )
 
-@REM for /f "delims=[" %%i in (%BUILD_LOGFILE%) do echo %%i
-
 pause
+exit /b %BUILD_EXIT_CODE%

@@ -12,7 +12,7 @@ namespace DGame
 {
     public class SpritePostprocessor : AssetPostprocessor
     {
-        private static List<string> m_resourcesToDelete = new List<string>();
+        private static readonly HashSet<string> m_resourcesToDelete = new HashSet<string>();
 
         #region 缓存相关
 
@@ -110,6 +110,16 @@ namespace DGame
 
         #endregion
 
+        private void OnPreprocessTexture()
+        {
+            if (!AtlasConfig.Instance.autoGenerate || !ShouldProcessAsset(assetPath))
+            {
+                return;
+            }
+
+            ApplySpriteTextureSettings((TextureImporter)assetImporter);
+        }
+
         private static void OnPostprocessAllAssets(
             string[] importedAssets, string[] deletedAssets,
             string[] movedAssets, string[] movedFromAssetPaths)
@@ -147,7 +157,7 @@ namespace DGame
                 }
 
                 bool isDelete = m_resourcesToDelete.Count > 0;
-                foreach (var res in m_resourcesToDelete)
+                foreach (var res in m_resourcesToDelete.ToArray())
                 {
                     AssetDatabase.DeleteAsset(res);
                 }
@@ -156,7 +166,6 @@ namespace DGame
                 {
                     Debug.LogError($"<color=red>针对 AtlasConfig.sourceAtlasRootDir 路径下资源</color>\n<color=red>移除了空格和同名资源，请检查重新合入相关资源</color>");
                 }
-                AssetDatabase.Refresh();
             }
         }
 
@@ -197,19 +206,18 @@ namespace DGame
                     RemoveFromCache(oldPaths[i]);
                     EditorSpriteSaveInfo.OnDeleteSprite(oldPaths[i]);
                     LogProcessed("[Moved From]", oldPaths[i]);
-                    EditorSpriteSaveInfo.MarkParentAtlasesDirty(oldPaths[i], true);
                 }
 
                 if (ShouldProcessAsset(newPaths[i]))
                 {
-                    if (CheckFileNameContainsSpace(newPaths[i]) || CheckDuplicateAssetName(newPaths[i]) || ChangeSpriteTextureType(newPaths[i]))
+                    if (CheckFileNameContainsSpace(newPaths[i]) || CheckDuplicateAssetName(newPaths[i])
+                        || EnsureSpriteTextureSettings(newPaths[i]))
                     {
                         continue;
                     }
                     AddToCache(newPaths[i]);
                     EditorSpriteSaveInfo.OnImportSprite(newPaths[i]);
                     LogProcessed("[Moved To]", newPaths[i]);
-                    EditorSpriteSaveInfo.MarkParentAtlasesDirty(newPaths[i], false);
                 }
             }
         }
@@ -233,7 +241,7 @@ namespace DGame
             {
                 if (ShouldProcessAsset(path))
                 {
-                    if (!isDelete && (CheckFileNameContainsSpace(path) || CheckDuplicateAssetName(path) || ChangeSpriteTextureType(path)))
+                    if (!isDelete && (CheckFileNameContainsSpace(path) || CheckDuplicateAssetName(path)))
                     {
                         continue;
                     }
@@ -305,7 +313,7 @@ namespace DGame
             return false;
         }
 
-        private static bool ChangeSpriteTextureType(string path)
+        private static bool EnsureSpriteTextureSettings(string path)
         {
             var importer = AssetImporter.GetAtPath(path) as TextureImporter;
 
@@ -313,6 +321,18 @@ namespace DGame
             {
                 return false;
             }
+
+            bool isChange = ApplySpriteTextureSettings(importer);
+            if (isChange)
+            {
+                LogProcessed("[Sprite Import Changed Reimport]", path);
+                importer.SaveAndReimport();
+            }
+            return isChange;
+        }
+
+        private static bool ApplySpriteTextureSettings(TextureImporter importer)
+        {
             bool isChange = false;
             if (importer.textureType != TextureImporterType.Sprite)
             {
@@ -340,11 +360,6 @@ namespace DGame
                 isChange = true;
             }
 
-            if (isChange)
-            {
-                LogProcessed("[Sprite Import Changed Reimport]", path);
-                importer.SaveAndReimport();
-            }
             return isChange;
         }
 

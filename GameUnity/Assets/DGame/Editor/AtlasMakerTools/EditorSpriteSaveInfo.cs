@@ -33,25 +33,22 @@ namespace DGame
         public static void ForceGenerateAll()
         {
             m_isBuildChange = true;
-            ForceGenerateAll(false);
-            m_isBuildChange = false;
+            try
+            {
+                RefreshChangedAtlases();
+            }
+            finally
+            {
+                m_isBuildChange = false;
+            }
         }
 
-        public static void ForceGenerateAll(bool isClearAll)
+        private static void RefreshChangedAtlases()
         {
             m_isInScanExistingSprites = true;
             try
             {
                 EditorUtility.DisplayProgressBar("生成图集", "正在初始化...", 0f);
-
-                if (isClearAll)
-                {
-                    EditorUtility.DisplayProgressBar("生成图集", "清理缓存...", 0.1f);
-                    m_atlasPathMap.Clear();
-                    ClearCache();
-                    ClearAllAtlas();
-                }
-
                 m_atlasMap.Clear();
                 EditorUtility.DisplayProgressBar("生成图集", "扫描现有精灵...", 0.2f);
                 ScanExistingSprites();
@@ -83,7 +80,7 @@ namespace DGame
                 }
 
                 EditorUtility.DisplayProgressBar("生成图集", "生成图集文件...", 0.6f);
-                ProcessDirtyAtlases(true);
+                ProcessDirtyAtlases();
             }
             finally
             {
@@ -92,36 +89,61 @@ namespace DGame
             }
         }
 
-        private static void ClearAllAtlas()
+        /// <summary>
+        /// 构建前同步刷新全部图集。保留现有图集资产与 GUID，仅删除已经没有来源的孤儿图集。
+        /// </summary>
+        public static void RefreshAllForBuild()
         {
-            string[] atlasV2Files =
-                Directory.GetFiles(Config.outputAtlasDir, "*.spriteatlasv2", SearchOption.AllDirectories);
-            string[] atlasFiles =
-                Directory.GetFiles(Config.outputAtlasDir, "*.spriteatlas", SearchOption.AllDirectories);
-
-            foreach (string filePath in atlasFiles)
+            m_isInScanExistingSprites = true;
+            try
             {
-                AssetDatabase.DeleteAsset(filePath);
+                EditorUtility.DisplayProgressBar("生成图集", "扫描现有精灵...", 0.2f);
+                m_atlasPathMap.Clear();
+                ClearCache();
+                ScanExistingSprites(false, false);
+                m_dirtyAtlasNames.UnionWith(m_atlasMap.Keys);
+                EditorUtility.DisplayProgressBar("生成图集", "同步刷新图集文件...", 0.6f);
+                ProcessDirtyAtlases();
+                EditorUtility.DisplayProgressBar("生成图集", "清理失效图集...", 0.95f);
+                DeleteOrphanAtlases();
+                AssetDatabase.SaveAssets();
+                AssetDatabase.Refresh();
             }
-
-            foreach (string filePath in atlasV2Files)
+            finally
             {
-                AssetDatabase.DeleteAsset(filePath);
+                EditorUtility.ClearProgressBar();
+                m_isInScanExistingSprites = false;
             }
-
-            AssetDatabase.Refresh();
-            Debug.Log($"已删除 {atlasFiles?.Length + atlasV2Files?.Length} 个图集文件");
         }
 
-        private static void ProcessDirtyAtlases(bool force = false)
+        private static void DeleteOrphanAtlases()
+        {
+            if (!Directory.Exists(Config.outputAtlasDir))
+            {
+                return;
+            }
+
+            IEnumerable<string> atlasFiles = Directory.GetFiles(Config.outputAtlasDir, "*.spriteatlas",
+                    SearchOption.AllDirectories)
+                .Concat(Directory.GetFiles(Config.outputAtlasDir, "*.spriteatlasv2",
+                    SearchOption.AllDirectories));
+            foreach (string atlasPath in atlasFiles)
+            {
+                string atlasName = Path.GetFileNameWithoutExtension(atlasPath);
+                if (!m_atlasMap.ContainsKey(atlasName))
+                {
+                    DeleteAtlas(atlasPath.Replace('\\', '/'));
+                }
+            }
+        }
+
+        private static void ProcessDirtyAtlases()
         {
             int totalCount = m_dirtyAtlasNames.Count + m_dirtyAtlasNamesNeedCreateNew.Count;
             int processedCount = 0;
             bool showProgress = totalCount > 3 && m_isInScanExistingSprites;
             try
             {
-                AssetDatabase.StartAssetEditing();
-
                 while (m_dirtyAtlasNames.Count > 0)
                 {
                     var atlasName = m_dirtyAtlasNames.First();
@@ -130,10 +152,7 @@ namespace DGame
                         processedCount++;
                         EditorUtility.DisplayProgressBar("生成图集", $"更新图集: {atlasName} ({processedCount}/{totalCount})", 0.6f + 0.4f * processedCount / totalCount);
                     }
-                    if (force || ShouldUpdateAtlas(atlasName))
-                    {
-                        GenerateAtlas(atlasName, false);
-                    }
+                    GenerateAtlas(atlasName, false);
                     m_dirtyAtlasNames.Remove(atlasName);
                 }
 
@@ -145,16 +164,13 @@ namespace DGame
                         processedCount++;
                         EditorUtility.DisplayProgressBar("生成图集", $"创建图集: {atlasName} ({processedCount}/{totalCount})", 0.6f + 0.4f * processedCount / totalCount);
                     }
-                    if (force || ShouldUpdateAtlas(atlasName))
-                    {
-                        GenerateAtlas(atlasName, true);
-                    }
+                    // 删除、移动资源会进入此集合，即使剩余文件时间戳更旧也必须重建。
+                    GenerateAtlas(atlasName, true);
                     m_dirtyAtlasNamesNeedCreateNew.Remove(atlasName);
                 }
             }
             finally
             {
-                AssetDatabase.StopAssetEditing();
                 AssetDatabase.SaveAssets();
                 AssetDatabase.Refresh();
             }
@@ -188,8 +204,7 @@ namespace DGame
                 DeleteAtlas(deletePath);
                 return;
             }
-            AssetDatabase.Refresh();
-            EditorApplication.delayCall += () => { InternalGenerateAtlas(atlasName, sprites, outputPath); };
+            InternalGenerateAtlas(atlasName, sprites, outputPath);
         }
 
         private static string InternalGenerateAtlas(string atlasName, List<Sprite> sprites, string outputPath)
@@ -225,23 +240,27 @@ namespace DGame
             {
                 spriteAtlasAsset?.Add(sprites.ToArray());
                 SpriteAtlasAsset.Save(spriteAtlasAsset, outputPath);
-                AssetDatabase.ImportAsset(outputPath, ImportAssetOptions.ForceUpdate);
-                EditorApplication.delayCall += () =>
-                {
+                AssetDatabase.ImportAsset(outputPath,
+                    ImportAssetOptions.ForceUpdate | ImportAssetOptions.ForceSynchronousImport);
 #if UNITY_2022_1_OR_NEWER
-                    SpriteAtlasImporter sai = (SpriteAtlasImporter)AssetImporter.GetAtPath(outputPath);
-                    if (sai != null)
-                    {
-                        ConfigureAtlasV2Settings(sai);
-                        AssetDatabase.WriteImportSettingsIfDirty(outputPath);
-                        AssetDatabase.Refresh(ImportAssetOptions.ForceUpdate);
-                    }
+                SpriteAtlasImporter sai = AssetImporter.GetAtPath(outputPath) as SpriteAtlasImporter;
+                if (sai == null)
+                {
+                    throw new InvalidOperationException($"无法获取图集导入器: {outputPath}");
+                }
+
+                ConfigureAtlasV2Settings(sai);
+                if (AssetDatabase.WriteImportSettingsIfDirty(outputPath))
+                {
+                    AssetDatabase.ImportAsset(outputPath,
+                        ImportAssetOptions.ForceUpdate | ImportAssetOptions.ForceSynchronousImport);
+                }
 #else
-                    ConfigureAtlasV2Settings(spriteAtlasAsset);
-                    SpriteAtlasAsset.Save(spriteAtlasAsset, outputPath);
-                    AssetDatabase.Refresh(ImportAssetOptions.ForceUpdate);
+                ConfigureAtlasV2Settings(spriteAtlasAsset);
+                SpriteAtlasAsset.Save(spriteAtlasAsset, outputPath);
+                AssetDatabase.ImportAsset(outputPath,
+                    ImportAssetOptions.ForceUpdate | ImportAssetOptions.ForceSynchronousImport);
 #endif
-                };
             }
             else
             {
@@ -271,8 +290,6 @@ namespace DGame
             {
                 EditorUtility.SetDirty(atlas);
             }
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh(ImportAssetOptions.ForceUpdate);
             if (File.Exists(outputPath))
             {
                 m_atlasPathMap[atlasName] = outputPath;
@@ -395,11 +412,18 @@ namespace DGame
                 return;
             }
 
-            ScanExistingSprites(false);
+            ScanExistingSprites(false, false);
+            foreach (string atlasName in m_atlasMap.Keys)
+            {
+                if (GetLatestAtlasTime(atlasName) == DateTime.MinValue)
+                {
+                    m_dirtyAtlasNamesNeedCreateNew.Add(atlasName);
+                }
+            }
             m_intialized = true;
         }
 
-        public static void OnImportSprite(string spritePath, bool isCreateNew = false)
+        public static void OnImportSprite(string spritePath, bool isCreateNew = false, bool markDirty = true)
         {
             spritePath = spritePath.Replace("\\", "/");
             // 检测是否需要打图集
@@ -426,8 +450,11 @@ namespace DGame
             if (!atlasList.Contains(spritePath))
             {
                 atlasList.Add(spritePath);
+            }
+
+            if (markDirty)
+            {
                 MarkDirty(atlasName, isCreateNew);
-                MarkParentAtlasesDirty(spritePath, isCreateNew);
             }
         }
 
@@ -450,71 +477,21 @@ namespace DGame
                 if (atlasList.Remove(spritePath))
                 {
                     MarkDirty(atlasName, isCreateNew);
-                    MarkParentAtlasesDirty(spritePath, isCreateNew);
                 }
             }
         }
 
-        public static void MarkParentAtlasesDirty(string spritePath, bool isCreateNew)
+        private static void ScanExistingSprites(bool isCreateNew = true, bool markDirty = true)
         {
-            var currentPath = Path.GetDirectoryName(spritePath)?.Replace("\\", "/");
-
-            if(string.IsNullOrEmpty(currentPath)) return;
-            var tempRootDirArr = new List<string>(Config.sourceAtlasRootDir);
-            tempRootDirArr.AddRange(Config.rootChildAtlasDir);
-            foreach (var rootPath in tempRootDirArr)
-            {
-                var tempPath = rootPath.Replace("\\", "/").TrimEnd('/');
-                var tempCurrentPath = currentPath;
-
-                if (!tempCurrentPath.StartsWith(tempPath))
-                {
-                    continue;
-                }
-                while (tempCurrentPath != null && tempCurrentPath.StartsWith(tempPath))
-                {
-                    var parentAtlasName = GetAtlasNameForDirectory(tempCurrentPath);
-
-                    if (!string.IsNullOrEmpty(parentAtlasName))
-                    {
-                        MarkDirty(parentAtlasName, isCreateNew);
-                    }
-                    tempCurrentPath = Path.GetDirectoryName(tempCurrentPath)?.Replace("\\", "/");
-                }
-            }
-        }
-
-        private static string GetAtlasNameForDirectory(string directoryPath)
-        {
-            foreach (var rootPath in Config.sourceAtlasRootDir)
-            {
-                var tempPath = rootPath.Replace("\\", "/").TrimEnd('/');
-                if (!directoryPath.StartsWith(tempPath + "/"))
-                {
-                    continue;
-                }
-                var relativePath = directoryPath.Substring(rootPath.Length + 1).Split('/');
-                var atlasNamePart = string.Join("_", relativePath);
-                var rootFolderName = Path.GetFileName(rootPath);
-                return $"{rootFolderName}_{atlasNamePart}";
-            }
-            return null;
-        }
-
-        private static void ScanExistingSprites(bool isCreateNew = true)
-        {
-            List<string> sprites = new List<string>();
-            var guids = AssetDatabase.FindAssets("t:sprite", Config.sourceAtlasRootDir);
-            sprites.AddRange(guids);
-            guids = AssetDatabase.FindAssets("t:sprite", Config.rootChildAtlasDir);
-            sprites.AddRange(guids);
+            var sprites = new HashSet<string>(AssetDatabase.FindAssets("t:sprite", Config.sourceAtlasRootDir));
+            sprites.UnionWith(AssetDatabase.FindAssets("t:sprite", Config.rootChildAtlasDir));
             foreach (var guid in sprites)
             {
                 var path = AssetDatabase.GUIDToAssetPath(guid);
 
                 if (ShouldProcess(path))
                 {
-                    OnImportSprite(path, isCreateNew);
+                    OnImportSprite(path, isCreateNew, markDirty);
                 }
             }
         }
@@ -560,7 +537,7 @@ namespace DGame
             foreach (var rootPath in tempRootDirArr)
             {
                 var tempPath = rootPath.Replace("\\", "/").TrimEnd('/');
-                if (!spritePath.StartsWith(tempPath + "/"))
+                if (!IsPathUnderRoot(spritePath, tempPath))
                 {
                     continue;
                 }
@@ -585,19 +562,21 @@ namespace DGame
             foreach (var rootPath in Config.rootChildAtlasDir)
             {
                 var tempPath = rootPath.Replace("\\", "/").TrimEnd('/');
-                if (spritePath.StartsWith(tempPath))
+                if (!IsPathUnderRoot(spritePath, tempPath))
                 {
-                    string[] subDirectories = AssetDatabase.GetSubFolders(tempPath);
-                    foreach (var subDirectory in subDirectories)
-                    {
-                        if (spritePath.StartsWith(subDirectory))
-                        {
-                            string rootName = Path.GetFileName(tempPath);
-                            string directoryName = Path.GetFileName(subDirectory);
-                            return $"{rootName}_{directoryName}";
-                        }
-                    }
+                    continue;
                 }
+
+                string relativePath = spritePath.Substring(tempPath.Length + 1);
+                int separatorIndex = relativePath.IndexOf('/');
+                if (separatorIndex <= 0)
+                {
+                    return null;
+                }
+
+                string rootName = Path.GetFileName(tempPath);
+                string directoryName = relativePath.Substring(0, separatorIndex);
+                return $"{rootName}_{directoryName}";
             }
             return null;
         }
@@ -607,7 +586,7 @@ namespace DGame
             foreach (var rootPath in Config.sourceAtlasRootDir)
             {
                 var tempPath = rootPath.Replace("\\", "/").TrimEnd('/');
-                if (!spritePath.StartsWith(tempPath + "/"))
+                if (!IsPathUnderRoot(spritePath, tempPath))
                 {
                     continue;
                 }
@@ -644,14 +623,14 @@ namespace DGame
         {
             // 检查是否是需要排除的路径
             return !CheckIsExcludeFolder(spritePath)//spritePath.StartsWith(Config.excludeFolder)
-                   && Config.singleAtlasDir.Any(key => spritePath.IndexOf(key, StringComparison.OrdinalIgnoreCase) >= 0);
+                   && Config.singleAtlasDir.Any(rootPath => IsPathUnderRoot(spritePath, rootPath));
         }
 
         private static bool CheckIsNeedGenerateRootChildDirAtlas(string spritePath)
         {
             // 检查是否是需要排除的路径
             return !CheckIsExcludeFolder(spritePath)//spritePath.StartsWith(Config.excludeFolder)
-                   && Config.rootChildAtlasDir.Any(key => spritePath.IndexOf(key, StringComparison.OrdinalIgnoreCase) >= 0);
+                   && Config.rootChildAtlasDir.Any(rootPath => IsPathUnderRoot(spritePath, rootPath));
         }
 
         private static bool CheckIsExcludeFolder(string assetPath)
@@ -659,12 +638,19 @@ namespace DGame
             foreach (var rootPath in AtlasConfig.Instance.excludeFolder)
             {
                 var tempPath = rootPath.Replace("\\", "/").TrimEnd('/');
-                if (assetPath.StartsWith(tempPath + "/"))
+                if (IsPathUnderRoot(assetPath, tempPath))
                 {
                     return true;
                 }
             }
             return false;
+        }
+
+        private static bool IsPathUnderRoot(string assetPath, string rootPath)
+        {
+            string normalizedPath = assetPath.Replace("\\", "/");
+            string normalizedRoot = rootPath.Replace("\\", "/").TrimEnd('/');
+            return normalizedPath.StartsWith(normalizedRoot + "/", StringComparison.OrdinalIgnoreCase);
         }
 
         private static bool CheckIsImageFile(string spritePath)
@@ -696,11 +682,6 @@ namespace DGame
             }
         }
 
-        private static bool ShouldUpdateAtlas(string atlasName)
-        {
-            return true;
-        }
-
         private static DateTime GetLatestSpriteTime(string atlasName)
         {
             if (m_atlasMap.TryGetValue(atlasName, out List<string> list))
@@ -721,8 +702,15 @@ namespace DGame
 
         private static DateTime GetLatestAtlasTime(string atlasName)
         {
-            if (m_atlasPathMap.TryGetValue(atlasName, out var atlasPath) && File.Exists(atlasPath))
+            if (!m_atlasPathMap.TryGetValue(atlasName, out var atlasPath))
             {
+                string extension = Config.enableV2 ? ".spriteatlasv2" : ".spriteatlas";
+                atlasPath = $"{Config.outputAtlasDir}/{atlasName}{extension}";
+            }
+
+            if (File.Exists(atlasPath))
+            {
+                m_atlasPathMap[atlasName] = atlasPath;
                 return File.GetLastWriteTime(atlasPath);
             }
             return DateTime.MinValue;
@@ -754,7 +742,6 @@ namespace DGame
             m_dirtyAtlasNamesNeedCreateNew.Clear();
             m_dirtyAtlasNames.Clear();
             m_atlasMap.Clear();
-            AssetDatabase.Refresh();
         }
     }
 }

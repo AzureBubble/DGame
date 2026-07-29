@@ -133,7 +133,7 @@ namespace DGame
         {
             EditorGUILayout.Space(4f);
             EditorGUILayout.HelpBox(
-                "构建前请确认已执行 GameConfig/GenerateTool_Binary/gen_bin_client_lazyload；首包或 AOT/泛型引用变化且启用 HybridCLR 时，还需先执行 HybridCLR GenerateAll。",
+                "构建前请先执行客户端 LazyLoad 转表；首包或 AOT/泛型引用变化时，请先手动执行 HybridCLR GenerateAll。",
                 MessageType.Warning);
 
             using (new EditorGUI.DisabledScope(m_isBuilding || EditorApplication.isCompiling))
@@ -646,14 +646,14 @@ namespace DGame
                 return;
             }
 
-            if (EditorApplication.ExecuteMenuItem(LUBAN_CONVERT_MENU_ITEM))
+            if (LubanTools.ConvertClientTableData())
             {
-                AddLog("已调用 DGame Tools/Luban/转表（客户端 LazyLoad）");
+                AddLog("客户端 LazyLoad 转表成功");
                 Repaint();
                 return;
             }
 
-            Debug.LogError($"[BuildPipelineWindow] 调用菜单失败: {LUBAN_CONVERT_MENU_ITEM}");
+            Debug.LogError("[BuildPipelineWindow] 客户端 LazyLoad 转表失败");
         }
 
         private void ExecuteHybridCLRGenerateAll()

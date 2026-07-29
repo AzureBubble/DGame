@@ -7,6 +7,10 @@ using UnityEngine;
 using YooAsset;
 using YooAsset.Editor;
 
+#if ENABLE_HYBRIDCLR
+using HybridCLR.Editor.Commands;
+#endif
+
 namespace DGame
 {
     public static class ReleaseTools
@@ -42,95 +46,15 @@ namespace DGame
         [MenuItem("DGame Tools/Build/一键打包AB _F8", priority = 151)]
         public static void BuildCurrentPlatformAB()
         {
-            // 编译并复制热更新DLL文件
-            BuildDllCommand.BuildAndCopyDlls();
-            // 获取当前构建目标平台
             BuildTarget target = EditorUserBuildSettings.activeBuildTarget;
-            // 执行AssetBundle构建
-            BuildInternal(target, Application.dataPath + "/../Builds/", packageVersion: GetBuildPackageVersion());
-            AssetDatabase.Refresh();
-            //复制到打包后的StreamingAssets
-            CopyStreamingAssetsFiles();
-        }
-
-        /// <summary>
-        /// 复制StreamingAssets文件去打包目录
-        /// </summary>
-        private static void CopyStreamingAssetsFiles()
-        {
-            if (!Settings.UpdateSettings.IsAutoAssetCopyToBuildAddress())
-            {
-                Debug.Log("[CopyStreamingAssetsFiles] UpdateSettings.IsAutoAssetCopyToBuildAddress关闭，不会生产到打包目录中");
-                return;
-            }
-
-            // 获取StreamingAssets路径
-            string streamingAssetsPath = Application.streamingAssetsPath;
-            // 目标路径 可以是任何目录路径
-            string targetPath = Settings.UpdateSettings.GetBuildAddress();
-
-            if (!System.IO.Path.IsPathRooted(targetPath))
-            {
-                // 如果是相对路径，结合 StreamingAssets 的路径进行合并
-                targetPath = System.IO.Path.Combine(streamingAssetsPath, targetPath).Replace("\\", "/");
-            }
-
-            if (!Directory.Exists(targetPath))
-            {
-                Debug.LogError($"[CopyStreamingAssetsFiles] 打包目录不存在，检查UpdateSettings.m_buildAddress: {targetPath}");
-                return;
-            }
-
-            // 删除目标目录下的所有文件
-            string[] deleteFiles = Directory.GetFiles(targetPath);
-
-            foreach (var filePath in deleteFiles)
-            {
-                File.Delete(filePath);
-                Debug.Log($"[CopyStreamingAssetsFiles] 删除文件: {filePath}");
-            }
-
-            // 删除目录下的所有子目录
-            string[] directories = Directory.GetDirectories(targetPath);
-
-            foreach (var directory in directories)
-            {
-                Directory.Delete(directory, true); // true：递归删除子目录及其内容
-                Debug.Log($"[CopyStreamingAssetsFiles] 删除目录: {directory}");
-            }
-
-            // 获取StreamingAssets中的所有文件，排除.meta文件
-            string[] files = Directory.GetFiles(streamingAssetsPath, "*", SearchOption.AllDirectories);
-
-            foreach (var file in files)
-            {
-                if (file.EndsWith(".meta"))
-                {
-                    continue;
-                }
-
-                // 获取相对路径 用于目标目录中创建相同的文件夹结构
-                string relativePath = file.Substring(streamingAssetsPath.Length + 1);
-                string destinationPath = Path.Combine(targetPath, relativePath);
-                // 确保目标文件夹存在
-                string destinationDir = Path.GetDirectoryName(destinationPath);
-
-                if (!Directory.Exists(destinationDir) && !string.IsNullOrEmpty(destinationDir))
-                {
-                    Directory.CreateDirectory(destinationDir);
-                }
-
-                // 复制文件
-                File.Copy(file, destinationPath, true); // true：覆盖存在的文件
-            }
-
-            Debug.Log($"[CopyStreamingAssetsFiles] 复制文件成功: {targetPath}");
+            BuildPipelineConfig config = CreateBuildConfig(target, GetBuildPackageVersion(), "Builds");
+            RunBuildOrThrow(config, true, false);
         }
 
         /// <summary>
         /// 生成构建包版本号
         /// 格式：yyyy-MM-dd-分钟段（每10分钟一个段）
-        /// 例如：1997-01-01-919 表示1997年1月1日的第919个10分钟段
+        /// 例如：1997-01-01-91 表示1997年1月1日的第91个10分钟段
         /// </summary>
         /// <returns></returns>
         private static string GetBuildPackageVersion()
@@ -146,84 +70,8 @@ namespace DGame
         private static string GetAutoBuildPackageVersionFallback()
         {
             // 计算当天从0点开始的总分钟数，然后除以10得到段数
-            int totalMinutes = DateTime.Now.Hour * 6 + DateTime.Now.Minute;
+            int totalMinutes = DateTime.Now.Hour * 6 + DateTime.Now.Minute / 10;
             return DateTime.Now.ToString("yyyy-MM-dd") + "-" + totalMinutes;
-        }
-
-        /// <summary>
-        /// 内部构建方法，执行具体的AssetBundle打包流程
-        /// </summary>
-        /// <param name="buildTarget">目标构建平台</param>
-        /// <param name="outputRoot">输出根目录</param>
-        /// <param name="packageVersion">包版本号</param>
-        /// <param name="buildPipeline">构建管线类型，默认使用可编程构建管线</param>
-        private static void BuildInternal(BuildTarget buildTarget, string outputRoot, string packageVersion = "1.0",
-            EBuildPipeline buildPipeline = EBuildPipeline.ScriptableBuildPipeline)
-        {
-            if (Settings.UpdateSettings.ForceGenerateAtlas)
-            {
-                Debug.Log($"[BuildInternal] 强制重新生成所有图集");
-                EditorSpriteSaveInfo.ForceGenerateAll(true);
-            }
-
-            Debug.Log($"[BuildInternal] 开始构建AssetBundle: {buildTarget}");
-
-            IBuildPipeline pipeline = null;
-            BuildParameters buildParameters = null;
-
-            // 根据构建管线类型创建对应的参数和管线实例
-            if (buildPipeline == EBuildPipeline.BuiltinBuildPipeline)
-            {
-                // 使用Unity内置构建管线
-                BuiltinBuildParameters builtinParameters = new BuiltinBuildParameters();
-                pipeline = new BuiltinBuildPipeline();
-                buildParameters = builtinParameters;
-                // 使用LZ4压缩，平衡压缩率和加载速度
-                builtinParameters.CompressOption = ECompressOption.LZ4;
-            }
-            else
-            {
-                // 使用可编程构建管线（推荐，功能更强大）
-                ScriptableBuildParameters scriptableBuildParameters = new ScriptableBuildParameters();
-                pipeline = new ScriptableBuildPipeline();
-                buildParameters = scriptableBuildParameters;
-                scriptableBuildParameters.CompressOption = ECompressOption.LZ4;
-                // 设置内置着色器资源包名称，避免重复打包着色器
-                scriptableBuildParameters.BuiltinShadersBundleName = GetBuiltinShaderBundleName("DefaultPackage");
-                scriptableBuildParameters.ReplaceAssetPathWithAddress =
-                    Settings.UpdateSettings.GetReplaceAssetPathWithAddress();
-            }
-
-            // 配置构建参数
-            buildParameters.BuildOutputRoot =
-                outputRoot; //AssetBundleBuilderHelper.GetDefaultBuildOutputRoot(); // 构建输出目录
-            buildParameters.BuildinFileRoot = AssetBundleBuilderHelper.GetStreamingAssetsRoot(); // 内置文件根目录
-            buildParameters.BuildPipeline = buildPipeline.ToString(); // 构建管线名称
-            buildParameters.BuildTarget = buildTarget; // 目标平台
-            buildParameters.BuildBundleType = (int)EBuildBundleType.AssetBundle; // 资源包类型
-            buildParameters.PackageName = "DefaultPackage"; // 包名称
-            buildParameters.PackageVersion = packageVersion; // 包版本
-            buildParameters.VerifyBuildingResult = true; // 验证构建结果
-            // 启动共享资源打包
-            buildParameters.EnableSharePackRule = true; // 启用共享资源打包规则
-            buildParameters.FileNameStyle = EFileNameStyle.BundleName_HashName; // 文件名风格：包名_哈希值
-            buildParameters.BuildinFileCopyOption = EBuildinFileCopyOption.ClearAndCopyAll; // 清理并复制所有内置文件
-            buildParameters.BuildinFileCopyParams = string.Empty; // 内置文件复制参数
-            buildParameters.EncryptionServices = GetEncryptionFromResourceModuleDriver(); // 加密服务
-            buildParameters.ClearBuildCacheFiles = false; // 不清理构建缓存，启用增量构建，可以提高打包速度
-            buildParameters.UseAssetDependencyDB = true; // 使用资源依赖关系数据库，可以提高打包速度
-
-            // 执行构建流程
-            var buildResult = pipeline.Run(buildParameters, true);
-
-            if (buildResult.Success)
-            {
-                Debug.Log($"[BuildInternal] AssetBundle资源构建成功: {buildResult.OutputPackageDirectory}");
-            }
-            else
-            {
-                Debug.LogError($"[BuildInternal] AssetBundle资源构建失败: {buildResult.ErrorInfo}");
-            }
         }
 
         /// <summary>
@@ -249,48 +97,6 @@ namespace DGame
             }
 
             return null;
-        }
-
-        /// <summary>
-        /// 根据 ResourceModuleDriver 的 encryptionType 获取对应的加密服务
-        /// </summary>
-        private static IEncryptionServices GetEncryptionFromResourceModuleDriver()
-        {
-            // 通过名字查找 GameEntry 预制体
-            var guids = AssetDatabase.FindAssets("t:Prefab GameEntry");
-
-            if (guids.Length == 0)
-            {
-                Debug.LogWarning("[BuildInternal] Failed to find GameEntry.prefab");
-                return null;
-            }
-
-            var gameEntryPath = AssetDatabase.GUIDToAssetPath(guids[0]);
-            var gameEntryPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(gameEntryPath);
-
-            if (gameEntryPrefab == null)
-            {
-                Debug.LogWarning("[BuildInternal] Failed to load GameEntry.prefab");
-                return null;
-            }
-
-            var resourceModuleDriver = gameEntryPrefab.GetComponentInChildren<ResourceModuleDriver>();
-
-            if (resourceModuleDriver == null)
-            {
-                Debug.LogWarning("[BuildInternal] ResourceModuleDriver not found in GameEntry.prefab");
-                return null;
-            }
-
-            var encryptionType = resourceModuleDriver.EncryptionType;
-            Debug.Log($"[BuildInternal] Use EncryptionType from ResourceModuleDriver: {encryptionType}");
-
-            return encryptionType switch
-            {
-                EncryptionType.FileOffset => new FileOffsetEncryption(),
-                EncryptionType.FileStream => new FileStreamEncryption(),
-                _ => null // EncryptionType.None
-            };
         }
 
         /// <summary>
@@ -322,9 +128,12 @@ namespace DGame
                 return false;
             }
 
-            BuildDllCommand.BuildAndCopyDlls();
-            AssetDatabase.Refresh();
-            return true;
+            bool success = BuildDllCommand.TryBuildAndCopyDlls();
+            if (success)
+            {
+                AssetDatabase.Refresh();
+            }
+            return success;
         }
 
         /// <summary>
@@ -351,7 +160,8 @@ namespace DGame
             return ExecuteBuild(config, true, true);
         }
 
-        private static bool ExecuteBuild(BuildPipelineConfig config, bool buildAssetBundle, bool buildPlayer)
+        private static bool ExecuteBuild(BuildPipelineConfig config, bool buildAssetBundle, bool buildPlayer,
+            bool runHybridClrGenerateAll = false)
         {
             if (!ValidateBuildConfig(config, buildAssetBundle, buildPlayer))
             {
@@ -363,11 +173,20 @@ namespace DGame
                 return false;
             }
 
+            if (runHybridClrGenerateAll && buildAssetBundle && buildPlayer && config.BuildHotFixDll
+                && !PrepareHybridClrForFullBuild())
+            {
+                return false;
+            }
+
             if (buildAssetBundle)
             {
                 if (config.BuildHotFixDll)
                 {
-                    BuildDllCommand.BuildAndCopyDlls();
+                    if (!BuildDllCommand.TryBuildAndCopyDlls())
+                    {
+                        return false;
+                    }
                 }
 
                 AssetDatabase.Refresh();
@@ -413,12 +232,33 @@ namespace DGame
             return true;
         }
 
+        private static bool PrepareHybridClrForFullBuild()
+        {
+#if ENABLE_HYBRIDCLR
+            try
+            {
+                Debug.Log("[ReleaseTools] 完整构建前执行 HybridCLR GenerateAll");
+                PrebuildCommand.GenerateAll();
+                AssetDatabase.Refresh();
+                return true;
+            }
+            catch (Exception exception)
+            {
+                Debug.LogError($"[ReleaseTools] HybridCLR GenerateAll 失败: {exception.Message}");
+                Debug.LogException(exception);
+                return false;
+            }
+#else
+            return true;
+#endif
+        }
+
         private static YooAsset.Editor.BuildResult BuildInternal(BuildPipelineConfig config)
         {
             if (config.ForceGenerateAtlas)
             {
                 Debug.Log("[BuildInternal] 强制重新生成所有图集");
-                EditorSpriteSaveInfo.ForceGenerateAll(true);
+                EditorSpriteSaveInfo.RefreshAllForBuild();
             }
 
             Debug.Log($"[BuildInternal] 开始构建AssetBundle: {config.BuildTarget}");
@@ -513,15 +353,16 @@ namespace DGame
             }
 
             string streamingAssetsRoot = AssetBundleBuilderHelper.GetStreamingAssetsRoot();
-            if (!Directory.Exists(streamingAssetsRoot))
+            string packageStreamingAssetsRoot = Path.Combine(streamingAssetsRoot, config.PackageName);
+            if (!Directory.Exists(packageStreamingAssetsRoot))
             {
-                Debug.LogError($"[最小包] StreamingAssets 目录不存在: {streamingAssetsRoot}");
+                Debug.LogError($"[最小包] 资源包 StreamingAssets 目录不存在: {packageStreamingAssetsRoot}");
                 return false;
             }
 
             int deletedCount = 0;
             int retainedCount = 0;
-            foreach (string bundleFile in Directory.GetFiles(streamingAssetsRoot, "*.bundle",
+            foreach (string bundleFile in Directory.GetFiles(packageStreamingAssetsRoot, "*.bundle",
                          SearchOption.AllDirectories))
             {
                 if (retainFileNames.Contains(Path.GetFileName(bundleFile)))
@@ -534,7 +375,7 @@ namespace DGame
                 deletedCount++;
             }
 
-            CleanEmptyDirectories(streamingAssetsRoot);
+            CleanEmptyDirectories(packageStreamingAssetsRoot);
             Debug.Log($"[最小包] 处理完成，删除 {deletedCount} 个 Bundle，保留 {retainedCount} 个 Bundle");
             return true;
         }
@@ -669,11 +510,24 @@ namespace DGame
 
             targetPath = Path.GetFullPath(targetPath);
             string projectRoot = Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
+            string[] protectedProjectDirectories =
+            {
+                Application.dataPath,
+                Path.Combine(projectRoot, "Packages"),
+                Path.Combine(projectRoot, "ProjectSettings"),
+                Path.Combine(projectRoot, "Library"),
+            };
             if (IsSameOrSubPath(streamingAssetsPath, targetPath)
                 || IsSameOrSubPath(targetPath, streamingAssetsPath)
                 || IsSameOrSubPath(targetPath, projectRoot))
             {
                 Debug.LogError($"[CopyStreamingAssetsFiles] BuildAddress 与工程或 StreamingAssets 路径存在危险包含关系: {targetPath}");
+                return false;
+            }
+
+            if (protectedProjectDirectories.Any(directory => IsSameOrSubPath(directory, targetPath)))
+            {
+                Debug.LogError($"[CopyStreamingAssetsFiles] BuildAddress 位于受保护的工程目录中: {targetPath}");
                 return false;
             }
 
@@ -731,9 +585,19 @@ namespace DGame
             }
 
             BuildTargetGroup buildTargetGroup = BuildPipelineConfig.GetBuildTargetGroup(buildTarget);
+            string[] scenes = EditorBuildSettings.scenes
+                .Where(scene => scene.enabled && !string.IsNullOrWhiteSpace(scene.path))
+                .Select(scene => scene.path)
+                .ToArray();
+            if (scenes.Length == 0)
+            {
+                Debug.LogError("[ReleaseTools] Build Settings 中没有启用的场景");
+                return false;
+            }
+
             var buildPlayerOptions = new BuildPlayerOptions
             {
-                scenes = EditorBuildSettings.scenes.Select(scene => scene.path).ToArray(),
+                scenes = scenes,
                 locationPathName = locationPathName,
                 target = buildTarget,
                 targetGroup = buildTargetGroup,
@@ -749,6 +613,29 @@ namespace DGame
 
             Debug.LogError($"Build {buildTarget} Failed: {summary.result}");
             return false;
+        }
+
+        private static BuildPipelineConfig CreateBuildConfig(BuildTarget buildTarget, string packageVersion,
+            string assetBundleOutputRoot, string playerOutputPath = null)
+        {
+            BuildPipelineConfig config = BuildPipelineConfig.CreateDefault(buildTarget);
+            config.PackageVersion = packageVersion;
+            config.AssetBundleOutputRoot = assetBundleOutputRoot;
+            config.PlayerOutputPath = string.IsNullOrWhiteSpace(playerOutputPath)
+                ? BuildPipelineConfig.GetDefaultPlayerOutputPath(buildTarget, packageVersion)
+                : playerOutputPath;
+            config.OpenOutputDirectory = !Application.isBatchMode;
+            return config;
+        }
+
+        private static void RunBuildOrThrow(BuildPipelineConfig config, bool buildAssetBundle, bool buildPlayer,
+            bool runHybridClrGenerateAll = false)
+        {
+            if (!ExecuteBuild(config, buildAssetBundle, buildPlayer, runHybridClrGenerateAll))
+            {
+                throw new InvalidOperationException(
+                    $"构建失败：平台={config.BuildTarget}，版本={config.PackageVersion}");
+            }
         }
 
         #endregion
@@ -777,45 +664,31 @@ namespace DGame
         [MenuItem("DGame Tools/Build/AutoBuildWindow", priority = 152)]
         public static void AutoBuildWindow()
         {
-            // 编译并复制热更新DLL文件
-            BuildDllCommand.BuildAndCopyDlls();
-            BuildTarget target = BuildTarget.StandaloneWindows;
-            AssetDatabase.Refresh();
-            BuildInternal(target, Application.dataPath + "/../Bundles/Windows",
-                packageVersion: GetBuildPackageVersion());
-            AssetDatabase.Refresh();
-            var savePath = $"{Application.dataPath}/../Build/Windows/";
-            BuildImp(BuildTargetGroup.Standalone, target, savePath + "Release_Windows.exe");
-            OpenBuildSavePath(savePath);
+            string version = GetBuildPackageVersion();
+            BuildPipelineConfig config = CreateBuildConfig(BuildTarget.StandaloneWindows64, version,
+                "Bundles/Windows", "Build/Windows/Release_Windows.exe");
+            config.CopyToBuildAddress = false;
+            RunBuildOrThrow(config, true, true);
         }
 
         [MenuItem("DGame Tools/Build/AutoBuildAndroid", priority = 153)]
         public static void AutoBuildAndroid()
         {
-            // 编译并复制热更新DLL文件
-            BuildDllCommand.BuildAndCopyDlls();
-            BuildTarget target = BuildTarget.Android;
-            AssetDatabase.Refresh();
-            BuildInternal(target, Application.dataPath + "/../Bundles/Android",
-                packageVersion: GetBuildPackageVersion());
-            AssetDatabase.Refresh();
-            var savePath = $"{Application.dataPath}/../Build/Android/";
-            BuildImp(BuildTargetGroup.Android, target, savePath + $"{GetBuildPackageVersion()}-Android.apk");
-            OpenBuildSavePath(savePath);
+            string version = GetBuildPackageVersion();
+            BuildPipelineConfig config = CreateBuildConfig(BuildTarget.Android, version, "Bundles/Android",
+                $"Build/Android/{version}-Android.apk");
+            config.CopyToBuildAddress = false;
+            RunBuildOrThrow(config, true, true, true);
         }
 
         [MenuItem("DGame Tools/Build/AutoBuildIOS", priority = 154)]
         public static void AutoBuildIOS()
         {
-            // 编译并复制热更新DLL文件
-            BuildDllCommand.BuildAndCopyDlls();
-            BuildTarget target = BuildTarget.iOS;
-            AssetDatabase.Refresh();
-            BuildInternal(target, Application.dataPath + "/../Bundles/IOS", packageVersion: GetBuildPackageVersion());
-            AssetDatabase.Refresh();
-            var savePath = $"{Application.dataPath}/../Build/IOS/";
-            BuildImp(BuildTargetGroup.iOS, target, savePath + "XCode_Project");
-            OpenBuildSavePath(savePath);
+            string version = GetBuildPackageVersion();
+            BuildPipelineConfig config = CreateBuildConfig(BuildTarget.iOS, version, "Bundles/IOS",
+                "Build/IOS/XCode_Project");
+            config.CopyToBuildAddress = false;
+            RunBuildOrThrow(config, true, true, true);
         }
 
         private static void OpenBuildSavePath(string path)
@@ -830,32 +703,6 @@ namespace DGame
             EditorUtility.RevealInFinder(absolutePath);
         }
 
-        private static void BuildImp(BuildTargetGroup buildTargetGroup, BuildTarget buildTarget,
-            string locationPathName)
-        {
-            EditorUserBuildSettings.SwitchActiveBuildTarget(buildTargetGroup, buildTarget);
-            AssetDatabase.Refresh();
-            BuildPlayerOptions buildPlayerOptions = new BuildPlayerOptions()
-            {
-                scenes = EditorBuildSettings.scenes.Select(scene => scene.path).ToArray(),
-                locationPathName = locationPathName,
-                target = buildTarget,
-                targetGroup = buildTargetGroup,
-                options = BuildOptions.None
-            };
-            var report = BuildPipeline.BuildPlayer(buildPlayerOptions);
-            BuildSummary summary = report.summary;
-
-            if (summary.result == UnityEditor.Build.Reporting.BuildResult.Succeeded)
-            {
-                Debug.Log($"Build {buildTarget.ToString()} Succeeded: {summary.totalSize / 1024 / 1024}MB");
-            }
-            else
-            {
-                Debug.LogError($"Build {buildTarget.ToString()} Failed: {summary.result}");
-            }
-        }
-
         #endregion
 
         #region Build AssetBundle by Command
@@ -866,19 +713,13 @@ namespace DGame
 
             if (string.IsNullOrEmpty(version))
             {
-                Debug.LogError("[BuildWindowWithVersion] Please specify version using -version argument");
-                return;
+                throw new ArgumentException("[BuildWindowWithVersion] Please specify version using -version argument");
             }
 
-            // 编译并复制热更新DLL文件
-            BuildDllCommand.BuildAndCopyDlls();
-            BuildTarget target = BuildTarget.StandaloneWindows;
-            AssetDatabase.Refresh();
-            BuildInternal(target, Application.dataPath + "/../Bundles/Windows", packageVersion: version);
-            AssetDatabase.Refresh();
-            var savePath = $"{Application.dataPath}/../Build/Windows/";
-            BuildImp(BuildTargetGroup.Standalone, target, savePath + "Release_Windows.exe");
-            OpenBuildSavePath(savePath);
+            BuildPipelineConfig config = CreateBuildConfig(BuildTarget.StandaloneWindows64, version,
+                "Bundles/Windows", "Build/Windows/Release_Windows.exe");
+            config.CopyToBuildAddress = false;
+            RunBuildOrThrow(config, true, true, true);
         }
 
         public static void BuildAndroidWithVersion()
@@ -887,19 +728,13 @@ namespace DGame
 
             if (string.IsNullOrEmpty(version))
             {
-                Debug.LogError("[BuildAndroidWithVersion] Please specify version using -version argument");
-                return;
+                throw new ArgumentException("[BuildAndroidWithVersion] Please specify version using -version argument");
             }
 
-            // 编译并复制热更新DLL文件
-            BuildDllCommand.BuildAndCopyDlls();
-            BuildTarget target = BuildTarget.Android;
-            AssetDatabase.Refresh();
-            BuildInternal(target, Application.dataPath + "/../Bundles/Android", packageVersion: version);
-            AssetDatabase.Refresh();
-            var savePath = $"{Application.dataPath}/../Build/Android/";
-            BuildImp(BuildTargetGroup.Android, target, savePath + $"{GetBuildPackageVersion()}-Android.apk");
-            OpenBuildSavePath(savePath);
+            BuildPipelineConfig config = CreateBuildConfig(BuildTarget.Android, version, "Bundles/Android",
+                $"Build/Android/{version}-Android.apk");
+            config.CopyToBuildAddress = false;
+            RunBuildOrThrow(config, true, true, true);
         }
 
         public static void BuildIOSWithVersion()
@@ -908,19 +743,13 @@ namespace DGame
 
             if (string.IsNullOrEmpty(version))
             {
-                Debug.LogError("[BuildIOSWithVersion] Please specify version using -version argument");
-                return;
+                throw new ArgumentException("[BuildIOSWithVersion] Please specify version using -version argument");
             }
 
-            // 编译并复制热更新DLL文件
-            BuildDllCommand.BuildAndCopyDlls();
-            BuildTarget target = BuildTarget.iOS;
-            AssetDatabase.Refresh();
-            BuildInternal(target, Application.dataPath + "/../Bundles/IOS", packageVersion: version);
-            AssetDatabase.Refresh();
-            var savePath = $"{Application.dataPath}/../Build/IOS/";
-            BuildImp(BuildTargetGroup.iOS, target, savePath + "XCode_Project");
-            OpenBuildSavePath(savePath);
+            BuildPipelineConfig config = CreateBuildConfig(BuildTarget.iOS, version, "Bundles/IOS",
+                "Build/IOS/XCode_Project");
+            config.CopyToBuildAddress = false;
+            RunBuildOrThrow(config, true, true, true);
         }
 
         /// <summary>
@@ -928,13 +757,10 @@ namespace DGame
         /// </summary>
         public static void BuildAndroidAB()
         {
-            BuildDllCommand.BuildAndCopyDlls();
-            BuildTarget target = BuildTarget.Android;
-            BuildInternal(target, Application.dataPath + "/../Bundles/Android",
-                packageVersion: GetBuildPackageVersion());
-            AssetDatabase.Refresh();
-            CopyStreamingAssetsFiles();
-            Debug.Log("[BuildAndroidAB] Android AssetBundle build completed with auto version: " + GetBuildPackageVersion());
+            string version = GetBuildPackageVersion();
+            BuildPipelineConfig config = CreateBuildConfig(BuildTarget.Android, version, "Bundles/Android");
+            RunBuildOrThrow(config, true, false);
+            Debug.Log("[BuildAndroidAB] Android AssetBundle build completed with auto version: " + version);
         }
 
         /// <summary>
@@ -946,15 +772,11 @@ namespace DGame
 
             if (string.IsNullOrEmpty(version))
             {
-                Debug.LogError("[BuildAndroidABWithVersion] Please specify version using -version argument");
-                return;
+                throw new ArgumentException("[BuildAndroidABWithVersion] Please specify version using -version argument");
             }
 
-            BuildDllCommand.BuildAndCopyDlls();
-            BuildTarget target = BuildTarget.Android;
-            BuildInternal(target, Application.dataPath + "/../Bundles/Android", packageVersion: version);
-            AssetDatabase.Refresh();
-            CopyStreamingAssetsFiles();
+            BuildPipelineConfig config = CreateBuildConfig(BuildTarget.Android, version, "Bundles/Android");
+            RunBuildOrThrow(config, true, false);
             Debug.Log($"[BuildAndroidABWithVersion] Android AssetBundle build completed with manual version: {version}");
         }
 
@@ -963,13 +785,11 @@ namespace DGame
         /// </summary>
         public static void BuildWindowsAB()
         {
-            BuildDllCommand.BuildAndCopyDlls();
-            BuildTarget target = BuildTarget.StandaloneWindows;
-            BuildInternal(target, Application.dataPath + "/../Bundles/Windows",
-                packageVersion: GetBuildPackageVersion());
-            AssetDatabase.Refresh();
-            CopyStreamingAssetsFiles();
-            Debug.Log($"[BuildWindowsAB] Windows AssetBundle build completed with auto version: {GetBuildPackageVersion()}");
+            string version = GetBuildPackageVersion();
+            BuildPipelineConfig config = CreateBuildConfig(BuildTarget.StandaloneWindows64, version,
+                "Bundles/Windows");
+            RunBuildOrThrow(config, true, false);
+            Debug.Log($"[BuildWindowsAB] Windows AssetBundle build completed with auto version: {version}");
         }
 
         /// <summary>
@@ -981,15 +801,12 @@ namespace DGame
 
             if (string.IsNullOrEmpty(version))
             {
-                Debug.LogError("[BuildWindowsABWithVersion] Please specify version using -version argument");
-                return;
+                throw new ArgumentException("[BuildWindowsABWithVersion] Please specify version using -version argument");
             }
 
-            BuildDllCommand.BuildAndCopyDlls();
-            BuildTarget target = BuildTarget.StandaloneWindows;
-            BuildInternal(target, Application.dataPath + "/../Bundles/Windows", packageVersion: version);
-            AssetDatabase.Refresh();
-            CopyStreamingAssetsFiles();
+            BuildPipelineConfig config = CreateBuildConfig(BuildTarget.StandaloneWindows64, version,
+                "Bundles/Windows");
+            RunBuildOrThrow(config, true, false);
             Debug.Log($"[BuildWindowsABWithVersion] Windows AssetBundle build completed with manual version: {version}");
         }
 

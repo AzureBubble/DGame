@@ -138,47 +138,82 @@ namespace DGame
         private static StringBuilder GetFormatStringBuilder(ELogLevel level, string logStr, bool showColor)
         {
             m_stringBuilder.Clear();
+
+            string body = showColor ? ColorizePerLine(logStr, GetBodyColor(level)) : logStr;
             switch (level)
             {
                 case ELogLevel.Debug:
-                    m_stringBuilder.AppendFormat(
-                        showColor
-                            ? "<color=#CFCFCF><b>[DEBUG] ► </b></color> - <color=#00FF18>{0}</color>"
-                            : "<color=#00FF18><b>[DEBUG] ► </b></color> - {0}", logStr);
+                    m_stringBuilder.AppendFormat("<color=#CFCFCF><b>[DEBUG] ► </b></color> - {0}", body);
                     break;
                 case ELogLevel.Info:
-                    m_stringBuilder.AppendFormat(
-                        showColor
-                            ? "<color=#CFCFCF><b>[INFO] ► </b></color> - <color=#CFCFCF>{0}</color>"
-                            : "<color=#CFCFCF><b>[INFO] ► </b></color> - {0}", logStr);
+                    m_stringBuilder.AppendFormat("<color=#CFCFCF><b>[INFO] ► </b></color> - {0}", body);
                     break;
                 case ELogLevel.Assert:
-                    m_stringBuilder.AppendFormat(
-                        showColor
-                            ? "<color=#FF00BD><b>[ASSERT] ► </b></color> - <color=green>{0}</color>"
-                            : "<color=#FF00BD><b>[ASSERT] ► </b></color> - {0}", logStr);
+                    m_stringBuilder.AppendFormat("<color=#FF00BD><b>[ASSERT] ► </b></color> - {0}", logStr);
                     break;
                 case ELogLevel.Warning:
-                    m_stringBuilder.AppendFormat(
-                        showColor
-                            ? "<color=#FF9400><b>[WARNING] ► </b></color> - <color=yellow>{0}</color>"
-                            : "<color=#FF9400><b>[WARNING] ► </b></color> - {0}", logStr);
+                    m_stringBuilder.AppendFormat("<color=#FF9400><b>[WARNING] ► </b></color> - {0}", logStr);
                     break;
                 case ELogLevel.Error:
-                    m_stringBuilder.AppendFormat(
-                        showColor
-                            ? "<color=red><b>[ERROR] ► </b></color> - <color=red>{0}</color>"
-                            : "<color=red><b>[ERROR] ► </b></color>- {0}", logStr);
+                    m_stringBuilder.AppendFormat("<color=red><b>[ERROR] ► </b></color>- {0}", logStr);
                     break;
                 case ELogLevel.Exception:
-                    m_stringBuilder.AppendFormat(
-                        showColor
-                            ? "<color=red><b>[EXCEPTION] ► </b></color> - <color=red>{0}</color>"
-                            : "<color=red><b>[EXCEPTION] ► </b></color> - {0}", logStr);
+                    m_stringBuilder.AppendFormat("<color=red><b>[EXCEPTION] ► </b></color> - {0}", logStr);
                     break;
             }
 
             return m_stringBuilder;
+        }
+
+        private static string GetBodyColor(ELogLevel level)
+            => level switch
+            {
+                ELogLevel.Debug => "#00FF18",
+                ELogLevel.Assert => "green",
+                ELogLevel.Warning => "yellow",
+                ELogLevel.Error => "red",
+                ELogLevel.Exception => "red",
+                _ => "#CFCFCF"
+            };
+
+        private static string ColorizePerLine(string logStr, string color)
+        {
+            if(string.IsNullOrEmpty(logStr))
+            {
+                return logStr;
+            }
+
+            if (logStr.IndexOf('\n') < 0)
+            {
+                return Utility.StringUtil.Format("<color={0}>{1}</color>", color, logStr);
+            }
+
+            var sb = new StringBuilder(logStr.Length + 32);
+            int start = 0;
+
+            for (int i = 0; i < logStr.Length; i++)
+            {
+                if (logStr[i] != '\n')
+                {
+                    continue;
+                }
+
+                int lineEnd = i > start && logStr[i - 1] == '\r' ? i - 1 : i;
+                sb.Append("<color=").Append(color).Append('>')
+                    .Append(logStr, start, lineEnd - start)
+                    .Append("</color>")
+                    .Append(logStr, lineEnd, i - lineEnd + 1);
+                start = i + 1;
+            }
+
+            if (start < logStr.Length)
+            {
+                sb.Append("<color=").Append(color).Append('>')
+                    .Append(logStr, start, logStr.Length - start)
+                    .Append("</color>");
+            }
+
+            return sb.ToString();
         }
     }
 }
@@ -232,7 +267,8 @@ namespace DGame
                                    assetPath.Contains("DGameLogHelper.cs") ||
                                    assetPath.Contains("DGameLog.cs") ||
                                    assetPath.Contains("AssetsLogger.cs") ||
-                                   assetPath.Contains("DLogger.cs");
+                                   assetPath.Contains("DLogger.cs") ||
+                                   assetPath.Contains("DGameException.cs");
 
             var stackTrace = GetStackTrace();
             if (!string.IsNullOrEmpty(stackTrace) && (stackTrace.Contains("[DEBUG]") ||

@@ -86,8 +86,7 @@ namespace DGame
             }
 
             StringBuilder formatSb = GetFormatStringBuilder(level, msg, true);
-            string logStr = formatSb.ToString();
-
+            
             // 获取 C# 堆栈 Warning以上级别日志才获取堆栈
             if (level >= ELogLevel.Warning)
             {
@@ -103,7 +102,7 @@ namespace DGame
                     formatSb.AppendFormat("[{0}::{1}\n", declaringTypeName, methodName);
                 }
             }
-
+            string logStr = formatSb.ToString();
             switch (level)
             {
                 case ELogLevel.Info:

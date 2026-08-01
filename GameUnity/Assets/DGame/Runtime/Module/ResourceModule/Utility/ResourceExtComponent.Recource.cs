@@ -12,13 +12,20 @@ namespace DGame
             public CancellationTokenSource Cts { get; set; }
             public string Location { get; set; }
 
+            public void Cancel()
+            {
+                if (Cts != null && !Cts.IsCancellationRequested)
+                {
+                    Cts.Cancel();
+                }
+            }
+
             public override void OnRelease()
             {
                 var cts = Cts;
                 Cts = null;
                 if (cts != null)
                 {
-                    cts.Cancel();
                     cts.Dispose();
                 }
                 Location = string.Empty;
@@ -26,7 +33,6 @@ namespace DGame
         }
 
         private static IResourceModule m_resourceModule;
-        private LoadAssetCallbacks m_loadAssetCallbacks;
 
         public static IResourceModule ResourceModule => m_resourceModule;
 
@@ -35,46 +41,6 @@ namespace DGame
         private void InitializedResources()
         {
             m_resourceModule = ModuleSystem.GetModule<IResourceModule>();
-            m_loadAssetCallbacks = new LoadAssetCallbacks(OnLoadAssetSuccess, OnLoadAssetFailure);
-        }
-
-        private void OnLoadAssetFailure(string assetName, LoadResourceStatus status, string errormessage, object userdata)
-        {
-            m_loadingAssetList.Remove(assetName);
-
-            if (userdata is ISetAssetObject setAssetObject)
-            {
-                ClearLoadingState(setAssetObject.TargetObject);
-            }
-            DLogger.Error("加载资源失败 '{0}' 错误信息： '{1}'.", assetName, errormessage);
-        }
-
-        private void OnLoadAssetSuccess(string assetName, object asset, float duration, object userdata)
-        {
-            m_loadingAssetList.Remove(assetName);
-            if (asset is UnityEngine.Object assetObject)
-            {
-                if (userdata is ISetAssetObject setAssetObject)
-                {
-                    // 检查资源是否仍然是当前需要的
-                    if (IsCurrentLocation(setAssetObject.TargetObject, setAssetObject.Location))
-                    {
-                        ClearLoadingState(setAssetObject.TargetObject);
-
-                        m_assetItemPool.Register(AssetItemObject.Create(setAssetObject.Location, assetObject), true);
-                        SetAsset(setAssetObject, assetObject);
-                    }
-                    else
-                    {
-                        // 资源已经过期，卸载
-                        m_resourceModule.UnloadAsset(assetObject);
-                    }
-                }
-            }
-            else
-            {
-                DLogger.Error($"加载资源失败 资源类型： {asset.GetType()}.");
-            }
         }
 
         /// <summary>
@@ -89,23 +55,28 @@ namespace DGame
             var location = setAssetObject.Location;
             if (target == null)
             {
+                MemoryPool.Release(setAssetObject);
                 return;
             }
-            // 取消并清理旧的加载请求
-            CancelAndCleanupOldRequest(target);
             // 创建新的加载状态
             var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             var loadingState = MemoryObject.Spawn<LoadingState>();
             loadingState.Cts = linkedTokenSource;
             loadingState.Location = location;
-            m_loadingStates[target] = loadingState;
+            ReplaceLoadingState(target, loadingState);
+
+            var hasLoadingMarker = false;
+            var setAssetObjectTransferred = false;
+            T loadedResource = null;
+            var resourceRegistered = false;
 
             try
             {
                 // 等待其他可能正在进行的加载
                 await TryWaitingLoading(location).AttachExternalCancellation(linkedTokenSource.Token);
+
                 // 再次检查是否被新请求替换
-                if (!IsCurrentLocation(target, location))
+                if (!IsCurrentRequest(target, loadingState))
                 {
                     return;
                 }
@@ -113,9 +84,9 @@ namespace DGame
                 // 检查缓存
                 if (m_assetItemPool.CanSpawn(location))
                 {
-                    ClearLoadingState(target);
-
                     var assetObject = (T)m_assetItemPool.Spawn(location).Target;
+                    DetachCurrentRequest(target, loadingState);
+                    setAssetObjectTransferred = true;
                     SetAsset(setAssetObject, assetObject);
                 }
                 else
@@ -124,60 +95,87 @@ namespace DGame
                     if (!m_loadingAssetList.Add(location))
                     {
                         // 已经在加载中，等待回调处理。
+                        DLogger.Warning($"资源仍在加载中，跳过重复请求: {location}");
                         return;
                     }
 
-                    T resource = await m_resourceModule.LoadAssetAsync<T>(location, linkedTokenSource.Token);
-                    if (resource != null)
+                    hasLoadingMarker = true;
+                    
+                    loadedResource = await m_resourceModule.LoadAssetAsync<T>(location, linkedTokenSource.Token);
+                    if (loadedResource == null)
                     {
-                        m_loadAssetCallbacks?.LoadAssetSuccessCallback?.Invoke(location,resource, 0f, setAssetObject);
+                        DLogger.Error($"加载资源失败，资源为空: {location}");
+                        return;
                     }
-                    m_loadingAssetList.Remove(location);
+
+                    if (!IsCurrentRequest(target, loadingState))
+                    {
+                        return;
+                    }
+
+                    m_assetItemPool.Register(AssetItemObject.Create(location, loadedResource), true);
+                    resourceRegistered = true;
+                    DetachCurrentRequest(target, loadingState);
+                    setAssetObjectTransferred = true;
+                    SetAsset(setAssetObject, loadedResource);
                 }
+            }
+            catch (OperationCanceledException) when (linkedTokenSource.IsCancellationRequested)
+            {
+                // 请求被替换或目标销毁属于正常取消流程
             }
             catch (Exception e)
             {
                 DLogger.Error($"Failed to load asset '{location}': {e}");
-                ClearLoadingState(target);
             }
-        }
-
-        /// <summary>
-        /// 取消并清理旧的加载请求
-        /// <param name="target">Unity对象</param>
-        /// </summary>
-        private void CancelAndCleanupOldRequest(UnityEngine.Object target)
-        {
-            if (m_loadingStates.TryGetValue(target, out var oldState))
+            finally
             {
-                MemoryObject.Release(oldState);
-                m_loadingStates.Remove(target);
+                DetachCurrentRequest(target, loadingState);
+
+                if (hasLoadingMarker)
+                {
+                    m_loadingAssetList.Remove(location);
+                }
+
+                if (loadedResource != null && !resourceRegistered)
+                {
+                    m_resourceModule.UnloadAsset(loadedResource);
+                }
+
+                if (!setAssetObjectTransferred)
+                {
+                    MemoryPool.Release(setAssetObject);
+                }
+                MemoryObject.Release(loadingState);
             }
         }
 
-        /// <summary>
-        /// 清理加载状态
-        /// <param name="target">Unity对象</param>
-        /// </summary>
-        private void ClearLoadingState(UnityEngine.Object target)
+        private void DetachCurrentRequest(UnityEngine.Object target, LoadingState expectedState)
         {
-            if (m_loadingStates.TryGetValue(target, out var state))
+            if(m_loadingStates.TryGetValue(target, out var curState)
+               && ReferenceEquals(curState, expectedState))
             {
-                MemoryObject.Release(state);
-                m_loadingStates.Remove(target);
+                m_loadingStates.Remove(target);   
             }
         }
 
-        /// <summary>
-        /// 检查指定位置是否仍是该目标的当前加载位置
-        /// </summary>
-        private bool IsCurrentLocation(UnityEngine.Object target, string location)
+        private void ReplaceLoadingState(UnityEngine.Object target, LoadingState newState)
+        {
+            if (m_loadingStates.Remove(target, out var oldState))
+            {
+                oldState.Cancel();
+            }
+            m_loadingStates[target] = newState;
+        }
+        
+        private bool IsCurrentRequest(UnityEngine.Object target, LoadingState expectedState)
         {
             if (target == null)
             {
                 return false;
             }
-            return m_loadingStates.TryGetValue(target, out var state) && state.Location == location;
+            return m_loadingStates.TryGetValue(target, out var curState) 
+                   && ReferenceEquals(curState, expectedState);
         }
 
         /// <summary>
@@ -185,12 +183,13 @@ namespace DGame
         /// </summary>
         private void OnDestroy()
         {
-            foreach (var state in m_loadingStates.Values)
-            {
-                MemoryObject.Release(state);
-            }
-
+            var loadingStates = new LoadingState[m_loadingStates.Count];
+            m_loadingStates.Values.CopyTo(loadingStates, 0);
             m_loadingStates.Clear();
+            foreach (var state in loadingStates)
+            {
+                state.Cancel();
+            }
         }
     }
 }

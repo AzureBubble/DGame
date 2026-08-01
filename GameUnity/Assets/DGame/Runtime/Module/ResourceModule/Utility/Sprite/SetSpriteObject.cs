@@ -53,10 +53,14 @@ namespace DGame
         {
             m_spriteRenderer = null;
             m_image = null;
+            TargetObject = null;
             Location = null;
             m_setType = SetType.None;
             m_setNativeSize = false;
             m_sprite = null;
+            m_imageCallback = null;
+            m_spriteRendererCallback = null;
+            m_cancellationToken = default;
         }
 
         public void SetAsset(UnityEngine.Object asset)

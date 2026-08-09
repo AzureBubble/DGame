@@ -539,45 +539,51 @@ namespace DGame
             private string GetLogString(LogNode logNode)
             {
                 Color32 color = GetLogStringColor(logNode.LogType);
-                // 对于Exception类型，Unity传递的logMessage已包含堆栈，只显示第一行
                 string displayMessage = logNode.LogMessage;
-                if (logNode.LogType == LogType.Exception)
+                if (logNode.LogType == LogType.Exception
+                    && !string.IsNullOrEmpty(displayMessage) && displayMessage.StartsWith("Exception: "))
                 {
-                    displayMessage = TruncateString(displayMessage, 500);
+                    displayMessage = displayMessage.Substring("Exception: ".Length);
                 }
+
+                displayMessage = GetSingleLinePreview(displayMessage, 500);
                 return Utility.StringUtil.Format(Constant.CONSOLE_WINDOW_LOG_SINGLE_MESSAGE_STRING, color.r, color.g,
                     color.b, color.a, logNode.LogTime.ToLocalTime(), logNode.LogFrameCount, displayMessage);
             }
 
-            private string TruncateString(string str, int maxLength)
+            private string GetSingleLinePreview(string str, int maxLength)
             {
                 if (string.IsNullOrEmpty(str))
                 {
                     return str;
                 }
 
-                // 移除Exception错误消息开头的"Exception:"前缀
-                if (str.StartsWith("Exception: "))
+                int carriageReturnIndex = str.IndexOf('\r');
+                int lineFeedIndex = str.IndexOf('\n');
+                int newlineIndex;
+
+                if (carriageReturnIndex < 0)
                 {
-                    str = str.Substring("Exception: ".Length);
+                    newlineIndex = lineFeedIndex;
                 }
-
-                // 先移除富文本标签，避免截断时破坏标签导致富文本解析失败
-                string plainText = RemoveRichTextTags(str);
-
-                if (plainText.Length <= maxLength)
+                else if(lineFeedIndex < 0)
                 {
-                    return plainText;
+                    newlineIndex = carriageReturnIndex;
                 }
-
-                // 截取第一行
-                int newlineIndex = plainText.IndexOf('\n');
-                if (newlineIndex >= 0 && newlineIndex < maxLength)
+                else
                 {
-                    return plainText.Substring(0, newlineIndex) + "...";
+                    newlineIndex = Math.Min(carriageReturnIndex, lineFeedIndex);
                 }
+                int previewLength = newlineIndex >= 0 ? newlineIndex : str.Length;
 
-                return plainText.Substring(0, maxLength) + "...";
+                if (previewLength <= maxLength)
+                {
+                    return newlineIndex >= 0 ? str.Substring(0, previewLength) + "..." : str;
+                }
+                
+                // 超长首行需要硬截断，先移除富文本标签，避免截断后标签不闭合。
+                string plainText = RemoveRichTextTags(str.Substring(0, previewLength));
+                return plainText.Substring(0, Math.Min(maxLength, plainText.Length)) + "...";
             }
 
             private string RemoveRichTextTags(string str)

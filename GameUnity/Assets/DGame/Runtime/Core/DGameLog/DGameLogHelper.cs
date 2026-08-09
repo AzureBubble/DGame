@@ -87,6 +87,7 @@ namespace DGame
 
             StringBuilder formatSb = GetFormatStringBuilder(level, msg, true);
             
+            string logStr = formatSb.ToString();
             // 获取 C# 堆栈 Warning以上级别日志才获取堆栈
             if (level >= ELogLevel.Warning)
             {
@@ -102,7 +103,6 @@ namespace DGame
                     formatSb.AppendFormat("[{0}::{1}\n", declaringTypeName, methodName);
                 }
             }
-            string logStr = formatSb.ToString();
             switch (level)
             {
                 case ELogLevel.Info:
@@ -148,16 +148,16 @@ namespace DGame
                     m_stringBuilder.AppendFormat("<color=#CFCFCF><b>[INFO] ► </b></color> - {0}", body);
                     break;
                 case ELogLevel.Assert:
-                    m_stringBuilder.AppendFormat("<color=#FF00BD><b>[ASSERT] ► </b></color> - {0}", logStr);
+                    m_stringBuilder.AppendFormat("<color=#FF00BD><b>[ASSERT] ► </b></color> - {0}", body);
                     break;
                 case ELogLevel.Warning:
-                    m_stringBuilder.AppendFormat("<color=#FF9400><b>[WARNING] ► </b></color> - {0}", logStr);
+                    m_stringBuilder.AppendFormat("<color=#FF9400><b>[WARNING] ► </b></color> - {0}", body);
                     break;
                 case ELogLevel.Error:
-                    m_stringBuilder.AppendFormat("<color=red><b>[ERROR] ► </b></color>- {0}", logStr);
+                    m_stringBuilder.AppendFormat("<color=red><b>[ERROR] ► </b></color>- {0}", body);
                     break;
                 case ELogLevel.Exception:
-                    m_stringBuilder.AppendFormat("<color=red><b>[EXCEPTION] ► </b></color> - {0}", logStr);
+                    m_stringBuilder.AppendFormat("<color=red><b>[EXCEPTION] ► </b></color> - {0}", body);
                     break;
             }
 

@@ -12,6 +12,34 @@
 /// </summary>
 {{~end~}}
 {{~
+func generate_copy_field
+    field = $0
+    fieldName = format_property_name __code_style field.name
+    if field.ctype.type_name == 'list' || field.ctype.type_name == 'set'
+        if is_field_array_like_need_resolve_ref field
+            ret 'other.' + fieldName + ' = ' + fieldName + ' == null ? null : new ' + (declaring_type_name field.ctype) + '(); if (' + fieldName + ' != null) foreach (var _e in ' + fieldName + ') { var _copy = _e; _e?.CopyTo(ref _copy); other.' + fieldName + '.Add(_copy); }'
+        else
+            ret 'other.' + fieldName + ' = ' + fieldName + ' == null ? null : new ' + (declaring_type_name field.ctype) + '(' + fieldName + ');'
+        end
+    else if field.ctype.type_name == 'array'
+        if is_field_array_like_need_resolve_ref field
+            ret 'other.' + fieldName + ' = ' + fieldName + ' == null ? null : new ' + (declaring_type_name field.ctype.element_type) + '[' + fieldName + '.Length]; if (' + fieldName + ' != null) for (var _i = 0; _i < ' + fieldName + '.Length; _i++) { var _copy = ' + fieldName + '[_i]; ' + fieldName + '[_i]?.CopyTo(ref _copy); other.' + fieldName + '[_i] = _copy; }'
+        else
+            ret 'other.' + fieldName + ' = ' + fieldName + ' == null ? null : ((' + (declaring_type_name field.ctype) + ')' + fieldName + '.Clone());'
+        end
+    else if field.ctype.type_name == 'map'
+        if is_field_map_need_resolve_ref field
+            ret 'other.' + fieldName + ' = ' + fieldName + ' == null ? null : new ' + (declaring_type_name field.ctype) + '(); if (' + fieldName + ' != null) foreach (var _e in ' + fieldName + ') { var _copy = _e.Value; _e.Value?.CopyTo(ref _copy); other.' + fieldName + '.Add(_e.Key, _copy); }'
+        else
+            ret 'other.' + fieldName + ' = ' + fieldName + ' == null ? null : new ' + (declaring_type_name field.ctype) + '(' + fieldName + ');'
+        end
+    else if is_field_bean_need_resolve_ref field
+        ret fieldName + '?.CopyTo(ref other.' + fieldName + ');'
+    else
+        ret 'other.' + fieldName + ' = ' + fieldName + ';'
+    end
+end
+
 func get_ref_name 
     ret (format_property_name __code_style $0.name) + '_Ref'
 end
@@ -152,8 +180,15 @@ public {{class_modifier __bean}} partial class {{__name}} : {{if parent_def_type
         }
         {{~end~}}
         {{~for field in export_fields~}}
-        other.{{format_property_name __code_style field.name}} = {{format_property_name __code_style field.name}};
+        {{generate_copy_field field}}
         {{~end~}}
+    }
+
+    public {{__name}} DeepCopy()
+    {
+        var other = new {{__name}}();
+        CopyTo(ref other);
+        return other;
     }
     {{~end~}}
     

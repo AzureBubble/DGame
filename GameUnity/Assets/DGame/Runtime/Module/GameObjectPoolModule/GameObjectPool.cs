@@ -240,7 +240,7 @@ namespace DGame
             
             m_spawnedPool.Remove(node);
 
-            if (!MarkedForDestroy && Count < m_maxCapacity)
+            if (!MarkedForDestroy && Count < m_maxCapacity && m_parent != null)
             {
                 go.SetActive(false);
                 go.transform.SetParent(m_parent.transform, false);

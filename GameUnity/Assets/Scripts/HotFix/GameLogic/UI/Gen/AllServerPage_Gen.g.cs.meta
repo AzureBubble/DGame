@@ -1,9 +1,5 @@
 fileFormatVersion: 2
-<<<<<<<< HEAD:GameUnity/Assets/Scripts/HotFix/GameLogic/UI/Gen/AllServerPage_Gen.g.cs.meta
 guid: 58fe9ba3cfb65c349ac41f0b7f5b4828
-========
-guid: 782c38ce4f201f344a26fc7d41fda8ea
->>>>>>>> main:GameUnity/Assets/Scripts/HotFix/GameProto/LubanConfig/EGuideInputMode.cs.meta
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2

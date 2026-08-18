@@ -28,6 +28,7 @@ namespace GameLogic
         private Image m_modelSprite;
         private UIButton m_modelCloseBtn;
         private bool m_isCreated;
+        private readonly UniTaskCompletionSource<bool> m_prepareCompletionSource = new UniTaskCompletionSource<bool>();
 
         /// <summary>
         /// Canvas组件
@@ -57,6 +58,11 @@ namespace GameLogic
                 : m_canvasGroup;
 
         private readonly CancellationTokenSource m_cancellationTokenSource = new CancellationTokenSource();
+
+        /// <summary>
+        /// 窗口生命周期取消令牌
+        /// </summary>
+        internal CancellationToken LifetimeToken => m_cancellationTokenSource.Token;
 
         private Transform m_transform;
 
@@ -236,6 +242,19 @@ namespace GameLogic
         internal bool IsLoadDone = false;
 
         /// <summary>
+        /// 等待窗口完成资源加载和生命周期初始化
+        /// </summary>
+        /// <param name="cancellationToken">外部取消令牌</param>
+        /// <returns>窗口是否可安全使用</returns>
+        internal UniTask<bool> WaitUntilPreparedAsync(CancellationToken cancellationToken = default)
+        {
+            var task = m_prepareCompletionSource.Task;
+            return cancellationToken.CanBeCanceled
+                ? task.AttachExternalCancellation(cancellationToken)
+                : task;
+        }
+
+        /// <summary>
         /// UI是否隐藏
         /// </summary>
         public bool IsHide { get; internal set; } = false;
@@ -268,6 +287,8 @@ namespace GameLogic
             WindowFullName = windowName;
             AssetLocation = assetLocation;
             AllocWindowId();
+            // 确保无等待者时也消费完成信号，避免 UniTaskTracker 残留。
+            m_prepareCompletionSource.Task.Forget();
         }
 
         #region 刘海屏适配
@@ -377,28 +398,52 @@ namespace GameLogic
             }
         }
 
-        internal async UniTaskVoid InternalLoad(string location, System.Action<UIWindow> prepareCallback, bool isAsync, System.Object[] userData)
+        internal async UniTask InternalLoad(string location, System.Action<UIWindow> prepareCallback, bool isAsync,
+            System.Object[] userData)
         {
             m_prepareCallback = prepareCallback;
             m_userDatas = userData;
 
-            if (!FromResources)
+            GameObject uiInstance = null;
+
+            try
             {
-                if (isAsync)
+                if (!FromResources)
                 {
-                    var uiInstance = await UIModule.ResourceLoader.LoadGameObjectAsync(location, UIModule.UICanvas);
-                    Handle_Completed(uiInstance);
+                    if (isAsync)
+                    {
+                        uiInstance = await UIModule.ResourceLoader.LoadGameObjectAsync(location, UIModule.UICanvas,
+                            LifetimeToken);
+                    }
+                    else
+                    {
+                        uiInstance = UIModule.ResourceLoader.LoadGameObject(location, UIModule.UICanvas);
+                    }
                 }
                 else
                 {
-                    var uiInstance = UIModule.ResourceLoader.LoadGameObject(location, UIModule.UICanvas);
-                    Handle_Completed(uiInstance);
+                    uiInstance = Object.Instantiate(Resources.Load<GameObject>(location), UIModule.UICanvas);
                 }
             }
-            else
+            catch (System.OperationCanceledException)
             {
-                var uiInstance = Object.Instantiate(Resources.Load<GameObject>(location), UIModule.UICanvas);
+            }
+            catch (System.Exception exception)
+            {
+                DLogger.Error($"加载UI窗口 {WindowFullName} 失败: {exception.Message}");
+            }
+
+            try
+            {
                 Handle_Completed(uiInstance);
+            }
+            catch (System.Exception exception)
+            {
+                DLogger.Error($"初始化UI窗口 {WindowFullName} 失败: {exception.Message}");
+                if (!IsDestroyed)
+                {
+                    Close();
+                }
             }
         }
 
@@ -586,6 +631,8 @@ namespace GameLogic
                 return;
             }
 
+            IsDestroyed = true;
+            m_prepareCompletionSource.TrySetResult(false);
             transform?.DOKill();
             m_cancellationTokenSource?.Cancel();
             m_cancellationTokenSource?.Dispose();
@@ -606,22 +653,24 @@ namespace GameLogic
                 gameObject = null;
             }
 
-            IsDestroyed = true;
-
             CancelHideToCloseTimer();
         }
 
         private void Handle_Completed(GameObject windowGo)
         {
-            if (windowGo == null)
-            {
-                return;
-            }
-
             IsLoadDone = true;
             if (IsDestroyed)
             {
-                Object.Destroy(windowGo);
+                if (windowGo != null)
+                {
+                    Object.Destroy(windowGo);
+                }
+                return;
+            }
+
+            if (windowGo == null)
+            {
+                Close();
                 return;
             }
 
@@ -647,8 +696,21 @@ namespace GameLogic
             m_isChildCanvasDirty = false;
 
             IsPrepared = true;
-            IsDestroyed = false;
-            m_prepareCallback?.Invoke(this);
+            try
+            {
+                m_prepareCallback?.Invoke(this);
+            }
+            catch (System.Exception exception)
+            {
+                DLogger.Error($"初始化UI窗口 {WindowFullName} 失败: {exception.Message}");
+                Close();
+                return;
+            }
+            finally
+            {
+                m_prepareCallback = null;
+            }
+            m_prepareCompletionSource.TrySetResult(IsPrepared && !IsDestroyed);
         }
 
         internal void CancelHideToCloseTimer()

@@ -16,6 +16,7 @@ namespace GameLogic
         #region 常量定义
 
         private const int DEFAULT_LAYER_DEEP = 2000;
+        private const int WINDOW_LOAD_TIMEOUT_SECONDS = 60;
         public const int EACH_WINDOW_DEEP = 100;
 
         #endregion
@@ -520,31 +521,17 @@ namespace GameLogic
         {
             Type type = typeof(T);
             string windowName = type.FullName;
+            UIWindow window;
 
-            if (TryGetWindow(windowName, out var window, userDatas))
-            {
-                return window as T;
-            }
-            else
+            if (!TryGetWindow(windowName, out window, userDatas))
             {
                 window = InternalCreateWindow<T>();
                 Push(window);
                 window.InternalLoad(window.AssetLocation, OnWindowPrepare, isAsync, userDatas).Forget();
-                float time = 0f;
-
-                while (!window.IsLoadDone) // 观察是否需要加上 && !window.IsDestroyed
-                {
-                    time += Time.deltaTime;
-
-                    if (time > 60f)
-                    {
-                        DLogger.Warning($"窗口 {windowName} 加载超时(60s)");
-                        break;
-                    }
-                    await UniTask.Yield();
-                }
-                return window as T;
             }
+
+            bool isPrepared = await WaitWindowPreparedAsync(window);
+            return isPrepared && !window.IsDestroyed ? window as T : null;
         }
 
         /// <summary>
@@ -558,29 +545,44 @@ namespace GameLogic
 
         private async UniTask<UIWindow> ShowWindowAwaitImp(UIWindow uiWindow, bool isAsync, params System.Object[] userDatas)
         {
-            if (TryGetWindow(uiWindow.WindowID, out var window, userDatas))
-            {
-                return window;
-            }
-            else
+            UIWindow window;
+
+            if (!TryGetWindow(uiWindow.WindowID, out window, userDatas))
             {
                 window = InternalCreateWindow(uiWindow);
                 Push(window);
                 window.InternalLoad(window.AssetLocation, OnWindowPrepare, isAsync, userDatas).Forget();
-                float time = 0f;
+            }
 
-                while (!window.IsLoadDone)
+            bool isPrepared = await WaitWindowPreparedAsync(window);
+            return isPrepared && !window.IsDestroyed ? window : null;
+        }
+
+        private async UniTask<bool> WaitWindowPreparedAsync(UIWindow window,
+            CancellationToken cancellationToken = default)
+        {
+            if (window == null)
+            {
+                return false;
+            }
+
+            using var timeoutCts = new CancellationTokenSource();
+            using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token);
+            using var timeoutRegistration = timeoutCts.CancelAfterSlim(
+                TimeSpan.FromSeconds(WINDOW_LOAD_TIMEOUT_SECONDS), DelayType.UnscaledDeltaTime);
+
+            try
+            {
+                return await window.WaitUntilPreparedAsync(linkedCts.Token);
+            }
+            catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+            {
+                DLogger.Warning($"窗口 {window.WindowFullName} 加载超时({WINDOW_LOAD_TIMEOUT_SECONDS}s)");
+                if (!window.IsDestroyed)
                 {
-                    time += Time.deltaTime;
-
-                    if (time > 60f)
-                    {
-                        DLogger.Warning($"窗口 {window.WindowFullName} 加载超时(60s)");
-                        break;
-                    }
-                    await UniTask.Yield();
+                    CloseWindow(window);
                 }
-                return window;
+                return false;
             }
         }
 
@@ -711,25 +713,8 @@ namespace GameLogic
                 return null;
             }
 
-            if (result.IsLoadDone)
-            {
-                return result;
-            }
-
-            float time = 0f;
-
-            while (!result.IsLoadDone)
-            {
-                time += Time.deltaTime;
-
-                if (time > 60f)
-                {
-                    DLogger.Warning($"窗口 {window.WindowFullName} 加载超时(60s)");
-                    break;
-                }
-                await UniTask.Yield(cancellationToken);
-            }
-            return result;
+            bool isPrepared = await WaitWindowPreparedAsync(result, cancellationToken);
+            return isPrepared && !result.IsDestroyed ? result : null;
         }
 
         /// <summary>
@@ -754,21 +739,10 @@ namespace GameLogic
 
             GetWindowAsyncImp(callback).Forget();
 
-            async UniTaskVoid GetWindowAsyncImp(Action<T> ctx)
+            async UniTask GetWindowAsyncImp(Action<T> ctx)
             {
-                float time = 0f;
-
-                while (!result.IsLoadDone)
-                {
-                    time += Time.deltaTime;
-
-                    if (time > 60f)
-                    {
-                        break;
-                    }
-                    await UniTask.Yield();
-                }
-                ctx?.Invoke(result);
+                bool isPrepared = await WaitWindowPreparedAsync(result);
+                ctx?.Invoke(isPrepared && !result.IsDestroyed ? result : null);
             }
         }
 

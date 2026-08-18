@@ -424,13 +424,27 @@ namespace GameLogic
             bool visible = true)
             where T : UIWidget, new()
         {
-            if (gameObject == null)
+            if (IsDestroyed || gameObject == null)
             {
                 return null;
             }
 
+            var ownerObject = gameObject;
+            bool hasParent = parentTrans != null;
+            var cancellationToken = ownerObject.GetCancellationTokenOnDestroy();
             GameObject goInst = await UIModule.ResourceLoader.LoadGameObjectAsync(assetLocation, parentTrans,
-                gameObject.GetCancellationTokenOnDestroy());
+                cancellationToken);
+
+            if (cancellationToken.IsCancellationRequested || IsDestroyed || gameObject == null ||
+                gameObject != ownerObject || (hasParent && parentTrans == null))
+            {
+                if (goInst != null)
+                {
+                    UnityEngine.Object.Destroy(goInst);
+                }
+                return null;
+            }
+
             return CreateWidget<T>(goInst, visible);
         }
 
@@ -554,9 +568,12 @@ namespace GameLogic
             int maxCntPerFrame, Action<T, int> updateAction, GameObject prefab, string assetLocation)
             where T : UIWidget, new()
         {
-            if (itemList == null)
+            if (itemList == null || IsDestroyed || gameObject == null)
             {
-                DLogger.Error($"itemList is null, please check GameObject: {gameObject.name}.{parentTrans.name}!");
+                if (itemList == null)
+                {
+                    DLogger.Error("itemList is null, please check UI list initialization!");
+                }
                 return;
             }
 
@@ -581,7 +598,16 @@ namespace GameLogic
                         tempT = await CreateWidgetByPathAsync<T>(parentTrans, assetLocation);
                     }
 
+                    if (tempT == null || IsDestroyed || gameObject == null)
+                    {
+                        return;
+                    }
                     itemList.Add(tempT);
+                }
+
+                if (tempT == null || tempT.IsDestroyed || IsDestroyed || gameObject == null)
+                {
+                    return;
                 }
 
                 int index = i;
@@ -597,6 +623,11 @@ namespace GameLogic
                 {
                     createCnt = 0;
                     await UniTask.Yield();
+
+                    if (IsDestroyed || gameObject == null)
+                    {
+                        return;
+                    }
                 }
             }
 
@@ -612,7 +643,7 @@ namespace GameLogic
             {
                 var item = itemList[i];
                 itemList.RemoveAt(i);
-                item.Destroy();
+                item?.Destroy();
             }
         }
 

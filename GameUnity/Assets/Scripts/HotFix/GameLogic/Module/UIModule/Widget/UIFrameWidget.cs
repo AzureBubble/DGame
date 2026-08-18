@@ -1,4 +1,5 @@
 ﻿using System;
+using Cysharp.Threading.Tasks;
 using GameProto;
 using UnityEngine;
 using UnityEngine.UI;
@@ -31,7 +32,11 @@ namespace GameLogic
 
         protected override void OnDestroy()
         {
-            m_animatorAgent?.Release();
+            m_initVersion++;
+            var animatorAgent = m_animatorAgent;
+            m_animatorAgent = null;
+            animatorAgent?.Release();
+            m_clickAction = null;
         }
 
         #endregion
@@ -42,6 +47,7 @@ namespace GameLogic
         private Action<UIWidget> m_clickAction;
         private int m_modelID;
         private ModelConfig m_modelCfg;
+        private int m_initVersion;
 
         #endregion
 
@@ -52,20 +58,33 @@ namespace GameLogic
         /// </summary>
         /// <param name="modelID">模型ID</param>
         /// <param name="clickAction">点击回调</param>
-        public async void Init(int modelID, Action<UIWidget> clickAction = null)
+        public void Init(int modelID, Action<UIWidget> clickAction = null)
+            => InitAsync(modelID, clickAction).Forget();
+
+        private async UniTask InitAsync(int modelID, Action<UIWidget> clickAction)
         {
-            if (modelID <= 0)
+            if (modelID <= 0 || IsDestroyed || m_animatorAgent == null)
             {
                 return;
             }
+            int initVersion = ++m_initVersion;
             m_modelID = modelID;
 
             m_clickAction = clickAction;
             m_btnSprite.interactable = clickAction != null;
-            m_modelCfg = ModelConfigMgr.Instance.GetModelOrDefault(modelID);
-            await m_animatorAgent.Init(m_modelCfg);
-            m_animatorAgent?.BindDisplayRender(m_btnSprite.image);
-            m_animatorAgent?.StartAnim();
+            m_modelCfg = ModelConfigMgr.Instance.GetOrDefault(modelID);
+            var animatorAgent = m_animatorAgent;
+            var spriteButton = m_btnSprite;
+            await animatorAgent.Init(m_modelCfg);
+
+            if (initVersion != m_initVersion || IsDestroyed || gameObject == null ||
+                animatorAgent != m_animatorAgent || spriteButton == null)
+            {
+                return;
+            }
+
+            animatorAgent.BindDisplayRender(spriteButton.image);
+            animatorAgent.StartAnim();
         }
 
         /// <summary>

@@ -15,7 +15,6 @@ GameModule.ResourceModule      // IResourceModule
 GameModule.AudioModule         // IAudioModule
 GameModule.SceneModule         // ISceneModule
 GameModule.GameTimerModule     // IGameTimerModule
-GameModule.InputModule         // DGame.IInputModule
 GameModule.Input               // GameLogic.IInputModule，ENABLE_INPUT_SYSTEM 下可用
 GameModule.LocalizationModule  // ILocalizationModule
 GameModule.GameObjectPool      // IGameObjectPoolModule

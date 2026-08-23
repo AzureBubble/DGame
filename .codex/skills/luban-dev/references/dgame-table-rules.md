@@ -4,7 +4,7 @@
 
 - 默认推荐在 `GameConfig/Datas/__tables__.xlsx` 显式注册表。
 - Luban 支持 `#<value_type>-<comment>.xlsx` 文件级自动导入，DGame 可用但不默认推荐。
-- DGame 扩展支持 Sheet 级拆表：sheet 名为 `#<value_type>-<comment>` 时，导表脚本会用 `Tools/split_sheets.py` 拆成临时 `#` 文件再交给 Luban 自动导入。
+- DGame 扩展支持 Sheet 级拆表：sheet 名为 `#<value_type>-<comment>` 时，可手动运行 `GameConfig/Tools/split_sheets.py` 拆成临时 `#` 文件再交给 Luban 自动导入；当前默认导表脚本不会自动调用该步骤。
 - 需要 `mode`、`index`、`group_by`、复杂 `tags` 或明确双端分组时，优先使用 `__tables__.xlsx`。
 
 ## 显式注册
@@ -33,7 +33,7 @@ Sheet 级：
 
 ```text
 任意业务 Excel 的 sheet "#SkillCfg-技能表"
--> split_sheets.py 临时生成 GameConfig/Datas/#SkillCfg-技能表.xlsx
+-> 手动运行 split_sheets.py，临时生成 GameConfig/Datas/#SkillCfg-技能表.xlsx
 -> Luban 自动导入 TbSkillCfg
 ```
 

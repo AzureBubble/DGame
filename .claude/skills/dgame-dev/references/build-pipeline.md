@@ -26,7 +26,7 @@ DGame 的构建统一收口在 `DGame.ReleaseTools`（`GameUnity/Assets/DGame/Ed
 
 > **强制前置**：在构建首包，或 AOT 程序集/泛型引用发生变化，且当前启用了 HybridCLR 热更新（`ENABLE_HYBRIDCLR` / `UpdateSettings.Enable` 为 true）时，**必须先执行一次 HybridCLR 的 GenerateAll**，再继续 BuildPlayer、`BuildDllCommand.BuildAndCopyDlls()` 和 AB 构建。
 
-执行入口为 `HybridCLR/Generate/All`。`AutoBuildWindow` 和可视化窗口的“一键构建”不会自动执行；首包或 AOT/泛型引用变化时应先使用窗口中的独立按钮手动执行。Android/iOS 自动完整构建以及 `Build*WithVersion` 命令行完整构建仍会同步执行。这一步会刷新 HybridCLR 生成产物，例如 link、AOTGenericReferences、桥接/反向 PInvoke 等生成文件。
+执行入口为 `HybridCLR/Generate/All`。当前 `ReleaseTools` 的菜单和命令行完整构建入口默认都不会自动执行 `GenerateAll`；可视化窗口提供独立按钮，首包或 AOT/泛型引用变化时应先手动执行。此步骤会刷新 HybridCLR 生成产物，例如 link、AOTGenericReferences、桥接/反向 PInvoke 等生成文件。
 
 不涉及首包、不改 AOT、不启用 HybridCLR 热更时，不需要为了普通资源 AB 构建额外执行 GenerateAll。
 
@@ -39,7 +39,7 @@ DGame 的构建统一收口在 `DGame.ReleaseTools`（`GameUnity/Assets/DGame/Ed
 | `DGame Tools/Build/AutoBuildAndroid` | `AutoBuildAndroid` | Android AB + 整包 `{版本}-Android.apk` |
 | `DGame Tools/Build/AutoBuildIOS` | `AutoBuildIOS` | iOS AB + 整包 `XCode_Project` |
 
-`AutoBuildXXX` 会先 `SwitchActiveBuildTarget`，再进入统一完整构建流程。`AutoBuildWindow` 不自动执行 GenerateAll，`AutoBuildAndroid`/`AutoBuildIOS` 保留自动执行。为保持旧入口语义，这些完整构建入口显式关闭 `CopyToBuildAddress`；AB-only 和可视化窗口仍按各自的 `BuildPipelineConfig.CopyToBuildAddress` 决定是否同步。交互模式构建成功后用 `RevealInFinder` 打开输出目录；batchmode 不打开目录。
+`AutoBuildXXX` 会先 `SwitchActiveBuildTarget`，再进入统一完整构建流程；这些入口当前都不自动执行 `GenerateAll`。为保持旧入口语义，这些完整构建入口显式关闭 `CopyToBuildAddress`；AB-only 和可视化窗口仍按各自的 `BuildPipelineConfig.CopyToBuildAddress` 决定是否同步。交互模式构建成功后用 `RevealInFinder` 打开输出目录；batchmode 不打开目录。
 
 ## 命令行入口（Jenkins 自动化）
 
@@ -98,7 +98,7 @@ DGame 的构建统一收口在 `DGame.ReleaseTools`（`GameUnity/Assets/DGame/Ed
 ## Jenkins 落地
 
 1. 节点安装对应 Unity 版本，改 `path_define` 的 `WORKSPACE`/`UNITYEDITOR_PATH`。
-2. 拉取代码后调用对应 `build_*` 脚本；脚本先转表再启动 Unity。Windows 自动完整构建不会自动 GenerateAll，首包或 AOT/泛型引用变化时需在流水线中显式执行；Android 自动完整构建仍会执行。AB-only 构建仅用于 AOT 未变化的资源热更。
+2. 拉取代码后调用对应 `build_*` 脚本；脚本先转表再启动 Unity。所有当前完整构建入口都不会自动执行 `GenerateAll`，首包或 AOT/泛型引用变化时需在流水线中显式执行。AB-only 构建仅用于 AOT 未变化的资源热更。
 3. `-quit` 后用退出码判断成功失败并归档 `BUILD_LOGFILE`；Windows 脚本通过 `run_unity_with_log.ps1` 将 Unity 日志实时输出到控制台并同步写入 UTF-8 日志文件，且保留 Unity 原始退出码。当前所有 Windows `.bat` 在成功或失败后都会 `pause`，避免本地双击运行时窗口直接关闭。
 4. 需要刷新 HybridCLR 生成产物时，确认对应入口会执行 GenerateAll，或在构建前显式执行；BuildPlayer 仍负责生成裁剪 AOT 产物。
 

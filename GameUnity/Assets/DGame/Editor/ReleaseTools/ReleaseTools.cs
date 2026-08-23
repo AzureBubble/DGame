@@ -678,7 +678,7 @@ namespace DGame
             BuildPipelineConfig config = CreateBuildConfig(BuildTarget.Android, version, "Bundles/Android",
                 $"Build/Android/{version}-Android.apk");
             config.CopyToBuildAddress = false;
-            RunBuildOrThrow(config, true, true, true);
+            RunBuildOrThrow(config, true, true);
         }
 
         [MenuItem("DGame Tools/Build/AutoBuildIOS", priority = 154)]
@@ -688,7 +688,7 @@ namespace DGame
             BuildPipelineConfig config = CreateBuildConfig(BuildTarget.iOS, version, "Bundles/IOS",
                 "Build/IOS/XCode_Project");
             config.CopyToBuildAddress = false;
-            RunBuildOrThrow(config, true, true, true);
+            RunBuildOrThrow(config, true, true);
         }
 
         private static void OpenBuildSavePath(string path)
@@ -719,7 +719,7 @@ namespace DGame
             BuildPipelineConfig config = CreateBuildConfig(BuildTarget.StandaloneWindows64, version,
                 "Bundles/Windows", "Build/Windows/Release_Windows.exe");
             config.CopyToBuildAddress = false;
-            RunBuildOrThrow(config, true, true, true);
+            RunBuildOrThrow(config, true, true);
         }
 
         public static void BuildAndroidWithVersion()
@@ -734,7 +734,7 @@ namespace DGame
             BuildPipelineConfig config = CreateBuildConfig(BuildTarget.Android, version, "Bundles/Android",
                 $"Build/Android/{version}-Android.apk");
             config.CopyToBuildAddress = false;
-            RunBuildOrThrow(config, true, true, true);
+            RunBuildOrThrow(config, true, true);
         }
 
         public static void BuildIOSWithVersion()
@@ -749,7 +749,7 @@ namespace DGame
             BuildPipelineConfig config = CreateBuildConfig(BuildTarget.iOS, version, "Bundles/IOS",
                 "Build/IOS/XCode_Project");
             config.CopyToBuildAddress = false;
-            RunBuildOrThrow(config, true, true, true);
+            RunBuildOrThrow(config, true, true);
         }
 
         /// <summary>

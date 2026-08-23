@@ -158,7 +158,7 @@ Excel、表结构、字段、Bean、枚举、`__tables__.xlsx` / `__beans__.xlsx
 
 ### ConfigSystem 位置
 
-DGame 的 `ConfigSystem.cs` 就在 `Assets/Scripts/HotFix/GameProto/ConfigSystem.cs`（由 Luban 生成，随仓库存在），不需要临时从模板重新生成。消费链路见 [luban-config.md](luban-config.md)。
+DGame 的 `ConfigSystem.cs` 就在 `Assets/Scripts/HotFix/GameProto/ConfigSystem.cs`。它由导表脚本从 `GameConfig/CustomTemplate/Client/Bin/ConfigSystem.cs` 复制，不属于 Luban 的表代码生成产物；调整加载逻辑时应修改模板后重新导表。消费链路见 [luban-config.md](luban-config.md)。
 
 ---
 
@@ -169,7 +169,7 @@ DGame 的 `ConfigSystem.cs` 就在 `Assets/Scripts/HotFix/GameProto/ConfigSystem
 `UniTaskVoid` 异常不按普通 `await` 链传播。优先让业务方法返回 `UniTask` 并在调用点 await；必须 fire-and-forget 时在方法内 try-catch。也可设置全局兜底：
 
 ```csharp
-UniTaskScheduler.UnobservedExceptionHandler = e => Log.Error($"未处理 UniTask 异常: {e}");
+UniTaskScheduler.UnobservedExceptionHandler = e => DLogger.Error($"未处理 UniTask 异常: {e}");
 ```
 
 ### await 后对象已销毁

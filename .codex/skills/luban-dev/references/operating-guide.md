@@ -185,7 +185,7 @@ python scripts/luban_helper.py --data-dir GameConfig/Datas table add TbItemConfi
 **自动导入格式**（`--auto-import`，支持但不默认推荐）：
 - 文件名格式：`#表名-注释.xlsx`
 - Luban 自动识别，无需在 `__tables__.xlsx` 中声明
-- DGame 还支持 sheet 名 `#表名-注释`，导表前由 `GameConfig/Tools/split_sheets.py` 拆成临时 `#` 文件
+- DGame 还支持 sheet 名 `#表名-注释`，需要手动运行 `GameConfig/Tools/split_sheets.py` 拆成临时 `#` 文件后再导表
 
 ### table delete - 删除配置表
 ```bash

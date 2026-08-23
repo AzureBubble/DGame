@@ -45,7 +45,7 @@ cmd /c "set AI_MODE=1 && GameConfig\GenerateTool_Binary\gen_bin_client_lazyload.
 脚本行为：
 
 1. 复制 `CustomTemplate\Client\Bin\ConfigSystem.cs` 和 `ExternalTypeUtil.cs` 到 `GameProto/`。
-2. 运行 `Tools\split_sheets.py`，把含 `#xxx-xxx` sheet 的表拆成临时文件。
+2. 当前默认脚本中的 `Tools\split_sheets.py` 前置/后置调用已注释；需要使用 Sheet 级 `#xxx-xxx` 拆表时，先手动执行该脚本，导表后再执行清理。
 3. 调用 Luban：`-t client -c cs-bin -d bin -d json`。
 4. 使用 `CustomTemplate\Client\CustomTemplate_Client_LazyLoad`。
 5. 输出代码到 `GameProto/LubanConfig/`，输出数据到 `path_define.*` 指定的 Binary/Json 目录。
@@ -90,7 +90,7 @@ DGame 当前支持三种表来源；默认仍推荐 `__tables__.xlsx` 显式注�
 
 1. `__tables__.xlsx` 显式注册：推荐方式，适合需要 `mode`、`index`、`tags` 等明确控制的表。
 2. 文件级自动导入：`GameConfig/Datas/#<value_type>-<comment>.xlsx`，Luban 自动生成 `Tb<value_type>`，不需要注册；DGame 支持但不默认推荐。
-3. Sheet 级拆表扩展：任意业务 Excel 中的 sheet 命名为 `#<value_type>-<comment>`，`split_sheets.py` 会在导表前拆成临时 `#<value_type>-<comment>.xlsx`，再交给 Luban 自动导入；DGame 支持但仍按自动导入场景谨慎使用。
+3. Sheet 级拆表扩展：任意业务 Excel 中的 sheet 命名为 `#<value_type>-<comment>`，手动执行 `GameConfig/Tools/split_sheets.py` 后会生成临时 `#<value_type>-<comment>.xlsx`，再交给 Luban 自动导入；当前默认导表脚本不会自动调用该拆表步骤，DGame 支持但仍按自动导入场景谨慎使用。
 
 `__tables__.xlsx` 常用字段：
 

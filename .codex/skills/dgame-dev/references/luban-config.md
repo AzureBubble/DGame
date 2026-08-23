@@ -22,7 +22,7 @@ DGame 的 Luban 工程在 `GameConfig/`，消费侧排查配置问题时至少�
 | Excel 数据源 | `GameConfig/Datas/*.xlsx`，业务表使用中文名，如 `道具配置表.xlsx`、`文本配置表.xlsx` |
 | 表/Bean/Enum 定义 | `GameConfig/Datas/Defines/__tables__.xlsx`、`__beans__.xlsx`、`__enums__.xlsx` |
 | Schema Defines | `GameConfig/Defines/`，并由 `luban.conf` 的 `schemaFiles` 引入 |
-| 客户端生成脚本 | `GameConfig/GenerateTool_Binary/gen_bin_client.bat`，路径变量在 `path_define.bat` |
+| 客户端生成脚本 | `GameConfig/GenerateTool_Binary/gen_bin_client_lazyload.bat`（推荐），路径变量在 `path_define.bat` |
 | 生成代码产物 | `GameUnity/Assets/Scripts/HotFix/GameProto/LubanConfig/` |
 | 二进制配置产物 | `GameUnity/Assets/BundleAssets/Configs/Binary/` |
 

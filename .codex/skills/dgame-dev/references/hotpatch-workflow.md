@@ -99,7 +99,7 @@ await clearOp;
 DGame AOT 启动链按后缀式命名（`XxxProcedure`）有序驱动，排障时按此顺序串起来看：
 
 ```
-LaunchProcedure → SplashProcedure → InitResourceProcedure → InitPackageProcedure
+LaunchProcedure → SplashProcedure → InitPackageProcedure → InitResourceProcedure
 → CreateDownloaderProcedure → DownloadFileProcedure → DownloadOverProcedure
 → PreloadProcedure → LoadAssemblyProcedure → StartGameProcedure
 ```
@@ -121,7 +121,7 @@ GameModule.ResourceModule.ClearAllBundleFiles(packageName);
 3. 真机测试：出包 → 部署热更资源到 CDN → 启动触发热更下载
 ```
 
-（代码域边界、程序集划分与 GameApp.Entrance 见 [hotfix-workflow.md](hotfix-workflow.md)，本文件只覆盖资源包侧。）
+（代码域边界、程序集划分与 `GameStart.Entrance` 见 [hotfix-workflow.md](hotfix-workflow.md)，本文件只覆盖资源包侧。）
 
 ## 常见错误
 

@@ -15,7 +15,7 @@ namespace GameLogic
     /// </summary>
     [DisallowMultipleComponent]
     [AddComponentMenu("UGUIPro/RichTextItem")]
-    public class RichTextItem : MonoBehaviour
+    public class RichTextItem : MonoBehaviour, ILayoutElement
     {
         #region 序列化字段
 
@@ -138,6 +138,22 @@ namespace GameLogic
         public float Height => RectTransform.sizeDelta.y;
         public int RowCount => m_rows.Count;
 
+        public float minWidth => m_layoutMinWidth;
+        public float preferredWidth => m_layoutPreferredWidth;
+        public float flexibleWidth => -1f;
+        public float minHeight => m_layoutMinHeight;
+        public float preferredHeight => m_layoutPreferredHeight;
+        public float flexibleHeight => -1f;
+        public int layoutPriority => 1;
+
+        public void CalculateLayoutInputHorizontal()
+        {
+        }
+
+        public void CalculateLayoutInputVertical()
+        {
+        }
+
         public Font Font
         {
             get => m_font;
@@ -242,6 +258,7 @@ namespace GameLogic
             // 同步渲染
             BuildLayout(elements);
             ApplyLayout();
+            MarkLayoutDirty();
 
             // 标记下一帧应用特效（在所有渲染完成后）
             m_pendingEffects = m_currentParams.EnableShadow || m_currentParams.EnableOutline;
@@ -333,6 +350,7 @@ namespace GameLogic
                 token.ThrowIfCancellationRequested();
 
                 ApplyLayout();
+                MarkLayoutDirty();
                 FinalizeRendering(elements, token);
             }
             catch (OperationCanceledException)
@@ -372,7 +390,8 @@ namespace GameLogic
             RecycleEmojiInstances();
             m_hasEmojis = false;
             m_pendingEffects = false;
-            RectTransform.sizeDelta = Vector2.zero;
+            UpdateLayoutMetrics(0f, 0f);
+            MarkLayoutDirty();
         }
 
         #endregion
@@ -382,6 +401,7 @@ namespace GameLogic
         private void Awake()
         {
             m_rectTransform = GetComponent<RectTransform>();
+            UpdateLayoutMetrics(m_rectTransform.sizeDelta.x, m_rectTransform.sizeDelta.y);
         }
 
         private void LateUpdate()
@@ -503,6 +523,10 @@ namespace GameLogic
         private float m_layoutHeight; // Truncate 模式下的固定布局高度
         private float m_originalWidth; // 布局前的原始 RectTransform 宽度
         private float m_originalHeight; // 布局前的原始 RectTransform 高度
+        private float m_layoutMinWidth;
+        private float m_layoutPreferredWidth;
+        private float m_layoutMinHeight;
+        private float m_layoutPreferredHeight;
 
         private void BuildLayout(List<RichTextElement> elements)
         {
@@ -526,11 +550,7 @@ namespace GameLogic
 
             if (elements == null || elements.Count == 0)
             {
-                if (m_layoutWidth > 0)
-                {
-                    RectTransform.sizeDelta = new Vector2(m_layoutWidth, RectTransform.sizeDelta.y);
-                }
-
+                UpdateLayoutMetrics(m_layoutWidth > 0 ? m_layoutWidth : 0f, 0f);
                 return;
             }
 
@@ -582,11 +602,7 @@ namespace GameLogic
 
             if (elements == null || elements.Count == 0)
             {
-                if (m_layoutWidth > 0)
-                {
-                    RectTransform.sizeDelta = new Vector2(m_layoutWidth, RectTransform.sizeDelta.y);
-                }
-
+                UpdateLayoutMetrics(m_layoutWidth > 0 ? m_layoutWidth : 0f, 0f);
                 return;
             }
 
@@ -695,6 +711,7 @@ namespace GameLogic
                 }
 
                 ApplyLayout();
+                MarkLayoutDirty();
                 FinalizeRendering(elements, token);
             }
             finally
@@ -1199,7 +1216,25 @@ namespace GameLogic
                 finalHeight = totalHeight;
             }
 
-            RectTransform.sizeDelta = new Vector2(finalWidth, finalHeight);
+            UpdateLayoutMetrics(finalWidth, finalHeight);
+        }
+
+        private void UpdateLayoutMetrics(float width, float height)
+        {
+            RectTransform.sizeDelta = new Vector2(width, height);
+            m_layoutMinWidth = width;
+            m_layoutPreferredWidth = width;
+            m_layoutMinHeight = height;
+            m_layoutPreferredHeight = height;
+        }
+
+        private void MarkLayoutDirty()
+        {
+            var parent = transform.parent as RectTransform;
+            if (parent != null)
+            {
+                LayoutRebuilder.MarkLayoutForRebuild(parent);
+            }
         }
 
         #endregion

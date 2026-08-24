@@ -1,23 +1,27 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using DGame;
 using SuperScrollView;
 using UnityEngine;
 
 namespace GameLogic
 {
-    public class UILoopListViewWidget<T> : UIWidget where T : UILoopItemWidget, new()
+    /// <summary>
+    /// 支持多种 Item 类型的 LoopListView 组件。
+    /// </summary>
+    public class UILoopListViewWidget : UIWidget
     {
         /// <summary>
         /// LoopListView组件
         /// </summary>
         public LoopListView2 LoopRectView { private set; get; }
 
-        private DGameDictionary<int, T> m_itemCache = new DGameDictionary<int, T>();
+        private readonly DGameDictionary<int, UILoopItemWidget> m_itemCache =
+            new DGameDictionary<int, UILoopItemWidget>();
 
         protected override void BindMemberProperty()
         {
             base.BindMemberProperty();
-            LoopRectView = this.rectTransform.GetComponent<LoopListView2>();
+            LoopRectView = rectTransform.GetComponent<LoopListView2>();
         }
 
         protected override void OnDestroy()
@@ -29,98 +33,131 @@ namespace GameLogic
         /// <summary>
         /// 创建Item
         /// </summary>
-        public T CreateItem()
+        public TItem CreateItem<TItem>() where TItem : UILoopItemWidget, new()
         {
-            string typeName = typeof(T).Name;
-            return CreateItem(typeName);
+            return CreateItem<TItem>(typeof(TItem).Name);
         }
 
         /// <summary>
         /// 创建Item
         /// </summary>
         /// <param name="itemName">Item名称</param>
-        public T CreateItem(string itemName)
+        public TItem CreateItem<TItem>(string itemName) where TItem : UILoopItemWidget, new()
         {
-            T widget = null;
             var item = LoopRectView.NewListViewItem(itemName);
-            if (item != null)
-            {
-                widget = CreateItem(item);
-            }
-
-            return widget;
+            return item == null ? null : GetOrCreateItem<TItem>(item);
         }
 
         /// <summary>
         /// 创建Item
         /// </summary>
         /// <param name="prefab">预制体</param>
-        public T CreateItem(GameObject prefab)
+        public TItem CreateItem<TItem>(GameObject prefab) where TItem : UILoopItemWidget, new()
         {
             if (prefab == null)
             {
                 return null;
             }
-            T widget = null;
-            var item = LoopRectView.NewListViewItem(prefab);
-            if (item != null)
-            {
-                widget = CreateItem(item);
-            }
 
-            return widget;
+            var item = LoopRectView.NewListViewItem(prefab);
+            return item == null ? null : GetOrCreateItem<TItem>(item);
         }
 
-        private T CreateItem(LoopListViewItem2 item)
+        private TItem GetOrCreateItem<TItem>(LoopListViewItem2 item)
+            where TItem : UILoopItemWidget, new()
         {
-            if (!m_itemCache.TryGetValue(item.GoId, out var widget))
+            if (m_itemCache.TryGetValue(item.GoId, out var cachedItem))
             {
-                widget = CreateWidget<T>(item.gameObject);
-                widget.LoopItem = item;
-                m_itemCache.Add(item.GoId, widget);
+                if (cachedItem is TItem typedItem)
+                {
+                    return typedItem;
+                }
+
+                DLogger.Error(
+                    $"LoopListView Item类型不匹配，预期：{typeof(TItem).Name}，实际：{cachedItem.GetType().Name}");
+                return null;
             }
 
+            var widget = CreateWidget<TItem>(item.gameObject);
+            if (widget == null)
+            {
+                return null;
+            }
+
+            widget.LoopItem = item;
+            m_itemCache.Add(item.GoId, widget);
             return widget;
         }
 
         /// <summary>
         /// 获取所有Item列表
         /// </summary>
-        public List<T> GetItemList()
+        public List<TItem> GetItemList<TItem>() where TItem : UILoopItemWidget
         {
-            List<T> list = new List<T>();
-            for (int i = 0; i < m_itemCache.Count; i++)
+            var list = new List<TItem>();
+            foreach (var item in m_itemCache.Values)
             {
-                list.Add(m_itemCache[i]);
+                if (item is TItem typedItem)
+                {
+                    list.Add(typedItem);
+                }
             }
 
             return list;
         }
 
         /// <summary>
-        /// 获取Item数量
-        /// </summary>
-        public int GetItemCount()
-        {
-            return m_itemCache.Count;
-        }
-
-        /// <summary>
         /// 根据GoID获取Item
         /// </summary>
-        public T GetItem(int goID)
+        public TItem GetItem<TItem>(int goID) where TItem : UILoopItemWidget
         {
-            return m_itemCache[goID];
+            return m_itemCache[goID] as TItem;
         }
 
         /// <summary>
         /// 获取Item。
         /// </summary>
-        /// <param name="index"></param>
-        /// <returns></returns>
+        /// <param name="index">索引</param>
+        /// <returns>Item</returns>
+        public TItem GetItemByIndex<TItem>(int index) where TItem : UILoopItemWidget
+        {
+            return m_itemCache.GetValue(index) as TItem;
+        }
+    }
+
+    /// <summary>
+    /// 单一 Item 类型的 LoopListView 组件。
+    /// </summary>
+    public class UILoopListViewWidget<T> : UILoopListViewWidget where T : UILoopItemWidget, new()
+    {
+        public T CreateItem()
+        {
+            return base.CreateItem<T>();
+        }
+
+        public T CreateItem(string itemName)
+        {
+            return base.CreateItem<T>(itemName);
+        }
+
+        public T CreateItem(GameObject prefab)
+        {
+            return base.CreateItem<T>(prefab);
+        }
+
+        public List<T> GetItemList()
+        {
+            return base.GetItemList<T>();
+        }
+
+        public T GetItem(int goID)
+        {
+            return base.GetItem<T>(goID);
+        }
+
         public T GetItemByIndex(int index)
         {
-            return m_itemCache.GetValue(index);
+            return base.GetItemByIndex<T>(index);
         }
     }
 }

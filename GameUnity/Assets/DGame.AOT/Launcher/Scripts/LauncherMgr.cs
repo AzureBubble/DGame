@@ -122,8 +122,13 @@ namespace Launcher
 
         public static void RefreshProgress(float progress)
         {
-            ShowUI<LoadUpdateUI>();
             var ui = GetActiveUI<LoadUpdateUI>();
+
+            if (ui == null)
+            {
+                ShowUI<LoadUpdateUI>();
+                ui = GetActiveUI<LoadUpdateUI>();
+            }
             ui?.RefreshProgress(progress);
         }
 

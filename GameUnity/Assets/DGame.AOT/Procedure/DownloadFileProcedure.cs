@@ -80,9 +80,9 @@ namespace Procedure
             string line3 = Utility.StringUtil.Format(UpdateUIDefine.Instance.Download_File_Update_Line3_Tips, speed,
                 GetRemainingTime(data.TotalDownloadBytes, data.CurrentDownloadBytes, CurrentSpeed));
 
-            LauncherMgr.RefreshProgress(m_resourceModule.Downloader.Progress);
             LauncherMgr.ShowUI<LoadUpdateUI>($"{line1}\n{line2}\n{line3}");
-
+            LauncherMgr.RefreshProgress(m_resourceModule.Downloader.Progress);
+            
             DLogger.Info($"{line1} {line2} {line3}");
         }
 

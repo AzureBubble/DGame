@@ -1313,6 +1313,7 @@ namespace SuperScrollView
             {
                 return null;
             }
+            mCurCreatingItemIndex = itemIndex;
             LoopGridViewItem newItem = mOnGetItemByRowColumn(this,itemIndex,row,column);
             if (newItem == null)
             {

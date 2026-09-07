@@ -16,20 +16,3 @@ type = "command"
 command = 'python ".codex/hooks/codex_popup.py"'
 timeout = 600
 statusMessage = "显示 Codex 权限确认弹窗"
-
-# -- Codex popup hooks --
-[[hooks.Stop]]
-
-[[hooks.Stop.hooks]]
-type = "command"
-command = 'python ".codex/hooks/codex_popup.py"'
-timeout = 600
-statusMessage = "显示 Codex 完成弹窗"
-
-[[hooks.SubagentStop]]
-
-[[hooks.SubagentStop.hooks]]
-type = "command"
-command = 'python ".codex/hooks/codex_popup.py"'
-timeout = 600
-statusMessage = "显示 Codex 子任务完成弹窗"

@@ -58,8 +58,6 @@ BADGE_COLORS = {
 
 # 超时行为
 AUTO_ALLOW_SEC = 30        # 权限弹窗：N 秒无操作自动同意
-AUTO_CLOSE_SEC = 8         # 空闲弹窗：N 秒后自动关闭
-KAOMOJI = '♡(>ᴗ<)'
 
 
 def _center(root, w, h):
@@ -557,146 +555,6 @@ def show_question_dialog(data):
     return result['behavior'], result['reason']
 
 
-def _last_assistant_text(transcript_path):
-    """从 transcript JSONL 读取最后一条 assistant 的文本内容及其 uuid。
-
-    Claude 用纯文字提问、停下等输入时，问题就在这里。
-    返回 (text, uuid)，读不到返回 ('', '')。"""
-    if not transcript_path or not os.path.isfile(transcript_path):
-        return '', ''
-    try:
-        with open(transcript_path, encoding='utf-8') as f:
-            lines = f.read().splitlines()
-    except Exception:
-        return '', ''
-    for ln in reversed(lines):
-        try:
-            o = json.loads(ln)
-        except Exception:
-            continue
-        if o.get('type') != 'assistant':
-            continue
-        texts = []
-        for c in o.get('message', {}).get('content', []):
-            if isinstance(c, dict) and c.get('type') == 'text':
-                t = c.get('text', '')
-                if t.strip():
-                    texts.append(t)
-        if texts:
-            return '\n'.join(texts), o.get('uuid', '')
-    return '', ''
-
-
-# 记录上次已弹过的消息 uuid，避免同一条内容重复弹窗
-LAST_IDLE_FILE = os.path.join(SCRIPT_DIR, '.last_idle')
-
-
-def _already_notified(uuid):
-    """该 uuid 是否已弹过；未弹过则记录并返回 False。"""
-    if not uuid:
-        return False
-    try:
-        if os.path.isfile(LAST_IDLE_FILE):
-            with open(LAST_IDLE_FILE, encoding='utf-8') as f:
-                if f.read().strip() == uuid:
-                    return True
-        with open(LAST_IDLE_FILE, 'w', encoding='utf-8') as f:
-            f.write(uuid)
-    except Exception:
-        pass
-    return False
-
-
-def show_idle_dialog(data):
-    # Codex 的 Stop 事件直接给 last_assistant_message；没有则回退读 transcript
-    body_text = (data.get('last_assistant_message') or '').strip()
-    if body_text:
-        # 无 uuid，用内容哈希作为去重键
-        import hashlib
-        uuid = hashlib.md5(body_text.encode('utf-8')).hexdigest()
-    else:
-        body_text, uuid = _last_assistant_text(data.get('transcript_path', ''))
-
-    # 同一条消息只弹一次（Stop/SubagentStop 会重复触发）
-    if _already_notified(uuid):
-        return
-
-    root = tk.Tk()
-    root.title('Codex')
-    root.resizable(False, False)
-    root.configure(bg=C['bg'])
-
-    win_w = 560 if body_text else 400
-    win_h = 460 if body_text else 300
-    _center(root, win_w, win_h)
-
-    rainbow_bar(root, win_w).pack(fill='x')
-
-    # ── 颜文字 + 品牌名 ──
-    tk.Label(root, text=KAOMOJI, font=(FONT, 22, 'bold'),
-             fg=C['accent'], bg=C['bg']).pack(pady=(18, 2))
-    tk.Label(root, text='Codex', font=(FONT, 14, 'bold'),
-             fg=C['accent2'], bg=C['bg']).pack(pady=(0, 8))
-
-    tk.Frame(root, bg=C['border'], height=1).pack(fill='x', padx=30, pady=(0, 10))
-
-    auto = {'left': AUTO_CLOSE_SEC, 'job': None}
-
-    def close():
-        if auto['job']:
-            try:
-                root.after_cancel(auto['job'])
-            except Exception:
-                pass
-        root.destroy()
-
-    # ── 底部区域：先 side='bottom' 固定，避免被中间内容挤出 ──
-    countdown = tk.Label(root, text=f'{AUTO_CLOSE_SEC}s 后自动关闭',
-                         font=(FONT, 9), fg=C['muted'], bg=C['bg'])
-    countdown.pack(side='bottom', pady=(0, 14))
-
-    btn = RoundButton(root, '知道啦', close, C['accent'], C['accent2'],
-                      filled=True, width=200, font_size=11)
-    btn.pack(side='bottom', pady=(2, 6))
-
-    # ── 提示语 / Claude 的提问（最后 pack，吃中间剩余空间）──
-    if body_text:
-        tk.Label(root, text='Codex 正在等待你的回复',
-                 font=(FONT, 12, 'bold'), fg=C['danger'], bg=C['bg']).pack(pady=(0, 8))
-        card = tk.Frame(root, bg=C['card2'],
-                        highlightbackground=C['border'], highlightthickness=1)
-        card.pack(fill='both', expand=True, padx=20, pady=(0, 10))
-        txt = tk.Text(card, font=(MONO, 11), fg=C['text'], bg=C['card2'],
-                      wrap='word', bd=0, padx=12, pady=10,
-                      cursor='arrow', relief='flat')
-        txt.insert('1.0', body_text)
-        txt.configure(state='disabled')
-        txt.pack(side='left', fill='both', expand=True)
-        sb = tk.Scrollbar(card, command=txt.yview, bd=0,
-                          elementborderwidth=0, highlightthickness=0)
-        sb.pack(side='right', fill='y')
-        txt.configure(yscrollcommand=sb.set)
-    else:
-        tk.Label(root, text='任务已完成，等待新指令',
-                 font=(FONT, 13, 'bold'), fg=C['danger'], bg=C['bg']).pack(pady=(2, 12))
-
-    def tick_close():
-        auto['left'] -= 1
-        if auto['left'] <= 0:
-            root.destroy()
-            return
-        countdown.config(text=f"{auto['left']}s 后自动关闭")
-        auto['job'] = root.after(1000, tick_close)
-
-    auto['job'] = root.after(1000, tick_close)
-
-    _focus(root, None)
-    root.bind('<Escape>', lambda e: close())
-    root.bind('<Return>', lambda e: close())
-
-    root.mainloop()
-
-
 # ── entry ──────────────────────────────────────────────────────────────
 def main():
     try:
@@ -735,8 +593,6 @@ def main():
                 }
             }
             print(json.dumps(output, ensure_ascii=False))
-        elif event in ('Notification', 'Stop', 'SubagentStop'):
-            show_idle_dialog(data)
     except Exception:
         with open(ERROR_LOG, 'a', encoding='utf-8') as f:
             f.write(f'[gui-error] {traceback.format_exc()}\n')

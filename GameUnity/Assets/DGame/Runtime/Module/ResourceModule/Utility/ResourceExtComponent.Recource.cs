@@ -104,6 +104,10 @@ namespace DGame
                     loadedResource = await m_resourceModule.LoadAssetAsync<T>(location, linkedTokenSource.Token);
                     if (loadedResource == null)
                     {
+                        if (linkedTokenSource.IsCancellationRequested)
+                        {
+                            return;
+                        }
                         DLogger.Error($"加载资源失败，资源为空: {location}");
                         return;
                     }

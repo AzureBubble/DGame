@@ -188,25 +188,11 @@ namespace DGame
             {
                 outputPath = outputPath.Replace(".spriteatlas", ".spriteatlasv2");
 
-                if (!File.Exists(outputPath))
-                {
-                    spriteAtlasAsset = new SpriteAtlasAsset();
-                }
-                else
-                {
-                    spriteAtlasAsset = SpriteAtlasAsset.Load(outputPath);
-                    atlas = AssetDatabase.LoadAssetAtPath<SpriteAtlas>(outputPath);
-
-                    if (atlas != null)
-                    {
-                        var olds = atlas.GetPackables();
-
-                        if (olds != null)
-                        {
-                            spriteAtlasAsset.Remove(olds);
-                        }
-                    }
-                }
+                // V2 的旧 packables 可能包含已删除或更换 GUID 的资源。
+                // 这类失效引用无法通过 GetPackables() 还原成 UnityEngine.Object，
+                // 因此不能依赖 Remove(olds) 清理。直接重建内容并覆盖原文件，
+                // 保留原 .meta，从而同时清除失效引用并保持图集 GUID 不变。
+                spriteAtlasAsset = new SpriteAtlasAsset();
             }
 
             if (Config.enableV2)

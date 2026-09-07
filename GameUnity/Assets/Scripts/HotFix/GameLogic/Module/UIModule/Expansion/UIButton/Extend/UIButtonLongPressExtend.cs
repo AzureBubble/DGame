@@ -11,7 +11,7 @@ namespace GameLogic
         [SerializeField, Range(0, 10)] private float m_pressDuration;
         [SerializeField] private bool m_isLoopLongPress;
         [SerializeField, Range(0, 10)] private float m_interval;
-        [SerializeField] private UnityEvent m_onLongPressEvent;
+        [SerializeField] private UnityEvent m_onLongPressEvent = new UnityEvent();
         private float m_pointerDownTime;
         private bool m_isTriggered;
 
@@ -66,6 +66,7 @@ namespace GameLogic
         {
             m_pressDuration = duration;
             m_isUseLongPress = true;
+            m_onLongPressEvent ??= new UnityEvent();
             m_onLongPressEvent.AddListener(callback);
         }
 
@@ -74,6 +75,7 @@ namespace GameLogic
             m_interval = interval;
             m_isLoopLongPress = true;
             m_isUseLongPress = true;
+            m_onLongPressEvent ??= new UnityEvent();
             m_onLongPressEvent.AddListener(callback);
         }
     }

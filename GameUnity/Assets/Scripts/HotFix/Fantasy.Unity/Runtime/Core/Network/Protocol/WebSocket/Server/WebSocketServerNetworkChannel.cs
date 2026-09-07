@@ -23,16 +23,32 @@ public sealed class WebSocketServerNetworkChannel : ANetworkServerChannel
     private bool _isInnerDispose;
     private readonly Pipe _pipe = new Pipe();
     private readonly System.Net.WebSockets.WebSocket _webSocket;
+    private readonly HttpListenerResponse _httpResponse;
     private readonly WebSocketServerNetwork _network;
     private readonly ReadOnlyMemoryPacketParser _packetParser;
     private readonly Queue<MemoryStreamBuffer> _sendBuffers = new Queue<MemoryStreamBuffer>();
     private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
     
-    public WebSocketServerNetworkChannel(ANetwork network, uint id, HttpListenerWebSocketContext httpListenerWebSocketContext, IPEndPoint remoteEndPoint) : base(network, id, remoteEndPoint)
+    public WebSocketServerNetworkChannel(ANetwork network, uint id, HttpListenerWebSocketContext httpListenerWebSocketContext, HttpListenerResponse httpResponse, IPEndPoint remoteEndPoint) : base(network, id, remoteEndPoint)
     {
-        _network = (WebSocketServerNetwork)network;
-        _webSocket = httpListenerWebSocketContext.WebSocket;
-        _packetParser = (ReadOnlyMemoryPacketParser)PacketParserFactory.CreateWebglBufferPacketParser(network);
+        try
+        {
+            _network = (WebSocketServerNetwork)network;
+            _webSocket = httpListenerWebSocketContext.WebSocket;
+            _httpResponse = httpResponse;
+            _packetParser =
+                (ReadOnlyMemoryPacketParser)PacketParserFactory
+                    .CreateWebglBufferPacketParser(network);
+        }
+        catch
+        {
+            base.Dispose();
+            throw;
+        }
+    }
+    
+    internal void Start()
+    {
         ReadPipeDataAsync().Coroutine();
         ReceiveSocketAsync().Coroutine();
     }
@@ -44,24 +60,41 @@ public sealed class WebSocketServerNetworkChannel : ANetworkServerChannel
             return;
         }
         
-        _isInnerDispose = true;
+        var synchronizationContext = Scene?.ThreadSynchronizationContext;
         
-        _network.RemoveChannel(Id);
-        
-        if (!_cancellationTokenSource.IsCancellationRequested)
+        if (synchronizationContext != null && !ReferenceEquals(SynchronizationContext.Current, synchronizationContext))
         {
-            try
-            {
-                _cancellationTokenSource.Cancel();
-            }
-            catch (OperationCanceledException)
-            {
-                // 通常情况下，此处的异常可以忽略
-            }
+            synchronizationContext.Post(Dispose);
+            return;
         }
         
-        _isSending = false;
-        CloseAndDisposeAsync().Coroutine();
+        _isInnerDispose = true;
+
+        try
+        {
+            _network.RemoveChannel(Id);
+
+            if (!_cancellationTokenSource.IsCancellationRequested)
+            {
+                try
+                {
+                    _cancellationTokenSource.Cancel();
+                }
+                catch (OperationCanceledException)
+                {
+                    // 通常情况下，此处的异常可以忽略
+                }
+            }
+
+            _isSending = false;
+            ClearSendBuffers();
+            _packetParser.Dispose();
+            CloseAndDisposeAsync().Coroutine();
+        }
+        finally
+        {
+            base.Dispose();
+        }
     }
 
     private async FTask CloseAndDisposeAsync()
@@ -75,7 +108,8 @@ public sealed class WebSocketServerNetworkChannel : ANetworkServerChannel
                 await _webSocket.CloseOutputAsync(
                     WebSocketCloseStatus.NormalClosure,
                     "Normal Closure",
-                    closeTimeout.Token);
+                    closeTimeout.Token)
+                    .ConfigureAwait(false);
             }
         }
         catch (Exception)
@@ -91,12 +125,22 @@ public sealed class WebSocketServerNetworkChannel : ANetworkServerChannel
         }
         finally
         {
-            ClearSendBuffers();
-            _webSocket.Dispose();
-            
-            base.Dispose();
+            try
+            {
+                _webSocket.Dispose();
+            }
+            finally
+            {
+                try
+                {
+                    _httpResponse.Close();
+                }
+                catch
+                {
+                    // 关闭过程中的异常可以忽略
+                }
+            }
         }
-        
     }
     
     #region ReceiveSocket
@@ -110,16 +154,12 @@ public sealed class WebSocketServerNetworkChannel : ANetworkServerChannel
                 var memory = _pipe.Writer.GetMemory(8192);
                 // 这里接收的数据不一定是一个完整的包。如果大于8192就会分成多个包。
                 var receiveResult = await _webSocket.ReceiveAsync(memory, _cancellationTokenSource.Token);
+                
                 // 客户端发送了关闭帧，服务器需要响应关闭帧
                 if (receiveResult.MessageType == WebSocketMessageType.Close)
                 {
-                    if (_webSocket.State == WebSocketState.CloseReceived)
-                    {
-                        await _webSocket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "Response Closure",
-                            CancellationToken.None);
-                    }
                     Dispose();
-                    return;
+                    break;
                 }
 
                 var count = receiveResult.Count;
@@ -147,6 +187,8 @@ public sealed class WebSocketServerNetworkChannel : ANetworkServerChannel
             catch (Exception e)
             {
                 Log.Error(e);
+                Dispose();
+                break;
             }
         }
 
@@ -228,10 +270,12 @@ public sealed class WebSocketServerNetworkChannel : ANetworkServerChannel
     {
         try
         {
-            while (_packetParser.UnPack(ref buffer, out var packInfo))
+            while (!_cancellationTokenSource.IsCancellationRequested &&
+                   _packetParser.UnPack(ref buffer, out var packInfo))
             {
                 if (_cancellationTokenSource.IsCancellationRequested)
                 {
+                    packInfo.Dispose();
                     return;
                 }
                 
@@ -256,6 +300,12 @@ public sealed class WebSocketServerNetworkChannel : ANetworkServerChannel
 
     public override void Send(uint rpcId, long address, MemoryStreamBuffer memoryStream, IMessage message, Type messageType)
     {
+        if (IsDisposed || _isInnerDispose)
+        {
+            message?.Dispose();
+            return;
+        }
+        
         _sendBuffers.Enqueue(_packetParser.Pack(ref rpcId, ref address, memoryStream, message, messageType));
 
         if (!_isSending)
@@ -267,10 +317,18 @@ public sealed class WebSocketServerNetworkChannel : ANetworkServerChannel
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void ReturnMemoryStream(MemoryStreamBuffer memoryStream)
     {
-        if (MemoryStreamBufferSource.Return.HasFlag(memoryStream.MemoryStreamBufferSource))
+        if ((memoryStream.MemoryStreamBufferSource & MemoryStreamBufferSource.Return) == 0)
         {
-            _network.MemoryStreamBufferPool.ReturnMemoryStream(memoryStream);
+            return;
         }
+
+        if (_isInnerDispose)
+        {
+            memoryStream.Dispose();
+            return;
+        }
+
+        _network.MemoryStreamBufferPool.ReturnMemoryStream(memoryStream);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

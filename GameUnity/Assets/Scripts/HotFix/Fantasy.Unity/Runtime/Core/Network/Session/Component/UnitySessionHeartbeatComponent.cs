@@ -84,7 +84,6 @@ namespace Fantasy.Network
                 return;
             }
             
-            // Use wall-clock scheduling so heartbeat remains active when Unity timeScale is paused or changed.
             TimerId = TimerComponent.Net.RepeatedTimer(interval, () =>
             {
                 RepeatedSend().Coroutine();
@@ -118,7 +117,7 @@ namespace Fantasy.Network
             {
                 TimerComponent?.Net.Remove(ref TimerId);
             }
-            
+
             if (TimeOutTimerId != 0)
             {
                 TimerComponent?.Net.Remove(ref TimeOutTimerId);

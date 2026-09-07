@@ -99,10 +99,6 @@ namespace Fantasy.Network
         /// </summary>
         public const uint ErrHandleRemotePublicationNotSubscribed = 100000026;
         /// <summary>
-        /// 表示设置转发会话地址时未找到对应的漫游终端的错误代码。
-        /// </summary>
-        public const uint ErrSetForwardSessionAddressNotFoundTerminus = 100000027;
-        /// <summary>
         /// 表示创建漫游终端时 RoamingId 无效的错误代码。
         /// </summary>
         public const uint ErrCreateTerminusInvalidRoamingId = 100000028;
@@ -133,5 +129,9 @@ namespace Fantasy.Network
         /// 需要先通过 LinkTerminusEntity 关联实体后才能使用。
         /// </summary>
         public const uint ErrTerminusNotLinked = 100000034;
+        /// <summary>
+        /// 表示漫游控制请求来自已经失效的 SessionRoamingComponent。
+        /// </summary>
+        public const uint ErrRoamingOwnerChanged = 100000035;
     }
 }

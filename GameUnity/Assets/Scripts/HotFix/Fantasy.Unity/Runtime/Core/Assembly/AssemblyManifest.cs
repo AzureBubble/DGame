@@ -2,7 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using Fantasy.Async;
+using System.Threading.Tasks;
 using Fantasy.DataStructure.Collection;
 using Fantasy.Entitas.Interface;
 #if FANTASY_NET
@@ -136,6 +136,18 @@ namespace Fantasy.Assembly
         }
         
         #region static
+        
+        private static async Task ObserveLifecycleTask(Task task)
+        {
+            try
+            {
+                await task.ConfigureAwait(false);
+            }
+            catch (Exception e)
+            {
+                Log.Error(e);
+            }
+        }
 
 #if FANTASY_NET
         /// <summary>
@@ -207,8 +219,8 @@ namespace Fantasy.Assembly
             }
             
             customInterfaceRegistrar.Register(manifest._customInterfaces);
-            Manifests.TryAdd(assemblyManifestId, manifest);
-            AssemblyLifecycle.OnLoad(manifest).Coroutine();
+            Manifests[assemblyManifestId] = manifest;
+            _ = ObserveLifecycleTask(AssemblyLifecycle.OnLoad(manifest));
         }
 #endif
 #if FANTASY_UNITY
@@ -264,35 +276,47 @@ namespace Fantasy.Assembly
                 ProtoBufDispatcherRegistrar = protoBufDispatcherRegistrar,
                 MemoryPackEntityGenerator = memoryPackEntityGenerator
             };
-#if FANTASY_WEBGL
             Manifests[assemblyManifestId] = manifest;
-#else
-            Manifests.TryAdd(assemblyManifestId, manifest);
-#endif
             customInterfaceRegistrar.Register(manifest._customInterfaces);
-            AssemblyLifecycle.OnLoad(manifest).Coroutine();
+            _ = ObserveLifecycleTask(AssemblyLifecycle.OnLoad(manifest));
         }
 #endif
         /// <summary>
         /// 取消注册指定程序集的清单
         /// </summary>
         /// <param name="assemblyManifestId">程序集唯一标识</param>
-        public static void Unregister(long assemblyManifestId)
+        /// <param name="assembly">可选的程序集实例。指定时仅注销属于该程序集实例的清单</param>
+        public static void Unregister(long assemblyManifestId, System.Reflection.Assembly assembly = null)
         {
 #if FANTASY_WEBGL
-            if (Manifests.TryGetValue(assemblyManifestId, out var manifest))
+            if (!Manifests.TryGetValue(assemblyManifestId, out var manifest) ||
+                (assembly != null && !ReferenceEquals(manifest.Assembly, assembly)))
             {
-                AssemblyLifecycle.OnUnLoad(manifest).Coroutine();
-                Manifests.Remove(assemblyManifestId);
-                manifest.CustomInterfaceRegistrar.UnRegister(manifest._customInterfaces);
+                return;
             }
+            Manifests.Remove(assemblyManifestId);
 #else
-            if (Manifests.TryRemove(assemblyManifestId, out var manifest))
+            AssemblyManifest manifest;
+            if (assembly == null)
             {
-                AssemblyLifecycle.OnUnLoad(manifest).Coroutine();
-                manifest.CustomInterfaceRegistrar.UnRegister(manifest._customInterfaces);
+                if (!Manifests.TryRemove(assemblyManifestId, out manifest))
+                {
+                    return;
+                }
+            }
+            else
+            {
+                if (!Manifests.TryGetValue(assemblyManifestId, out manifest) ||
+                    !ReferenceEquals(manifest.Assembly, assembly) ||
+                    !((ICollection<KeyValuePair<long, AssemblyManifest>>)Manifests)
+                        .Remove(new KeyValuePair<long, AssemblyManifest>(assemblyManifestId, manifest)))
+                {
+                    return;
+                }
             }
 #endif
+            _ = ObserveLifecycleTask(AssemblyLifecycle.OnUnLoad(manifest));
+            manifest.CustomInterfaceRegistrar.UnRegister(manifest._customInterfaces);
         }
 
         /// <summary>
@@ -471,11 +495,11 @@ namespace Fantasy.Assembly
         /// 卸载所有已注册的程序集，触发卸载事件，清理所有注册器和生命周期回调
         /// </summary>
         /// <returns>异步任务</returns>
-        public static async FTask Dispose()
+        public static async Task Dispose()
         {
             foreach (var (_, assemblyManifest) in Manifests)
             {
-                await AssemblyLifecycle.OnUnLoad(assemblyManifest);
+                await AssemblyLifecycle.OnUnLoad(assemblyManifest).ConfigureAwait(false);
                 assemblyManifest.Clear();
             }
             

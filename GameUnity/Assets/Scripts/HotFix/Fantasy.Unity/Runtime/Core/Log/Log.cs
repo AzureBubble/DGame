@@ -74,9 +74,6 @@ namespace Fantasy
             _logCore.Debug(msg);
         }
         
-        [Conditional("ENABLE_DGAME_LOG")]
-        [Conditional("ENABLE_DGAME_DEBUG_LOG")]
-        [Conditional("ENABLE_DGAME_DEBUG_AND_ABOVE_LOG")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Debug(Scene scene, string msg)
         {
@@ -96,10 +93,6 @@ namespace Fantasy
             _logCore.Info(msg);
         }
         
-        [Conditional("ENABLE_DGAME_LOG")]
-        [Conditional("ENABLE_DGAME_INFO_LOG")]
-        [Conditional("ENABLE_DGAME_DEBUG_AND_ABOVE_LOG")]
-        [Conditional("ENABLE_DGAME_INFO_AND_ABOVE_LOG")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Info(Scene scene, string msg)
         {
@@ -137,11 +130,6 @@ namespace Fantasy
             _logCore.Warning(msg);
         }
         
-        [Conditional("ENABLE_DGAME_LOG")]
-        [Conditional("ENABLE_DGAME_WARNING_LOG")]
-        [Conditional("ENABLE_DGAME_DEBUG_AND_ABOVE_LOG")]
-        [Conditional("ENABLE_DGAME_INFO_AND_ABOVE_LOG")]
-        [Conditional("ENABLE_DGAME_WARNING_AND_ABOVE_LOG")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Warning(Scene scene, string msg)
         {
@@ -164,12 +152,6 @@ namespace Fantasy
             _logCore.Error($"{msg}\n{st}");
         }
         
-        [Conditional("ENABLE_DGAME_LOG")]
-        [Conditional("ENABLE_DGAME_ERROR_LOG")]
-        [Conditional("ENABLE_DGAME_DEBUG_AND_ABOVE_LOG")]
-        [Conditional("ENABLE_DGAME_INFO_AND_ABOVE_LOG")]
-        [Conditional("ENABLE_DGAME_WARNING_AND_ABOVE_LOG")]
-        [Conditional("ENABLE_DGAME_ERROR_AND_ABOVE_LOG")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Error(Scene scene, string msg)
         {
@@ -181,12 +163,6 @@ namespace Fantasy
         /// 记录异常的错误级别的日志消息，并附带调用栈信息。
         /// </summary>
         /// <param name="e">异常对象。</param>
-        [Conditional("ENABLE_DGAME_LOG")]
-        [Conditional("ENABLE_DGAME_ERROR_LOG")]
-        [Conditional("ENABLE_DGAME_DEBUG_AND_ABOVE_LOG")]
-        [Conditional("ENABLE_DGAME_INFO_AND_ABOVE_LOG")]
-        [Conditional("ENABLE_DGAME_WARNING_AND_ABOVE_LOG")]
-        [Conditional("ENABLE_DGAME_ERROR_AND_ABOVE_LOG")]
         public static void Error(Exception e)
         {
             if (e.Data.Contains("StackTrace"))
@@ -198,12 +174,6 @@ namespace Fantasy
             _logCore.Error(str);
         }
         
-        [Conditional("ENABLE_DGAME_LOG")]
-        [Conditional("ENABLE_DGAME_ERROR_LOG")]
-        [Conditional("ENABLE_DGAME_DEBUG_AND_ABOVE_LOG")]
-        [Conditional("ENABLE_DGAME_INFO_AND_ABOVE_LOG")]
-        [Conditional("ENABLE_DGAME_WARNING_AND_ABOVE_LOG")]
-        [Conditional("ENABLE_DGAME_ERROR_AND_ABOVE_LOG")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Error(Scene scene, Exception e)
         {
@@ -239,21 +209,11 @@ namespace Fantasy
         /// </summary>
         /// <param name="message">日志消息模板。</param>
         /// <param name="args">格式化参数。</param>
-        [Conditional("ENABLE_DGAME_LOG")]
-        [Conditional("ENABLE_DGAME_WARNING_LOG")]
-        [Conditional("ENABLE_DGAME_DEBUG_AND_ABOVE_LOG")]
-        [Conditional("ENABLE_DGAME_INFO_AND_ABOVE_LOG")]
-        [Conditional("ENABLE_DGAME_WARNING_AND_ABOVE_LOG")]
         public static void Warning(string message, params object[] args)
         {
             _logCore.Warning(string.Format(message, args));
         }
         
-        [Conditional("ENABLE_DGAME_LOG")]
-        [Conditional("ENABLE_DGAME_WARNING_LOG")]
-        [Conditional("ENABLE_DGAME_DEBUG_AND_ABOVE_LOG")]
-        [Conditional("ENABLE_DGAME_INFO_AND_ABOVE_LOG")]
-        [Conditional("ENABLE_DGAME_WARNING_AND_ABOVE_LOG")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Warning(Scene scene, string message, params object[] args)
         {
@@ -265,19 +225,11 @@ namespace Fantasy
         /// </summary>
         /// <param name="message">日志消息模板。</param>
         /// <param name="args">格式化参数。</param>
-        [Conditional("ENABLE_DGAME_LOG")]
-        [Conditional("ENABLE_DGAME_INFO_LOG")]
-        [Conditional("ENABLE_DGAME_DEBUG_AND_ABOVE_LOG")]
-        [Conditional("ENABLE_DGAME_INFO_AND_ABOVE_LOG")]
         public static void Info(string message, params object[] args)
         {
             _logCore.Info(string.Format(message, args));
         }
         
-        [Conditional("ENABLE_DGAME_LOG")]
-        [Conditional("ENABLE_DGAME_INFO_LOG")]
-        [Conditional("ENABLE_DGAME_DEBUG_AND_ABOVE_LOG")]
-        [Conditional("ENABLE_DGAME_INFO_AND_ABOVE_LOG")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Info(Scene scene, string message, params object[] args)
         {
@@ -289,17 +241,11 @@ namespace Fantasy
         /// </summary>
         /// <param name="message">日志消息模板。</param>
         /// <param name="args">格式化参数。</param>
-        [Conditional("ENABLE_DGAME_LOG")]
-        [Conditional("ENABLE_DGAME_DEBUG_LOG")]
-        [Conditional("ENABLE_DGAME_DEBUG_AND_ABOVE_LOG")]
         public static void Debug(string message, params object[] args)
         {
             _logCore.Debug(string.Format(message, args));
         }
         
-        [Conditional("ENABLE_DGAME_LOG")]
-        [Conditional("ENABLE_DGAME_DEBUG_LOG")]
-        [Conditional("ENABLE_DGAME_DEBUG_AND_ABOVE_LOG")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Debug(Scene scene, string message, params object[] args)
         {
@@ -311,12 +257,6 @@ namespace Fantasy
         /// </summary>
         /// <param name="message">日志消息模板。</param>
         /// <param name="args">格式化参数。</param>
-        [Conditional("ENABLE_DGAME_LOG")]
-        [Conditional("ENABLE_DGAME_ERROR_LOG")]
-        [Conditional("ENABLE_DGAME_DEBUG_AND_ABOVE_LOG")]
-        [Conditional("ENABLE_DGAME_INFO_AND_ABOVE_LOG")]
-        [Conditional("ENABLE_DGAME_WARNING_AND_ABOVE_LOG")]
-        [Conditional("ENABLE_DGAME_ERROR_AND_ABOVE_LOG")]
         public static void Error(string message, params object[] args)
         {
             var st = new StackTrace(1, true);
@@ -324,12 +264,6 @@ namespace Fantasy
             _logCore.Error(s);
         }
         
-        [Conditional("ENABLE_DGAME_LOG")]
-        [Conditional("ENABLE_DGAME_ERROR_LOG")]
-        [Conditional("ENABLE_DGAME_DEBUG_AND_ABOVE_LOG")]
-        [Conditional("ENABLE_DGAME_INFO_AND_ABOVE_LOG")]
-        [Conditional("ENABLE_DGAME_WARNING_AND_ABOVE_LOG")]
-        [Conditional("ENABLE_DGAME_ERROR_AND_ABOVE_LOG")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Error(Scene scene, string message, params object[] args)
         {

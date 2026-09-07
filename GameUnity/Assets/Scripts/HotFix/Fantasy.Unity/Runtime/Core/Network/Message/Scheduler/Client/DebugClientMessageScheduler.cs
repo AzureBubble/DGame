@@ -73,7 +73,14 @@ namespace Fantasy.Scheduler
                             return;
                         }
 
-                        action.SetResult(aResponse);
+                        try
+                        {
+                            action.SetResult(aResponse);
+                        }
+                        catch (Exception e)
+                        {
+                            Log.Error(e);
+                        }
                     }
                     
                     return;
@@ -102,7 +109,11 @@ namespace Fantasy.Scheduler
     {
         public override FTask Scheduler(Session session, APackInfo packInfo)
         {
-            throw new NotSupportedException($"DebugClientMessageScheduler Received unsupported message protocolCode:{packInfo.ProtocolCode}");
+            var protocolCode = packInfo.ProtocolCode;
+            packInfo.Dispose();
+
+            throw new NotSupportedException(
+                $"DebugClientMessageScheduler Received unsupported message protocolCode:{protocolCode}");
         }
     }
 #endif

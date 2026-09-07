@@ -10,9 +10,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Fantasy-Net" Version="2026.0.1023" />
-    <PackageReference Include="NLog" Version="6.1.4" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.16.0" />
+    <PackageReference Include="Fantasy-Net" Version="2026.1.2002" />
+    <PackageReference Include="NLog" Version="6.2.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.22.0" />
     <PackageReference Include="ToolGood.Words" Version="3.1.0.3" />
   </ItemGroup>
 

@@ -1,20 +1,19 @@
 ---
 name: toggle-popup
-description: Toggle DGame project Codex popup reminder hooks in .codex/config.toml. Use when the user asks to enable, disable, or switch Codex stop/subagent-stop popups, permission request popups, or asks for a Codex equivalent of .claude/commands/toggle-popup.md.
+description: Toggle DGame project Codex permission request popup hooks in .codex/config.toml. Use when the user asks to enable, disable, or switch Codex permission request popups.
 ---
 
 # Toggle Popup
 
-用于切换当前 DGame 项目的 Codex 弹窗提醒 hooks。执行时不要手写 TOML，直接运行脚本：
+用于切换当前 DGame 项目的 Codex 权限确认弹窗 hook。执行时不要手写 TOML，直接运行脚本：
 
 ```powershell
-python ".codex/skills/toggle-popup/scripts/toggle_popup.py" [stop|permission]
+python ".codex/skills/toggle-popup/scripts/toggle_popup.py" [permission]
 ```
 
 ## 参数
 
-- 留空或 `all`：切换 `Stop`、`SubagentStop`、`PermissionRequest`。
-- `stop` 或 `s`：切换 `Stop` 和 `SubagentStop`，因为项目完成提醒同时覆盖主任务和子任务。
+- 留空或 `all`：切换 `PermissionRequest`。
 - `permission`、`p` 或 `permissionrequest`：只切换 `PermissionRequest`。
 
 ## 行为

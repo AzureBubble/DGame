@@ -23,9 +23,30 @@ namespace GameLogic
         private bool m_isPress; // 是否按下
         private bool m_isClickDown;
         private PointerEventData m_pointerEventData;
+        private bool m_deferClickScaleUntilClick;
+        private bool m_deferClickScaleForCurrentPress;
+        private bool m_longPressConsumedClick;
         public Action OnPointerUpEvent; // 按钮不可点击也触发
+        public PointerEventData CurrentPointerEventData => m_pointerEventData;
 
         public UIButtonClickScaleExtend ClickScaleExtend => m_uiButtonClickScale;
+
+        /// <summary>
+        /// 将缩放反馈延迟到确认点击后播放，供需要区分滚动与点击的控件启用。
+        /// </summary>
+        public bool DeferClickScaleUntilClick
+        {
+            get => m_deferClickScaleUntilClick;
+            set
+            {
+                m_deferClickScaleUntilClick = value;
+                if (value && m_isPress)
+                {
+                    m_deferClickScaleForCurrentPress = true;
+                    ResetDeferredClickScale();
+                }
+            }
+        }
 
         #endregion
 
@@ -53,8 +74,19 @@ namespace GameLogic
                 return;
             }
 
+            if (m_longPressConsumedClick ||
+                (m_deferClickScaleForCurrentPress && !eventData.eligibleForClick))
+            {
+                return;
+            }
+
             if (interactable)
             {
+                if (m_deferClickScaleForCurrentPress && eventData.button == PointerEventData.InputButton.Left)
+                {
+                    m_uiButtonClickScale?.PlayClickFeedback(transform, true);
+                    m_buttonClickEvent?.Invoke();
+                }
                 m_uiButtonClickSound?.OnPointerClick();
                 base.OnPointerClick(eventData);
                 // onClick?.Invoke();
@@ -74,10 +106,19 @@ namespace GameLogic
             m_isPress = true;
             m_pointerEventData = eventData;
             m_isClickDown = true;
+            m_deferClickScaleForCurrentPress = m_deferClickScaleUntilClick;
+            m_longPressConsumedClick = false;
             m_uiButtonClickProtect?.OnPointerDown();
             m_uiButtonLongPress?.OnPointerDown();
             m_uiButtonDoubleClick?.OnPointerDown();
-            m_uiButtonClickScale?.OnPointerDown(transform, interactable);
+            if (m_deferClickScaleForCurrentPress)
+            {
+                ResetDeferredClickScale();
+            }
+            else
+            {
+                m_uiButtonClickScale?.OnPointerDown(transform, interactable);
+            }
 
             if (interactable)
             {
@@ -100,14 +141,18 @@ namespace GameLogic
             m_isPress = false;
             m_pointerEventData = null;
 
-            if (interactable && Mathf.Abs(Vector2.Distance(m_pressPos, eventData.position)) < 10f)
+            if (!m_deferClickScaleForCurrentPress && interactable &&
+                Mathf.Abs(Vector2.Distance(m_pressPos, eventData.position)) < 10f)
             {
                 m_buttonClickEvent?.Invoke();
             }
             OnPointerUpEvent?.Invoke();
             m_uiButtonClickProtect?.OnPointerUp();
             m_uiButtonLongPress?.OnPointerUp();
-            m_uiButtonClickScale?.OnPointerUp(transform, interactable);
+            if (!m_deferClickScaleForCurrentPress)
+            {
+                m_uiButtonClickScale?.OnPointerUp(transform, interactable);
+            }
             if (interactable)
             {
                 m_uiButtonClickSound?.OnPointerUp();
@@ -148,7 +193,7 @@ namespace GameLogic
         /// <param name="duration">长按持续时间</param>
         public void AddButtonLongPressListener(UnityAction callback, float duration)
         {
-            m_uiButtonLongPress?.AddLongPressListener(callback, duration);
+            m_uiButtonLongPress?.AddLongPressListener(() => OnLongPressTriggered(callback), duration);
         }
 
         /// <summary>
@@ -158,7 +203,34 @@ namespace GameLogic
         /// <param name="interval">长按持续触发间隔</param>
         public void AddButtonLoopLongPressListener(UnityAction callback, float interval)
         {
-            m_uiButtonLongPress?.AddLoopLongPressListener(callback, interval);
+            m_uiButtonLongPress?.AddLoopLongPressListener(() => OnLongPressTriggered(callback), interval);
+        }
+
+        /// <summary>
+        /// 长按已处理本次操作时取消短按，避免松手后再次播放点击反馈或执行点击。
+        /// </summary>
+        private void OnLongPressTriggered(UnityAction callback)
+        {
+            if (m_deferClickScaleForCurrentPress)
+            {
+                m_longPressConsumedClick = true;
+                if (m_pointerEventData != null)
+                {
+                    m_pointerEventData.eligibleForClick = false;
+                }
+            }
+            callback?.Invoke();
+        }
+
+        /// <summary>
+        /// 清理待判定手势的缩放反馈，并保留原本关闭缩放的控件外观。
+        /// </summary>
+        private void ResetDeferredClickScale()
+        {
+            if (m_uiButtonClickScale?.IsUseClickScale == true)
+            {
+                m_uiButtonClickScale.OnEnable(transform);
+            }
         }
 
         /// <summary>

@@ -8,7 +8,7 @@ namespace GameLogic
     {
         [SerializeField] private bool m_isUseDoubleClick;
         [SerializeField] private float m_clickInterval;
-        [SerializeField] private UnityEvent m_onDoubleClickEvent;
+        [SerializeField] private UnityEvent m_onDoubleClickEvent = new UnityEvent();
         [SerializeField] private float m_lastPointDownTime;
 
 
@@ -30,6 +30,7 @@ namespace GameLogic
         {
             m_isUseDoubleClick = true;
             m_clickInterval = clickInterval;
+            m_onDoubleClickEvent ??= new UnityEvent();
             m_onDoubleClickEvent.AddListener(callback);
         }
     }

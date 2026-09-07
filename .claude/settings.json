@@ -1,16 +1,5 @@
 {
   "hooks": {
-    "Stop": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/claude_popup.py\""
-          }
-        ]
-      }
-    ],
     "PermissionRequest": [
       {
         "matcher": "",

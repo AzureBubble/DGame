@@ -239,6 +239,22 @@ public void Serialize(Type type, object @object, IBufferWriter<byte> buffer)
 
 ---
 
+### 6. UnitySessionHeartbeatComponent.cs - 心跳消息不受时间缩放影响
+
+**文件位置**: `Assets/Scripts/HotFix/Fantasy.Unity/Runtime/Core/Network/Session/Component/UnitySessionHeartbeatComponent.cs`
+
+**修改内容**: 将客户端心跳发送和超时检测从 `TimerComponent.Unity` 改为 `TimerComponent.Net`，并同步使用 `Net.Remove` 停止计时器。
+
+`TimerComponent.Unity` 基于 Unity 的 `Time.time` 调度，会受到 `Time.timeScale` 影响；`TimerComponent.Net` 基于 `TimeHelper.Now` 的系统实时时钟，游戏暂停、慢放或加速时仍会按真实时间发送 `PingRequest` 并执行超时检测。
+
+**检查结果**:
+
+- `dotnet build GameUnity/Fantasy.Unity.csproj --no-restore`：编译成功，0 个错误
+- `dotnet build GameUnity/GameLogic.csproj --no-restore`：编译成功，0 个错误
+- 构建中的 6 个 `UnityFormatters.cs` `CS9074` 警告为已有警告，与本次心跳修改无关
+
+---
+
 ## 检查清单
 
 更新 Fantasy 框架后，请确认：
@@ -249,4 +265,5 @@ public void Serialize(Type type, object @object, IBufferWriter<byte> buffer)
 - [ ] **Fantasy.Log 中 `Debug`、`Info`、`Warning`、`Error` 方法已添加条件宏定义**（`Trace` 和 `TraceInfo` 除外），防止打包输出相关的Debug代码
 - [ ] 检查项目是否引入了 Obfuz 包，如果引用了，在 `Fantasy.Unity` 程序集和 `Fantasy.Editor` 程序集中添加 `Obfuz.Runtime` 引用
 - [ ] **ProtoBufHelper.cs 中已添加协议日志回调支持**，用于协议消息的收发日志记录
+- [ ] `UnitySessionHeartbeatComponent.cs` 的心跳发送和超时检测使用 `TimerComponent.Net`，不受 `Time.timeScale` 影响
 - [ ] 编译无错误

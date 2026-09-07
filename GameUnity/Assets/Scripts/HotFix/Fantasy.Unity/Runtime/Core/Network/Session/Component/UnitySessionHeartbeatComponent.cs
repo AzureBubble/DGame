@@ -84,11 +84,12 @@ namespace Fantasy.Network
                 return;
             }
             
-            TimerId = TimerComponent.Unity.RepeatedTimer(interval, () =>
+            // Use wall-clock scheduling so heartbeat remains active when Unity timeScale is paused or changed.
+            TimerId = TimerComponent.Net.RepeatedTimer(interval, () =>
             {
                 RepeatedSend().Coroutine();
             });
-            TimeOutTimerId = TimerComponent.Unity.RepeatedTimer(timeOutInterval, CheckTimeOut);
+            TimeOutTimerId = TimerComponent.Net.RepeatedTimer(timeOutInterval, CheckTimeOut);
         }
 
         private void CheckTimeOut()
@@ -115,12 +116,12 @@ namespace Fantasy.Network
         {
             if (TimerId != 0)
             {
-                TimerComponent?.Unity.Remove(ref TimerId);
+                TimerComponent?.Net.Remove(ref TimerId);
             }
             
             if (TimeOutTimerId != 0)
             {
-                TimerComponent?.Unity.Remove(ref TimeOutTimerId);
+                TimerComponent?.Net.Remove(ref TimeOutTimerId);
             }
 
             _pingSum = 0;

@@ -72,7 +72,7 @@ namespace GameLogic
 
             m_clickAction = clickAction;
             m_btnSprite.interactable = clickAction != null;
-            m_modelCfg = ModelConfigMgr.Instance.GetOrDefault(modelID);
+            m_modelCfg = ModelConfigMgr.Instance.GetModelOrDefault(modelID);
             var animatorAgent = m_animatorAgent;
             var spriteButton = m_btnSprite;
             await animatorAgent.Init(m_modelCfg);

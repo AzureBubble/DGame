@@ -11,20 +11,6 @@ from pathlib import Path
 HOOK_COMMAND = 'python ".codex/hooks/codex_popup.py"'
 
 HOOK_BLOCKS = {
-    "Stop": f'''[[hooks.Stop]]
-
-[[hooks.Stop.hooks]]
-type = "command"
-command = '{HOOK_COMMAND}'
-timeout = 600
-statusMessage = "显示 Codex 完成弹窗"''',
-    "SubagentStop": f'''[[hooks.SubagentStop]]
-
-[[hooks.SubagentStop.hooks]]
-type = "command"
-command = '{HOOK_COMMAND}'
-timeout = 600
-statusMessage = "显示 Codex 子任务完成弹窗"''',
     "PermissionRequest": f'''[[hooks.PermissionRequest]]
 matcher = "*"
 
@@ -36,10 +22,8 @@ statusMessage = "显示 Codex 权限确认弹窗"''',
 }
 
 ALIASES = {
-    "": ["Stop", "SubagentStop", "PermissionRequest"],
-    "all": ["Stop", "SubagentStop", "PermissionRequest"],
-    "stop": ["Stop", "SubagentStop"],
-    "s": ["Stop", "SubagentStop"],
+    "": ["PermissionRequest"],
+    "all": ["PermissionRequest"],
     "permission": ["PermissionRequest"],
     "permissionrequest": ["PermissionRequest"],
     "p": ["PermissionRequest"],
@@ -58,13 +42,13 @@ def find_codex_config() -> Path:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="切换 .codex/config.toml 中的 Codex 弹窗 hook。",
+        description="切换 .codex/config.toml 中的 Codex 权限确认弹窗 hook。",
     )
     parser.add_argument(
         "scope",
         nargs="?",
         default="",
-        help="留空/all/stop/s/permission/p/permissionrequest",
+        help="留空/all/permission/p/permissionrequest",
     )
     parser.add_argument(
         "--config",
@@ -141,7 +125,7 @@ def main() -> int:
     if key not in ALIASES:
         print(
             "无法识别参数："
-            f"{args.scope!r}。有效值：留空、all、stop/s、permission/p/permissionrequest。",
+            f"{args.scope!r}。有效值：留空、all、permission/p/permissionrequest。",
             file=sys.stderr,
         )
         return 2
